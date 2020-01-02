@@ -1,0 +1,88 @@
+#userPage{
+    display:flex;
+    flex-direction:row;
+}
+
+#userPage #guideBar{
+    border-right:solid 1px rgba(215,215,215,215);
+    box-shadow:1px 1px 2px rgba(208,208,208,218);
+    display:flex;
+    flex-direction:column;
+    min-width:12rem;
+    width:12rem;
+    font-weight:normal;
+}
+
+#userPage #guideBar >div:nth-child(1){
+    min-height:12rem;
+    font-size:14px;
+}
+
+#userPage #guideBar >div:nth-child(2){
+    background:rgba(223,216,214,255);
+    height:auto;
+    display:flex;
+    flex-direction:column;
+}
+
+#userPage #guideBar >div:nth-child(2) a{
+    background:rgba(0,0,0,0);
+    color:rgba(108,95,93,255);
+    font-weight:bold;
+    width:100%;
+    padding-top:8px;
+    padding-bottom:8px;
+    font-size:14px;
+    text-align:center;
+    letter-spacing:2px;
+}
+
+#userPage #guideBar >div:nth-child(2) a:hover{
+    color:white;
+    background:rgba(181,163,160,218);
+}
+
+#userPage .dashLine{
+    background:rgba(215,215,215,215);
+    width:80%;
+    height:1px;
+    min-height:1px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.userName{
+    font-weight:bold;
+}
+
+#userInfo{
+    padding-left:10px;
+}
+
+#userInfo i{
+    margin-right:4px;
+}
+
+#userInfo button{
+    color:rgba(108,95,93,255);
+    padding-left:8px;
+    padding-right:8px;
+    padding-top:1px;
+    padding-bottom:1px;
+}
+
+
+#userFunction{
+    display:flex;
+    flex-direction:column;
+    margin-right:15px;
+    margin-left:auto;
+}
+
+#userFunction >div{
+    margin-top:5px;
+}
+
+#userFunction >div:last-child{
+    margin-bottom:auto;
+}

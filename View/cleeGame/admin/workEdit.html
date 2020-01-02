@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-lz-string.js"></script>
+    <script src="/js/JsExt.js"></script>
+    <script defer src="/lib/svgxuse.js"></script>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <script>
+        var app = angular.module('workEdit',['lz-string']);
+
+
+        app.controller("workEditCon",function($scope,$location,LZString,$http){
+            $scope.tagList = JSON.parse('<%-JSON.stringify(tag)%>'); //数组数据直接stringify就可以。
+            $scope.title = '<%=title%>';
+            $scope.coverLink = '<%=cover%>';
+            $scope.workIntro = '<%=subTitle%>';
+            $scope.gameLink ='<%=gameLink%>';
+            $scope._id='<%=_id%>';
+            $scope.chapCount = parseInt('<%=chapCount%>');
+            $scope.volCount= parseInt('<%=ext1%>');
+            $scope.status= '<%=status%>';
+            $scope.wordCount=parseInt('<%=wordCount%>');
+            var chapters = JSON.parse('<%-JSON.stringify(chapters)%>');
+            $scope.selectVolId = 0;
+            $scope.volumes = [];
+            $scope.chapters = [];
+
+            for(var i=0;i<chapters.length;++i)
+            {
+                   if(chapters[i].type==3000)
+                   {
+                       chapters[i].expand = true;
+                       $scope.volumes.push(chapters[i]);
+                   }
+                   else if(chapters[i].type==3005)
+                   {
+                       $scope.chapters.push(chapters[i]);
+                   }
+            }
+            // new volume list
+            $scope.newTagList=[];
+            $scope.newTag = ' ';
+            $scope.requesting = false;
+
+            $scope.statusSave = {
+                title: $scope.title,
+                cover: $scope.coverLink,
+                subTitle: $scope.workIntro,
+                gameLink: $scope.gameLink,
+                tag: $scope.tagList,
+                statements: document.getElementById('workStates').innerHTML,
+                intro: document.getElementById('workDetail').innerHTML
+            };
+
+            $scope.
+                expandIcon = function($event,vol){
+                var element = $event.target;
+                if(element.children && element.children.length !=0)
+                    element=element.children[0];
+                var url =  element.href.baseVal;
+                var type = url.substring(url.length-4);
+                var newType = type=='more'?'less':'more';
+
+                element.href.baseVal = url.substring(0,url.length-4)+newType;
+                element.href.animVal = url.substring(0,url.length-4)+newType;
+
+                if(vol)
+                    vol.expand = !vol.expand;
+            };
+
+            $scope.newVolumeTitle = '';
+
+             $scope.newVolumePage = function(id){
+                 if(id=='newVolumePage')
+                     $scope.newVolumeIndex = $scope.volCount+1;
+                 else if(id=='newChapterPage')
+                     $scope.newVolumeIndex = $scope.chapCount+1;
+                 var ele = document.getElementById('infoBack');
+                 var ele2 = document.getElementById(id);
+                 ele.style.setProperty('pointer-events','all');
+                 ele.style.setProperty('animation','fadeIn 0.1s 1');
+                 ele.style.setProperty('animation-fill-mode','forwards');
+                 ele2.style.setProperty('animation-delay','0.1s');
+                 ele2.style.setProperty('animation','show 0.4s 1');
+                 ele2.style.setProperty('animation-fill-mode','forwards');
+             };
+
+
+             $scope.closeVolumePage = function(id){
+                 var ele = document.getElementById('infoBack');
+                 var ele2 = document.getElementById(id);
+
+                 ele.style.setProperty('animation-delay','0.45s');
+                 ele.style.setProperty('animation','fadeOut 0.1s 1');
+                 ele.style.setProperty('animation-fill-mode','forwards');
+                 ele.style.setProperty('pointer-events','none');
+                 ele2.style.setProperty('animation','disappear 0.5s 1');
+                 ele2.style.setProperty('animation-fill-mode','forwards');
+             };
+
+
+             $scope.updateWork= function(){
+                 if($scope.requesting)
+                     return;
+                var data = {
+                    _id: $scope._id,
+                    title: $scope.title,
+                    cover: $scope.coverLink,
+                    subTitle: $scope.workIntro,
+                    gameLink: $scope.gameLink,
+                    tag: $scope.tagList,
+                    status: $scope.status,
+                    statements: document.getElementById('workStates').innerHTML,
+                    intro: document.getElementById('workDetail').innerHTML
+                };
+                $scope.requesting = true;
+                 $http.post('/works/edit/update/',{meta:LZString.compress(JSON.stringify(data))}).then(function(response){
+                     $scope.requesting = false;
+                     alert(response.data.message);
+                     if(response.data.status==500)
+                     {
+                         $scope.statusSave = {
+                             title: data.title,
+                             cover: data.coverLink,
+                             subTitle: data.workIntro,
+                             gameLink: data.gameLink,
+                             tag: data.tagList,
+                             statements: data.statements,
+                             intro: data.intro
+                         }
+                     }
+                 }).catch(function(err){
+                     $scope.requesting = false;
+                     alert(err);
+                 });
+             };
+
+             $scope.inVolume=function(volId){
+                 return function(input){
+                     return input.ext4.indexOf(volId) != -1;
+                 }
+             };
+
+             $scope.saveNewChapter = function(){
+                 if($scope.requesting)
+                     return;
+                 if($scope.newVolumeTitle == ''){
+                     alert('没有输入章节标题！');
+                     return;
+                 }
+                 else if(document.getElementById('newChapterCont').innerHTML.trim().length==0)
+                 {
+                     alert('没有输入内容');
+                     return;
+                 }
+                 var contents = document.getElementById('newChapterCont').innerHTML;
+                 contents = '<p>'+contents.replace(/<br>/g,"</p><p>")+'</p>';
+                 contents = contents.replace(/<p><\/p>/g,"<br>");
+                 contents = contents.replace(/div/g,'p');
+                 var data={
+                     works:$scope._id,
+                     title:$scope.newVolumeTitle,
+                     type:3005,
+                     prev:$scope.chapters[$scope.chapters.length]._id,
+                     next:null,
+                     order: ($scope.chapCount+1)*10,
+                     index: $scope.chapterIndex,
+                     tag:$scope.newTagList,
+                     contents: contents,
+                     wordCount: document.getElementById('newChapterCont').innerText.length,
+                     ext4:[$scope.volumes[$scope.selectVolId]._id]
+                 };
+                 $http.post('/works/edit/addChapter/',{meta:LZString.compress(JSON.stringify(data))})
+                     .then(function(response){
+                         $scope.requesting = false;
+                         alert(response.data.message);
+                         if(response.data.status==500)
+                         {
+                             $scope.chapters.push({
+                                 works:$scope._id,
+                                 type: 3005,
+                                 title:data.title,
+                                 order: data.order,
+                                 index: data.index,
+                                 wordCount: data.wordCount,
+                                 ext4: data.ext4
+                             });
+                             $scope.newTagList.length=0;
+                             $scope.newTag='';
+                             $scope.chapCount++;
+                             $scope.newVolumeTitle='';
+                             for(var i=0;i<$scope.volumes.length;++i)
+                             {
+                                 if($scope.volumes[i]._id == data.ext4[0])
+                                 {
+                                     $scope.volumes[i].ext4.push(response.data.result);
+                                 }
+                             }
+                         }
+                     })
+                     .catch(function(err){
+                         $scope.requesting = false;
+                         alert(err);
+                     });
+             };
+
+             $scope.saveNewVolume = function(){
+                 if($scope.requesting)
+                     return;
+                 if($scope.newVolumeTitle == ''){
+                     alert('没有输入卷标题！');
+                     return;
+                 }
+                 var data={
+                     works:$scope._id,
+                     title:$scope.newVolumeTitle,
+                     type:3000,
+                     order: $scope.volCount*10,
+                     index: $scope.newVolumeIndex,
+                     tag:$scope.newTagList,
+                     contents: document.getElementById('newVolumeIntro').innerHTML
+                 };
+
+                 $http.post('/works/edit/addVolume/',{meta:LZString.compress(JSON.stringify(data))})
+                     .then(function(response){
+                         $scope.requesting = false;
+                         alert(response.data.message);
+                         if(response.data.status==500)
+                         {
+                             $scope.volumes.push({
+                                 _id:$scope._id,
+                                 title:$scope.newVolumeTitle,
+                                 order: ($scope.volCount+1)*10,
+                                 index: $scope.newVolumeIndex,
+                                 contents: document.getElementById('newVolumeIntro').innerHTML,
+                                 expand:true
+                             });
+                             $scope.newTagList.length=0;
+                             $scope.newTag='';
+                             $scope.volCount++;
+                         }
+                     })
+                     .catch(function(err){
+                         $scope.requesting = false;
+                     });
+             };
+
+             $scope.enterTag = function($event){
+                 if($event.keyCode != 13)
+                 {
+                     return;
+                 }
+                 if($scope.newTag.trim().length==0)
+                  {
+                      $scope.newTag ='';
+                      return;
+                  }
+                 for(var i=0;i<$scope.newTagList.length;++i)
+                 {
+                     if($scope.newTagList[i]==$scope.newTag)
+                     {
+                         $scope.newTag = '';
+                         return;
+                     }
+                 }
+                 $scope.newTagList.push($scope.newTag);
+                 $scope.newTag = '';
+             };
+
+             $scope.deleteTag = function(tagList,tag){
+                 if(tagList.indexOf(tag)!=-1)
+                 {
+                     var index = tagList.indexOf(tag);
+                     tagList.splice(index,1);
+                 }
+             }
+
+        });
+
+    </script>
+    <link rel="stylesheet" href="/css/animation.css">
+    <link rel="stylesheet" href="/css/button.css">
+</head>
+
+<style>
+    *{
+        padding:0;
+        margin:0;
+    }
+    body{
+        background:rgba(243,237,234,1);
+        font-family: SimSun-extB ,serif;
+        color: rgba(126,126,126,1);
+        display:flex;
+        flex-direction:column;
+        padding:0;
+    }
+
+    body a{
+        color: rgba(126,126,126,1);
+        text-decoration:none;
+        margin-left: 1rem;
+        line-height:1.5rem;
+        font-weight:bold;
+        font-size:1.1rem;
+    }
+
+    body a:hover{
+        color:lightgray;
+    }
+
+    #mainBoard{
+        margin-left:auto;
+        margin-right:auto;
+        display:flex;
+        flex-direction:row;
+        flex-wrap: wrap;
+        min-width:57rem;
+    }
+
+    .line {
+        margin-top:1rem;
+        margin-bottom:1rem;
+        display:flex;
+        flex-direction:row;
+
+    }
+    .title{
+        height:1.5rem;
+        margin-right: 0.5rem;
+        color: dimgray;
+    }
+
+    .contents{
+        background:white;
+        border: lightgray 1.5px solid;
+        height:1.5rem;
+        padding-left:0.2rem;
+        padding-right:0.2rem;
+    }
+
+    .contentsBox{
+        background:white;
+        border: lightgray 1.5px solid;
+        padding:0.5rem;
+        padding-top:0;
+        width:25rem;
+        text-align: justify-all;
+    }
+
+    .workTag{
+         margin-right:0.9rem;
+         font-size:0.95rem;
+          padding-left:0;
+          margin-left:0px;
+        height:1.5rem;
+    }
+
+
+    .workTag:hover{
+        text-decoration:line-through;
+    }
+
+    #optionBar {
+        margin-top:0;
+        width:100%;
+        display:flex;
+        flex-direction:row;
+        height:2.5rem;
+        background:white;
+    }
+
+   .button{
+        margin-top:auto;
+        margin-bottom:auto;
+        margin-left:2rem;
+        height:2.5rem;
+        line-height:2.5rem;
+        font-weight:bold;
+       -webkit-user-select: none;
+       -moz-user-select: none;
+       -ms-user-select: none;
+       user-select:none;
+    }
+
+    .button:hover{
+        color:lightgray;
+    }
+
+    #infoBack{
+        background: rgba(186,178,181,0.45);
+        width:100%;
+        height:100%;
+        position:fixed;
+        animation: disappear 0.01s 1;
+        animation-fill-mode: forwards;
+    }
+
+    .boardStretch{
+        width:35rem;
+        position:fixed;
+        left:calc(50% - 18rem);
+        top:2rem;
+        min-height:5rem;
+        font-family: SimSun-ExtB, Arial, "Microsoft YaHei UI", serifserif;
+        display:flex;
+        flex-direction:column;
+        background:white;
+        border-radius:1rem;
+        padding:3rem;
+        animation: disappear 0.01s 1;
+        animation-fill-mode: forwards;
+    }
+
+    .volumeTitle{
+        display:flex;
+        flex-direction:column;
+    }
+
+    .chapterTitle{
+        margin:0;
+        margin-left:2rem;
+        display:flex;
+        flex-direction:row;
+        height:1.2rem;
+    }
+
+    .volumeTitle span{
+        margin-right:1rem;
+    }
+
+    .wordEditor {
+        width:100%;
+        height:25rem;
+        border:gray 1.5px solid;
+        overflow:auto;
+        font-size:0.9rem;
+        font-family:SimSun-ExtB, serif;
+        font-weight: lighter;
+        padding:8px;
+    }
+
+    .wordEditor p{
+        margin-top:0.5rem;
+        margin-bottom:0.5rem;
+        text-indent:2rem;
+    }
+
+</style>
+
+
+<body ng-app="workEdit" ng-controller="workEditCon" class="buttonColor1">
+ <div id="mainBoard">
+     <div id="optionBar">
+         <div ng-click="newVolumePage('newVolumePage')" class="button">增加新卷</div>
+         <div ng-click="newVolumePage('newChapterPage')" class="button">增加章节</div>
+     </div>
+     <div style="min-width:32rem;border-right: lightgray 1.5px solid;">
+         <div class="line">
+             <div class="title">作品名称：</div>
+             <input class="contents" ng-model="title" ng-value="title" size="18">
+         </div>
+
+         <div class="line">
+             <div class="title">封面链接：</div>
+             <input ng-model="coverLink" ng-value="coverLink" class="contents" size="25">
+         </div>
+
+         <div class="line">
+             <div class="title">连载状态：</div>
+             <select ng-model="status" class="contents" id="statusSelect">
+                 <option value=0>连载中</option>
+                 <option value=1>已完结</option>
+             </select>
+         </div>
+
+         <div class="line">
+             <div class="title">作品简介：</div>
+             <input ng-model="workIntro" ng-value="workIntro" class="contents" size="15">
+         </div>
+
+         <div class="line">
+             <div class="title">标签列表：</div>
+             <div style="display:flex;flex-direction:row;flex-flow:row wrap;word-break:break-all;max-width:18rem;background:white;border:lightgray 1.5px solid;padding-left:0.5rem;">
+                 <div class="workTag" ng-repeat="tag in tagList">#{{tag}}</div>
+                 <input ng-model="newTag" maxlength="12" style="background:rgba(0,0,0,0);border:none;width:5rem;">
+             </div>
+         </div>
+
+         <div class="line">
+             <div class="title">游戏链接：</div>
+             <input ng-model="gameLink" ng-value="gameLink" class="contents" size="15"> <a ng-href="{{gameLink}}" target="_blank">+click+</a>
+         </div>
+
+         <div class="line">
+             <div class="title">重要声明：</div>
+             <div id="workStates" class="contentsBox" contentEditable="true"><%-statements %></div>
+         </div>
+
+         <div class="line">
+             <div class="title">剧情简介：</div>
+             <div id="workDetail" class="contentsBox" contentEditable="true"><%- intro %></div>
+         </div>
+         <div style="height:2rem;display:flex;flex-direction:row;">
+             <div class="buttonPinkSmall" ng-click="updateWork()">修改</div>
+         </div>
+
+     </div>
+
+     <div style="display:flex;flex-direction:column;width:25rem;max-height:100%;padding-top:2rem;flex:1;">
+         <img ng-src="{{coverLink}}" style="margin-left:auto;margin-right:auto;">
+         <div style="background:white;height:2rem;width:calc(100% - 3rem);padding-left:2rem;font-weight:bold;line-height:2rem;margin-top:2rem;">
+             章节列表</div>
+         <div style="padding-left:2rem;padding-top:1.5rem;">
+             <div ng-repeat="vol in volumes | orderBy:order" class="volumeTitle">
+                 <div style="display:flex;flex-direction:row;">
+                     <span>{{'卷'+ vol.index.toCString()}}</span>
+                     <span>{{vol.title}}</span>
+                     <span>共计{{vol.ext4.length}}章</span>
+                     <svg class="icon" style="width:1.5rem;height:1.5rem;" ng-click="expandIcon($event,vol)">
+                         <use xlink:href="/svg/symbol-def1.svg#icon-expand_less"></use>
+                     </svg>
+                 </div>
+                 <div ng-show="vol.expand" ng-repeat="chap in chapters | filter:inVolume(vol._id)" class="chapterTitle">
+                     <span>{{'章'+chap.index.toCString()}}</span>
+                     <span>{{chap.title}}</span>
+                     <span>{{chap.wordCount}}字</span>
+                     <span class="button" style="margin-left:5rem;line-height:1.2rem;font-weight:normal;" ng-click="editChapter(chap._id)">EDIT</span>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+
+ <div id="infoBack"></div>
+
+<!-- 增加新卷-->
+ <div id="newVolumePage" class="boardStretch">
+     <div style="flex:1;">
+         <div>卷名称</div><div><input ng-model="newVolumeTitle"></div>
+         <div class="line">
+             <div class="title">第几卷:</div>
+             <input  ng-model="newVolumeIndex" class="contents">
+         </div>
+         <div class="line">
+             <div class="title">标签列表：</div>
+             <div style="display:flex;flex-direction:row;flex-flow:row wrap;word-break:break-all;max-width:18rem;background:white;border:lightgray 1.5px solid;padding-left:0.5rem;">
+                 <div class="workTag" ng-repeat="tag in newTagList" ng-click="deleteTag(newTagList,tag)">#{{tag}}</div>
+                 <input ng-model="newTag" maxlength="12" style="background:rgba(0,0,0,0);border:none;width:5rem;">
+             </div>
+         </div>
+         <div>卷简介</div><div id="newVolumeIntro" contenteditable="true" style="width:25rem;height:5rem;background:rgba(178,178,178,0.2);border:gray 1.5px solid;"></div>
+     </div>
+     <div style="display:flex;flex-direction:row;margin-top:1rem;">
+         <div class="buttonPink" ng-click="saveNewVolume()">SUBMIT</div>
+         <div class="buttonPink" ng-click="closeVolumePage('newVolumePage')">CANCEL</div>
+     </div>
+ </div>
+
+<!--增加新章节-->
+ <div id="newChapterPage" class="boardStretch">
+     <div style="flex:1;">
+         <div class="line">
+             <div class="title">章节名称:</div>
+             <input  ng-model="newVolumeTitle" class="contents">
+         </div>
+         <div class="line">
+             <div class="title">第几章:</div>
+             <input  ng-model="newVolumeIndex" class="contents">
+         </div>
+         <div class="line">
+             <div class="title"></div>
+             <select ng-model="selectVolId">
+                 <option ng-repeat="vol in volumes track by $index" value="{{$index}}">{{vol.title}}</option>
+             </select>
+         </div>
+         <div class="line">
+             <div class="title">标签列表：</div>
+             <div style="display:flex;flex-direction:row;flex-flow:row wrap;word-break:break-all;max-width:18rem;background:white;border:lightgray 1.5px solid;padding-left:0.5rem;">
+                 <div class="workTag" ng-repeat="tag in newTagList" ng-click="deleteTag(newTagList,tag)">#{{tag}}</div>
+                 <input ng-model="newTag" maxlength="12" style="border:none;" ng-keyup="enterTag($event)">
+             </div>
+         </div>
+
+         <div id="newChapterCont" contenteditable="true" class="wordEditor">
+
+         </div>
+     </div>
+     <div style="display:flex;flex-direction:row;margin-top:1rem;">
+         <div class="buttonPink" ng-click="saveNewChapter()">SUBMIT</div>
+         <div class="buttonPink" ng-click="closeVolumePage('newChapterPage')">CANCEL</div>
+     </div>
+ </div>
+
+ <!--更改章节内容-->
+ <div id="editChapterPage" class="boardStretch">
+     <div style="flex:1;">
+         <div class="line">
+             <div class="title">章节名称:</div>
+             <input  ng-model="newVolumeTitle" class="contents">
+         </div>
+         <div class="line">
+             <div class="title">所属卷名：</div>
+             <select ng-model="selectVolId">
+                 <option ng-repeat="vol in volumes track by $index" value="{{$index}}">{{vol.title}}</option>
+             </select>
+         </div>
+         <div class="line">
+             <div class="title">标签列表：</div>
+             <div style="display:flex;flex-direction:row;flex-flow:row wrap;word-break:break-all;max-width:18rem;background:white;border:lightgray 1.5px solid;padding-left:0.5rem;">
+                 <div class="workTag" ng-repeat="tag in newTagList" ng-click="deleteTag(newTagList,tag)">#{{tag}}</div>
+                 <input ng-model="newTag" maxlength="12" style="border:none;" ng-keyup="enterTag($event)">
+             </div>
+         </div>
+
+         <div id="editChapterCont" contenteditable="true" class="wordEditor">
+
+         </div>
+     </div>
+     <div style="display:flex;flex-direction:row;margin-top:1rem;">
+         <div class="buttonPink" ng-click="updateNewChapter()">SUBMIT</div>
+         <div class="buttonPink" ng-click="closeVolumePage('editChapterPage')">CANCEL</div>
+     </div>
+ </div>
+
+
+</body>
+</html>

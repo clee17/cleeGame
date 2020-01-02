@@ -1,0 +1,18 @@
+
+
+<page-button value="1"
+             ng-show="pageManager.getPageIndex().slice(0,1)>1"
+             ng-click="onGoPage(1)">
+</page-button>
+
+<span ng-show="pageManager.getPageIndex().slice(0,1)-1>1">…</span>
+
+<page-button value="{{n}}"
+             ng-repeat="n in pageManager.getPageIndex()">
+</page-button>
+
+<span ng-show="(pageManager.totalCount - pageManager.getPageIndex().slice(-1))>1">…</span>
+
+<page-button value="pageManager.pageTotal"
+             ng-show="pageManager.pageTotal>pageManager.pageManager.getPageIndex().slice(-1)">
+</page-button>

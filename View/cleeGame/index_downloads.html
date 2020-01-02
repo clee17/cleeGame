@@ -1,0 +1,210 @@
+<style>
+    #downloadsBoard{
+        --colorschema: rgba(249,124,145,1);
+        background:white;
+        border-radius:1rem;
+        margin-top:6rem;
+        padding:3rem;
+        width:85%;
+        color:rgba(156,147,150,1);
+        transition:height 0.3s;
+        display:flex;
+        flex-direction:column;
+    }
+
+    #downloadCat{
+        display:flex;
+        flex-direction:row;
+        width:100%;
+        height:3.5rem;
+
+    }
+
+    .downloadCatButton{
+        width:25%;
+        height:100%;
+        font-weight:normal;
+        -moz-border-radius-topleft: 1rem;
+        -webkit-border-top-left-radius: 1rem;
+        border-top-left-radius: 1rem;
+        -moz-border-radius-topright: 1rem;
+        -webkit-border-top-right-radius: 1rem;
+        border-top-right-radius: 1rem;
+        transition:opacity 0.3s;
+        text-align:center;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+    .downloadCatButton div:nth-child(1){
+        margin-top:5px;
+        font-family: "Microsoft YaHei UI",serif;
+        font-size:1.3rem;
+        font-weight:bold;
+    }
+
+    .downloadCatButton div:nth-last-child(1){
+        font-family: "Microsoft YaHei UI", serif;
+        font-size:1rem;
+        font-weight:bold;
+        margin-bottom:0;
+        padding-bottom:0;
+    }
+
+    #loadingLine{
+        width:100%;
+        height:1px;
+        background:gray;
+        transition:width 0.3s;
+    }
+
+    .downloadContents{
+        width:104%;
+        margin-left:-4%;
+        display:flex;
+        flex:1;
+        flex-direction:row;
+        flex-flow: wrap;
+        padding:0.5rem;
+        padding-top:2rem;
+    }
+
+    .downloadEntry{
+        width:44%;
+        height:118px;
+        position:relative;
+        margin-left:2rem;
+        border:lightgray 1px solid;
+        border-radius: 0.5rem;
+        display:flex;
+        flex-direction:row;
+        overflow:hidden;
+    }
+
+    .downloadEntry img{
+        width:100px;
+        height:100%;
+        max-width:30%;
+        margin-right:10px;
+
+    }
+
+    .downloadEntry img:hover{
+        filter:brightness(85%);
+
+    }
+
+    .downloadEntry .entryTitle{
+        font-weight:bold;
+        margin-bottom: 3px;
+        font-size:1.1rem;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+    .downloadEntry .entryTitle:hover{
+        text-decoration-line:underline;
+    }
+
+    .downloadEntry .entryIntro{
+        flex:1;
+        margin-top:5px;
+        text-indent: 0.5rem;
+        padding-left:15px;
+        width:180px;
+        min-width:0;
+        height:60px;
+        min-height:60px;
+        max-height:60px;
+        font-size:0.9rem;
+        display:block;
+        text-overflow: ellipsis;
+        word-break: break-all;
+        overflow:hidden;
+    }
+
+    .downloadEntry .entryInfo{
+        margin-top:auto;
+        display:flex;
+        flex-direction:row;
+        flex-flow:row wrap;
+        font-size:0.95rem;
+    }
+
+    .downloadEntry .entryInfo div{
+        margin-left:0;
+        margin-right:5px;
+    }
+    .downloadEntry .entryInfo div:nth-child(1){
+        margin-left:auto;
+    }
+
+    .downloadEntry .entryInfo div:nth-last-child(1){
+        margin-right:5px;
+    }
+
+    .downloadFooter{
+        width:100%;
+        display:flex;
+    }
+
+    .downloadFooter #FooterCore{
+        height:2rem;
+        margin-left:auto;
+        margin-right:auto;
+        display:flex;
+        flex-direction:row;
+    }
+
+    .FooterPage{
+        height:1.8rem;
+        width:1.8rem;
+        border-radius:0.2rem;
+        line-height:1.8rem;
+        text-align:center;
+        margin:0.5rem;
+        transition: background 0.2s;
+        font-family: "Arial Rounded MT Bold", serif;
+    }
+</style>
+
+<div id="downloadsBoard">
+    <div id="downloadCat" >
+        <category-button-top class="downloadCatButton" index='1' name="游戏小说,NOVEL" color="rgba(249,124,145,1)"></category-button-top>
+        <category-button-top class="downloadCatButton" index='2' name="共享素材,RESOURCE" color="rgba(103,169,141,1)"></category-button-top>
+        <category-button-top class="downloadCatButton" index='3' name="开发记录,DEVELOPMENT" color="rgba(111,195,217,1)"></category-button-top>
+        <category-button-top class="downloadCatButton" index='4' name="单机下载,GAME" color="rgba(255,214,114,1)"></category-button-top>
+    </div>
+
+    <div id="loadingLine"></div>
+
+    <div ng-include="'/templates/waitingAnim.html'" ng-show="requesting" style="margin-top:2rem;margin-bottom:auto;"></div>
+
+    <div class="downloadContents">
+        <div ng-show="error != ''" class="centerPage">{{error}}</div>
+        <div class="downloadEntry" ng-repeat="entry in entryList">
+            <img ng-src="{{entry.cover}}" ng-click="gotoEntry(entry)">
+            <div style="display:flex;flex-direction:column;height:100%;">
+                <div class="entryTitle" ng-click="gotoEntry(entry)">{{entry.title}}</div>
+                <div class="entryIntro">{{entry.subTitle | trimMaxWord: 38}} </div>
+                <div class="entryInfo">
+                    <div>{{entry.visited | visitParse:entry.type}}</div>
+                    <div>{{entry.liked + '收藏'}}</div>
+                    <div>{{entry.chapCount | chapterCount}}</div>
+                    <div>{{entry.wordCount | wordCount}}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="downloadFooter" ng-show="error == ''" >
+        <div id="FooterCore" ng-include="'/templates/pageSplit.html'"></div>
+    </div>
+</div>
+
+<!--"-->

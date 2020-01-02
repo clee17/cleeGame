@@ -1,0 +1,63 @@
+<style>
+
+    #admin_board select{
+        font-size:14px;
+        height:1.4rem;
+    }
+
+    #admin_board button{
+        font-size:1rem;
+        padding-left:10px;
+        padding-right:10px;
+        color:rgba(108,95,93,255);
+    }
+
+    #funcBoard{
+        margin-bottom:3rem;
+    }
+
+    #funcBoard button{
+        margin-right:10px;
+        padding-left:10px;
+        padding-right:10px;
+        padding-top:0;
+        padding-bottom:3px;
+    }
+    #funcBoard button:nth-child(1){
+        margin-left:auto;
+    }
+
+    #funcBoard button:last-child{
+        margin-right:20px;
+    }
+
+</style>
+
+<div id="admin_board" controller="admin_con" style="flex:1;display:flex;flex-direction:column;min-width:35rem;" ng-controller="adminCon">
+    <div style="margin-left:auto;margin-right:auto;margin-top:10px;">欢迎来到Clee_Archive管理界面，请选择您要管理的项目: </div>
+    <div style="margin-left:auto;margin-right:auto;margin-top:20px;">表格：<select ng-model="tableId">
+        <option value="0">注册表</option>
+        <option value="1">用户表</option>
+    </select>
+        <button ng-click="request()">获取</button>
+    </div>
+    <div ng-show="!requested && !requesting" style="display:flex;flex:1;">
+        <div style="margin:auto;text-align:center;font-weight:bold;">请先获取列表</div>
+    </div>
+    <waiting-anim ng-show="requesting"></waiting-anim>
+    <div ng-show="err && err!= ''">{{err}}</div>
+
+    <div ng-show="requested" style="flex:1;display:flex;flex-direction:column;width:80%;margin-left:auto;margin-right:auto;margin-top:1rem;">
+        <div table-header style="min-height:2rem;display:flex;flex-direction:row;padding-left:25px;"></div>
+        <div ng-repeat="item in contents" style="display:flex;flex-direction:row;border-bottom:solid 1px rgba(218,218,218,218);width:95%;margin-left:auto;margin-right:auto;min-height:1.8rem;">
+            <div table-content contents="item" style="display:flex;flex-direction:row;"></div>
+            <button style="margin-left:auto;margin-right:10px;">编辑</button>
+            <button style="margin-right:10px;" ng-click="removeItem(item._id,$index)">删除</button>
+        </div>
+    </div>
+
+    <div id="funcBoard" style="display:flex;flex-direction:row;width:90%;">
+        <add-error></add-error>
+        <button ng-disabled="!requested" ng-click="requestAdd()">添加</button>
+    </div>
+</div>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <title>info</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="lib/angular-cookies.js"></script>
+
+    <script>
+        var app = angular.module('cleeInfo',[]);
+
+        app.controller("templateControl",function($rootScope,$scope,$http,$location,$window){
+            $rootScope.templateStyle = 'set1';
+            $scope.prevExisted=true;
+            $scope.nextExisted=true;
+            $scope.prevName = "前一条";
+            $scope.nextName = "后一条";
+            $scope.prevClick = "link2";
+            $scope.nextClick= "link2";
+            $scope.error = '';
+            $scope.type= parseInt(document.getElementById("infoType").innerText);
+            document.getElementsByTagName("title")[0].innerText=document.getElementById("newsTitle").innerText;
+            switch($scope.type){
+                case 1000:
+                    $rootScope.templateStyle = 'set1';
+                    break;
+                case 1005:
+                    $rootScope.templateStyle= 'set2';
+                    break;
+                default:
+                    $rootScope.templateStyle = 'set2';
+                    break;
+            }
+
+            $scope.showTimeStamp = function(){
+                return $scope.type === 1005;
+            };
+
+            $scope.showPrevNext = function(){
+                return $scope.type === 1005;
+            };
+
+
+            if($scope.showPrevNext()){
+                document.getElementById('prevClick').style.marginLeft='auto';
+            }
+            else{
+                document.getElementById('returnClick').style.marginLeft='auto';
+            }
+
+            $scope.prev = function(){
+                if($scope.requesting)
+                    return;
+                $scope.requesting =true;
+                var path = window.location.pathname;
+                var data ={
+                    newsId: path.substring(path.lastIndexOf('/')+1),
+                    type: $scope.type
+                };
+                path = path.substring(0,path.lastIndexOf('/'));
+                $http.post(path+'/prev/',data).then(function(response){
+                    $scope.requesting = false;
+                    if(response.data.msg== 'no data found'){
+                        $scope.prevExisted = false;
+                        $scope.prevName = "已是最早";
+                        $scope.prevClick = 'linkDisabled';
+                        return;
+                    }
+                    else if(response.data._id){
+
+                        var newUrl = window.location.href;
+                        var path = window.location.pathname;
+                        var oldId = path.substring(path.lastIndexOf('/')+1);
+                        newUrl = newUrl.substring(0,newUrl.indexOf(oldId))+response.data._id;
+                        $window.location.href = newUrl;
+                    }
+                    else{
+
+                        throw '后端出错啦！';
+                    }
+                }).catch(function(err){
+
+                    $scope.requesting = false;
+                    $scope.error = err;
+                });
+            };
+
+            $scope.next = function(){
+                if($scope.requesting)
+                    return;
+                $scope.requesting =true;
+                var path = window.location.pathname;
+                var data ={
+                    newsId: path.substring(path.lastIndexOf('/')+1),
+                    type: $scope.type
+                };
+                path = path.substring(0,path.lastIndexOf('/'));
+                $http.post(path+'/next/',data).then(function(response){
+                    $scope.requesting = false;
+                    if(response.data.msg== 'no data found'){
+                        $scope.nextExisted = false;
+                        $scope.nextName = "已是最新";
+                        $scope.nextClick = "linkDisabled";
+                        return;
+                    }
+                    else if(response.data._id){
+
+                        var newUrl = window.location.href;
+                        var path = window.location.pathname;
+                        var oldId = path.substring(path.lastIndexOf('/')+1);
+                        newUrl = newUrl.substring(0,newUrl.indexOf(oldId))+response.data._id;
+                        $window.location.href = newUrl;
+                    }
+                    else{
+
+                        throw '后端出错啦！';
+                    }
+                }).catch(function(err){
+
+                    $scope.requesting = false;
+                    $scope.error = err;
+                });
+            };
+        });
+    </script>
+
+    <link rel="stylesheet" href="/css/root.css">
+    <style>
+        /*基础模板*/
+
+        #infoMainBoard{
+            flex:1;
+            font-family:SimSun-ExtB,serif;
+            color:rgba(190,150,124,1);
+            margin-left:auto;
+            margin-right:auto;
+            width:100%;
+        }
+
+        /*模板1*/
+        .set1 h1 {
+            background:rgba(236,199,184,1);
+            height:2.5rem;
+            color:white;
+            font-size:2rem;
+            line-height:2.5rem;
+            text-align:center;
+            margin-bottom:1rem;
+            font-family:"Microsoft YaHei UI",serif;
+        }
+
+        .set1 p{
+            text-indent:2rem;
+            margin:1rem;
+            font-size:1rem;
+            margin-top:0.7rem;
+            margin-bottom:0.7rem;
+            line-height:1.5rem;
+        }
+
+        .set1 h2{
+            color:rgba(26,63,104,9);
+            font-size:1rem;
+            margin-top:0.8rem;
+            margin-bottom:0.8rem;
+            border-left:rgba(26,63,104,1) 0.5rem solid;
+            padding-left:1rem;
+        }
+
+        .set1 li{
+            margin-left:5rem;
+        }
+
+        .set1 a{
+            text-decoration:none;
+            color:rgba(190,150,124,1);
+            font-style: italic;
+            font-weight: lighter;
+        }
+
+        .set1 a:after{
+           margin-left:2rem;
+           content:"←";
+        }
+
+        .set1 a:hover{
+            color:rgba(221,174,185,1);
+            text-decoration-line:underline;
+        }
+
+        /*模板2*/
+        .set2 #infoMainBoard{
+            display:flex;
+            flex-direction:column;
+            background:white;
+            border-radius: 1.5rem;
+            color:rgba(186,178,181,1);
+            padding:3rem;
+            padding-top:1.5rem;
+            font-size:1rem;
+        }
+
+        .set2 h1{
+            font-size:1.7rem;
+            margin-left:auto;
+            margin-right:auto;
+            padding-bottom:1rem;
+            font-family: SongBold, serif;
+        }
+
+        .set2 p{
+            text-indent:2rem;
+        }
+
+        .set2 #infoLine{
+            margin-top:0.2rem;
+            text-align:center;
+            margin-bottom:1.2rem;
+        }
+
+        .set2 #infoLine span{
+            margin-left: 2rem;
+        }
+
+        .set2 h2{
+            font-weight: bold;
+            font-size:1.2rem;
+        }
+    </style>
+
+</head>
+
+<body ng-app="cleeInfo" ng-controller="templateControl">
+<div style="margin-top:4.5rem;margin-left:auto;padding:0;margin-right:auto;height:100%;display:flex;flex-direction:column;width:45%;min-width:30rem;" ng-class="templateStyle" >
+        <div id="infoMainBoard" >
+            <div ng-show="error!=''">{{error}}</div>
+            <div ng-show="false" id="infoType"><%= type %></div>
+            <h1 id="newsTitle"><%= title %></h1>
+            <div ng-show="showTimeStamp()" id="infoLine"><span>Published:<%= date.toLocaleString().replace(/\//g,'-')%></span><span>阅读量 <%= visited %></span></div>
+            <%- contents%>
+        </div>
+        <!--      底部logo-->
+        <div style="width:100%;height:5rem;background-image:url('/img/logo_002.png');background-repeat:no-repeat;background-position:center;">
+        </div>
+</div>
+
+
+<div style="background:rgba(236,199,184,1);top:0;height:0.5rem;width:100%;position:fixed;display:flex;">
+    <a id="prevClick" ng-click="prev()" ng-class="prevClick" ng-show="showPrevNext()">{{prevName}}</a>
+    <a id="nextClick" ng-click="next()" ng-class="nextClick" ng-show="showPrevNext()">{{nextName}}</a>
+    <a class ="link2" href="/" id="returnClick">返回首页</a>
+</div>
+
+</body>
+
+</html>

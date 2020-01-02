@@ -1,0 +1,194 @@
+<style>
+
+    #manualBoard{
+        margin-top:6rem;
+        color:rgba(156,147,150,1);
+        transition:height 0.3s;
+        width:calc(85% + 6rem);
+        position:relative;
+        --boardColor: rgba(249,124,145,1);
+
+    }
+
+    #manualBoard img{
+        max-width:100%;
+        height:auto;
+
+    }
+
+    #manualGuideBar{
+        display:flex;
+        flex-direction:column;
+        width:167px;
+        position:absolute;
+        top:20px;
+        left:0;
+    }
+
+    #manualMainBoard{
+        background:white;
+        border-radius:1rem;
+        margin-top:0px;
+        margin-left:6rem;
+        min-height:45rem;
+        padding-top:1rem;
+        color:rgba(156,147,150,1);
+        padding-bottom:3rem;
+        /*font-size:1rem;*/
+        display:flex;
+        flex-direction:column;
+    }
+
+    .manualButtonBg{
+        background-image:url(img/button_000_bg.png);
+        height:67px;
+        width:153px;
+        background-repeat: no-repeat;
+        margin-bottom:0.5rem;
+        margin-top:0.5rem;
+        border-radius:1rem;
+        align-item:center;
+        transition:box-shadow 0.4s;
+    }
+
+    .manualButton{
+        width:143px;
+        height:57px;
+        filter:brightness(100%);
+        margin:5px;
+    }
+
+    .manualButton:hover{
+        filter:brightness(108%);
+
+    }
+
+    .manualTitle{
+        margin-left:auto;
+        margin-right:auto;
+        width:75%;
+        height:4rem;
+        line-height:4rem;
+        text-align:center;
+        font-family:SimSun-ExtB, Arial, "Microsoft YaHei UI", serif;
+        font-size:1.5rem;
+    }
+
+    .manualLoading{
+        opacity:75%;
+        width:75%;
+        padding:0px;
+        margin-left:auto;
+        margin-right:auto;
+        background:var(--boardColor);
+        height:4px;
+        border-radius:5px;
+        overflow:hidden;
+        position:relative;
+    }
+
+    .manualSubTab{
+        display:flex;
+        width:75%;
+        margin-top:0px;
+        height:3rem;
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    .manualSubTab .subTab{
+        margin-left:0px;
+        width:6rem;
+        height:2rem;
+        font-weight:bold;
+        line-height:1.5rem;
+        text-align: center;
+        -moz-border-radius-bottomleft: 1rem;
+        -moz-border-radius-bottomright: 1rem;
+        border-bottom-left-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+        -webkit-border-bottom-left-radius: 1rem;
+        -webkit-border-bottom-right-radius: 1rem;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+    .subTabSelected{
+        color:white;
+        border:none;
+    }
+
+
+    .manualSubTab:nth-last-child(1){
+        margin-right:auto;
+    }
+
+   #manualContents{
+        width:80%;
+        margin-left:auto;
+        margin-right:auto;
+        padding-left: 4rem;
+        padding-right:3rem;
+       font-size:1.05rem;
+       letter-spacing:0;
+       line-height:1.3rem;
+    }
+
+    #manualContents li{
+        margin-left:4rem;
+    }
+
+    #manualContents p{
+        text-indent:2rem;
+        margin-top:0.5rem;
+        margin-bottom:1rem;
+
+    }
+
+    #manualContents h2{
+        font-size:1.2rem;
+        padding-left:1rem;
+        margin-bottom:1rem;
+        margin-top:2rem;
+    }
+
+   .template0 h2{
+       border-left:rgba(249,124,145,1) 0.5rem  solid;
+   }
+
+    .template1 h2{
+        border-left:rgba(103,169,141,1) 0.5rem  solid;
+    }
+
+    .template2 h2{
+        border-left:rgba(111,195,217,1) 0.5rem  solid;
+    }
+
+    .template3 h2{
+        border-left:rgba(255,214,114,1) 0.5rem  solid;
+    }
+</style>
+
+<div id="manualBoard">
+
+    <div id="manualGuideBar">
+        <manual-sub-button  class="manualButtonBg" name="网站导航" index="0" color="rgba(249,124,145,1)"></manual-sub-button>
+        <manual-sub-button  class="manualButtonBg" name="风雨山河依旧在" index="1" color="rgba(103,169,141,1)"></manual-sub-button>
+        <manual-sub-button  ng-cloak="finishedLoading()" class="manualButtonBg" name="Memoria" index="2" color="rgba(111,195,217,1)"></manual-sub-button>
+    </div>
+
+    <div id="manualMainBoard">
+        <div ng-show="error != ''" class="warningPage">{{error}}</div>
+        <div class="manualTitle" ng-show="error==''"><span>{{title}}</span></div>
+        <div class="manualLoading" ng-show="error==''">
+            <div class="linearCore" ng-show="requesting"></div>
+        </div>
+        <div class="manualSubTab" ng-show="error== ''">
+            <category-button-bottom ng-repeat="content in contents" class="subTab"></category-button-bottom>
+        </div>
+        <div id="manualContents" ng-class="mainBoardTemplate">
+        </div>
+    </div>
+</div>

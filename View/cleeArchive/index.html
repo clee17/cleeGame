@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <% if(title){ %>
+    <title><%- title %></title>
+    <% }else{ %>
+    <title>cleeArchive</title>
+    <% } %>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-lz-string.js"></script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/svgxuse@1.2.6/svgxuse.min.js"></script>
+
+    <script src="/js/JsExt.js"></script>
+
+    <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/archive/layout.css">
+    <link rel="stylesheet" href="/css/archive/button.css">
+    <link rel="stylesheet" href="/css/animation.css">
+
+    <script src="https://unpkg.com/pure-md5@latest/lib/index.js"></script>
+
+    <script>var app = angular.module('cleeArchive',['lz-string']);</script>
+    <script src="/service/userService.js"></script>
+    <script src="/templates/log_con.js"></script>
+    <script>
+        var _getAbsolutePosition = function(obj) {
+            if(!obj)return null;
+            let w = obj.offsetWidth, h = obj.offsetHeight;
+
+            let t = obj.offsetTop,l = obj.offsetLeft;
+            obj = obj.offsetParent;
+            while(obj)
+            {
+
+                t += obj.offsetTop;
+                l += obj.offsetLeft;
+                obj = obj.offsetParent;
+            }
+
+            let r = l+w;
+            let b = t-h;
+
+            return {width: w, height: h, top: t, left: l, right: r, bottom: b};
+        };
+
+        var _getInsideTheElement = function(pointer,area){
+            if(area.target && area.target == pointer.target)
+               return true;
+
+            let x = pointer.clientX-pointer.layerX;
+            let y = pointer.clientY-pointer.layerY;
+
+            let a = x>=area.left;
+            let b = x<=area.right;
+            let c = y>=area.bottom;
+            let d = y<=area.top;
+
+            return  a && b && c && d;
+        };
+
+        app.controller('entryCon',function($scope,$rootScope,$window,$timeout,loginManager){
+            window.addEventListener("click",function(event){
+                $rootScope.$broadcast('clicked',{event:event});
+            });
+
+            $rootScope.err = '<%- err %>';
+            $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
+            for(let attr in $rootScope.variables){
+                $rootScope[attr] = $rootScope.variables[attr];
+            };
+            $scope.loggingOut = false;
+            $scope.freezingClick = false;
+
+            $scope.showDashboard = false;
+            $scope.showLoginboard = false;
+
+            $scope.switchDashboard = function(event){
+                $scope.showDashboard = !$scope.showDashboard;
+                $scope.freezingClick = true;
+                $timeout(function(){
+                    $scope.freezingClick = false;
+                },500);
+            };
+
+            $scope.switchLoginboard = function(event){
+                $scope.showLoginboard = !$scope.showLoginboard;
+                $scope.freezingClick = true;
+                $timeout(function(){
+                    $scope.freezingClick = false;
+                },500);
+            };
+
+            $scope.logout = function(){
+                loginManager.requestLogout();
+                $scope.loggingOut = true;
+                $scope.showDashboard = false;
+            };
+
+            $scope.$on('logoutFinished',function(event,data){
+                $scope.loggingOut = false;
+                if(data.success)
+                    window.location.reload();
+            });
+
+            $scope.$on('clicked',function(event,data) {
+                if(!data.event.target)
+                    return;
+                if(!data.event.target.className.indexOf)
+                    return;
+                if (data.event.target.className.indexOf('dashboard') == -1 && !$scope.freezingClick && $scope.showDashboard)
+                {
+                    $scope.showDashboard = false;
+                    $scope.$apply();
+                }
+            });
+        });
+
+
+        app.directive('initialisation',['$rootScope',function() {
+            return {
+                restrict: 'AC',
+                link: function($scope) {
+                    var to;
+                    var listener = $scope.$watch(function() {
+                        clearTimeout(to);
+                        to = setTimeout(function () {
+                            listener();
+                            $scope.$broadcast('initialisation completed');
+                        }, 50);
+                    });
+                }
+            };
+        }]);
+    </script>
+    <% services.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
+
+    <% styles.forEach(function(item){ %>
+    <link rel="stylesheet" href="<%= '/css/'+ item +'.css' %>">
+    <% }) %>
+
+    <script src="/templates/animation.js"></script>
+    <script src="/view/modules/button.js"></script>
+
+    <% controllers.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
+
+</head>
+
+<body ng-app="cleeArchive" ng-controller="entryCon" style="display:flex;flex-direction:column;">
+<div id="header">
+    <div style="display:flex;flex-direction:row;width:100%;position:relative;" id="userBoard">
+        <div style="font-family:'Microsoft YaHei UI';font-size:32px;font-weight:bold;margin-left:3rem;color:rgba(158,142,166,255);">ARCHIVE</div>
+        <div style="font-family:'Microsoft Yahei UI';font-size:14px;height:18px;line-height:18px;font-weight:bold;margin-left:8px;margin-bottom:5px;margin-top:auto;border-radius:5px;color:white;padding-left:5px;padding-right:5px;background:rgba(158,142,166,255);">CLEE</div>
+        <% if(user) { %>
+        <a href="<%= '/users/'+user._id %>" style="margin-left:auto;">个人主页</a>
+        <a href="/fanfic/post/new" target="_blank">新的文章</a>
+        <a href="" style="display:flex;flex-direction:row;margin-right:2.5rem;" ng-click="switchDashboard($event)">
+            <div style="margin-top:auto;margin-bottom:auto;text-align:right;"><%= user.user %></div>
+            <div style="margin-left:8px;"><i class="fas fa-caret-down"></i></div>
+        </a>
+        <div ng-show="showDashboard" id="dashboard" class="dashboard">
+            <% if(user.group.indexOf(999)!=-1){ %>
+            <a class="dashboard" href="/admin">管理员</a>
+            <% } %>
+            <a class="dashboard" href="'/user/'+user._id+'/setting'">用户设置</a>
+            <button ng-click="logout()" ng-disabled="loggingOut" class="dashboard">登出</button>
+        </div>
+        <% }else{ %>
+        <div class="dashboard" ng-show="showLoginboard" style="position:absolute;right:0;top:0;">
+            <div ng-include="'/templates/loginBoard.html'" ng-controller="loginCon"></div>
+        </div>
+        <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()">登录</a>
+        <% } %>
+    </div>
+    <div style="background:rgba(158,142,166,255);width:100%;height:2rem;display:flex;flex-direction:row;">
+        <div style="display:flex;flex-direction:row;margin-left:auto;margin-right:auto;min-width:600px;">
+            <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:0px;"><a href="/">首 页</a></guide_button>
+            <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:0px;"><a href="/fanfic">同 人 创 作</a></guide_button>
+            <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:0px;"><a href="/tech">技 术 文 档</a></guide_button>
+            <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:0px;margin-right:auto;"><a href="/design">设 计 参 考</a></guide_button>
+        </div>
+    </div>
+</div>
+
+<div id="main" ng-include="'<%= viewport %>'">
+</div>
+
+<div id="footer">
+    <div id="publication" class="board" style="margin-left:auto;">
+        <div class="headline">网站信息</div>
+        <div><a>网站地图</a></div>
+        <div><a>网站简介</a></div>
+        <div><a>版权声明</a></div>
+    </div>
+
+
+    <div id="contact" class="board" style="margin-right:auto;border:none;">
+        <div class="headline">联系我们</div>
+        <div><a>提交故障</a></div>
+        <div><a>联系站主</a></div>
+    </div>
+</div>
+
+</body>
+</html>

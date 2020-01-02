@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="f1492b90-00d3-4777-9ed7-d1c86aa34b50" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="tsconfig.json" />
+        <option value="CSS File" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="ProjectId" id="1QJHjGQWEKYVRawPTi07ZRtQZYW" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON&#10;EJS" />
+    <property name="javascript.nodejs.core.library.configured.version" value="10.15.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\svg" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame\gameEntry" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\js\lib" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image\2019" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive\cont" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="JavaScript Debug.booknew.html">
+    <configuration name="booknew.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://52.69.247.145/View/cleeFanfic/booknew.html">
+      <method v="2" />
+    </configuration>
+    <configuration name="fanfic.cleegame.com" type="JavascriptDebugType" nameIsGenerated="true" uri="http://fanfic.cleegame.com/" useFirstLineBreakpoints="true">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.booknew.html" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f1492b90-00d3-4777-9ed7-d1c86aa34b50" name="Default Changelist" comment="" />
+      <created>1550021723320</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1550021723320</updated>
+      <workItem from="1550021726779" duration="32349000" />
+      <workItem from="1550063238241" duration="20769000" />
+      <workItem from="1550248679666" duration="12741000" />
+      <workItem from="1550370941387" duration="30271000" />
+      <workItem from="1550583929987" duration="12145000" />
+      <workItem from="1550763004560" duration="8120000" />
+      <workItem from="1550937471820" duration="47746000" />
+      <workItem from="1551025938417" duration="18313000" />
+      <workItem from="1554789934244" duration="665000" />
+      <workItem from="1558592457437" duration="11882000" />
+      <workItem from="1558777299161" duration="1287000" />
+      <workItem from="1558836545976" duration="92242000" />
+      <workItem from="1559001820777" duration="40032000" />
+      <workItem from="1559100542149" duration="70836000" />
+      <workItem from="1559219167236" duration="33784000" />
+      <workItem from="1559287376726" duration="179578000" />
+      <workItem from="1559611585584" duration="30947000" />
+      <workItem from="1559676101951" duration="25133000" />
+      <workItem from="1559715979303" duration="2603000" />
+      <workItem from="1559724092654" duration="1769000" />
+      <workItem from="1559734716234" duration="44308000" />
+      <workItem from="1559816401354" duration="6631000" />
+      <workItem from="1559825655637" duration="9582000" />
+      <workItem from="1559859664070" duration="45521000" />
+      <workItem from="1559925273401" duration="26521000" />
+      <workItem from="1559988007316" duration="14414000" />
+      <workItem from="1560033636957" duration="742000" />
+      <workItem from="1560034397822" duration="5984000" />
+      <workItem from="1560218674542" duration="4134000" />
+      <workItem from="1560241760154" duration="1533000" />
+      <workItem from="1560248796033" duration="5379000" />
+      <workItem from="1560269088006" duration="302000" />
+      <workItem from="1560321387268" duration="19539000" />
+      <workItem from="1560345342990" duration="10681000" />
+      <workItem from="1560357805590" duration="622000" />
+      <workItem from="1560378189479" duration="96092000" />
+      <workItem from="1560562103913" duration="48703000" />
+      <workItem from="1560647737401" duration="4199000" />
+      <workItem from="1560654397194" duration="8342000" />
+      <workItem from="1561878815316" duration="3716000" />
+      <workItem from="1567481939491" duration="728000" />
+      <workItem from="1569906967597" duration="1709000" />
+      <workItem from="1569920193712" duration="15059000" />
+      <workItem from="1570278584655" duration="9527000" />
+      <workItem from="1570442513671" duration="5000000" />
+      <workItem from="1570516863609" duration="630000" />
+      <workItem from="1570518347369" duration="19700000" />
+      <workItem from="1570670851841" duration="3330000" />
+      <workItem from="1570770052819" duration="2719000" />
+      <workItem from="1570777690183" duration="62000" />
+      <workItem from="1570778323463" duration="2000" />
+      <workItem from="1570778334098" duration="3297000" />
+      <workItem from="1570848253327" duration="7000" />
+      <workItem from="1570849352597" duration="21000" />
+      <workItem from="1570849492354" duration="6480000" />
+      <workItem from="1571052912954" duration="1355000" />
+      <workItem from="1571055751945" duration="14000" />
+      <workItem from="1571058266508" duration="69000" />
+      <workItem from="1571208669852" duration="2145000" />
+      <workItem from="1571266686475" duration="18000" />
+      <workItem from="1571351641205" duration="1249000" />
+      <workItem from="1571369983130" duration="2042000" />
+      <workItem from="1571396301009" duration="612000" />
+      <workItem from="1571643718167" duration="1583000" />
+      <workItem from="1571645323714" duration="6844000" />
+      <workItem from="1571652753951" duration="1192000" />
+      <workItem from="1571659637776" duration="2403000" />
+      <workItem from="1572080080919" duration="1299000" />
+      <workItem from="1572178806402" duration="1519000" />
+      <workItem from="1572228838915" duration="22846000" />
+      <workItem from="1572384164415" duration="87933000" />
+      <workItem from="1572585300268" duration="26075000" />
+      <workItem from="1572648840692" duration="13712000" />
+      <workItem from="1572663135943" duration="30465000" />
+      <workItem from="1572738215134" duration="11404000" />
+      <workItem from="1572752124919" duration="32083000" />
+      <workItem from="1572830098969" duration="34630000" />
+      <workItem from="1572910449226" duration="29884000" />
+      <workItem from="1572953928904" duration="19279000" />
+      <workItem from="1573017442919" duration="19776000" />
+      <workItem from="1573091085182" duration="134602000" />
+      <workItem from="1573529968423" duration="56370000" />
+      <workItem from="1573687673230" duration="50002000" />
+      <workItem from="1573955910314" duration="37126000" />
+      <workItem from="1574214574242" duration="58905000" />
+      <workItem from="1574482476791" duration="69480000" />
+      <workItem from="1575492395097" duration="1193000" />
+      <workItem from="1576160359414" duration="2779000" />
+      <workItem from="1576165042273" duration="10922000" />
+      <workItem from="1576194011628" duration="20243000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TodoView" selected-index="1">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="554" y="361" key="publish.login" timestamp="1576164590823">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="554" y="361" key="publish.login/0.0.1368.912@0.0.1368.912" timestamp="1576164590823" />
+  </component>
+</project>

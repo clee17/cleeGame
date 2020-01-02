@@ -1,0 +1,25 @@
+{
+  "warning": [{
+    "code": 100,
+    "refer": "未成年性行为"
+  },{
+    "code": 101,
+    "refer": "强迫性行为"
+  },{
+    "code": 102,
+    "refer": "年龄差"
+  },{
+    "code": 103,
+    "refer": "伦理混乱"
+  }],
+  "grade":[{
+    "code": 0,
+    "refer":"全年龄向"
+  },{
+    "code": 1,
+    "refer": "NC-17"
+  },{
+    "code": 2,
+    "refer": "NC-21"
+  }]
+}

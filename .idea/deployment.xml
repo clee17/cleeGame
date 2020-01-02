@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="52.69.247.145" autoUploadExternalChanges="true">
+    <serverData>
+      <paths name="52.69.247.145">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath path="/cleeBlog/node_modules" />
+            <excludedPath path="/node_modules" />
+            <excludedPath path="/cleeFanfic/node_modules" />
+            <excludedPath path="/Directory/memoria" />
+            <excludedPath path="/Directory/Nirvana" />
+            <excludedPath local="true" path="/Directory/" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

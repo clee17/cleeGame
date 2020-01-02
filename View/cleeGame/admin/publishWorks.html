@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>publishWorks</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-lz-string.js"></script>
+
+    <script>
+        var app = angular.module('cleePublish',['lz-string']);
+        app.controller("publishController",function($scope,LZString,$http){
+            $scope.title ="";
+            $scope.type=0;
+            $scope.cover="";
+            $scope.subTitle="";
+            $scope.tag="";
+            $scope.statements="";
+            $scope.intro="";
+            $scope.gameLink="";
+            $scope.status=0;
+
+            $scope.publishing = false;
+            $scope.style = ['btnBasic','btnNormal'];
+
+            $scope.onPublishWorks=function(){
+                if($scope.publishing)
+                    return;
+                if($scope.type <2000)
+                {
+                    alert('文章未分类');
+                    return;
+                }
+                else if($scope.title == "")
+                {
+                    alert('没有填写标题');
+                    return;
+                }
+                else if($scope.status <0 || $scope.status>1)
+                {
+                    alert('没有选择状态');
+                    return;
+                }
+
+                let data = {
+                    title:$scope.title,
+                    type:$scope.type,
+                    cover:$scope.cover,
+                    subTitle:$scope.subTitle,
+                    tag:$scope.tag.split(','),
+                    statements: $scope.statements,
+                    intro: $scope.intro,
+                    gameLink: $scope.gameLink,
+                    status: $scope.status
+                };
+                $scope.publishing = true;
+                $scope.style[1] = 'btnDisable';
+                $http.post('/publishWorks/publish',{metaData:LZString.compress(JSON.stringify(data))}).then(function(response){
+                    $scope.publishing = false;
+                    $scope.style[1] = 'btnNormal';
+                    alert(response.data.message);
+                }).catch(function(err){
+                    $scope.publishing = false;
+                    $scope.style[1] = 'btnNormal';
+                    alert(err);
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .btnBasic{
+            line-height:1.5rem;
+            margin-top:2rem;
+            height:1.5rem;
+            border-radius:1rem;
+            width:4rem;
+            font-weight:bold;
+            text-align:center;
+            color:white;
+            font-family: "Agency FB";
+        }
+
+        .btnDisable{
+            background:gray;
+        }
+
+        .btnNormal{
+            background:lightpink;
+        }
+
+        .mainBoard div{
+            margin-left:3rem;
+            margin-top:0.2rem;
+        }
+
+        .mainBoard img{
+            margin-left:5rem;
+        }
+    </style>
+
+</head>
+<body ng-app="cleePublish" ng-controller="publishController">
+
+<div style="display:flex;flex-direction:column;margin-left:auto;margin-right:auto;" class="mainBoard">
+    <div>作品标题：<input ng-model="title"></div>
+    <div>封面图片：<input ng-model="cover"></div>
+    <div><img ng-src="{{cover}}" style="width:197px;height:258px;"></div>
+    <div>游戏链接：<input style="width:8rem;" ng-model="gameLink"></div>
+    <div>作品分类：<select ng-model="type">
+        <option value=2000>游戏小说</option>
+        <option value =2005>共享素材</option>
+        <option value =2010>开发记录</option>
+        <option value=2015>单机下载</option>
+    </select></div>
+    <div>连载状态：<select ng-model="status">
+        <option value=0>连载中</option>
+        <option value =1>已完结</option>
+    </select></div>
+    <div>副小标题：<input ng-model="subTitle" style="width:8rem;"></div>
+    <div>标签列表：<input ng-model="tag" style="width:8rem;"></div>
+    <div>重要声明：</div>
+    <div><textarea ng-model="statements" style="width:25rem;height:5rem;"></textarea></div>
+    <div>剧情简介：</div>
+    <div><textarea ng-model="intro" style="width:25rem;height:15rem;"></textarea></div>
+    <div id="btn"
+         ng-class="style"
+         ng-click="onPublishWorks()">SUBMIT
+    </div>
+</div>
+
+</body>
+
+
+
+</html>

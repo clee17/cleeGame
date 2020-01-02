@@ -1,0 +1,21 @@
+{
+  "name": "cleegamegroup",
+  "version": "1.0.0",
+  "description": "fanfiction archive",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "clee",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.7.7",
+    "angular-cookies": "^1.7.7",
+    "angular-md5": "^0.1.10",
+    "angular-route": "^1.7.7",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.4.11",
+    "nodejs": "0.0.0"
+  }
+}

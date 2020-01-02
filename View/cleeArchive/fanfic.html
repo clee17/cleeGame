@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/pure-md5@latest/lib/index.js"></script>
+    <meta charset="UTF-8">
+    <title><%- book.title %></title>
+
+    <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+    <link href="/css/archive/fanfic.css" rel="stylesheet">
+</head>
+<script>
+    var index = '<%- chapter._id %>';
+    var submitting = false;
+
+    let submitForm = function(value,success,failure){
+        if(submitting)
+            return;
+        var xhr = "";
+        if(window.XMLHttpRequest)
+            xhr = new XMLHttpRequest();
+        else if(window.ActiveXObject)
+            xhr = newActiveObject();
+
+        xhr.open("post","/fanfic/validate/"+index,true);
+        xhr.setRequestHeader("content-type","application/x-www-form-urlencoded");
+        submitting = true;
+        xhr.send(value);
+        xhr.onreadystatechange = function(){
+            submitting = false;
+            let response = JSON.parse(xhr.response);
+            if(xhr.status == 200 && xhr.readyState == 4){
+                if(success)
+                    success(response);
+            }
+            else if(xhr.readyState == 4) {
+                if(!response.msg)
+                    response.msg = '网络通信错误，请重新尝试';
+                if (failure)
+                    failure(response);
+            }
+        };
+    };
+
+    let indexLink = function(e){
+        console.log('index entered');
+    };
+
+    let getCookie = function(name){
+        let arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+
+        if(arr=document.cookie.match(reg))
+            return (arr[2]);
+        else
+            return null;
+    };
+
+    let switchInfoPanel = function(){
+        let infoPanel = document.getElementById('infoScroll');
+        if(!infoPanel)
+            return;
+        if(!infoPanel.style.display)
+            infoPanel.style.display = 'none';
+        infoPanel.style.display = infoPanel.style.display=='none'? 'block':'none';
+
+        refreshGuideBar();
+    };
+
+    let closeInfoPanel = function(){
+        let infoPanel = document.getElementById('infoScroll');
+        if(!infoPanel)
+            return;
+        infoPanel.style.display = 'none';
+
+        refreshGuideBar();
+    };
+
+    let switchButton = function(btn,on){
+        btn.style.background = on?'rgba(158,142,166,255)':'white';
+        btn.style.color = on?'white':'rgba(158,142,166,255)';
+        btn.style.pointerEvents = on?'auto':'none';
+    };
+
+    let refreshGuideBar = function(){
+        let infoPanel = document.getElementById('infoScroll');
+        let book = document.getElementById('bookInfo');
+        let index = document.getElementById('indexInfo');
+        let hideInfo = function(info){
+             info.style.display = 'none';
+        };
+        if(book)
+            hideInfo(book);
+        if(index)
+            hideInfo(index);
+
+        let bookButton = document.getElementById('bookButton');
+        let indexButton = document.getElementById('indexButton');
+
+        if(bookButton)
+            switchButton(bookButton,true);
+        if(indexButton)
+            switchButton(indexButton,true);
+
+    };
+
+    let showBook = function(){
+        switchInfoPanel();
+        let bookButton = document.getElementById('bookButton');
+        if(bookButton)
+            switchButton(bookButton,false);
+        let infoPanel = document.getElementById('infoScroll');
+        infoPanel.style.display='block';
+        let bookInfo = document.getElementById('bookInfo');
+        if(bookInfo)
+        {
+            bookInfo.style.display = 'flex';
+        }
+    };
+
+    let showIndex = function(){
+        switchInfoPanel();
+
+        let infoPanel = document.getElementById('infoScroll');
+        infoPanel.style.display='block';
+        let indexInfo = document.getElementById('indexInfo');
+
+        let button = document.getElementById('indexButton');
+        if(button)
+            switchButton(button,false);
+
+        if(indexInfo){
+            indexInfo.style.display = 'flex';
+        }
+    };
+
+    let definePrevLink = function(currentIndexNum,indexList){
+        let link = '/fanfic/';
+        for (let i = currentIndexNum-1; i >= 0; i--)
+        {
+            if(indexList[i].chapter && indexList[i].chapter.published)
+            {
+                return (link+ indexList[i].chapter._id);
+            }
+        }
+        return null;
+    };
+
+    let defineNextLink = function(currentIndexNum,indexList){
+        let link = '/fanfic/';
+        for (let i = currentIndexNum+1; i < indexList.length;i++)
+        {
+            if(indexList[i].chapter && indexList[i].chapter.published)
+            {
+                return (link+ indexList[i].chapter._id);
+            }
+        }
+        return null;
+    }
+
+    let definePrevBtn = function(currentIndex,indexList){
+        let ChapBtn1 = document.getElementById('prevChapterA');
+        let ChapBtn2 = document.getElementById('prevChapterB');
+        var prevLink = definePrevLink(currentIndex,indexList);
+        if(ChapBtn1)
+        {
+            if(prevLink){
+                ChapBtn1.href = prevLink;
+                ChapBtn1.style.color = 'white';
+            }
+            else
+            {
+                ChapBtn1.removeAttribute("href");
+                ChapBtn1.style.color = 'gray';
+            }
+        }
+        if(ChapBtn2)
+        {
+            ChapBtn2.style.color = prevLink? 'white':'rgba(187,187,187,255)';
+            if(prevLink) {
+                ChapBtn2.onclick = function () {
+                    if(prevLink)
+                       window.location.href = prevLink;
+                };
+                ChapBtn2.className = 'miniInfo';
+            }
+        }
+    };
+
+    let defineNextBtn = function(currentIndex,indexList){
+        let ChapBtn3 = document.getElementById('nextChapterA');
+        let ChapBtn4 = document.getElementById('nextChapterB');
+        var nextLink = defineNextLink(currentIndex,indexList);
+        if(ChapBtn3)
+        {
+            if(nextLink){
+                ChapBtn3.href = nextLink;
+                ChapBtn3.style.color = 'white';
+            }
+            else
+            {
+                ChapBtn3.removeAttribute("href");
+                ChapBtn3.style.color = 'gray';
+            }
+        }
+        if(ChapBtn4)
+        {
+            ChapBtn4.style.color = nextLink? 'white':'rgba(187,187,187,255)';
+            if(nextLink) {
+                ChapBtn4.onclick = function () {
+                    if(nextLink)
+                        window.location.href = nextLink;
+                };
+                ChapBtn4.className = 'miniInfo';
+            }
+        }
+    };
+
+
+
+    window.onload = function(){
+        let infoPanel = document.getElementById('infoScroll');
+        infoPanel.style.display = 'none';
+
+        let loading1 = document.getElementById('checkingPassword');
+
+        let submitBtn = document.getElementById('submitBtn');
+        let entryValue = document.getElementById('entryValue');
+        let errContent = document.getElementById('errContent');
+
+        let indexList =JSON.parse('<%- JSON.stringify(index) %>');
+        let currentIndex = JSON.parse('<%- JSON.stringify(currentIndex) %>');
+        let bookStatus = '<%- book.status %>';
+        let currentIndexNum = -1;
+        for(let i=0;i<indexList.length;++i)
+        {
+            if(currentIndex._id == indexList[i]._id)
+                currentIndexNum = i;
+        }
+
+        definePrevBtn(currentIndexNum,indexList);
+        defineNextBtn(currentIndexNum,indexList);
+
+        let end = document.getElementById('endSign');
+        if(end)
+        {
+            let link = defineNextLink(currentIndexNum,indexList);
+            if(!link)
+            {
+                let contents = Number(bookStatus)>0 ? '· 未完待续 ·' : '· 全文完 ·';
+                end.innerText = contents;
+                end.style.display = 'block';
+            }
+
+        }
+
+        if(entryValue)
+           entryValue.value = '';
+
+        if(submitBtn)
+        {
+            submitBtn.onclick = function(){
+                let errStr = '';
+
+                let success = true;
+                if(!entryValue.value){
+                    errStr = '您必须输入阅读口令！';
+                    success = false;
+                }
+
+                if(success){
+                    errStr = '';
+                    errContent.innerHTML = errStr;
+                    let value = entryValue.value;
+                    value = md5(value).toString();
+                    loading1.style.display='flex';
+                    submitForm('request='+JSON.stringify({code:value,type:0}),function(response){
+                        loading1.style.display = 'none';
+                        if(!response.status)
+                        {
+                            errStr = '您输入的口令错误，请重新输入';
+                            errContent.innerHTML = errStr;
+                            let exp = new Date();
+                            exp.setTime(exp.getTime() - 1);
+                            let cval=getCookie(index);
+                            if(cval!=null)
+                                document.cookie= index + "="+cval+";expires="+exp.toGMTString();
+                        }
+                        else{
+                            errStr = '成功验证口令，即将刷新';
+                            errContent.innerHTML = errStr;
+                            let exp = new Date();
+                            exp.setTime(exp.getTime() + 1000*60*60*24*7);
+                            document.cookie = index + "="+ response.code + ";expires=" + exp.toGMTString();
+                            window.location.reload();
+                        }
+                    },function(response){
+                        loading1.style.display = 'none';
+                        errStr = response.msg;
+                        errContent.innerHTML = errStr;
+                    });
+                }
+                else
+                    errContent.innerHTML = errStr;
+            };
+        }
+
+    };
+</script>
+
+<body>
+<div id="guideBar">
+    <div><a id="prevChapterA">上一章</a></div>
+    <div id="prevChapterB" style="margin-top:0;margin-bottom:2rem;color:rgba(187,187,187,255);"><a><i class="chapter fas fa-arrow-left"></i></a></div>
+
+    <div class="miniInfo" onclick="showBook()">作品</div>
+    <div class="miniInfo" id="bookButton" onClick="showBook()"><i class="fas fa-book"></i></div>
+
+    <% if(index.length>=1 && book.status == 1) { %>
+    <div  class="miniInfo" onClick="showIndex()">目录</div>
+    <div  class="miniInfo" id="indexButton" onClick="showIndex()"><i class="fas fa-list"></i></div>
+    <% } %>
+
+    <% if(user._id == readerId && book.published){ %>
+    <div class="ss-edit"><a href="<%- '/fanfic/post/edit?id='+currentIndex._id %>" target="_blank">编辑</a></div>
+    <div class="ss-edit"><a href="<%- '/fanfic/post/edit?id='+currentIndex._id %>" target="_blank"><i class="fas fa-edit"></i></a></div>
+    <% } %>
+
+    <div style="margin-left:auto;margin-right:0;"><a style="color:gray" id="nextChapterA">下一章</a></div>
+    <div id="nextChapterB" style="margin-bottom:0;margin-top:auto;color:rgba(187,187,187,255);"><i class="chapter fas fa-arrow-right"></i></div>
+</div>
+
+<div id="infoScroll">
+    <div style="display:flex;flex-direction:row;" class="scrollFunc">
+        <div class="scrollButton" onclick="closeInfoPanel()"><i class="fas fa-arrow-alt-circle-left"></i></div>
+        <div class="scrollButton fadeLink" style="margin-top:1rem;font-size:32px;" onclick="closeInfoPanel()">收起 ↑</div>
+    </div>
+
+<!--    书籍信息界面-->
+    <div id="bookInfo">
+        <div style="margin-top:2rem;"><span>作品名：</span><span><%- book.title %></span></div>
+        <% let calcWord = function(wordNum){ %>
+        <% let wordShow = wordNum+' 字'; %>
+        <% if(wordNum > 999 && wordNum <= 9999){ %>
+        <% wordShow = (wordNum/1000).toFixed(2)+' 千字'; %>
+        <% } else if(wordNum > 9999){ %>
+        <% wordShow = (wordNum/10000).toFixed(2)+' 万字';} %>
+        <% return wordShow; %>
+        <% } %>
+        <div><span>总字数：</span><span><%- calcWord(book.wordCount) %></span></div>
+        <div><span>章节数：</span><span><%- book.chapterCount %>章</span></div>
+        <div class="timeInfo">
+            <span>发布于：</span>
+            <div>
+                <% let publishTime= new Date(book.updated) %>
+                <div><%- publishTime.getFullYear() %>年<%- publishTime.getMonth() %>月<%- publishTime.getDate() %>日</div>
+                <div><%- publishTime.getHours() %>时<%- publishTime.getMinutes() %>分<%- publishTime.getSeconds() %>秒</div>
+            </div>
+        </div>
+        <div class="timeInfo">
+            <span>更新于：</span>
+            <div>
+                <% publishTime= new Date(book.updated) %>
+                <div><%- publishTime.getFullYear() %>年<%- publishTime.getMonth() %>月<%- publishTime.getDate() %>日</div>
+                <div><%- publishTime.getHours() %>时<%- publishTime.getMinutes() %>分<%- publishTime.getSeconds() %>秒</div>
+            </div>
+        </div>
+    </div>
+
+<!--    目录界面-->
+    <div id="indexInfo">
+        <% var chapterCount = function(num){ %>
+        <% if(num ==0 ) { %>
+        <%       return '首章'; %>
+        <% } else { %>
+        <%      return '第' + num +'章'; }%>
+        <% }%>
+
+        <% for (var i=0; i< index.length;++i) {%>
+        <% if(index[i]._id == currentIndex._id){ %>
+        <div style="font-weight:bold;color:gray;" >
+            <div><%- chapterCount(index[i].order) %></div>
+            <div style="margin-left:5px;flex:1;text-overflow: ellipsis;word-break: break-all;overflow:hidden;">
+                     <span> <%- index[i].chapter.title %> </span>
+            </div>
+        </div>
+        <% } else if (index[i].chapter && index[i].chapter.published){ %>
+        <div> <a href="<%- '/fanfic/'+index[i].chapter._id %>">
+            <div><%- chapterCount(index[i].order) %></div>
+            <div style="margin-left:5px;flex:1;text-overflow: ellipsis;word-break: break-all;overflow:hidden;"><%- index[i].chapter.title %></div>
+        </a></div>
+        <% } }%>
+    </div>
+
+</div>
+<div id="main">
+    <h1>
+        <% if(chapter.grade <= 1){ %>
+        <div class="grade"><%- grade[chapter.grade].refer %></div>
+        <% }else{ %>
+        <div class="grade" style="background:rgba(251,161,0,255);"><%- grade[chapter.grade].refer %></div>
+        <% } %>
+        <%- title %>
+    </h1>
+    <h2>
+       <span>
+            <span>作者：</span><a href="<%- '/users/'+user._id %>" target="_blank"><%- user.user %></a>
+        </span>
+        <% if(index.length >1 || book.status == 1) {%>
+        <span>
+            <span>属于作品：</span>
+            <div class='fadeLink' onclick="showBook()"><%- book.title %></div>
+        </span>
+        <% } %>
+        <span>
+            <span>总字数：</span>
+            <span><%- calcWord(chapter.wordCount) %></span>
+        </span>
+        <span>
+            <span>点赞数：</span>
+            <span><%- chapter.liked %></span>
+        </span>
+        <span>
+            <span>阅读量：</span>
+            <span><%- chapter.visited %></span>
+        </span>
+        <span>
+            <span>更新于:</span>
+            <% let updateTime= new Date(chapter.date) %>
+            <span><%- updateTime.getFullYear() %>年<%- updateTime.getMonth() %>月<%- updateTime.getDate() %>日</span>
+            <span><%- updateTime.getHours() %>时<%- updateTime.getMinutes() %>分<%- updateTime.getSeconds() %>秒</span>
+        </span>
+    </h2>
+    <% if(chapter.notes!='') {%>
+       <div class="notes">
+           <div class="emphasize infoEmphasize" style="margin-bottom:0.5rem;">作者的话：</div>
+           <div style="margin-left:2rem;">
+               <%- chapter.notes %>
+           </div>
+       </div>
+    <% } %>
+    <div style="margin-bottom:4rem;"></div>
+
+    <% if(chapter.passcode.use && !codeMatch) {%>
+    <div style="display:flex;flex-direction:column;margin-left:auto;margin-right:auto;">
+        <div>本文作者决定不向公众公开该作品，该文章仅做个人存档之用。</div>
+        <form class="requestForm">
+            <div style="margin-top:3rem;">
+                <div style="font-weight:bold;">分享口令：</div>
+                <div style="display:flex;flex-direction:row;">
+                    <input style="flex:1;" id="entryValue" type="text" autocapitalize="off" autocorrect="off" placeholder="请输入口令">
+                    <div id="checkingPassword" style="display:none;flex-direction:row;"><img src="/img/loading.gif" style="width:22px;height:22px;"> <span>密码验证中，请稍后</span></div>
+                </div>
+            </div>
+            <div style="margin-top:2rem;">
+                <button id="submitBtn" type="button" style="margin-right:-5rem;margin-left:auto;">提交</button>
+            </div>
+        </form>
+        <div id="errContent" style="color:rgba(251,161,0,255);margin-left:auto;margin-right:auto;"> </div>
+    </div>
+    <% } else { %>
+    <div id="tagInfo">
+        <div>
+            <div>
+                <span>基于作品：</span>
+                <% for(let i=0;i < chapter.fandom.length;++i){ %>
+                <a href="<%- '/search/tag?id='+ escape(chapter.fandom[i]) %>" target="_blank"><%- chapter.fandom[i] %></a>
+                <% if(i < chapter.fandom.length-1){ %><span>,</span><% } %>
+                <% } %>
+            </div>
+            <div>
+                <span>登场角色：</span>
+                <% for(let i=0;i < chapter.characters.length;++i){ %>
+                <a href="<%- '/search/tag?id='+ escape(chapter.characters[i]) %>" target="_blank"><%- chapter.characters[i] %></a>
+                <% if(i < chapter.characters.length-1){ %> <span>,</span><% } %>
+                <% } %>
+            </div>
+            <div>
+                <span>人物关系：</span>
+                <% for(let i=0;i < chapter.relationships.length;++i){ %>
+                <a href="<%- '/search/tag?id='+ escape(chapter.relationships[i]) %>" target="_blank"><%- chapter.relationships[i] %></a>
+                <% if(i < chapter.relationships.length-1){ %><span>,</span><% } %>
+                <% } %>
+            </div>
+            <div>
+                <span>其他标签：</span>
+                <% for(let i=0;i < chapter.tag.length;++i){ %>
+                <a href="<%- '/search/tag?id='+ escape(chapter.tag[i]) %>" target="_blank"><%- chapter.tag[i] %></a>
+                <% if(i < chapter.tag.length-1){ %><span>,</span><% } %>
+                <% }; %>
+            </div>
+            <div></div>
+        </div>
+    </div>
+    <div class="warning infoPanel">
+        <div class="emphasize infoEmphasize" style="margin-left:0;">作者警告:</div>
+        <% if(chapter.warning.length >0) {%>
+        <div>
+            <ul>
+                <% chapter.warning.forEach(function(item){%>
+                <li><%= item %></li>
+                <% }) %>
+            </ul>
+        </div>
+        <% } else {%>
+               <div>作者选择不使用文前警告</div>
+        <% } %>
+        <div style="margin-top:2rem;"></div>
+    </div>
+    <div class="infoDash"></div>
+    <div style="margin-top:2rem;"></div>
+
+    <div id="contents" style="flex:1;min-width:28rem;width:90%;margin-left:auto;margin-right:auto;">
+        <%- chapter.contents %>
+    </div>
+
+    <div style="margin-bottom:2rem;"></div>
+    <div id="endSign" class="end" style="display:none;padding-bottom:2rem;">· 全文完 · </div>
+    <% } %>
+</div>
+</body>
+</html>

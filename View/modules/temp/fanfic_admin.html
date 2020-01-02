@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/admin/">
+
+    <meta charset="UTF-8">
+
+    <title>FanficAdmin</title>
+
+    <script src="/lib/encode_front.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-route.js"></script>
+    <script src="/lib/angular-cookies.js"></script>
+    <script src="/lib/angular-md5.js"></script>
+
+    <script src="/modules/userData.js"></script>
+    <script src="/modules/utility.js"></script>
+
+
+    <script type="text/javascript">
+        var app = angular.module('fanfic_admin',['ngRoute','userData','ngMd5','cleeUtility']);
+    </script>
+    <!--<script src="/modules/infoService.js"></script>-->
+
+    <script src="/view/fanfic_admin.js"></script>
+    <script src="/controller/dataCon.js"></script>
+    <script src="/controller/infoCon.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Italianno" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/index.css">
+
+</head>
+
+<body ng-app="fanfic_admin" ng-controller="rootCon" ng-include="'/templates/main.html'">
+
+</body>
+
+<!--<body>-->
+<!--<div id ="root" style="width:100%;height:100%;background:bisque;display:flex;flex-direction:column;flex-flow:row wrap;">-->
+<!--<div id="parent" style="width:100%;background:pink;position:relative;">-->
+    <!--<div id="main_info" style="background:skyblue;position:absolute;left:15px;top:35px;width:50px;height:50px;" >test of div;</div>-->
+<!--</div>-->
+    <!--<div style="background:black;width:100%;"></div>-->
+<!--</div>-->
+<!--</body>-->
+
+</html>

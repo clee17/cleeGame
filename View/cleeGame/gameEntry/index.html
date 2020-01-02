@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="user-scalable=no">
+    <script>
+        let Scene_Title = null;
+        let SceneManager = null;
+        let ImageManager = null;
+        let AudioManager = null;
+        let ConfigManager = null;
+    </script>
+    <script type="text/javascript" src="/lib/loadingManager.min.js"></script>
+    <script type="text/javascript" src="/js/JsExt.min.js" onload="loadingManager.updateProgress(5)"></script>
+    <script type="text/javascript" src="/lib/GameviewPort.js" onload="loadingManager.updateProgress(5)"></script>
+    <script src="/lib/proton.min.js" onload="loadingManager.updateProgress(5)"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@4.5.1/dist/pixi.min.js" onload="loadingManager.updateProgress(10);"></script>
+    <script>
+        let path = '<%= path %>';
+        var $gameTitle = '<%= title %>';
+        var $previewSrc = '<%= srcList %>';
+        $previewSrc = $previewSrc.split(',');
+        $previewSrc.forEach(function(item,index,arr){
+            arr[index] = path+'/img/titles/'+item;
+        });
+
+        let head= document.getElementsByTagName('head')[0];
+        let link= document.createElement('link');
+        link.href= path+'/img/icon.png';
+        link.type= "image/png";
+        link.rel ='icon';
+        head.appendChild(link);
+
+        link = document.createElement('link');
+        link.href=path+'/css/gamefont.css';
+        link.type="text/css";
+        link.rel="stylesheet";
+        head.appendChild(link);
+
+    </script>
+    <title><%= title %></title>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+        }
+
+        body{
+            background-color:black;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAABfAQMAAAC0gom2AAAABlBMVEUiIiIcHBy5c10lAAAAIklEQVQ4y2NgYGaA46HD+Y8A/1A4g8Bto5zR+BnsnOEcPwBdyUrUPEOuGQAAAABJRU5ErkJggg==');
+            background-repeat: repeat;
+        }
+
+
+        body{
+            overflow:hidden;
+            height:auto;
+        }
+    </style>
+</head>
+<body>　
+<script>
+    Graphics.initialize();
+</script>
+<div id="titleFile">
+</div>
+<div id="secondLib">
+</div>
+<div id="gameFiles">
+</div>
+<script>
+    let node= document.getElementById('titleFile');
+    let script = document.createElement('script');
+    script.src = path+'/js/'+'Scene_Title.js';
+    script.type = "text/javascript";
+    script.onload = function(){
+        loadingManager.updateProgress(5);
+        loadLibFiles();
+    };
+    node.appendChild(script);
+
+    let loadLibFiles = function(){
+        let libFileName = ['pixi-picture.min','pixi-tilemap.min','fpsmeter','iphone-inline-video.browser','angular-lz-string.min'];
+        let lengthStart = 0;
+        for(let i=0;i<libFileName.length;++i)
+        {
+            let body= document.getElementById('secondLib');
+            let script = document.createElement('script');
+            script.src='/lib/'+libFileName[i]+'.js';
+            script.type="text/javascript";
+            script.onload = function(){
+                loadingManager.updateProgress(6);
+                lengthStart++;
+                if(lengthStart>= libFileName.length)
+                    loadGameEngine();
+            };
+            body.appendChild(script);
+        }
+    };
+
+
+    let loadGameEngine = function(){
+        let node= document.getElementById('secondLib');
+        let script = document.createElement('script');
+        script.src = '/lib/rpgMKMVExt.min.js';
+        script.type = "text/javascript";
+        script.onload = function(){
+            loadingManager.updateProgress(5);
+            loadGameFiles();
+        };
+        node.appendChild(script);
+
+    };
+
+    let loadGameFiles = function(){
+        let gameFiles = ['Game_Manager','Game_Objects','Game_Data','Game_Sprites','Game_Windows','Game_Scene'];
+        let startIndex = 0;
+        for(let i=0;i<gameFiles.length;++i)
+        {
+            let body= document.getElementById('gameFiles');
+            let script = document.createElement('script');
+            script.src=path +'/js/'+gameFiles[i]+'.js';
+            script.type="text/javascript";
+            script.onload = loadingManager.updateProgress(5);
+            body.appendChild(script);
+            startIndex++;
+            if(startIndex>= gameFiles.length)
+                loadGame();
+        }
+    };
+
+    let loadGame = function(){
+
+    }
+
+</script>
+</body>
+</html>

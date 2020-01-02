@@ -1,0 +1,118 @@
+<style>
+    #left_root {
+        position: fixed;
+        top: 0px;
+        background: rgba(236, 199, 184, 1);
+        display: flex;
+        width: 15rem;
+        height: 100%;
+        background-image: url('/img/pattern_000.png');
+    }
+
+    #left_inner {
+        width:85%;
+        height:100%;
+        margin-left:auto;
+        margin-right:auto;
+        display:flex;
+        flex-direction:column;
+        background:rgba(255,255,255,0.25);
+
+    }
+
+    #left_logo{
+        width:100%;
+        height:10rem;
+        background-image:url('/img/logo_000.png');
+        background-repeat:no-repeat;
+        background-position:center;
+    }
+
+    .left_contents{
+        width:100%;
+        height:14rem;
+        background-image:url('/img/title_000.png');
+        background-repeat:no-repeat;
+        background-position:10% 0%;
+        color:rgba(190,150,124,1);
+        font-size:13px;
+        padding-top:5px;
+    }
+
+    .left_contents .title{
+        color:rgba(155,60,84,1);
+        font-size:0.95rem;
+        padding-left:2rem;
+        font-weight:900;
+    }
+
+    .left_contents .contents{
+        font-family:SimSun-ExtB,Arial,"Microsoft YaHei UI",serif;
+        font-size:0.9rem;
+        margin-left:1.8rem;
+        margin-right:0.8rem;
+        margin-top:1.5rem;
+        font-weight: 500;
+    }
+
+    .link{
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+    .link:hover{
+        color:rgba(221,174,185,1);
+        text-decoration:underline;
+    }
+
+    .left_contents a{
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+    .left_contents a:after{
+        margin-left:0;
+    }
+
+    .left_contents a:before{
+        content:'●';
+        margin-left:0;
+    }
+</style>
+
+
+<div id="left_root" ng-controller="guideBarCon">
+    <div id="left_inner">
+       <div id="left_logo"></div>
+       <div class="left_contents">
+           <div class="title"><b>网站简介</b></div>
+           <div class="contents">
+               <p>本站为非盈利性质的个人游戏工作站。</p>
+               <p>除下载区发布的下载素材外，游戏中二次创作素材禁止无授权转载使用，授权申请请联系站主。</p>
+               <p>欢迎点击下方的捐赠支持本站发展。</p>
+           </div>
+       </div>
+        <div class="left_contents">
+            <div class="title"><b>更新公告</b></div>
+            <div class="contents" style="display:flex;flex-direction:column;margin-left:0;padding-left:2rem;width:85%">
+                <p ng-show=" !requesting && news.length===0">暂无更新</p>
+                <p ng-show="requesting">更新中</p>
+                <a ng-repeat="new in news"
+                   style="text-overflow: ellipsis;width:90%;word-break:break-all;margin-left:0;"
+                   target='_blank' ng-href="/news/{{new._id}}">
+                    {{new.title}}
+                </a>
+            </div>
+        </div>
+        <div style="color:rgba(190,150,124,1);margin-top:auto;margin-bottom:1rem;font-size:0.8rem;" class="buttonColor2">
+            <div class="buttonPink" style="width:5.5rem;margin-left:auto;margin-right:auto;margin-bottom:1rem;">DONATE</div>
+            <div style="width:100%;text-align:center;">
+                <span class="link" onClick="window.location.href='info/5cec293f22564237d3d95bbb'">版权声明</span>
+            </div>
+        </div>
+    </div>
+</div>

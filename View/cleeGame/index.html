@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <title>cleeGame</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-route.js"></script>
+    <script src="/lib/angular-lz-string.js"></script>
+    <script src="/modules/page-split.js"></script>
+    <script src="/js/JsExt.js"></script>
+
+    <link rel="stylesheet" href="/css/root.css">
+    <link rel="stylesheet" href="/css/button.css">
+
+    <script>
+        var app = angular.module('cleeGame',['ngRoute','lz-string','page-split']);
+
+        app.config(function($routeProvider,$locationProvider){
+            $routeProvider
+                .when('/',{
+                    templateUrl:'/view/index_games.html'  //已完成；
+                })
+                .when('/news',{
+                    controller:'newsCon',
+                    templateUrl:'/view/index_news.html'
+                })
+                .when('/downloads',{
+                    controller:'downloadsCon',
+                    templateUrl:'/view/index_downloads.html'
+                })
+                .when('/manual',{
+                    controller:'manualCon',
+                    templateUrl:'/view/index_encyclopedia.html',
+                    reloadOnSearch:false
+                })
+                .when('/contact',{
+                    templateUrl:'/view/index_contacts.html'     //已完成
+                });
+            $locationProvider.html5Mode(true);
+        });
+
+
+        app.controller('rootCon',function($rootScope,$timeout,$location){
+            $rootScope.callBack = {};
+            $rootScope.name = '';
+
+            $rootScope.colorSchema = ['rgba(249,124,145,1)','rgba(103,169,141,1)','rgba(111,195,217,1)','rgba(255,214,114,1)'];
+
+            $rootScope.$on('turnPage',function(event,data){
+                $location.search({});
+                if($rootScope.callBack[$rootScope.name])
+                {
+                    let list = $rootScope.callBack[$rootScope.name];
+                    while(list.length>0)
+                    {
+                        $timeout.cancel(list.pop());
+                    }
+                }
+                $rootScope.$apply(function(){
+                    $location.path(data.link);
+                });
+                $rootScope.pageTurning = false;
+            });
+        });
+
+
+    </script>
+    <script src="/view/index_directive.js"></script>
+    <script src="/view/index_controller.js"></script>
+    <script src="/view/index_filter.js"></script>
+</head>
+
+<style>
+
+    #indexLeftGuideBar{
+        display:none;
+    }
+
+    #mainBoard{
+        margin-left:auto;
+        margin-right:auto;
+        display:flex;
+        flex-direction:column;
+        width:48rem;
+        height:100%;
+        position:relative;
+    }
+
+    .logoInBoard{
+        height:3rem;
+        background-image:url('/img/logo_001.png');
+        background-repeat:no-repeat;
+        background-position:center;
+    }
+
+    #headGuideBar{
+        position:fixed;
+        top:0;left:0;
+        width:100%;
+        height:4.5rem;
+        background:rgba(236,199,184,1);
+        -webkit-mask-image: linear-gradient(rgba(255,255,255,1) 0, rgba(255,255,255,1) 55%,rgba(255,255,255,0) 100%);
+        -webkit-mask-position: 0 0;
+        background-image:url('/img/pattern_000.png');
+    }
+
+    #headGuideBarContents{
+        top:0.5rem;
+        display:flex;
+        margin-top:1rem;
+        position:absolute;
+        margin-left:2rem;
+    }
+
+        .headOptions{
+        margin-left:18px;
+        font-family:"Microsoft YaHei UI", serif;
+        font-weight:bold;
+        font-size:1.3rem;
+        letter-spacing:-1px;
+        transition: color 0.5s;
+        -moz-transition: color 0.5s; /* Firefox 4 */
+        -webkit-transition: color 0.5s; /* Safari 和 Chrome */
+        -o-transition: color 0.5s; /* Opera */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;
+    }
+
+
+
+    @media only screen and (min-device-width: 1024px)
+    {
+        body{
+            font-size:1.1rem;
+        }
+
+        #indexLeftGuideBar{
+            display: block;
+        }
+
+        #headGuideBarContents{
+            margin-left:0;
+            left:10.5rem;
+        }
+
+
+        #mainBoard{
+            margin-left:16.5rem;
+        }
+
+        #headGuideBarContents{
+            margin-left:0;
+            left:1rem;
+        }
+    }
+
+</style>
+
+<body ng-app="cleeGame"
+      ng-controller="rootCon">
+
+  <div style="margin-left:auto;margin-right:auto;height:100vw;min-width:51rem;">
+
+      <div id="headGuideBar"></div>
+
+      <div id="mainBoard">
+          <div ng-view style="flex:1;"></div>
+          <div class="logoInBoard">
+          </div>
+          <div id="headGuideBarContents" ng-controller="headControl">
+              <head-button class="headOptions" name="GAME" link="/"></head-button>
+              <head-button class="headOptions" name="NEWS" link="/news"></head-button>
+              <head-button class="headOptions" name="DOWNLOADS" link="/downloads"></head-button>
+              <head-button class="headOptions" name="MANUAL" link="/manual"></head-button>
+              <head-button class="headOptions" name="CONTACT" link="/contact"></head-button>
+          </div>
+      </div>
+
+      <div id="indexLeftGuideBar"  ng-include="'/view/index_guideBar.html'"></div>
+
+  </div>
+
+  <div id="topLine"></div>
+
+</body>
+</html>

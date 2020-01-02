@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <script src="/js/JsExt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-lz-string.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/root.css">
+    <link rel="stylesheet" href="/css/animation.css">
+    <link rel="stylesheet" href="/css/works.css">
+    <link rel="stylesheet" href="/css/button.css">
+    <link rel="stylesheet" href="/css/svgStyle.css">
+    <script>
+        var app = angular.module('cleeWorks',['lz-string']);
+   </script>
+    <script src="/view/works_directive.js"></script>
+    <script src="/view/works_filter.js"></script>
+    <script src="/view/works_controller.js"></script>
+    <script src="/lib/linkViewPort.js"></script>
+    <script>
+        var path = '<%= gameLink %>';
+        var exports = {};
+        app.controller('worksControl',function($rootScope,$scope,LZString){
+            $rootScope.colorSchemaLighten = ['rgba(162,201,185,1)','rgba(255,209,217,1)','rgba(255,235,112,1)','rgba(197,243,255,1)'];
+            $rootScope.colorSchema = ['rgba(103,169,141,1)','rgba(249,124,145,1)','rgba(248,227,99,1)','rgba(111,195,217,1)'];
+            $rootScope.status = 0;
+            $rootScope.chapters = JSON.parse('<%- JSON.stringify(chapters) %>');
+            $rootScope.chapCount = '<%= chapCount %>';
+            $rootScope.gameLink = '<%= gameLink %>';
+            $rootScope.ifLiked = JSON.parse('<%= ifLiked %>');
+            $rootScope.current = JSON.parse(LZString.decompressFromBase64('<%= current %>'));
+            $rootScope.current.date = new Date($rootScope.current.date);
+            $rootScope.volCount = '<%= ext1 %>';
+            $rootScope.comment = [];
+            $rootScope.requesting = true;
+
+        });
+     </script>
+
+</head>
+
+
+<body ng-app="cleeWorks" ng-controller="worksControl">
+
+<!--主要内容图层-->
+<div id="worksContentsBoard">
+<div id="bannerBoard" ng-controller="contentsControl">
+<img src="<%= cover.replace('.png','_banner.png')%>">
+    <div id="bannerCore" class="buttonColor1">
+        <page-button index="0" text='上一章' class="mainLink"></page-button>
+         <div id="mainVolume">{{ current | volumeTitle}}</div>
+        <page-button index="1" text='下一章' class="mainLink"></page-button>
+    </div>
+</div>
+
+<div id="mainWorksBoard" ng-controller="contentsControl">
+    <div ng-include="'/templates/waitingAnim.html'" ng-show="requesting" style="margin-top:auto;margin-bottom:auto;"></div>
+    <div ng-show="current.type==3000" class="volumeInBoard" ng-show="current">
+        <div  class="volTitleInBoard">{{current.title}}</div>
+        <div class="volIntroInBoard">{{current.contents}}</div>
+    </div>
+
+    <div id="mainContentsBoard" ng-show="current.type==3005" ng-show="current">
+        <div class="titleInBoard">第{{current.index.toCString()}}章 {{current.title}}</div>
+        <div class="infoInBoard">
+           <span>发布于:{{(current.date).toLocaleString()}}</span>
+            <span>阅读量: {{current.visited>= 10000? (current.visited/10000).toFixed(2)+'万': current.visited;}}</span>
+            <span style="margin-right:1.2rem;margin-left:1.2rem;">字数: {{current.wordCount}}</span>
+
+            <span ng-repeat="tag in current.tag">#{{tag}}</span>
+        </div>
+        <div id="contentsInBoard"></div>
+    </div>
+
+    <div id="mainBoardFoot" class="buttonColor2" ng-show="current">
+        <div class="buttonPink" style="margin-left:auto;margin-right:auto;width:5rem;">捐 助</div>
+        <div style="margin-bottom:-15px;margin-top:4rem;display:flex;flex-direction:row;height:18px;" ng-show="current.type==3005">
+            <span ng-class="['bottomLineInfo','bottomLineLink']" ng-click="showComment()">评论({{comment.length}})</span>
+            <like-button class='bottomLineInfo'></like-button>
+            <svg like-symbol style="width:18px;height:18px;" class="icon"><use xlink:href="/svg/symbol32-def.svg#icon-heart"></use></svg>
+        </div>
+    </div>
+</div>
+
+<div id="footerBoard" ng-controller="contentsControl">
+        <page-button index="0" text='上一章' class="mainLink"></page-button>
+        <page-button index="1" text='下一章' class="mainLink"></page-button>
+</div>
+</div>
+
+
+<div id="topRightBtn">
+    <a href="<%= '/works/edit/'+_id %>" class="link2" target="_blank"><%= edit %></a>
+    <a class="link2" href="/">返回首页</a>
+</div>
+
+
+
+<!--      信息图层-->
+<div id="infoBack"></div>
+<div class="infoGuide"  ng-controller="indexControl">
+    <div ng-class="['leftBtn','green']"
+         ng-mouseover="onHover($event,1)"
+         ng-mouseleave="onLeave($event,1)"
+         ng-click="onSelectTab('worksDetail',1)">信息</div>
+    <div ng-class="['leftBtn','pink']"
+         ng-mouseover="onHover($event,2)"
+         ng-mouseleave="onLeave($event,2)"
+         ng-click="onSelectTab('worksComment',2)">评论</div>
+    <div ng-class="['leftBtn','yellow']"
+         ng-mouseover="onHover($event,3)"
+         ng-mouseleave="onLeave($event,3)"
+         ng-click="onSelectTab('worksGame',3)">游戏</div>
+    <div ng-class="['leftBtn','blue']"
+         ng-mouseover="onHover($event,4)"
+         ng-mouseleave="onLeave($event,4)"
+         ng-click="onSelectTab('worksIndex',4)">目录</div>
+</div>
+
+
+
+
+<!--        文章信息图层-->
+<div float-page page-index="1" id="worksDetail" class="boardFixed">
+    <div class="detailBoard">
+        <div style="display:flex;flex-direction:row;">
+            <close-button></close-button>
+        </div>
+        <div style="display:flex;flex-direction:row;margin-bottom:0.5rem;">
+            <img src="<%= cover %>" style="width:197px;height:258px;margin-right:2rem;">
+            <div>
+                <h2> <%= title %></h2>
+                <p><%= subTitle %></p>
+                <p>字数统计: <span><%= (wordCount/10000).toFixed(2) %>万字</span></p>
+                <p>声明: <br></p>
+                <div style="padding-left:1rem;" id="workStates"><%- statements %></div>
+            </div>
+        </div>
+        简介:
+        <div id="worksIntro">
+            <div> <%- intro %></div>
+        </div>
+        <div  style="width:100%;display:flex;flex-direction:row;padding-left:1.5rem;margin-bottom:8px;margin-top:3.5rem;margin-left:-3rem;">
+            <div class="subInfo"><span>浏览量:</span> <span><%=visited %></span></div>
+            <div class="subInfo"><span>收藏数: </span><span><%= liked %></span></div>
+            <div class="subInfo"><span>总章节: </span><span><%= chapCount %></span></div>
+        </div>
+    </div>
+</div>
+
+
+<!--        评论图层-->
+<div float-page page-index="2" id="worksComment" class="boardStretch">
+    <div class="detailBoard">
+        <div style="display:flex;flex-direction:row;">
+            <close-button></close-button>
+        </div>
+        <div>
+            该功能尚在开发中。
+        </div>
+    </div>
+</div>
+
+
+
+<!--        游戏链接图层-->
+<div float-page page-index="3" id="worksGame" class="boardFixed" ng-controller="gameInfoControl">
+    <div class="detailBoard">
+        <div style="display:flex;flex-direction:row;">
+            <close-button></close-button>
+        </div>
+        <div id="worksGameView" style="width:100%;height:265px;margin-top:0.5rem;position:relative;display:flex;font-size:25px;border-radius:15px;overflow:hidden;">
+             <div ng-include="'/templates/waitingAnim.html'" ng-show="loading" style="margin-top:auto;margin-bottom:auto;margin-left:auto;margin-right:auto;" ng-show="loading"></div>
+                <span style="margin-left:auto;margin-right:auto;margin-top:20%;margin-bottom:auto;">{{showInfo}}</span>
+        </div>
+        <div style="width:100%;height:45px;display:flex;margin-top:1.5rem;margin-bottom:1rem;">
+            <a style="margin-left:auto;margin-right:auto;margin-top:auto;margin-bottom:auto;padding:0;" ng-href="{{gameLink}}" target="_blank" ng-show="_gameExist">+前往游戏+</a>
+        </div>
+    </div>
+</div>
+
+
+
+<!--        文章目录图层-->
+<div float-page page-index="4" id="worksIndex" class="boardStretch" ng-controller="workIndexControl">
+    <div class="detailBoard">
+        <div style="display:flex;flex-direction:row;">
+            <close-button></close-button>
+        </div>
+        <div class="indexMain" style="display:flex;flex-direction:row;flex-flow: row wrap;margin-left:0;">
+            <chapter-index ng-repeat="chap in chapters track by $index" value="{{$index}}" ng-class="chap.type==3000? 'volTitle': 'titleInIndex'">
+
+            </chapter-index>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

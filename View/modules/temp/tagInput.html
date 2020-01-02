@@ -1,0 +1,35 @@
+<style>
+    #tagBack{
+        display:flex;
+        flex-direction:row;
+        flex-flow:row wrap;
+        word-break:break-all;
+        max-width:18rem;
+        background:white;
+        border:lightgray 1.5px solid;
+        padding-left:0.5rem;
+    }
+
+    .tagShow{
+        margin-right:0.9rem;
+        font-size:0.95rem;
+        padding-left:0;
+        margin-left:0px;
+        height:1.5rem;
+    }
+
+    .tagShow:hover{
+        text-decoration:line-through;
+    }
+
+    .tagInput{
+        background:rgba(0,0,0,0);
+        border:none;
+        width:5rem;
+    }
+</style>
+
+<div id="tagBack">
+    <div class="tagShow" ng-repeat="tag in tagList" ng-click="deleteTag()">#{{tag}}</div>
+    <input ng-model="newTag" maxlength="6">
+</div>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectId" id="1QJHjGQWEKYVRawPTi07ZRtQZYW" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON&#10;EJS" />
+    <property name="javascript.nodejs.core.library.configured.version" value="10.15.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/svg" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="settings.github" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image\2019" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive\cont" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\svg" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame\gameEntry" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\js\lib" />
+    </key>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1129" y="242" key="#Deployment" timestamp="1577942761532">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="308" y="139" key="#Deployment/0.0.1368.912@0.0.1368.912" timestamp="1577941607872" />
+    <state x="1129" y="242" key="#Deployment/0.0.2560.1080@0.0.2560.1080" timestamp="1577942761532" />
+    <state x="872" y="198" key="#Options" timestamp="1577279113904">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="872" y="198" key="#Options/0.0.2560.1080@0.0.2560.1080" timestamp="1577279113904" />
+    <state x="420" y="298" key="FileChooserDialogImpl" timestamp="1576593847670">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="420" y="298" key="FileChooserDialogImpl/0.0.2560.1080@0.0.2560.1080" timestamp="1576593847670" />
+    <state x="919" y="226" key="SettingsEditor" timestamp="1577942643063">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="919" y="226" key="SettingsEditor/0.0.2560.1080@0.0.2560.1080" timestamp="1577942643063" />
+    <state x="1335" y="260" width="1225" height="707" key="find.popup" timestamp="1577936863221">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1335" y="260" width="1225" height="707" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1577936863221" />
+    <state x="586" y="215" key="ftp.server.browser" timestamp="1577941605939">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="586" y="215" key="ftp.server.browser/0.0.1368.912@0.0.1368.912" timestamp="1577941605939" />
+    <state x="554" y="361" key="publish.login" timestamp="1577941197994">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="554" y="361" key="publish.login/0.0.1368.912@0.0.1368.912" timestamp="1577941197994" />
+    <state x="1037" y="428" key="publish.login/0.0.2560.1080@0.0.2560.1080" timestamp="1577939802496" />
+    <state x="1522" y="380" width="672" height="676" key="search.everywhere.popup" timestamp="1577932834499">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1522" y="380" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1577932834499" />
+  </component>
+</project>

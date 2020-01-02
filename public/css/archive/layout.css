@@ -1,0 +1,244 @@
+*{
+    padding:0;
+    margin:0;
+}
+
+body{
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+input{
+    box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+}
+
+#header{
+    width:100%;
+    height:auto;
+}
+
+#header a{
+    text-decoration:none;
+    color:white;
+    flex:1;
+    height:100%;
+    text-align:center;
+}
+
+#header a:visited{
+    color:white;
+    text-decoration:none;
+}
+
+#header a:hover{
+    color:white;
+    text-decoration:none;
+}
+
+#userBoard >a{
+    width:auto;
+    flex:none;
+    margin-top:auto;
+    margin-bottom:auto;
+    margin-right:20px;
+    font-size:14px;
+    font-weight:bold;
+    font-family: "Arial Rounded MT Bold", SimSun-ExtB, "Microsoft YaHei UI", serif;
+    color:rgba(108,95,93,255);
+    text-decoration:none;
+}
+
+#userBoard >a:hover{
+    color: rgba(181,163,160,255);
+    fill:rgba(181,163,160,255);
+}
+
+#userBoard >a:visited{
+    color:rgba(108,95,93,255);
+    text-decoration:none;
+}
+
+#userBoard >a:visited:hover{
+    color: rgba(181,163,160,255);
+    fill:rgba(181,163,160,255);
+}
+
+#dashboard{
+    position:absolute;
+    top:2.5rem;right:2.5rem;
+    display:flex;flex-direction:column;
+    border:1px solid rgba(181,163,160,255);
+    width:8rem;
+    color: rgba(108,95,93,255) ;
+    background:white;
+    font-size:14px;
+}
+
+#dashboard a{
+    color: inherit;
+    height:1.5rem;
+    padding-bottom:4px;
+    padding-top:4px;
+}
+
+#dashboard a:hover{
+    background:rgba(235,235,235,200);
+    color:inherit;
+}
+
+#dashboard a:visited{
+    color: rgba(108,95,93,255);
+    height:1.5rem;
+    padding-bottom:4px;
+    padding-top:4px;
+}
+
+
+#dashboard button{
+    border:none;
+    background:rgba(0,0,0,0);
+    margin:0;
+    padding-bottom:4px;
+    padding-top:4px;
+}
+
+#dashboard button:hover{
+    background:rgba(235,235,235,200);
+    color:inherit;
+    border:none;
+}
+
+#dashboard button:disabled{
+    background:rgba(235,235,235,200);
+    color:dimgray;
+}
+
+#userBoard i{
+    font-size:20px;
+}
+
+#userBoard>a:nth-child(1){
+    margin-left:auto;
+}
+
+#userBoard>a:last-child{
+    margin-right:10px;
+}
+
+.dashboard{
+    color:rgba(108,95,93,255);
+}
+
+.dashboard #loginWindow{
+    color:inherit;
+    border:none;
+    box-shadow:none;
+    background:white;
+    font-size:14px;
+    background:rgba(215,215,215,230);
+    z-index:0;
+    padding-top:2.5rem;
+    padding-left:0;
+    padding-right:30px;
+}
+
+.dashboard #loginWindow button{
+    background:white;
+    color:inherit;
+    border:solid 1px rgba(108,95,93,255);
+}
+
+.dashboard #loginWindow button:hover{
+    background: rgba(108,95,93,255);
+    color: rgba(181,163,160,255);
+}
+
+#main{
+    flex:1;
+    display:flex;
+    flex-direction:row;
+    font-size:16px;
+    color:rgba(108,95,93,255);
+    font-family: SimSun-ExtB, Arial, "Microsoft YaHei UI", serif;
+}
+
+#footer{
+    margin-bottom:0;
+    margin-top:auto;
+    background:rgba(158,142,166,255);
+    display:flex;
+    flex-direction:row;
+    color:white;
+    font-family: SimSun-ExtB;
+}
+
+#footer .board{
+    padding-left:30px;
+    padding-right:30px;
+    margin-top:30px;
+    margin-bottom:30px;
+    display:flex;
+    flex-direction:column;
+    font-size:14px;
+    border-right: solid 1px rgba(119,111,144,180);
+}
+
+#footer .headline{
+    font-weight:bold;
+    margin-bottom:10px;
+    font-size:16px;
+    border-bottom:solid 2px white;
+    width:8rem;
+}
+
+#footer a{
+    color:white;
+    userSelect:'none';
+    webkitUserSelect:'none';
+    msUserSelect:'none';
+    mozeUserSelect:'none';
+    margin:3px;
+    margin-left:5px;
+}
+
+#footer a:hover{
+     text-decoration: underline;
+    userSelect:'none';
+    webkitUserSelect:'none';
+    msUserSelect:'none';
+    mozeUserSelect:'none';
+    margin:3px;
+    margin-left:5px;
+}
+
+.displayRow{
+    display:flex;
+    flex-direction:row;
+
+}
+
+.multipleRow{
+    flex-wrap:wrap;
+    align-self:baseline;
+    height:auto;
+    flex:1;
+}
+
+.doubleLinear{
+      border-top:solid 2px rgba(218,218,218,218);
+      border-bottom:solid 1px rgba(218,218,218,218);
+      height:5px;
+      min-height:5px;
+}
+
+.vLinear{
+    width:1px;
+    height:80%;
+    margin-top:auto;
+    margin-bottom:auto;
+    border-right:solid 1px rgba(158,158,158,218);
+}

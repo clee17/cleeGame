@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>publish</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/lib/angular-lz-string.js"></script>
+
+    <script>
+        var app = angular.module('cleePublish',['lz-string']);
+        app.controller("publishController",function($scope,LZString,$http){
+            $scope.title ="";
+            $scope.contents="";
+            $scope.type= 0;
+            $scope.subType="";
+            $scope.publishing = false;
+            $scope.style = ['btnBasic','btnNormal'];
+
+            $scope.showSub = function(){
+                return $scope.type==1010;
+            };
+
+            $scope.onPublish=function(){
+                if($scope.publishing)
+                    return;
+                 if($scope.type <1000)
+                 {
+                     alert('文章未分类');
+                     return;
+                 }
+                 else if($scope.title == "")
+                 {
+                     alert('没有填写标题');
+                     return;
+                 }
+                 else if($scope.contents == "")
+                 {
+                     alert('内容什么都没写');
+                     return;
+                 }
+                 else if($scope.showSub() && $scope.subType == "")
+                 {
+                     alert('选择次一级分类');
+                     return;
+                 }
+                var compressedContents = LZString.compress($scope.contents);
+                var compressedTitle = LZString.compress($scope.title);
+                let data = {
+                    title:compressedTitle,
+                    type:$scope.type,
+                    subType:$scope.subType,
+                    contents:compressedContents
+                };
+                $scope.publishing = true;
+                $scope.style[1] = 'btnDisable';
+                $http.post('/publishNews',data).then(function(response){
+                        $scope.publishing = false;
+                        $scope.style[1] = 'btnNormal';
+                         alert(response.data.message);
+                     }).catch(function(err){
+                        $scope.publishing = false;
+                        $scope.style[1] = 'btnNormal';
+                        alert(err);
+                    });
+            }
+        });
+    </script>
+    <style>
+        .btnBasic{
+            line-height:1.5rem;
+            margin-top:2rem;
+            height:1.5rem;
+            border-radius:1rem;
+            width:4rem;
+            font-weight:bold;
+            text-align:center;
+            color:white;
+            font-family: "Agency FB";
+        }
+
+        .btnDisable{
+            background:gray;
+        }
+
+        .btnNormal{
+            background:lightpink;
+        }
+    </style>
+
+</head>
+<body ng-app="cleePublish" ng-controller="publishController">
+
+   <div style="display:flex;flex-direction:column;">
+       <div>文章标题：<input ng-model="title"></div>
+       <div>文章分类：<select ng-model="type"><option value="1000">网站信息</option><option value = 1005>新闻</option><option value = 1010>游戏说明</option></select></div>
+       <div ng-show="showSub()">二级标签：<input ng-model="subType"></div>
+       <div>文章内容:</div>
+       <div><textarea ng-model="contents" style="width:45rem;height:25rem;"></textarea></div>
+       <div id="btn"
+            ng-class="style"
+            ng-click="onPublish()">SUBMIT</div>
+   </div>
+
+</body>
+
+
+
+
+</html>

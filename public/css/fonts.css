@@ -1,0 +1,35 @@
+@font-face
+{
+    font-family: ArialNarrowBold;
+    src: url('/fonts/ArialNarrowBold.ttf');
+}
+
+@font-face
+{
+    font-family:SongNormal;
+    src: url('/fonts/SourceHanSerifSC-Regular.ttf')
+}
+
+@font-face
+{
+    font-family:Lishu;
+    src: url('/fonts/standardLi.ttf')
+}
+
+@font-face
+{
+    font-family:SongBold;
+    src: url('/fonts/SongSquareBold.TTF')
+}
+
+
+@font-face {
+    font-family: 'robotoregular';
+    src: url('fonts/Roboto-Regular-webfont.eot');
+    src: url('fonts/Roboto-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+    url('fonts/Roboto-Regular-webfont.woff') format('woff'),
+    url('fonts/Roboto-Regular-webfont.ttf') format('truetype'),
+    url('fonts/Roboto-Regular-webfont.svg#robotoregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}

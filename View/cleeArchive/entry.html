@@ -1,0 +1,154 @@
+<style>
+    #entryBoard{
+        color:rgba(108,95,93,255);
+        margin-left:auto;
+        margin-right:auto;
+        display:flex;
+        flex-direction:column;
+        flex-wrap:wrap;
+        width:60%;
+        min-width:100px;
+        max-width:750px;
+        height:100%;
+    }
+
+    #loginInfo{
+        display:flex;
+        flex-direction:column;
+        flex:1;
+        padding-bottom:120px;
+    }
+
+   #entryBoard .headline{
+        padding-left:8px;
+        padding-bottom:4px;
+        font-weight:bold;
+        font-family:'Microsoft YaHei UI';
+        border-bottom:solid 1px rgba(215,215,215,180);
+        width:100%;
+        text-align: left;
+        min-width:8rem;
+        letter-spacing:2px;
+       font-size:20px;
+    }
+
+    #feedHeader{
+        display:flex;
+        flex-direction:row;
+        color:rgba(181,163,160,255);
+        font-weight:bold;
+        font-family: "Microsoft YaHei UI";
+        padding-top:10px;
+    }
+
+    .feedGuide{
+        fill: rgba(181,163,160,255);
+        color: rgba(181,163,160,255);
+        padding-left:8px;
+        padding-right:8px;
+        padding-top:3px;
+        font-weight:bold;
+        margin-right:0.5rem;
+
+    }
+
+    .feedGuide svg{
+        fill: inherit;
+    }
+
+    .feedGuide:first-child:hover{
+        fill:rgba(158,142,166,255);
+        color:rgba(158,142,166,255);
+    }
+
+    .feedGuide:nth-child(2):hover{
+        fill:rgba(145,176,169,255);
+        color:rgba(145,176,169,255);
+    }
+
+    .feedGuide:nth-child(3):hover{
+        fill:rgba(211,186,156,255);
+        color:rgba(211,186,156,255);
+    }
+
+    .feedGuide:nth-child(4):hover{
+        fill:rgba(142,147,166,255);
+        color:rgba(142,147,166,255);
+    }
+
+
+    .feedGuide:first-child{
+        margin-left:auto;
+    }
+
+    .feedGuide:last-child{
+        margin-right:auto;
+    }
+
+    #entryBoard .floatBoard{
+        border:solid 1px rgba(215,215,215,188);
+        box-shadow:0px 0px 8px rgba(215,215,215,188);
+        width:12rem;
+    }
+
+    #entryBoard .feedBoard{
+        flex:1;
+    }
+</style>
+
+<div id="entryBoard" ng-controller="welcomeCon">
+    <div id="searchBar"></div>
+
+    <div id="loginInfo">
+            <div id="feedHeader">
+                <div class="feedGuide" ng-click="changeChannel(0)">
+                    <div style="width:40px;height:40px;"><svg class="icon" style="width:40px;height:40px;"><use xlink:href="/svg/symbols2.svg#icon-archive"></use></svg></div>
+                    <div style="font-size:14px;">频道浏览</div>
+                </div>
+                <div class="feedGuide" ng-click="changeChannel(1)">
+                    <div style="width:40px;height:40px;"><svg class="icon" style="width:40px;height:40px;"><use xlink:href="/svg/symbols2.svg#icon-envelope"></use></svg></div>
+                    <div style="font-size:14px;">消息提醒</div>
+                </div>
+
+                <div class="feedGuide" ng-click="changeChannel(2)">
+                    <div style="width:40px;height:40px;"><svg class="icon" style="width:45px;height:45px;margin-top:-3px;"><use xlink:href="/svg/symbols2.svg#icon-chat1"></use></svg></div>
+                    <div style="font-size:14px;">评论沟通</div>
+                </div>
+
+                <div class="feedGuide" ng-click="changeChannel(3)">
+                    <div style="width:40px;height:40px;"><svg class="icon" style="width:35px;height:35px;margin-top:2px;"><use xlink:href="/svg/symbols2.svg#icon-book-reference"></use></svg></div>
+                    <div style="font-size:14px;">订阅更新</div>
+                </div>
+            </div>
+            <div ng-show="channel==0" style="width:100%;position:relative;">
+                <div style="display:flex;flex-direction:row;flex-wrap:wrap;" ng-controller="tagUpdateCon">
+                    <div class="floatBoard" style="position:absolute;left:-6rem;z-index:99;">
+                        <div style="display:flex;flex-direction:row;margin:10px;height:2rem;padding-bottom:10px;padding-left:10px;border-bottom:solid 1px rgba(218,218,218,255);">
+                            <div style="margin-left:0;margin-top:auto;margin-bottom:auto;width:40px;"><svg class="icon icon-mode_edit" style="width:15px;height:15px;"><use xlink:href="/svg/symbols2.svg#icon-plus"></use></svg></div>
+
+                            <div style="margin-left:0;margin-top:auto;margin-bottom:auto;margin-right:auto;">您的订阅</div>
+                        </div>
+                        <div style="min-height:3rem;display:flex;flex-direction:column;padding-bottom:10px;">
+                            <waiting-anim ng-show="requesting" ></waiting-anim>
+                            <div ng-show="initialized && list.length==0 && !requesting" style="margin-top:auto;margin-bottom:auto;margin-left:auto;margin-right:auto;font-weight:bold;">
+                                暂无订阅
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feedBoard" style="margin-left:10px;margin-top:20px;">
+                        <div ng-show="!updated" style="display:flex;flex-direction:row;">
+                            <div style="margin-left:auto;"><waiting-anim style="width:50px;height:50px;"></waiting-anim></div>
+                            <div style="margin-left:1rem;width:6rem;margin-right:auto;font-weight:bold;margin-top:auto;margin-bottom:auto;">加载您的订阅</div>
+                        </div>
+                        <div ng-show="err && updated" style="font-weight:bold;display:flex;flex-direction:row;">
+                            <div style="margin-left:auto;margin-right:auto;"> {{err}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="channel==1"></div>
+            <div ng-show="channel==2"></div>
+            <div ng-show="channel==3"></div>
+        </div>
+    </div>
+</div>

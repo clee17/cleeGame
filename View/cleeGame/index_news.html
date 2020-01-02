@@ -1,0 +1,81 @@
+<style>
+
+    #newsboard{
+        display:flex;
+        flex-direction:column;
+        min-height: calc(100% - 6.5rem);
+        margin-left:1.5rem;
+        margin-right:1.5rem;
+        padding-top:6.5rem;
+        width:85%;
+        color:rgba(190,150,124,1);
+    }
+
+    #newsList{
+        min-height:25vw;
+        margin-top:1rem;
+        display:flex;
+        flex-direction:column;
+        margin-bottom:2rem;
+    }
+
+    #newsFoot{
+        padding-left:2rem;
+        padding-right:2rem;
+        height:1.5rem;
+        margin-top:0.5rem;
+        line-height:1.5rem;
+        font-size:1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #newsFoot a {
+        margin-left:0.5rem;
+    }
+    #newsFoot a:after{
+        margin-left:0;
+        content:"";
+        width:0;
+    }
+
+
+    #newsFoot a:hover{
+        color:rgba(206,123,148,1);
+    }
+
+    .divideLine{
+        background:rgba(190,150,124,1);
+        height:2px;
+        width:100%;
+    }
+
+    .newsTitle{
+        color:white;
+        background:rgba(236,199,184,1);
+        padding-left:2rem;
+        height:1.8rem;
+        line-height:1.8rem;
+        font-size:1.3rem;
+        margin-bottom:0.5rem;
+        margin-top:1rem;
+        font-family: "Arial Rounded MT Bold","SongBold";
+    }
+</style>
+
+<div id="newsboard" >
+    <div ng-include="'/templates/waitingAnim.html'" ng-show="requesting" style="margin-top:2rem;margin-bottom:auto;"></div>
+
+   <div id="newsList">
+          <div ng-show="newsList.length==0 && error == '' && $scope.page == 1" style="margin-left:auto;margin-right:auto;margin-top:auto;margin-bottom:auto;font-size:2rem;">暂无更新</div>
+          <div ng-show="error!=''" style="margin-left:auto;margin-right:auto;margin-top:auto;margin-bottom:auto;font-size:2rem;">{{error}}</div>
+          <div ng-repeat="new in newsList">
+                  <a target='_blank' ng-href="/news/{{new._id}}">
+                      <span style="margin-right:4rem;">{{new.date | dateFormat}}</span>
+                       <span>{{new.title}}</span>
+                  </a>
+           </div>
+   </div>
+    <div class="divideLine"></div>
+   <div id="newsFoot" ng-include="'/templates/pageSplit.html'">
+   </div>
+</div>

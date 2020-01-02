@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <title>admin*memoria*</title>
+
+    <link rel="stylesheet" href="/css/index.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script src="/bin/angular-route.js"></script>
+
+    <script src="/modules/userData.js"></script>
+
+    <script type="text/javascript">
+        var app = angular.module('admin',['ngRoute','ngCookies','userData']);
+    </script>
+
+    <script src="/view/memoria.js"></script>
+
+    <script src="/controller/logCon.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Italianno" rel="stylesheet">
+
+</head>
+
+<body ng-app="admin" ng-controller="rootCon" ng-include="'/templates/main.html'"></body>
+
+</html>

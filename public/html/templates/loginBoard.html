@@ -1,0 +1,17 @@
+<div id="loginWindow">
+    <div mytable-row>
+        <div style="text-align:right;margin-right:10px;">用户名:</div>
+        <input ng-model="data[0]" ng-blur="checkUser()">
+        <div ng-show="userChecking" class="anim" style="height:1rem;width:28px;max-width:28px;margin-left:5px;"><img src="/img/loading.gif" style="width:22px;height:22px;"></div>
+    </div>
+    <div ng-show="userErr!=''" style="margin-right:0;margin-left:auto;font-size:14px;font-weight:bold;text-align:right;">{{userErr}}</div>
+    <div mytable-row>
+        <div style="text-align:right;margin-right:10px;">密码:</div>
+        <input type="password" ng-model="data[1]" maxlength="12">
+    </div>
+    <div mytable-row >
+        <div style="width:100%;display:flex;flex-direction:row;margin-top:1rem;"><button style="margin-right:0px;margin-left:auto;" ng-click="sendLogin()" ng-disabled="requesting" id="submitButton">{{submitSign}}</button></div>
+    </div>
+    <div mytable-row></div>
+</div>
+<div mytable-row style="padding-left:2rem;" ng-show="error"><div style="margin:auto;color:darkred;font-weight:bold;text-align:center;">{{error}}</div></div>

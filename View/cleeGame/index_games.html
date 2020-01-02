@@ -1,0 +1,138 @@
+<style>
+    #gameBoard{
+        background:white;
+        border-radius:1rem;
+        margin-top:6rem;
+        padding:3rem;
+        width:85%;
+        color:rgba(156,147,150,1);
+    }
+
+    .gameArea{
+    }
+
+    .gameArea .title{
+        width:100%;
+        height:1.5rem;
+        position:relative;
+        margin-bottom:1rem;
+    }
+
+    .gameArea .title .titleName{
+        background:rgba(249,124,145,1);
+        color:white;
+        height:2rem;
+        width:10rem;
+        display:flex;
+        font-size:1.2rem;
+        font-family:"Microsoft YaHei UI",serif;
+        font-weight:bold;
+        position:absolute;
+        bottom:-4px;
+    }
+
+    .gameArea .title .titleName span{
+        margin-left:auto;
+        margin-right:auto;
+        width:8rem;
+        border-left:white 4px solid;
+        border-right:white 4px solid;
+        text-align:center;
+        line-height:1.8rem;
+    }
+
+    .gameArea .gameList {
+        min-height:4rem;
+        display:flex;
+        flex-direction:column;
+        width:100%;
+
+    }
+
+    .gameArea .gameFoot{
+        width:25%;
+        height:4px;
+        background:rgba(249,124,145,1);
+        margin-right:0px;
+        margin-left:auto;
+        position:relative;
+        margin-top:1rem;
+    }
+
+    .gameArea .empty{
+        margin:auto;
+    }
+
+    .gameIcon {
+        border-radius:1rem;
+        background-repeat:no-repeat;
+        background-position:center;
+        background-size:621px 91px;
+        height:91px;
+        width:621px;
+        margin-left:auto;
+        margin-right:1rem;
+        margin-top:1rem;
+        margin-bottom:0.5rem;
+        transition:box-shadow 0.5s;
+        -moz-transition:box-shadow 0.5s;/*Firefox4*/
+        -webkit-transition:box-shadow 0.5s;/*Safari和Chrome*/
+        -o-transition:box-shadow 0.5s;/*Opera*/
+    }
+
+
+    .gameIcon.fanWork:hover{
+        box-shadow:0px 0px 12px rgba(111,195,217,1);
+    }
+
+
+
+</style>
+
+<div id="gameBoard">
+    <div class="gameArea">
+        <div class="title" style="border-bottom:rgba(249,124,145,1) 4px solid;">
+              <div class="titleName"><span>原创作品区</span></div>
+        </div>
+        <div class="gameList">
+            <p class="empty">等待更新……</p>
+        </div>
+        <div class="gameFoot"><span style="position:absolute;background:white;border-left:white 16px solid;height:100%;margin-left:25px;"></span></div>
+    </div>
+
+    <div class="gameArea">
+        <div class="title" style="border-bottom:rgba(111,195,217,1) 4px solid;">
+            <div class="titleName" style="background:rgba(111,195,217,1);"><span>同人作品区</span></div>
+        </div>
+        <div class="gameList">
+<!--            <p id="empty" >等待更新……</p>-->
+            <div class="gameIcon fanWork" style="background-image:url('/img/banner_000000.png');" onClick="window.open('/games/Nirvana/')"></div>
+
+            <div class="gameIcon fanWork" style="background-image:url('/img/banner_000001.png');" onClick="window.open('/games/memoria/')"></div>
+
+        </div>
+        <div class="gameFoot" style="background:rgba(111,195,217,1)"><span style="position:absolute;background:white;border-left:white 16px solid;height:100%;margin-left:25px;"></span></div>
+    </div>
+
+    <div class="gameArea">
+        <div class="title" style="border-bottom:rgba(255,214,114,1) 4px solid;">
+            <div class="titleName" style="background:rgba(255,214,114,1);"><span>单机作品区</span></div>
+        </div>
+        <div class="gameList">
+            <p class="empty">等待更新……</p>
+        </div>
+        <div class="gameFoot" style="background:rgba(255,214,114,1)"><span style="position:absolute;background:white;border-left:white 16px solid;height:100%;margin-left:25px;"></span></div>
+    </div>
+
+    <div class="gameArea">
+        <div class="title" style="border-bottom:rgba(103,169,141,1) 4px solid;">
+            <div class="titleName" style="background:rgba(103,169,141,1);"><span>外站作品区</span></div>
+        </div>
+        <div class="gameList">
+            <p class="empty">等待更新……</p>
+        </div>
+        <div style="background:rgba(103,169,141,1);width:5rem;height:4px;margin-left:auto;margin-right:auto;margin-bottom:3px;"></div>
+        <div style="background:rgba(103,169,141,1);width:5rem;height:6px;margin-left:auto;margin-right:auto;"></div>
+    </div>
+</div>
+
