@@ -3,17 +3,14 @@ let chapterModel = require('./../model/cleeArchive_fanfic'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     userSettingModel = require('./../model/cleeArchive_userSetting');
 
-let fs = require('fs');
+let fs = require('fs'),
+    path = require('path');
 
 let redis = require('redis'),
     redisClient = redis.createClient();
 
 var argv = process.argv;
 console.log(argv);
-
-let readSettings = function(){
-
-};
 
 let calcTag = function(){
     let type = [1];
@@ -272,7 +269,7 @@ let calcTag = function(){
 
 let readSettings = function () {
     redisList = ['grade','warning'];
-    let readResult = fs.readFile(path.join(__dataModel, '../json/fanficEdit.json'), {encoding: 'utf-8'},(err,File)=>{
+    let readResult = fs.readFile('./../json/fanficEdit.json', {encoding: 'utf-8'},(err,File)=>{
         if(err)
         {
            console.log(err);
@@ -281,19 +278,23 @@ let readSettings = function () {
             let settings = JSON.parse(File);
             let redisCondition = [];
             let redisDocs = [];
+            let multiRedisCommands = [];
             while(redisList.length>0)
             {
                 let keyString = redisList.pop();
-                redisCondition.push(keyString);
-                redisDocs.push(JSON.stringify(settings[keyString]));
+                let value = settings[keyString];
+                keyString = 'fanfic_'+keyString;
+                multiRedisCommands.push(['set',keyString,JSON.stringify(value)]);
             }
-            asyncRedis.mset(redisCondition, redisDocs,function(err,reply){
+            console.log(multiRedisCommands);
+            redisClient.multi(multiRedisCommands).exec(function(err,replies){
+                console.log('finished writing');
                 if(err)
                     console.log(err);
-                else
+                else 
                 {
-                    console.log(reply);
-                    console.log('对象写入完成');
+                    console.log(replies);
+                    console.log('设置对象写入完成');
                 }
             });
         }
