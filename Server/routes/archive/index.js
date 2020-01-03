@@ -42,8 +42,11 @@ global.__readSettings = function (callBack,data) {
                 data['fanfic_'+keyString] = settings[keyString];
                 redisCondition.push('fanfic'+keyString);
                 redisDocs.push(JSON.stringify(settings[keyString]));
+                console.log(data);
             }
-            asyncRedis.mset(redisCondition, redisDocs);
+            asyncRedis.mset(redisCondition, redisDocs,function(docs,reply){
+
+            });
         }
         if(callBack)
              callBack();

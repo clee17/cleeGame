@@ -115,8 +115,6 @@ let handler = {
                     throw '没有这本作品的目录';
                 data.index =  JSON.parse(JSON.stringify(docs));
                 redisClient.get('fanfic_grade',function(err,response){
-                    console.log(err);
-                    console.log(response);
                     if(!err && !response)
                     {
                         data.fanfic_grade =  JSON.parse(response);
