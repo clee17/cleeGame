@@ -76,7 +76,7 @@ let handler = {
                 __renderError(req,res,'该作者为文章设置了站内可见，您必须成为注册用户才能阅览该文章');
             else if(data.chapter && data.chapter.lockType == 2)
                 __renderError(req,res,'该作者设置该文章为仅自己可见，您无法阅读该文章。');
-            else if(!data.grade)
+            else if(!data.fanfic_grade)
                 __renderError(req,res,'后台网站设置出错，请联系管理员');
             else if(data.chapter && data.chapter.lockType <2)
                 res.render('cleeArchive/fanfic.html',data);

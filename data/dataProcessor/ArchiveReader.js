@@ -291,7 +291,7 @@ let readSettings = function () {
                 console.log('finished writing');
                 if(err)
                     console.log(err);
-                else 
+                else
                 {
                     console.log(replies);
                     console.log('设置对象写入完成');
