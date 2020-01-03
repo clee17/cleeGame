@@ -76,6 +76,8 @@ let handler = {
                 __renderError(req,res,'该作者为文章设置了站内可见，您必须成为注册用户才能阅览该文章');
             else if(data.chapter && data.chapter.lockType == 2)
                 __renderError(req,res,'该作者设置该文章为仅自己可见，您无法阅读该文章。');
+            else if(!data.grade)
+                __renderError(req,res,'后台网站设置出错，请联系管理员');
             else if(data.chapter && data.chapter.lockType <2)
                 res.render('cleeArchive/fanfic.html',data);
         };
@@ -112,13 +114,18 @@ let handler = {
                 if(!docs|| docs.length ==0)
                     throw '没有这本作品的目录';
                 data.index =  JSON.parse(JSON.stringify(docs));
-                redisClient.get('grade',function(err,response){
-                    if(!err)
-                        data.grade =  JSON.parse(response);
-                    finalSend();
+                redisClient.get('fafic_grade',function(err,response){
+                    if(!err && !response)
+                    {
+                        data.fanfic_grade =  JSON.parse(response);
+                        finalSend();
+                    }
+                    else
+                       __readSettings(finalSend,data);
                 });
             })
             .catch(function(err){
+                console.log(err);
                 noRes = {message:err};
                 finalSend();
             });

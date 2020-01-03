@@ -1010,7 +1010,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
                publish(true);  
                break; 
        }
-   }; 
+   };
  
 
    $scope.$on('initialisation completed',function(){

@@ -26,6 +26,7 @@ global.__renderError = function(req,res,errMessage){
 };
 
 global.__readSettings = function (callBack,data) {
+    let redisList = ['grade','warning'];
     let readResult = fs.readFile(path.join(__dataModel, '../json/fanficEdit.json'), {encoding: 'utf-8'},(err,File)=>{
         if(err)
         {
@@ -39,7 +40,7 @@ global.__readSettings = function (callBack,data) {
             {
                 let keyString = redisList.pop();
                 data['fanfic_'+keyString] = settings[keyString];
-                redisCondition.push(keyString);
+                redisCondition.push('fanfic'+keyString);
                 redisDocs.push(JSON.stringify(settings[keyString]));
             }
             asyncRedis.mset(redisCondition, redisDocs);
