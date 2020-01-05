@@ -51,6 +51,8 @@ let handler = {
 
         let readRedis = function () {
             redisClient.mget(redisList, function (err, docs) {
+                console.log(err);
+                console.log(docs);
                 if (err) {
                     console.log(err);
                     __readSettings(nextStep,data);

@@ -38,19 +38,17 @@ global.__readSettings = function (callBack,data) {
         }
         else{
             let settings = JSON.parse(File);
-            let redisCondition = [];
-            let redisDocs = [];
+            let multiRedisCommands = [];
             while(redisList.length>0)
             {
                 let keyString = redisList.pop();
                 data['fanfic_'+keyString] = settings[keyString];
-                redisCondition.push('fanfic'+keyString);
-                redisDocs.push(JSON.stringify(settings[keyString]));
+                multiRedisCommands.push(["set",keyString,JSON.stringify(settings[keyString])]);
             }
-            if(callBack)
-                callBack();
-            asyncRedis.mset(redisCondition, redisDocs,function(docs,reply){
-                console.log(err);
+            redisClient.multi(multiRedisCommands).exec(function(err,docs){
+                console.log(docs);
+                if(callBack)
+                    callBack();
             });
         }
     });
