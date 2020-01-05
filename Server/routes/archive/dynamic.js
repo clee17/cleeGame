@@ -50,15 +50,16 @@ let handler = {
         };
 
         let readRedis = function () {
-            console.log('enter readRedis');
             redisClient.mget(redisList, function (err, docs) {
                 if (err) {
                     console.log(err);
                     __readSettings(nextStep,data);
+                    redisList.length = 0;
                 }
                 else if(docs.indexOf(null) != -1)
                 {
                     __readSettings(nextStep,data);
+                    redisList.length = 0;
                 }
                 else
                 {
@@ -67,7 +68,6 @@ let handler = {
                         data['fanfic_'+redisList[i]] = JSON.parse(docs[i]);
                     }
                     redisList.length = 0;
-                    console.log(data);
                     nextStep();
                 }
             });
@@ -147,10 +147,14 @@ let handler = {
 
     userPage:function(req,res,next){
         let userId = req.params.userId;
+        let readerId = '';
+        if(req.session.user)
+            readerId = req.session.user._id;
         let sent = false;
         let response = {
             success:false,
             user:null,
+            readerId:readerId,
             function:[],
             message:''
         };
@@ -169,7 +173,7 @@ let handler = {
                     throw '不存在该用户';
                 response.success = true;
                 response.user = JSON.parse(JSON.stringify(reply));
-                return userSettingModel.find({user:userId}).exec();
+                return userSettingModel.findOne({user:userId}).exec();
             })
             .then(function(doc){
                  if(!doc)

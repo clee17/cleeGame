@@ -1,7 +1,7 @@
 <div id="userPage" ng-controller="dashboard_con">
     <info-receiver
-            ng-init="userSetting = '<%= JSON.stringify(user.settings) %>';
-                     userId = '<%= user._id %>';">
+            ng-init="userSetting='<%= JSON.stringify(user.setting) %>';
+                     userId='<%= user._id %>';">
     </info-receiver>
     <div id="guideBar">
         <div id="userInfo" style="display:flex;flex-direction:column;">
@@ -13,24 +13,40 @@
                 </div>
             </div>
 
-            <div class="userInfo">用户名:<%- user.user %></div>
-            <div class="userInfo">被喜欢: 0</div>
-            <div class="userInfo">被推荐: 0</div>
-            <div class="userInfo">被评论: 0</div>
+            <div class="userInfo">用户名: <span><%- user.user %></span></div>
+            <div class="userInfo">被喜欢: <span>0</span></div>
+            <div class="userInfo">被推荐: <span>0</span></div>
+            <div class="userInfo">被评论: <span>0</span></div>
             <div class="userInfo">作者简介:</div>
-            <div style="margin-left:10px;min-height:2rem;">
+            <div style="margin-left:10px;min-height:4rem;overflow:text-overflow: ellipsis;word-break: break-all;overflow:hidden;">
                 {{userSetting.intro | introType}}
             </div>
         </div>
 
-        <div>
-            <a>作品目录</a>
+        <div id="classification">
+            <a href="<%- '/users/'+user._id +'?pageId=1000' %>">作品目录</a>
             <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
-            <a>文章推荐</a>
+            <a href="<%- '/users/'+user._id +'?pageId=1005' %>">文章推荐</a>
             <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
-            <a>翻译作品</a>
+            <a href="<%- '/users/'+user._id +'?pageId=1010' %>">翻译作品</a>
             <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
-            <a>分类汇总</a>
+            <a href="<%- '/users/'+user._id +'?pageId=1015' %>">分类汇总</a>
+        </div>
+        <div id="ownData">
+            <% if(user && user._id == readerId) { %>
+            <a href="<%- '/users/'+user._id +'?pageId=1020' %>">数据分析</a>
+            <% } %>
+        </div>
+        <div style="margin-top:2rem;" id="tagPanel">
+            <a ng-repeat="item in userSetting.usedTag | tagFilter" href="{{ '/users/'+userId+'?pageId=1025&tagId='+ item._id}}" >{{item.contents}}({{item.usedTimes}})</a>
+        </div>
+    </div>
+
+    <div id="userPageContents">
+        <div id="mainError" ng-show="showError"><i class="fas fa-quote-left"></i> {{error}} <i class="fas fa-quote-right"></i></div>
+        <div style="display:flex;flex:1;" ng-show="!showError">
+            <div ng-show="updatesInfo.length == 0" style="margin:auto;">当前作者没有任何更新记录</div>
+            <div ng-repeat="item in updatesInfo" style="display:flex;flex-direction:column;"></div>
         </div>
     </div>
 </div>

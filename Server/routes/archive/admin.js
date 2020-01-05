@@ -2,7 +2,7 @@ let express = require('express'),
     path = require('path'),
     lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'),
         tagModel = require(path.join(__dataModel,'cleeArchive_tag'))),
-    feedModel = require(path.join(__dataModel,'cleeArchive_feed'));
+    msgModel = require(path.join(__dataModel,'cleeArchive_msgPool'));
 
 let registerModel = require(path.join(__dataModel,'register'));
 let userModel = require(path.join(__dataModel,'user'));

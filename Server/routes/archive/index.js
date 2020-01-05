@@ -26,11 +26,15 @@ global.__renderError = function(req,res,errMessage){
 };
 
 global.__readSettings = function (callBack,data) {
+    console.log('read files entered');
     let redisList = ['grade','warning'];
     let readResult = fs.readFile(path.join(__dataModel, '../json/fanficEdit.json'), {encoding: 'utf-8'},(err,File)=>{
         if(err)
         {
             data.err = err;
+            if(callBack)
+                callBack();
+            return;
         }
         else{
             let settings = JSON.parse(File);
@@ -43,13 +47,12 @@ global.__readSettings = function (callBack,data) {
                 redisCondition.push('fanfic'+keyString);
                 redisDocs.push(JSON.stringify(settings[keyString]));
             }
-            asyncRedis.mset(redisCondition, redisDocs,function(err,docs){
-				if(err)
-					console.log(err);
+            if(callBack)
+                callBack();
+            asyncRedis.mset(redisCondition, redisDocs,function(docs,reply){
+                console.log(err);
             });
         }
-        if(callBack)
-             callBack();
     });
 };
 
@@ -91,6 +94,7 @@ router.post('/admin/removeRec',admin.removeRec);
 //user
 router.get('/register/:registerId',subUser.register);
 router.get('/users/:userId',subUser.userPage);
+router.post('/users/request/dashboard',subUser.requestDashboard);
 router.post('/settings/save',subUser.saveSetting);
 // router.post('/user/getInfo/',user.getInfo);
 

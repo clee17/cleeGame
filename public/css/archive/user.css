@@ -1,6 +1,27 @@
 #userPage{
     display:flex;
     flex-direction:row;
+    flex:1;
+}
+
+#userPageContents{
+    display:flex;
+    flex:1;
+}
+
+#userPageContents >div{
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#mainError{
+    margin:auto;
+    font-weight:bold;
+    width:15rem;
+    word-break:break-all;
+    height:auto;
+    font-size:24px;
+    line-height:1.8rem;
 }
 
 #userPage #guideBar{
@@ -25,22 +46,6 @@
     flex-direction:column;
 }
 
-#userPage #guideBar >div:nth-child(2) a{
-    background:rgba(0,0,0,0);
-    color:rgba(108,95,93,255);
-    font-weight:bold;
-    width:100%;
-    padding-top:8px;
-    padding-bottom:8px;
-    font-size:14px;
-    text-align:center;
-    letter-spacing:2px;
-}
-
-#userPage #guideBar >div:nth-child(2) a:hover{
-    color:white;
-    background:rgba(181,163,160,218);
-}
 
 #userPage .dashLine{
     background:rgba(215,215,215,215);
@@ -85,4 +90,68 @@
 
 #userFunction >div:last-child{
     margin-bottom:auto;
+}
+
+#tagPanel{
+    display:flex;
+    flex-direction:column;
+    color:rgba(131,131,131,215);
+}
+
+#tagPanel >a{
+    margin-right:3px;
+    margin-left:auto;
+    margin-bottom:4px;
+    color:rgba(131,131,131,215);
+    text-decoration:none;
+}
+
+#tagPanel >a:Hover{
+    color:rgba(181,181,181,215);
+}
+
+#classification >a{
+    text-decoration:none;
+}
+
+#classification >a{
+    background:rgba(0,0,0,0);
+    color:rgba(108,95,93,255);
+    font-weight:bold;
+    width:100%;
+    padding-top:8px;
+    padding-bottom:8px;
+    font-size:14px;
+    text-align:center;
+    letter-spacing:2px;
+}
+
+#classification a:hover{
+    color:white;
+    background:rgba(181,163,160,218);
+}
+
+#ownData{
+    background:rgba(158,142,166,255);
+    display:flex;
+    flex-direction:column;
+    height:auto;
+}
+
+#ownData a{
+    background:rgba(0,0,0,0);
+    color:rgba(108,95,93,255);
+    font-weight:bold;
+    width:100%;
+    padding-top:8px;
+    padding-bottom:8px;
+    font-size:14px;
+    text-align:center;
+    letter-spacing:2px;
+    color:white;
+    text-decoration:none;
+}
+
+#ownData a:hover{
+    background:rgba(119,111,144,255);
 }

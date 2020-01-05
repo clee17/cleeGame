@@ -591,7 +591,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         };
 
         $scope.getFromDB = function(callBack){
-            if(!$scope.db)
+            let chapterId = $scope.currentIndex.chapter;
+            if(!$scope.db || !chapterId)
             {
                 if(callBack)
                     callBack();
@@ -599,16 +600,25 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             }
             let transaction = $scope.db.transaction(['fanfic_chapter']);
             let objectStore = transaction.objectStore('fanfic_chapter');
-            objectStore.get($scope.currentIndex.chapter)
-                .then(function(doc){
-                    console.log(doc);
-                    $rootScope.$broadcast('fanficReceived',{success:true,chapter:{chapter:doc}});
-                })
-                .catch(function(err){
-                    console.log(err);
-                    if(callBack)
-                        callBack();
-                })
+            if(chapterId._id)
+                chapterId = chapterId._id;
+            let request = objectStore.get(chapterId);
+            request.onsuccess= function(doc){
+                    if(request.result)
+                    {
+                        $rootScope.$broadcast('fanficReceived',{success:true,chapter:{chapter:request.result}});
+                    }
+                    else
+                    {
+                        if(callBack)
+                            callBack();
+                    }
+                };
+            request.onerror = function(err){
+                console.log(err);
+                if(callBack)
+                    callBack();
+            }
         }
     }
 
@@ -693,11 +703,12 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
            entry.modified = chapterModified(entry);
            $scope.backupChapter.set(entry._id,entry);
            if($scope.writeToDB)
+           {
                $scope.writeToDB(entry._id,callBack);
-           else
-               callBack();
+               return;
+           }
        }
-       else
+       if(callBack)
            callBack();
    };
 
@@ -705,6 +716,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        let proceed = function(){
            $scope.contentsLoaded = false;
            let getFromWeb = function(){
+               console.log('started from web');
                fanficManager.requestFanfic($scope.currentIndex);
            };
            if($scope.getFromDB)
@@ -712,6 +724,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
            else
                getFromWeb();
        };
+
        if($scope.contentsLoaded)
            backupChapter(proceed);
        else
@@ -736,14 +749,22 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    $scope.$on('fanficReceived',function(event,data){
         if(data.success)
         {
+
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter.chapter));
+            let backup = $scope.chapter;
+            if(!backup.modified)
+                backup.modified = false;
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
             $scope.workIndex.map(function(item,i,arr){
                 if(item._id == $scope.chapter._id && item.chapter == null) {
                     $scope.workIndex[i].chapter = {_id:$scope.chapter._id,title:$scope.chapter.title,wordCount:$scope.chapter.wordCount};
+                    backup.prev = $scope.workIndex[i].prev;
+                    backup.order = $scope.workIndex[i].order;
+                    backup.next = $scope.workIndex[i].next;
                 }
             });
+            $scope.backupChapter.set(backup._id,backup);
             $scope.contentsLoaded = true;
 
             if(data.isFirst)
@@ -1011,7 +1032,6 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
                break; 
        }
    };
- 
 
    $scope.$on('initialisation completed',function(){
        let initialize = function(){
@@ -1020,7 +1040,9 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
                $scope.loadContent();
            else
                $timeout(initialize,500);
-       }
+       };
+
+       initialize();
    });
 });
 

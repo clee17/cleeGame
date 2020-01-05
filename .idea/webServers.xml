@@ -5,7 +5,7 @@
       <webServer id="4470ed61-2d23-4775-977a-7a63c82a20b4" name="52.69.247.145" url="http://52.69.247.145">
         <fileTransfer host="52.69.247.145" port="21">
           <advancedOptions>
-            <advancedOptions compatibilityMode="true" controlEncoding="GBK" dataProtectionLevel="Private" forceListCommand="true" keepAliveTimeout="20000" maxConnections="3" shareSSLContext="true" showHiddenFiles="true" />
+            <advancedOptions compatibilityMode="true" dataProtectionLevel="Private" forceListCommand="true" keepAliveTimeout="20000" maxConnections="3" passiveMode="true" shareSSLContext="true" showHiddenFiles="true" />
           </advancedOptions>
           <option name="port" value="21" />
         </fileTransfer>

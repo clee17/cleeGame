@@ -2,7 +2,7 @@ let express = require('express'),
     path = require('path'),
     lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'),
     tagModel = require(path.join(__dataModel,'cleeArchive_tag'))),
-    feedModel = require(path.join(__dataModel,'cleeArchive_feed'));
+    msgModel = require(path.join(__dataModel,'cleeArchive_msgPool'));
 
 let handler = {
     channel:function(req,res,next){
@@ -16,7 +16,7 @@ let handler = {
             response.code = 408;
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         }
-        feedModel.find({user: req.session.user._id}).exec()
+        msgModel.find({publisher: req.session.user._id}).exec()
             .then(function (feeds) {
                 response.code = 500;
                 response.message = '搜索完成';

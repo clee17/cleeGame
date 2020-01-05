@@ -1,13 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+    <list default="true" id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/data/model/cleeArchive_msgPool.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/schema/cleeArchive_msgPool.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/webServers.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/webServers.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/admin.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/dynamic.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/dynamic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/feed.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/feed.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/view.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/view.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/dashboard_con.js" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/cont/dashboard_con.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/edit_con-DESKTOP-9FG0S6F.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/edit_con.js" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/cont/edit_con.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/userService.js" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/cont/userService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/userPage.html" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/userPage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataProcessor/ArchiveReader.js" beforeDir="false" afterPath="$PROJECT_DIR$/data/dataProcessor/ArchiveReader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/model/cleeArchive_feed.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/schema/cleeArchive_tag.js" beforeDir="false" afterPath="$PROJECT_DIR$/data/schema/cleeArchive_tag.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/schema/cleeArchive_userSetting.js" beforeDir="false" afterPath="$PROJECT_DIR$/data/schema/cleeArchive_userSetting.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/archive/user.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/archive/user.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1QJHjGQWEKYVRawPTi07ZRtQZYW" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -16,10 +51,11 @@
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON&#10;EJS" />
-    <property name="javascript.nodejs.core.library.configured.version" value="10.15.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/svg" />
+    <property name="javascript.nodejs.core.library.configured.version" value="12.14.0" />
+    <property name="last_opened_file_path" value="C:/Program Files/nodejs/node.exe" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -27,10 +63,11 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="settings.github" />
+    <property name="settings.editor.selected.configurable" value="settings.nodejs" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -64,42 +101,65 @@
     <configuration />
   </component>
   <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+      <created>1578012691015</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578012691015</updated>
+      <workItem from="1578012713165" duration="4075000" />
+      <workItem from="1578019362854" duration="18737000" />
+      <workItem from="1578099856745" duration="335000" />
+      <workItem from="1578100220738" duration="314000" />
+      <workItem from="1578100561435" duration="1059000" />
+      <workItem from="1578101744591" duration="322000" />
+      <workItem from="1578102087423" duration="297000" />
+      <workItem from="1578102410551" duration="214000" />
+      <workItem from="1578102646489" duration="21534000" />
+    </task>
     <servers />
   </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
   <component name="WindowStateProjectService">
-    <state x="1129" y="242" key="#Deployment" timestamp="1577942761532">
+    <state x="1129" y="242" key="#Deployment" timestamp="1578012748833">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
     <state x="308" y="139" key="#Deployment/0.0.1368.912@0.0.1368.912" timestamp="1577941607872" />
-    <state x="1129" y="242" key="#Deployment/0.0.2560.1080@0.0.2560.1080" timestamp="1577942761532" />
+    <state x="1129" y="242" key="#Deployment/0.0.2560.1080@0.0.2560.1080" timestamp="1578012748833" />
     <state x="872" y="198" key="#Options" timestamp="1577279113904">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
     <state x="872" y="198" key="#Options/0.0.2560.1080@0.0.2560.1080" timestamp="1577279113904" />
-    <state x="420" y="298" key="FileChooserDialogImpl" timestamp="1576593847670">
+    <state x="714" y="283" key="FileChooserDialogImpl" timestamp="1578022717362">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="420" y="298" key="FileChooserDialogImpl/0.0.2560.1080@0.0.2560.1080" timestamp="1576593847670" />
-    <state x="919" y="226" key="SettingsEditor" timestamp="1577942643063">
+    <state x="714" y="283" key="FileChooserDialogImpl/0.0.2560.1080@0.0.2560.1080" timestamp="1578022717362" />
+    <state x="776" y="195" key="SettingsEditor" timestamp="1578022758614">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="919" y="226" key="SettingsEditor/0.0.2560.1080@0.0.2560.1080" timestamp="1577942643063" />
-    <state x="1335" y="260" width="1225" height="707" key="find.popup" timestamp="1577936863221">
+    <state x="776" y="195" key="SettingsEditor/0.0.2560.1080@0.0.2560.1080" timestamp="1578022758614" />
+    <state x="1245" y="362" width="1225" height="693" key="find.popup" timestamp="1578217907247">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="1335" y="260" width="1225" height="707" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1577936863221" />
+    <state x="1245" y="362" width="1225" height="693" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1578217907247" />
     <state x="586" y="215" key="ftp.server.browser" timestamp="1577941605939">
       <screen x="0" y="0" width="1368" height="912" />
     </state>
     <state x="586" y="215" key="ftp.server.browser/0.0.1368.912@0.0.1368.912" timestamp="1577941605939" />
-    <state x="554" y="361" key="publish.login" timestamp="1577941197994">
-      <screen x="0" y="0" width="1368" height="912" />
-    </state>
-    <state x="554" y="361" key="publish.login/0.0.1368.912@0.0.1368.912" timestamp="1577941197994" />
-    <state x="1037" y="428" key="publish.login/0.0.2560.1080@0.0.2560.1080" timestamp="1577939802496" />
-    <state x="1522" y="380" width="672" height="676" key="search.everywhere.popup" timestamp="1577932834499">
+    <state x="955" y="428" key="jetbrains.nodejs.interpreters-dialog" timestamp="1578022724759">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="1522" y="380" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1577932834499" />
+    <state x="955" y="428" key="jetbrains.nodejs.interpreters-dialog/0.0.2560.1080@0.0.2560.1080" timestamp="1578022724759" />
+    <state x="1037" y="428" key="publish.login" timestamp="1578012722265">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="554" y="361" key="publish.login/0.0.1368.912@0.0.1368.912" timestamp="1577941197994" />
+    <state x="1037" y="428" key="publish.login/0.0.2560.1080@0.0.2560.1080" timestamp="1578012722265" />
+    <state x="1577" y="369" width="672" height="676" key="search.everywhere.popup" timestamp="1578202488439">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1577" y="369" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1578202488439" />
   </component>
 </project>

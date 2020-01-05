@@ -14,18 +14,14 @@ console.log(argv);
 
 let calcTag = function(){
     let type = [1];
-    if(argv[1] && typeof argv[3] == typeof 'test')
-        type=argv[1].split(',');
-    type.forEach(function(item,i,arr){
-        if(typeof item != Number)
-            item = Number(item);
-    });
     let tagMap = new Map();
     let tagUser = new Map();
     let tagDetailMap = new Map();
+
     let totalNum = 0;
     let processed = 0;
     let process = 0;
+
     let nextStep = function(){
         switch(process)
         {
@@ -38,6 +34,15 @@ let calcTag = function(){
             case 2:
                 nextType();
                 break;
+            case 5:
+                writeDetailedTag();
+                break;
+            case 10:
+                writeCount();
+                break;
+            case 15:
+                writeTagUser();
+                break;
             case 200:
                 finalProcess();
                 break;
@@ -48,89 +53,128 @@ let calcTag = function(){
 
     let finalProcess = function(){
         console.log('共计'+totalNum+'条数据已完成扫描');
-        console.log('开始写入');
+        process = 505;
+    };
 
-        let writeDetailedTag = function(){
-            let list = [];
+    let writeDetailedTag = function(){
+        let list = [];
 
-            let writeDetail = function(){
-                if(list.length ==0)
-                {
-                    console.log('全部数据写入完毕');
-                    return;
-                }
-                let option = list.pop();
-                console.log('开始写入'+unescape(option.tag));
-                tagModel.findOneAndUpdate({name:unescape(option.tag)},{totalNum:option.totalNum},{new: true, upsert: true,setDefaultsOnInsert: true}).exec()
-                    .then(function(doc){
-                        if(doc)
-                            return tagMapModel.findOneAndUpdate({tag:doc._id,aid:option.aid,type:option.type,user:option.user},{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec();
-                        else
-                            throw option.tag+'存入失败';
-                    })
-                    .then(function(doc){
-                        if(!doc)
-                            throw unescape(option.tag)+'章节链接索引更新失败';
-                        else
-                        {
-                            console.log(doc);
-                            writeDetail();
-                        }
-                    })
-                    .catch(function(err){
-                        console.log(err);
-                        writeDetail(option);
-                    });
+        let writeDetail = function(){
+            if(list.length ==0)
+            {
+                process= 10;
+                nextStep();
+                return;
+            }
+            let option = list.pop();
+            console.log('开始写入'+unescape(option.tag));
+            console.log(option);
+            tagModel.findOneAndUpdate({name:unescape(option.tag)},{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec()
+                .then(function(doc){
+                    if(doc)
+                        return tagMapModel.findOneAndUpdate({tag:doc._id,aid:option.aid,type:option.type,user:option.user},{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec();
+                    else
+                        throw option.tag+'存入失败';
+                })
+                .then(function(doc){
+                    if(!doc)
+                        throw unescape(option.tag)+'章节链接索引更新失败';
+                    else
+                        writeDetail();
+                })
+                .catch(function(err){
+                    console.log(err);
+                    writeDetail(option);
+                });
+        };
+
+        tagDetailMap.forEach(function(value,key){
+            list.push(value);
+            if(list.length == tagDetailMap.size)
+                writeDetail();
+        });
+    };
+
+    let writeTagUser = function(){
+        let list = [];
+        let writeSettings = function(){
+            if(process != 15)
+                return;
+            if(list.length == 0)
+            {
+                console.log('用户设定更新完成');
+                process=200;
+                nextStep();
+                return;
             }
 
-            tagDetailMap.forEach(function(value,key){
-                list.push(value);
-                if(list.length == tagDetailMap.size)
-                    writeDetail();
-            });
-        };
+            let entry = list.pop();
+            let subTag = [];
+            if(entry.length>1)
+                subTag = JSON.parse(JSON.stringify(entry[1].usedTag));
 
-        let writeTagUser = function(){
-            let listReady = false;
-            let list = [];
-            let writeSettings = function(){
-                if(list.length == 0)
+            let writeToTable = function(){
+                console.log(entry[1]);
+                if(!entry[1])
                 {
-                    console.log('用户设定更新完成');
-                    writeDetailedTag();
+                    console.log('有单独记录');
+                    let process = 505;
+                    nextStep();
+                }
+                userSettingModel.findOneAndUpdate(entry[0],entry[1],function(err,doc){
+                    if(err)
+                    {
+                        console.log(err);
+                        process = 505;
+                        nextStep();
+                    }
+                    else{
+                        if(doc)
+                            console.log('写入成功：'+JSON.stringify(doc));
+                        else
+                            console.log('写入失败');
+                        writeSettings();
+                    }
+                })
+            };
+
+            let processEntry = function(){
+                if(!subTag)
                     return;
-                }
-                if(list.length>0)
-                {
-                    let entry = list.pop();
-                    if(entry.length >= 2)
-                       userSettingModel.findOneAndUpdate(entry[0],entry[1],{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
-                                if(err)
-                                    console.log(err);
-                                else
-                                    console.log('写入成功：'+JSON.stringify(doc));
-                                writeSettings();
-                       });
-                    else
-                        continueWrite();
-                }
+                if(subTag.length == 0)
+                    {
+                        writeToTable();
+                        return;
+                    }
+                let item = subTag.pop();
+                tagModel.findOne({name:item.contents},function(err,doc){
+                    if(err)
+                        console.log(err);
+                    else if(doc)
+                        entry[1].usedTag.forEach(function(item,i,arr){
+                            if(item.contents == doc.name)
+                                item._id = doc._id;
+                        });
+                    processEntry();
+                });
             };
 
-            let continueWrite = function(){
-                writeSettings();
-            };
-
-            tagUser.forEach(function(value,key){
-                list.push([{user:key},{usedTag:value}]);
-                if(list.length == tagUser.size)
-                    writeSettings();
-            });
+            processEntry();
         };
 
+        tagUser.forEach(function(value,key){
+            list.push([{user:key},{usedTag:value}]);
+            if(list.length == tagUser.size)
+                writeSettings();
+        });
+    };
 
+    let writeCount = function(){
         let multiRedisCommands = [];
+        let bulkWrite = [];
         tagMap.forEach(function(value,key){
             multiRedisCommands.push(["set",'tag_count_'+key,value]);
+            bulkWrite.push({updateOne:{'filter':{'name':unescape(key)},'update':{'totalNum':value}}});
         });
         redisClient.multi(multiRedisCommands).exec(function(err,replies){
             if(err)
@@ -139,26 +183,23 @@ let calcTag = function(){
                 nextStep();
                 return;
             }
-            redisClient.keys('tag_count_*',function(err,reply){
-                if(err)
+            tagModel.bulkWrite(bulkWrite)
+                .then(function(docs){
+                    console.log(docs);
+                    process = 15;
+                    nextStep();
+                })
+                .catch(function(err){
                     console.log(err);
-                reply.forEach(function(item,i,arr){
-                   redisClient.get(item,function(err,doc){
-                       if(!err)
-                          console.log(item+':'+doc);
-                       if(i==reply.length-1)
-                       {
-                           console.log('计数表更新完成');
-                           writeTagUser();
-                       }
-                    });});
-            });
+                    process = 505;
+                    nextStep();
+                })
         });
     };
 
     let nextType = function(){
         if(type.length == 0)
-            process = 200;
+            process = 5;
         else
             process = 0;
         nextStep();
@@ -232,8 +273,7 @@ let calcTag = function(){
                         }
 
                         let tagDetailIndex = id+'_'+index;
-                        let tempCount = tagMap.get(index);
-                        let tagDetailContents = {type:subTagType,user:user,tag:index,aid:id,totalNum:tempCount};
+                        let tagDetailContents = {type:subTagType,user:user,tag:index,aid:id};
                         tagDetailMap.set(tagDetailIndex,tagDetailContents);
                     };
 

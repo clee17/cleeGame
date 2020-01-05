@@ -13,9 +13,15 @@
     "angular-cookies": "^1.7.7",
     "angular-md5": "^0.1.10",
     "angular-route": "^1.7.7",
-    "express": "^4.16.4",
+    "async-redis": "^1.1.7",
+    "connect-redis": "^4.0.3",
+    "cookie-parser": "^1.4.4",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
     "express-session": "^1.15.6",
+    "mongod": "^2.0.0",
     "mongoose": "^5.4.11",
-    "nodejs": "0.0.0"
+    "nodejs": "0.0.0",
+    "redis": "^2.8.0"
   }
 }

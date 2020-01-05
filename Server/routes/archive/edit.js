@@ -327,7 +327,6 @@ let handler = {
             saveData.book.updated = Date.now();
         }
 
-
         let finalSend = function(){
             if(sent)
                 return;
@@ -349,7 +348,7 @@ let handler = {
             .then(function(docs){
                 if(!docs)
                     throw '发布书籍失败';
-                return chapterModel.updateMany({_id:{$in:updateIndex,published:false}},{published:true,Date:date.now()}).exec();
+                return chapterModel.updateMany({_id:{$in:updateIndex},published:false},{published:true,Date:Date.now()}).exec();
             })
             .then(function(docs){
                 if(!docs)
