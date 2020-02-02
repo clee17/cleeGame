@@ -69,6 +69,7 @@
             });
 
             $rootScope.err = '<%- err %>';
+            $rootScope.readerId = '<%- userId %>';
             $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
@@ -149,6 +150,10 @@
     <script src="/view/modules/button.js"></script>
 
     <% controllers.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
+
+    <% modules.forEach(function(item){ %>
     <script src='<%= item %>'></script>
     <% }) %>
 

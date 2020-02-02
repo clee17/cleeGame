@@ -1,9 +1,17 @@
 var mongoose = require('mongoose');
 
+let feedBackSchema = new mongoose.Schema({
+    _id:{type:mongoose.Schema.ObjectId,default:null,ref:'tag'},
+    contents:{type:String,default:''},
+    type:{type:Number,default:0},
+    usedTimes:{type:Number,default:0},
+},{_id:false});
+
+
 module.exports = new mongoose.Schema({
     title:{type:String,default:""},
 
-    user:{type:mongoose.Schema.ObjectId,default:null,ref:'user'},
+    user:{type:mongoose.Schema.ObjectId,default:null,ref:'user',index:true},
 
     type:{type:Number,default:0}, //0 同人文
 
@@ -13,11 +21,17 @@ module.exports = new mongoose.Schema({
 
     date: { type: Date, default: Date.now },
 
-    bookmarked: {type:Number,default:0}, //收藏人数
-
     wordCount: {type:Number,default:0},
 
     chapterCount: {type:Number,default:1},
 
-    updated: {type:Date,default:Date.now()}
+    updated: {type:Date,default:Date.now()},
+
+    comments: {type:Number,default:0},
+
+    liked:{type:Number,default:0},
+
+    bookmarked: {type:Number,default:0}, //收藏人数
+
+    visited:{type:Number,default:0}
 });

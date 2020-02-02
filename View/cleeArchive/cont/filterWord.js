@@ -6,6 +6,28 @@ app.filter('textInfo', function() { //可以注入依赖
     }
 });
 
+app.filter('dateInfo',function(){
+    return function(date,format){
+        if(!date)
+            return '错误的日期格式';
+        let finalDate = new Date(date);
+        let year = finalDate.getFullYear();
+        let month = finalDate.getMonth()+1;
+        let day = finalDate.getDate();
+        let hour = finalDate.getHours();
+        let min = finalDate.getMinutes();
+        let sec = finalDate.getSeconds();
+        switch(format){
+            case 0:
+                return year+'-'+month+'-'+day+'  '+hour+':'+min;
+                break;
+            default:
+                return year+'-'+month+'-'+day+'  '+hour+':'+min+':'+sec;
+        }
+
+    }
+});
+
 app.filter('wordCount', function() { //可以注入依赖
     return function(wordCount) {
         if(wordCount < 1000)
@@ -46,5 +68,14 @@ app.filter('chapterTitle',function(){
             return '[等待命名]';
         else
             return chapter;
+    }
+});
+
+app.filter('introType', function() { //可以注入依赖
+    return function(info) {
+        if(!info || info == '')
+            return '作者很懒，什么也没写。';
+        else
+            return info;
     }
 });

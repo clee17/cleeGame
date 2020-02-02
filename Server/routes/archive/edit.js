@@ -33,7 +33,7 @@ let handler = {
             __renderError(req,res,'没有收到任何可编辑的章节索引');
         else {
             indexModel.findOne({_id: requestIndex}, function (err, doc) {
-                if (err)
+                if (err || !doc)
                     __renderError(req, res, '数据库中没有该章节');
                 else {
                     if (req.session.user._id != doc.chapter.user)
@@ -316,6 +316,8 @@ let handler = {
             if(item.chapter && saveData.ifAll && updateIndex.indexOf(item.chapter._id) ==-1)
                 updateIndex.push(item.chapter._id);
         });
+
+
 
         if(!saveData.book.published)
         {

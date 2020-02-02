@@ -1,6 +1,8 @@
 let chapterModel = require('./../model/cleeArchive_fanfic'),
+    worksModel = require('./../model/cleeArchive_works'),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
+    msgPoolModel = require('./../model/cleeArchive_msgPool'),
     userSettingModel = require('./../model/cleeArchive_userSetting');
 
 let fs = require('fs'),
@@ -11,301 +13,6 @@ let redis = require('redis'),
 
 var argv = process.argv;
 console.log(argv);
-
-let calcTag = function(){
-    let type = [1];
-    let tagMap = new Map();
-    let tagUser = new Map();
-    let tagDetailMap = new Map();
-
-    let totalNum = 0;
-    let processed = 0;
-    let process = 0;
-
-    let nextStep = function(){
-        switch(process)
-        {
-            case 0:
-                calcAll(type[0]);
-                break;
-            case 1:
-                processAllTag(type[0]);
-                break;
-            case 2:
-                nextType();
-                break;
-            case 5:
-                writeDetailedTag();
-                break;
-            case 10:
-                writeCount();
-                break;
-            case 15:
-                writeTagUser();
-                break;
-            case 200:
-                finalProcess();
-                break;
-            case 505:
-                break;
-        }
-    };
-
-    let finalProcess = function(){
-        console.log('共计'+totalNum+'条数据已完成扫描');
-        process = 505;
-    };
-
-    let writeDetailedTag = function(){
-        let list = [];
-
-        let writeDetail = function(){
-            if(list.length ==0)
-            {
-                process= 10;
-                nextStep();
-                return;
-            }
-            let option = list.pop();
-            console.log('开始写入'+unescape(option.tag));
-            console.log(option);
-            tagModel.findOneAndUpdate({name:unescape(option.tag)},{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec()
-                .then(function(doc){
-                    if(doc)
-                        return tagMapModel.findOneAndUpdate({tag:doc._id,aid:option.aid,type:option.type,user:option.user},{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec();
-                    else
-                        throw option.tag+'存入失败';
-                })
-                .then(function(doc){
-                    if(!doc)
-                        throw unescape(option.tag)+'章节链接索引更新失败';
-                    else
-                        writeDetail();
-                })
-                .catch(function(err){
-                    console.log(err);
-                    writeDetail(option);
-                });
-        };
-
-        tagDetailMap.forEach(function(value,key){
-            list.push(value);
-            if(list.length == tagDetailMap.size)
-                writeDetail();
-        });
-    };
-
-    let writeTagUser = function(){
-        let list = [];
-        let writeSettings = function(){
-            if(process != 15)
-                return;
-            if(list.length == 0)
-            {
-                console.log('用户设定更新完成');
-                process=200;
-                nextStep();
-                return;
-            }
-
-            let entry = list.pop();
-            let subTag = [];
-            if(entry.length>1)
-                subTag = JSON.parse(JSON.stringify(entry[1].usedTag));
-
-            let writeToTable = function(){
-                console.log(entry[1]);
-                if(!entry[1])
-                {
-                    console.log('有单独记录');
-                    let process = 505;
-                    nextStep();
-                }
-                userSettingModel.findOneAndUpdate(entry[0],entry[1],function(err,doc){
-                    if(err)
-                    {
-                        console.log(err);
-                        process = 505;
-                        nextStep();
-                    }
-                    else{
-                        if(doc)
-                            console.log('写入成功：'+JSON.stringify(doc));
-                        else
-                            console.log('写入失败');
-                        writeSettings();
-                    }
-                })
-            };
-
-            let processEntry = function(){
-                if(!subTag)
-                    return;
-                if(subTag.length == 0)
-                    {
-                        writeToTable();
-                        return;
-                    }
-                let item = subTag.pop();
-                tagModel.findOne({name:item.contents},function(err,doc){
-                    if(err)
-                        console.log(err);
-                    else if(doc)
-                        entry[1].usedTag.forEach(function(item,i,arr){
-                            if(item.contents == doc.name)
-                                item._id = doc._id;
-                        });
-                    processEntry();
-                });
-            };
-
-            processEntry();
-        };
-
-        tagUser.forEach(function(value,key){
-            list.push([{user:key},{usedTag:value}]);
-            if(list.length == tagUser.size)
-                writeSettings();
-        });
-    };
-
-    let writeCount = function(){
-        let multiRedisCommands = [];
-        let bulkWrite = [];
-        tagMap.forEach(function(value,key){
-            multiRedisCommands.push(["set",'tag_count_'+key,value]);
-            bulkWrite.push({updateOne:{'filter':{'name':unescape(key)},'update':{'totalNum':value}}});
-        });
-        redisClient.multi(multiRedisCommands).exec(function(err,replies){
-            if(err)
-            {
-                process = 505;
-                nextStep();
-                return;
-            }
-            tagModel.bulkWrite(bulkWrite)
-                .then(function(docs){
-                    console.log(docs);
-                    process = 15;
-                    nextStep();
-                })
-                .catch(function(err){
-                    console.log(err);
-                    process = 505;
-                    nextStep();
-                })
-        });
-    };
-
-    let nextType = function(){
-        if(type.length == 0)
-            process = 5;
-        else
-            process = 0;
-        nextStep();
-    };
-
-    let calcAll = function(subType){
-        chapterModel.countDocuments({type:subType}).exec()
-            .then(function(num){
-                process = 1;
-                totalNum += num;
-                nextStep();
-            })
-            .catch(function(err){
-                console.log(err);
-                process = 505;
-                nextStep();
-            })
-    };
-
-    let processAllTag = function(subType){
-        if(processed >= totalNum)
-        {
-            let result = type.splice(0,1);
-            console.log('类型'+result+'执行结束');
-            process=2;
-            nextStep();
-            return;
-        }
-
-        chapterModel.find({type:subType},null,{skip:processed,limit:50,sort:{_id: -1}},function(err,docs){
-            if(err)
-            {
-                console.log(err);
-                process = 505;
-                nextStep();
-            }
-            else{
-                docs.map(function(item,i,arr){
-                    let fandom = item.fandom;
-                    let relationships = item.relationships;
-                    let characters = item.characters;
-                    let tag = item.tag;
-                    let id = item._id.toString();
-                    let user = item.user.toString();
-
-                    let setData = function(item,data,subTagType){
-                        let index = escape(item);
-                        if(!tagMap.get(index))
-                            tagMap.set(index,1);
-                        else
-                            tagMap.set(index,tagMap.get(index)+1);
-
-                        let tagUserContents = [{type:subTagType,contents:item,usedTimes:1}];
-                        if(!tagUser.get(user)) {
-                            tagUser.set(user, tagUserContents);
-                        }
-                        else
-                        {
-                            tagUserContents = tagUser.get(user);
-                            let existed = false;
-                            tagUserContents.forEach(function(subItem,i,arr){
-                                if(subItem.contents == item)
-                                {
-                                    subItem.usedTimes++;
-                                    existed = true;
-                                }
-                            });
-                            if(!existed)
-                                tagUserContents.push({type:subTagType,contents:item,usedTimes:1});
-                            tagUser.set(user,tagUserContents);
-                        }
-
-                        let tagDetailIndex = id+'_'+index;
-                        let tagDetailContents = {type:subTagType,user:user,tag:index,aid:id};
-                        tagDetailMap.set(tagDetailIndex,tagDetailContents);
-                    };
-
-                    if(fandom)
-                        fandom.map(function(item,i,arr){
-                            setData(item,'fandom',1);
-                        });
-
-                    if(relationships)
-                        relationships.map(function(item,i,arr){
-                            setData(item,'relationships',2);
-                        });
-
-                    if(characters)
-                        characters.map(function(item,i,arr){
-                            setData(item,'characters',3);
-                        });
-
-                    if(tag)
-                        tag.map(function(item,i,arr){
-                            setData(item,'tag',4);
-                        });
-
-                    processed++;
-                });
-                nextStep();
-            }
-        })
-    };
-
-    nextStep();
-};
 
 let readSettings = function () {
     redisList = ['grade','warning'];
@@ -341,13 +48,371 @@ let readSettings = function () {
     });
 };
 
+let initializeRecords = function(){
+    chapterModel.updateMany({type:{$lt:1000}},{$set:{comments:0,liked:0,bookmarked:0}},function(err,docs){
+        console.log(err);
+        console.log(docs);
+    });
+    worksModel.aggregate([
+        {$lookup:{from: 'work_chapters', localField: "_id", foreignField: "book",as:"chapter"}},
+        {$set:{visited:{$sum:"$chapter.visited"},liked:{$sum:"$chapter.liked"},comments:{$sum:"$chapter.comments"}}},
+    ]).exec()
+        .then(function(docs){
+            console.log(docs);
+            let bulkWriteDocs = [];
+            while(docs.length>0){
+                let record = docs.pop();
+                bulkWriteDocs.push({updateOne:{'filter':{'_id':record._id},'update':{'visited':record.visited,'comments':record.comments,'liked':record.liked}}});
+            }
+            return worksModel.bulkWrite(bulkWriteDocs);
+        })
+        .then(function(docs){
+            console.log('更新写入完成');
+        })
+        .catch(function(err){
+            console.log(err);
+        });
+};
+
+let updateTagMap = function(){
+    let processData = {};
+
+    let write = function(){
+        let startIndex = 0;
+        let writeOne = function(){
+            if(startIndex >= processData.currentRecords.length)
+             {console.log(processData);return;}
+            console.log(processData.currentRecords[startIndex]);
+            let rec = processData.currentRecords[startIndex];
+            startIndex++;
+            let total = {'totalNum':rec.totalCount};
+            if(processData.currentIndex != 0)
+                total = { '$inc': {'totalNum':rec.totalCount}};
+            tagModel.findOneAndUpdate({'name':rec._id},total,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+                .then(function(doc){
+                    if(!doc)
+                        throw '没有找到该记录';
+                    let list = rec.list;
+                    list.forEach(function(item,i,arr){
+                        list.tag = doc._id;
+                    });
+                    let listIndex = 0;
+                    let writeTagMap = function(){
+                        if(listIndex>= list.length)
+                        {writeOne();return;}
+                        let item = list[listIndex];
+                        listIndex++;
+                        if(item._id)
+                            delete item._id;
+                        console.log(item);
+                        tagMapModel.findOneAndUpdate({tag:doc._id,infoType:item.infoType,aid:item.aid},item,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+                            .then(function(result){
+                                console.log(result);
+                                writeTagMap();
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                                writeTagMap();
+                            });
+                    }
+                    writeTagMap();
+                })
+                .catch(function(err){
+                    console.log(err);
+                });
+        };
+        writeOne();
+    };
+
+    let proceed = function(){
+        worksModel.aggregate([
+            {$skip:processData.currentIndex},
+            {$limit:processData.step},
+            {$match:{published:true}},
+            {$facet:{
+                    "fanfic_chapter_fandom":[
+                        {$match:{"type":{$lt:100},$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                                    {$project:{_id:1,fandom:1,user:1,date:1}}]}},
+                        {$unwind:"$chapters"},
+                        {$replaceRoot:{newRoot:"$chapters"}},
+                        {$unwind:"$fandom"},
+                        {$set:{type:1,infoType:1}},
+                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_works_fandom":[
+                        {$match:{"type":{$lt:100}}},
+                        {$lookup:{from:"work_index",as:"index",
+                                let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                                    {$project:{chapter:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
+                        {$unwind:"$chapter"},
+                        {$set:{"chapter.date":"$updated"}},
+                        {$replaceRoot:{newRoot:"$chapter"}},
+                        {$unwind:"$fandom"},
+                        {$set:{type:1,infoType:0}},
+                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_chapter_characters":[
+                        {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                                    {$project:{_id:1,characters:1,user:1,date:1}}]}},
+                        {$unwind:"$chapters"},
+                        {$replaceRoot:{newRoot:"$chapters"}},
+                        {$unwind:"$characters"},
+                        {$set:{type:2,infoType:1}},
+                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_works_characters":[
+                        {$match:{"type":{$lt:100},published:true}},
+                        {$lookup:{from:"work_index",as:"index",
+                                let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                                    {$project:{chapter:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
+                        {$unwind:"$chapter"},
+                        {$set:{"chapter.date":"$updated"}},
+                        {$replaceRoot:{newRoot:"$chapter"}},
+                        {$unwind:"$characters"},
+                        {$set:{type:2,infoType:0}},
+                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_chapter_relationships":[
+                        {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                                    {$project:{_id:1,relationships:1,user:1,date:1}}]}},
+                        {$unwind:"$chapters"},
+                        {$replaceRoot:{newRoot:"$chapters"}},
+                        {$unwind:"$relationships"},
+                        {$set:{type:3,infoType:1}},
+                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_works_relationships":[
+                        {$match:{"type":{$lt:100},published:true}},
+                        {$lookup:{from:"work_index",as:"index",
+                                let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                                    {$project:{chapter:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
+                        {$unwind:"$chapter"},
+                        {$set:{"chapter.date":"$updated"}},
+                        {$replaceRoot:{newRoot:"$chapter"}},
+                        {$unwind:"$relationships"},
+                        {$set:{type:3,infoType:0}},
+                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_chapter_tag":[
+                        {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                                    {$project:{_id:1,tag:1,user:1,date:1}}]}},
+                        {$unwind:"$chapters"},
+                        {$replaceRoot:{newRoot:"$chapters"}},
+                        {$unwind:"$tag"},
+                        {$set:{type:4,infoType:1}},
+                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1}}
+                    ],
+                    "fanfic_works_tag":[
+                        {$match:{"type":{$lt:100},published:true}},
+                        {$lookup:{from:"work_index",as:"index",
+                                let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                                    {$project:{chapter:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
+                        {$unwind:"$chapter"},
+                        {$set:{"chapter.date":"$updated"}},
+                        {$replaceRoot:{newRoot:"$chapter"}},
+                        {$unwind:"$tag"},
+                        {$set:{type:4,infoType:0}},
+                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1}}
+                    ],
+                }},
+            {$project:{all:{$setUnion:["$fanfic_chapter_fandom", "$fanfic_works_fandom",
+                            "$fanfic_chapter_characters","$fanfic_works_characters",
+                            "$fanfic_chapter_relationships","$fanfic_works_relationships",
+                            "$fanfic_chapter_tag","$fanfic_works_tag"]}}},
+            {$unwind:"$all"},
+            {$replaceRoot:{newRoot:"$all"}},
+            {$group:{_id:"$name",totalCount:{$sum:1},list:{$push:"$$ROOT"}}}
+        ]).allowDiskUse(true).exec()
+            .then(function(docs){
+                console.log(docs);
+                processData.currentRecords = docs;
+                write();
+            })
+            .catch(function(err){
+                console.log(err);
+            });
+    };
+
+    let calcAll = function(){
+        worksModel.countDocuments(null,function(err,response){
+            if(err)
+                console.log(err);
+            else
+               {
+                   processData.all = response;
+                   processData.step = 1000;
+                   processData.currentIndex = 0;
+                   proceed();
+               }
+        })
+    };
+
+
+
+            calcAll();
+
+};
+
+let clearTagMap = function(dataName){
+    let arr = {
+        tagMap:tagMapModel,
+        msgPool:msgPoolModel,
+    };
+    if(arr[dataName])
+        arr[dataName].deleteMany(null,function(err,response){
+            console.log(err);
+            console.log(response);
+        });
+    else
+        console.log('请输入正确的数据库表名称');
+};
+
+let updateMessagePool = function(){
+    let processData = {
+        currentIndex:0,
+        step:10000
+    };
+
+
+    let write = function(){
+        let startIndex = 0;
+
+        let writeOne = function(){
+            if(startIndex >= processData.currentRecords.length)
+            {
+                console.log(processData);
+                if(processData.currentIndex + processData.step < processData.max)
+                   {
+                       processData.currentIndex += processData.step;
+                       proceed();
+                       return;
+                   }
+                else
+                {
+                    console.log('写入完成');
+                    return;
+                }
+            }
+            let rec = processData.currentRecords[startIndex];
+            startIndex++;
+            msgPoolModel.findOneAndUpdate({publisher:rec.user,infoType:rec.infoType,contents:rec.contents},rec,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+                .then(function(doc){
+                    if(!doc)
+                        throw '没有找到该记录';
+                    writeOne();
+                })
+                .catch(function(err){
+                    console.log(err);
+                });
+        };
+
+        writeOne();
+    };
+
+
+    let proceed = function(){
+        worksModel.aggregate([
+            {$skip:processData.currentIndex},
+            {$limit:processData.step},
+            {$match:{published:true}},
+            {$facet:{
+                    "fanfic_chapters":[
+                        {$match:{"type":{$lt:100},$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                                    ]}},
+                        {$unwind:"$chapters"},
+                        {$replaceRoot:{newRoot:"$chapters"}},
+                        {$set:{infoType:1}},
+                        {$project:{infoType:1,contents:"$_id",publisher:"$user",date:1,work:"$book",_id:0}}
+                    ],
+                    "fanfic_works":[
+                        {$match:{"type":{$lt:100}}},
+                        {$lookup:{from:"work_index",as:"index",
+                                let:{work_id:"$_id"},
+                                pipeline:[
+                                    {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                                    {$project:{chapter:1}}]}},
+                        {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
+                        {$unwind:"$chapter"},
+                        {$set:{infoType:0}},
+                        {$project:{infoType:1,contents:"$chapter._id",publisher:"$user",date:"$updated",work:"$_id",_id:0}}
+                    ],
+                }},
+            {$project:{all:{$setUnion:["$fanfic_chapters", "$fanfic_works"]}}},
+            {$unwind:"$all"},
+            {$replaceRoot:{newRoot:"$all"}},
+        ]).allowDiskUse(true).exec()
+            .then(function(docs){
+                console.log(docs);
+                processData.currentRecords = docs;
+                write();
+            })
+            .catch(function(err){
+                console.log(err);
+            });
+    };
+
+
+    let calcAll = function(){
+        worksModel.countDocuments(null,function(err,response){
+            if(err)
+                console.log(err);
+            else
+            {
+                processData.all = response;
+                processData.step = 1000;
+                processData.currentIndex = 0;
+                proceed();
+            }
+        })
+    };
+
+
+    calcAll();
+};
+
 switch(argv[2])
 {
     case 'setting':
         readSettings();
         break;
-    case 'tagCount':
-        calcTag();
+    case 'initialize':
+        initializeRecords();
+        break;
+    case 'updateMsg':
+        updateMessagePool();
+        break;
+    case 'updateTagMap':
+        updateTagMap();
+        break;
+    case 'clearDataBase':
+        clearTagMap(argv[3]);
         break;
     default:
         console.log('输入无效的指令');

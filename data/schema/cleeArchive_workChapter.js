@@ -4,7 +4,7 @@ module.exports = new mongoose.Schema({
 
     title:{type:String,default:""},
 
-    user:{type:mongoose.Schema.ObjectId,ref:'user',default:null},
+    user:{type:mongoose.Schema.ObjectId,ref:'user',default:null,index:true},
 
     book:{type:mongoose.Schema.ObjectId,ref:'works'},
 
@@ -30,13 +30,9 @@ module.exports = new mongoose.Schema({
 
     date: { type: Date, default: Date.now },
 
-    updated: {type: Date, default: Date.now},
-
     contents:{type:String,default:'<div class="paragraph"><br class="clear"></div>'},
 
     visited: {type:Number, default:0},
-
-    liked: {type:Number,default:0},
 
     lockType: {type:Number,default:0}, //0站内可见，1 站外可见 3 全网可见
 
@@ -44,5 +40,11 @@ module.exports = new mongoose.Schema({
 
     linked:{type:Boolean,default:false},
 
-    published:{type:Boolean,default:false}
+    published:{type:Boolean,default:false},
+
+    comments:{type:Number,default:0},
+
+    liked:{type:Number,default:0},
+
+    bookmarked:{type:Number,default:0}
 });

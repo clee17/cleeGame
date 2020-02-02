@@ -1,7 +1,10 @@
 <div id="userPage" ng-controller="dashboard_con">
     <info-receiver
             ng-init="userSetting='<%= JSON.stringify(user.setting) %>';
-                     userId='<%= user._id %>';">
+                     userId='<%= user._id %>';
+                     tagList='<%= JSON.stringify(tagList) %>';
+                     count = '<%= JSON.stringify(workCount) %>';
+                     gradeTemplate = '<%= JSON.stringify(fanfic_grade) %>';">
     </info-receiver>
     <div id="guideBar">
         <div id="userInfo" style="display:flex;flex-direction:column;">
@@ -24,13 +27,13 @@
         </div>
 
         <div id="classification">
+            <a href="<%- '/users/'+user._id %>">更新列表</a>
+            <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
             <a href="<%- '/users/'+user._id +'?pageId=1000' %>">作品目录</a>
             <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
             <a href="<%- '/users/'+user._id +'?pageId=1005' %>">文章推荐</a>
             <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
-            <a href="<%- '/users/'+user._id +'?pageId=1010' %>">翻译作品</a>
-            <div class="dashLine" style="background:rgba(181,163,160,218);"></div>
-            <a href="<%- '/users/'+user._id +'?pageId=1015' %>">分类汇总</a>
+            <a href="<%- '/users/'+user._id +'?pageId=1010' %>">系列作品</a>
         </div>
         <div id="ownData">
             <% if(user && user._id == readerId) { %>
@@ -38,15 +41,52 @@
             <% } %>
         </div>
         <div style="margin-top:2rem;" id="tagPanel">
-            <a ng-repeat="item in userSetting.usedTag | tagFilter" href="{{ '/users/'+userId+'?pageId=1025&tagId='+ item._id}}" >{{item.contents}}({{item.usedTimes}})</a>
+            <a ng-repeat="item in tagList | tagFilter" href="{{ '/users/'+userId+'?pageId=1025&tagId='+ item._id}}" >{{item.tag.name}}({{item.totalCount}})</a>
         </div>
     </div>
 
+
     <div id="userPageContents">
+        <div id="waitingBoard"  ng-show="!contentsLoaded" style="font-size:30px;font-weight:bold;padding-top:2rem;">
+            等待加载<i class="fa fa-spinner fa-spin" style="margin-left:1rem;"></i>
+        </div>
         <div id="mainError" ng-show="showError"><i class="fas fa-quote-left"></i> {{error}} <i class="fas fa-quote-right"></i></div>
-        <div style="display:flex;flex:1;" ng-show="!showError">
-            <div ng-show="updatesInfo.length == 0" style="margin:auto;">当前作者没有任何更新记录</div>
-            <div ng-repeat="item in updatesInfo" style="display:flex;flex-direction:column;"></div>
+
+        <div class="dashboard" ng-show="contentsLoaded && !showError && pageId == 0" id="listInfo">
+            <div style="display:flex;flex-direction:row;width:100%;margin-bottom:2rem;">
+                <a  href="<%- '/users/'+user._id +'?pageId=1000' %>" style="margin-left:auto;" ng-show="count['0'] != undefined">作品({{count['0']}})</a>
+                <a  href="<%- '/users/'+user._id +'?pageId=1005' %>" ng-show="count['5'] != undefined">推荐({{count['5']}})</a>
+                <a  href="<%- '/users/'+user._id +'?pageId=1010' %>" style="margin-right:auto;" ng-show="count['10'] != undefined">系列({{count['10']}})</a>
+            </div>
+            <div ng-show="receivedList.length == 0" style="margin:auto;">当前作者没有任何更新记录</div>
+            <work-info ng-repeat="item in receivedList" type="1"></work-info>
+        </div>
+
+        <div class="dashboard" ng-show="contentsLoaded && !showError && pageId == 1005">
+            <div ng-show="receivedList.length == 0" style="margin:auto;">当前作者没有作出任何推荐</div>
+        </div>
+
+        <div class="dashboard" ng-show="contentsLoaded && !showError && pageId == 1010">
+            <div ng-show="receivedList.length == 0" style="margin:auto;">当前作者没有添加过任何系列作品</div>
+        </div>
+
+        <div class="dashboard" style="flex-direction:row;" ng-show="contentsLoaded && !showError && pageId == 1020" ng-include="'<%- '/dynamic/dataAnalysis/'+user._id %>'">
+
+        </div>
+
+        <div class="dashboard workDashboard" ng-show="contentsLoaded && !showError && pageId == 1000 ">
+            <div style="min-height:4rem;height:4rem;width:100%;"></div>
+            <div ng-show="receivedList.length == 0 && pageId == 1000" style="margin:auto;">当前作者没有发布任何作品</div>
+            <work-info ng-repeat="item in receivedList" type="0"></work-info>
+        </div>
+
+        <div class="dashboard workDashboard" ng-show="contentsLoaded && !showError && pageId == 1025 ">
+            <div style="min-height:4rem;height:4rem;width:100%;"></div>
+            <work-info ng-repeat="item in receivedList" type="1"></work-info>
+        </div>
+
+        <div style="display:flex;flex-direction:row;min-height:2rem;height:2rem;width:100%;margin-bottom:2rem;" class="pageIndex" ng-show="receivedList.length>0">
+            <div ng-repeat="x in [].constructor(pageMax) track by $index"><button ng-click="gotoPage($index)" ng-disabled="subPageIndex  == $index">{{$index+1}}</button></div>
         </div>
     </div>
 </div>

@@ -1,10 +1,12 @@
 let express = require('express'),
     path = require('path'),
     fs = require('fs'),
+    mongoose = require('mongoose'),
     lzString = require(path.join(__basedir, 'js/lib/angular-lz-string')),
 
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic')),
+    tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
     indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
 
     userModel = require(path.join(__dataModel,'user')),
@@ -51,8 +53,6 @@ let handler = {
 
         let readRedis = function () {
             redisClient.mget(redisList, function (err, docs) {
-                console.log(err);
-                console.log(docs);
                 if (err) {
                     console.log(err);
                     __readSettings(nextStep,data);
@@ -181,10 +181,38 @@ let handler = {
                  if(!doc)
                      throw '获取用户信息失败,该用户从未登录';
                  response.user.setting = JSON.parse(JSON.stringify(doc));
-                 finalSend();
+                 return tagMapModel.aggregate([
+                     {$match:{user:mongoose.Types.ObjectId(userId)}},
+                     {$group:{_id:"$tag",totalCount:{$sum:1},list:{$push:"$$ROOT"}}},
+                     {$lookup:{from:"tag",localField:"_id",foreignField:"_id",as:"tag"}},
+                     {$unwind:"$tag"}
+                 ]).exec();
+            })
+            .then(function(docs){
+                response.tagList = JSON.parse(JSON.stringify(docs));
+                return worksModel.aggregate([
+                    {$match:{published:true,user:mongoose.Types.ObjectId(userId)}},
+                    {$group:{_id:"$type",num:{$sum:1}}},
+                ]).exec();
+            })
+            .then(function(docs) {
+                let tmpResult = {
+                };
+                for (let i = 0; i < docs.length; ++i) {
+                    tmpResult[docs[i]._id] = docs[i].num;
+                };
+                response.workCount = tmpResult;
+                redisClient.get('fanfic_grade',function(err,docs) {
+                    if (!err && docs) {
+                        response.fanfic_grade = JSON.parse(docs);
+                        finalSend();
+                    } else
+                        __readSettings(finalSend, response);
+                });
             })
             .catch(function(err){
                 sent = true;
+                console.log(err);
                 res.render('cleeArchive/errorB.html',{error:err});
             })
     }

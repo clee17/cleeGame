@@ -1,0 +1,148 @@
+<style>
+    .workInfo{
+        border:1px solid rgba(205,205,205,255);
+        box-shadow:0px 0px 8px rgba(215,215,215,188);
+        padding:10px;
+        padding-left:30px;
+        padding-right:30px;
+        display:flex;
+        font-size:14px;
+        margin-left:auto;
+        margin-right:auto;
+        margin-bottom:2rem;
+        width:80%;
+        color:rgba(108,95,93,255);
+        flex-direction:column;
+        flex:1;
+        min-width:28rem;
+        height:auto;
+    }
+
+    .workInfo >div{
+        line-height:1.5rem;
+        margin-bottom:5px;
+    }
+
+    .workInfo >div{
+        margin-left:15px;
+    }
+
+    .workInfo >div:first-child{
+        line-height:1.8rem;
+        color:rgba(131,131,131,255);
+        margin-left:0;
+    }
+
+    .workInfo >div:nth-child(2) {
+        line-height:1rem;
+        margin-bottom:18px;
+        margin-top:1px;
+        margin-left:30px;
+    }
+
+    .workInfo >div:nth-child(2) >div:nth-child(odd){
+        margin-left:15px;
+    }
+
+
+    .workInfo >div:first-child a{
+        font-weight:bold;
+        color:rgba(108,95,93,255);
+        text-decoration:none;
+        font-size:16px;
+    }
+
+    .workInfo >div:first-child >div{
+        line-height:1.5rem;
+        height:1.5rem;
+    }
+
+    .workInfo >div:first-child a:hover{
+        text-decoration:underline;
+    }
+
+    .editRow{
+        margin-top:10px;
+        display:flex;
+        flex-direction:row;
+    }
+
+    .editRow >button{
+        margin-left:15px;
+        background:rgba(0,0,0,0);
+        border:none;
+        color:rgba(138,138,138,255);
+    }
+
+    .editRow >button:first-child{
+        margin-left:auto;
+    }
+
+    .editRow a{
+        background:rgba(0,0,0,0);
+        border:none;
+        color:rgba(138,138,138,255);
+        text-decoration:none;
+        font-size:14px;
+    }
+
+    .editRow a:hover{
+        color:rgba(181,181,181,255);
+    }
+
+    .editRow >button:hover{
+        color:rgba(181,181,181,255);
+    }
+
+
+
+</style>
+
+<div style="display:flex;flex-direction:column;flex:1;" class="workInfo work-info-outer">
+    <div style="display:flex;flex-direction:row;">
+        <div class="grade" grade-show grade="{{item.chapter.grade}}">{{item.chapter.grade | grade:gradeTemplate }} </div>
+        <div><a href="{{ item | workInfoLink:type }}">{{item | workInfoTitle:type}}</a></div>
+        <div ng-show="item.infoType==0" style="margin-left:2rem;font-weight:bold;border-radius:5px;border:2px solid rgba(107,187,167,218);color:rgba(107,187,167,218);padding-left:4px;padding-right:4px;height:1.2rem;line-height:1.2rem;">新的作品</div>
+        <div style="margin-left:auto;">{{item | workInfoDate:type}}</div>
+    </div>
+    <div class="tagRow">
+        <div>总字数:</div>
+        <div>{{item | workInfoWordCount:type}}</div>
+        <div ng-show="item.infoType== 0">总章节数:</div>
+        <div ng-show="item.infoType== 0">{{item.work.chapterCount}}</div>
+        <div>浏览量:</div>
+        <div>{{item | workInfoVisited:type}}</div>
+        <div ng-show="item.infoType != 0">属于作品:</div>
+        <div ng-show="item.infoType != 0"><a href="{{'/fanfic/work/'+item.work.id}}">{{item.work.title}}</a></div>
+        <div>更新状态:</div>
+        <div>{{item.work.status | workInfoStatus}}</div>
+    </div>
+    <div class="tagRow">
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">基于作品:</div>
+        <a ng-repeat="fandom in item.chapter.fandom" href="{{searchTag(fandom,0)}}" class="tag">{{fandom}}</a>
+    </div>
+    <div class="tagRow">
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">人物关系:</div>
+        <a ng-repeat="relation in item.chapter.relationships" href="{{searchTag(relation,1)}}" class="tag">{{relation}}</a>
+    </div>
+    <div class="tagRow">
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">登场角色:</div>
+        <a ng-repeat="character in item.chapter.characters" href="{{searchTag(character,2)}}" class="tag">{{character}}</a>
+    </div>
+    <div class="tagRow">
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">其他标签:</div>
+        <a ng-repeat="tag in item.chapter.tag" href="{{searchTag(tag,3)}}" class="tag">{{tag}}</a>
+    </div>
+    <div>
+        <div>作品简介:</div>
+        <div style="margin-left:20px;">{{item.chapter.intro | introType}}</div>
+    </div>
+    <div class="editRow">
+        <button ng-click="deleteItem(item)" ng-if="item.user == readerId">删除</button>
+        <button><a href="{{'/fanfic/post/edit?id='+item.index._id}}" ng-if="item.user == readerId" target="_blank">编辑</a></button>
+        <button>互动({{item.work.liked+ item.work.bookmarked}})</button>
+        <button>评论({{item.work.comments}})</button>
+        <button ng-show="item.user != readerId">点赞({{item.work.liked}})</button>
+        <button ng-show="item.user != readerId">推荐({{item.work.bookmarked}})</button>
+    </div>
+</div>

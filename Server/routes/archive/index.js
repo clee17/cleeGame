@@ -3,6 +3,8 @@ let express = require('express'),
 
 let fs = require('fs');
 
+global.__msgList = new Array();
+
 global.__chapterCount = function(index){
     if(index==0)
         return '首章';
@@ -13,15 +15,19 @@ global.__chapterCount = function(index){
 };
 
 global.__renderIndex = function(req,res,renderInfo){
-    let renderPage = {viewport:'',controllers:[],services:[],err:'',user:req.session.user,title:null,styles:[],variables:{}};
+    let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
     };
+    if(req.session.user)
+        renderPage.userId = req.session.user._id;
+    else
+        renderPage.userId = req.ip;
     res.render('cleeArchive/index.html',renderPage);
 };
 
 global.__renderError = function(req,res,errMessage){
-      let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],services:[],err:errMessage,user:req.session.user,title:null,styles:[],variables:{}};
+      let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,title:null,styles:[],variables:{}};
       res.render('cleeArchive/index.html',renderInfo);
 };
 
@@ -55,6 +61,8 @@ global.__readSettings = function (callBack,data) {
 };
 
 global.__validateId = function(id){
+    if(!id)
+        return false;
     if(id.match(/^[0-9a-fA-F]{24}$/))
         return true;
     else
@@ -66,6 +74,7 @@ let  main = require(path.join(__routes,"/archive/main")),
      subUser = require(path.join(__routes,'/archive/user')),
      feed = require(path.join(__routes,"/archive/feed")),
      admin = require(path.join(__routes,"/archive/admin")),
+     search = require(path.join(__routes,"/archive/search")),
      edit = require(path.join(__routes,"/archive/edit"));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
@@ -82,6 +91,8 @@ router.get('/tech/:techId',main.tech);
 //fanfic pages
 router.get('/fanfic/:fanficId',main.fanfic);
 router.post('/fanfic/validate/:fanficId',main.validate);
+router.get('/fanfic/work/:workId',main.work);
+
 
 //admin pages
 router.get('/admin/',main.index);
@@ -94,7 +105,7 @@ router.get('/register/:registerId',subUser.register);
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/request/dashboard',subUser.requestDashboard);
 router.post('/settings/save',subUser.saveSetting);
-// router.post('/user/getInfo/',user.getInfo);
+router.post('/users/request/calculate',subUser.calculate);
 
 //edit routes;
 router.get('/fanfic/post/new',edit.newFanfic);
@@ -109,6 +120,8 @@ router.post('/fanfic/chapter/add',edit.addChapter);
 router.post('/fanfic/book/save',edit.saveBook);
 router.post('/fanfic/post/loadChapter',edit.fanficGet);
 
+//index
+router.post('/search/all',search.all);
 
 //feed
 router.post('/feeds/channel',feed.channel);

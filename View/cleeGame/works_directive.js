@@ -8,7 +8,6 @@ app.directive('chapterIndex',['chapterManager','$timeout',function(chapterManage
             scope.index = attr.value;
             scope.selected = false;
 
-
             let refreshTitle = function(){
                 scope.selected = false;
                 element.css('color','rgba(126,126,126,1)');

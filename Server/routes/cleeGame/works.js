@@ -257,7 +257,8 @@ let handler = {
                     response.result = chapter._id;
                     chapterModel.findOneAndUpdate({_id:instance.prev}, {next:chapter._id});
                     chapterModel.findOneAndUpdate({_id:instance.next},{prev:chapter._id});
-                    return chapterModel.aggregate([{$match:{works:chapter.works}},
+                    return chapterModel.aggregate([
+                        {$match:{works:chapter.works}},
                         {$sort:{order:1}},
                         {$group:{_id:"$type",totalWordCount:{$sum:"$wordCount"},totalCount:{$sum:1}}}
                         ]).exec();

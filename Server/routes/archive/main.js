@@ -4,13 +4,32 @@ let express = require('express'),
     lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'));
 
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
+    worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic'));
 
 let handler = {
     index:function(req,res,next){
+        let response = {};
+        let callBack = function(){
+            handler.indexDetail(req,res,next,response.fanfic_grade);
+        };
+        redisClient.get('fanfic_grade',function(err,docs) {
+            if (!err && docs) {
+                handler.indexDetail(req,res,next,JSON.parse(docs));
+            } else
+                __readSettings(callBack, response);
+        });
+    },
+
+    indexDetail:function(req,res,next,fanfic_grade){
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
-        viewPortMap.set('/fanfic',{viewport:'/view/fanficMain.html',controllers:['/view/cont/index_con.js']});
+        viewPortMap.set('/fanfic',{viewport:'/view/fanficSearch.html',
+            modules:['/view/modules/workInfo.js'],
+            styles:['archive/user'],
+            controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
+            services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/workManager.js'],
+            variables:{searchType:1,gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js']});
@@ -48,6 +67,40 @@ let handler = {
         }
         else
             next();
+    },
+
+    work:function(req,res,next){
+       let workName = req.params.workId;
+       if(!__validateId(workName))
+           __renderError(req,res,'不是有效的作品ID');
+       else
+       {
+           worksModel.findOne({_id:workName}).exec()
+               .then(function(doc) {
+                   if (!doc)
+                       throw '数据库中没有该作品';
+                   return indexModel.aggregate([
+                       {$match:{work:doc._id}},
+                       {$sort:{order:1}},
+                       {$lookup: {from: 'work_chapters',as:"chapter",let:{chapter_id:"$chapter"},
+                               pipeline:[
+                                   {$match:{$expr:{$eq:["$_id","$$chapter_id"]},published:true}},
+                                   {$project:{_id:1}}
+                               ]}},
+                       {$unwind:"$chapter"},
+                       {$limit: 1}]).exec();
+               })
+               .then(function(docs){
+                   if(docs.length == 0)
+                       __renderError(req,res,'后端出错，请联系管理员');
+                   else
+                       handler.fanficDetail(req,res,next,docs[0].chapter._id.toString());
+               })
+               .catch(function(err){
+                   console.log(err);
+                   __renderError(req,res,err);
+               });
+       }
     },
 
     fanficDetail:function(req,res,next,fileName){

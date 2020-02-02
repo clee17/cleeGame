@@ -1,4 +1,5 @@
 let express = require('express'),
+    mongoose = require('mongoose'),
     path = require('path'),
     crypto = require('crypto'),
     lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'));
@@ -6,7 +7,12 @@ let express = require('express'),
 let registerModel = require(path.join(__dataModel,'register')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
+    indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
+    chapterModel = require(path.join(__dataModel,'cleeArchive_fanfic')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
+
+    tagModel =  require(path.join(__dataModel,'cleeArchive_tag')),
+    tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
     msgModel = require(path.join(__dataModel,'cleeArchive_msgPool'));
 
 let md5 = crypto.createHash('md5');
@@ -76,7 +82,14 @@ let handler = {
             if(sent)
                 return;
             if(response.userInfo)
-                __renderIndex(req,res,{viewport:'/dynamic/users/'+userId,title:response.userInfo.user+'的主页',controllers:['/view/cont/dashboard_con.js'],styles:['archive/user'],services: ['/view/cont/userService.js'],variables:{userId:response.userInfo._id,readerId:readerId,query:query}});
+                __renderIndex(req,res, {
+                    viewport:'/dynamic/users/'+userId,
+                    title:response.userInfo.user+'的主页',
+                    controllers:['/view/cont/dashboard_con.js'],
+                    styles:['archive/user'],
+                    modules:['/view/modules/workInfo.js'],
+                    services: ['/view/cont/userService.js','/view/cont/filterWord.js','/view/cont/workManager.js'],
+                    variables:{userId:response.userInfo._id,readerId:readerId, query:query}});
             else
                 __renderError(req,res,response.message);
         };
@@ -155,10 +168,8 @@ let handler = {
             handler.requestWorkboard(req,res,data,response);
         else if(data.pageId == 1005)
             handler.requestRecommendationBoard(req,res,data,response);
-        else if(data.pageId==1015)
-            handler.requestTranslationBoard(req,res,data,response);
-        else if(data.pageId == 1020 )
-            handler.requestClassificationBoard(req,res,data,response);
+        else if(data.pageId==1010)
+            handler.requestSeries(req,res,data,response);
         else if(data.pageId == 1025)
             handler.requestTagBoard(req,res,data,response);
         else
@@ -168,11 +179,152 @@ let handler = {
             }
     },
 
-    requestUpdates:function(req,res,data,response){
-        let result = [];
+    requestTagBoard(req,res,data,response){
+       let pageId = data.subPage || 0;
+       let perPage = 10;
+       let tagName = data.tagId;
+       let sent = false;
+
+        let sendError = function(msg){
+            if(sent)
+                return;
+            sent = true;
+            response.info = msg;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+
+        let finalSend = function(){
+            if(sent)
+                return;
+            sent = true;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+
+       if(tagName)
+           tagName  = unescape(tagName);
+       else
+           sendError('不是有效的标签名称');
+
+        if(sent)
+            return;
+        tagModel.findOne({_id:tagName}).exec()
+            .then(function(doc){
+                if(!doc)
+                    throw '不是有效的标签名称';
+                return tagMapModel.aggregate([
+                    {$match:{user:mongoose.Types.ObjectId(data.userId),tag:mongoose.Types.ObjectId(doc._id)}},
+                    {$lookup:{from:'work_chapters',as:"chapter",let:{chapter_id:"$aid"},pipeline:[
+                                {$match:{$expr:{$eq:["$_id","$$chapter_id"]}}},
+                                {$project:{contents:0}}
+                            ]}},
+                    {$unwind: "$chapter" },
+                    {$lookup:{from:'works',localField:"chapter.book",foreignField:"_id",as:"work"}},
+                    {$unwind: "$work" },
+                    {$lookup:{from:'work_index',localField:"chapter._id",foreignField:"chapter",as:"index"}},
+                    {$unwind: "$index" },
+                    {$facet:{
+                            "fanfic_chapter":[
+                                {$match:{"work.type":{$lt:100},$or:[{"work.status":1},{"work.chapterCount":{$gt:1}}],"chapter.published":true,infoType:1}},
+                                {$set:{updated:"$chapter.date"}},
+                            ],
+                            "fanfic_works":[
+                                {$match:{"work.type":{$lt:100},"index.order":0,"work.published":true,infoType:0}},
+                                {$set:{updated:"$work.updated"}}
+                            ]
+                        }},
+                    {$project:{all:{$setUnion:["$fanfic_chapter","$fanfic_works"]}}},
+                    {$unwind:"$all"},
+                    {$replaceRoot:{newRoot:"$all"}},
+                    {$sort:{updated:-1}}
+                ]).exec();
+            })
+            .then(function(docs){
+                response.success = true;
+                response.maxLimit = docs.length;
+                let startIndex = pageId*perPage;
+                let endIndex = startIndex + perPage;
+                response.result = docs.slice(startIndex,endIndex);
+                finalSend();
+            })
+
+
+    },
+
+    requestSeries:function(req,res,data,response){
+        response.success = true;
+        response.maxLimit = 0;
+        response.result = [];
+        res.send(lzString.compressToBase64(JSON.stringify(response)));
+    },
+
+    requestRecommendationBoard:function(req,res,data,response){
+        response.success = true;
+        response.maxLimit = 0;
+        response.result = [];
+        res.send(lzString.compressToBase64(JSON.stringify(response)));
+    },
+
+    requestWorkboard:function(req,res,data,response){
+        let pageId = data.subPage || 0;
+        let perPage = data.perPage || 10;
         let sent = false;
-        if(!data.pageId)
-            data.pageId = 0;
+        let finalSend = function(){
+            if(sent)
+                return;
+            sent = true;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+
+        let sendError = function(msg){
+            if(sent)
+                return;
+            sent = true;
+            response.info = msg;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+
+        if(data.type && data.type == 1)
+            response.maxLimit = data.userSetting.workCount.maxChaptersCount || 0;
+
+        worksModel.aggregate([
+            {$match:{user:mongoose.Types.ObjectId(data.userId),type:{$lte:10},published:true}},
+            {$sort:{updated:-1}},
+            {$project:{work:"$$ROOT"}},
+            {$set:{infoType:0}},
+            {$lookup:{from:'work_index',as:"index",
+                    let:{work_id:"$_id"},
+                    pipeline:[
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},order:0}},
+                        {$project:{contents:0}}
+                    ]}},
+            {$unwind:"$index"},
+            {$lookup:{from:'work_chapters',as:"chapter",
+                    let:{work_id:"$_id",chapter_id:"$index.chapter"},
+                    pipeline:[
+                        {$match:{$expr:{$eq:["$_id","$$chapter_id"]}}},
+                        {$project:{contents:0}}
+                    ]}},
+            {$unwind:"$chapter"},
+            {$set:{updated:"$work.updated"}}
+        ])
+            .then(function(docs){
+                response.success = true;
+                response.maxLimit = docs.length;
+                let startIndex = pageId*perPage;
+                let endIndex  = startIndex + perPage;
+                response.result = docs.slice(startIndex,endIndex);
+                finalSend();
+            })
+            .catch(function(err){
+                console.log(err);
+                if(err.success)
+                    return;
+                sendError(err);
+            });
+    },
+
+    requestUpdates:function(req,res,data,response){
+        let sent = false;
         let sendError = function(msg){
             if(sent)
                 return;
@@ -186,73 +338,125 @@ let handler = {
             sent = true;
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
-        msgModel.countDocuments({publisher:data.userId,type:{$lt:110}}).exec()
-            .then(function(reply){
-                if(reply === 0) {
-                    response.result = [];
-                    response.success = true;
-                    finalSend();
-                    throw {success:true,msg:'no need for action'};
-                }
-                else
-                {
-                    return msgModel.find({publisher:data.userId,type:{$lt:110}},null,{sort:{data:-1},limit:20,skip:data.pageId*20}).exec();
-                }
-            })
-            .then(function(replies){
-                console.log(' next then entered');
+        if(!data.userId)
+            sendError('不是有效的用户ID');
+        if(sent)
+            return;
+
+        data.userId = mongoose.Types.ObjectId(data.userId);
+        response.type = 0;
+        if(!data.perPage)
+            data.perPage = 10;
+        if(!data.pageId)
+            data.pageId = 0;
+        if(!data.subPage)
+            data.subPage = 0;
+
+        response.maxLimit = data.maxMsgCount || 0;
+
+        worksModel.aggregate([
+            {$match:{user:data.userId,published:true,type:{$lt:100}}},
+            {$facet:{
+                "fanfic_chapter":[
+                    {$match:{type:{$lt:100},$or:[{status:1},{chapterCount:{$gt:1}}],published:true}},
+                    {$project:{work:"$$ROOT"}},
+                    {$lookup:{from:"work_chapters", let:{work_id:"$_id"},as:"chapter",pipeline:[
+                        {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
+                        {$project:{contents:0}}]}},
+                    {$unwind:"$chapter"},
+                    {$set:{updated:"$chapter.date",infoType:1}},
+                    {$lookup:{from:"work_index", localField:"chapter._id",foreignField:"chapter",as:"index"}},
+                    {$unwind:"$index"}
+                ],
+                    "fanfic_works":[
+                        {$match:{type:{$lt:100}}},
+                        {$project:{work:"$$ROOT"}},
+                        {$lookup:{from:"work_index", let:{work_id:"$_id"},as:"index",pipeline:[{$match:{$expr:{$eq:["$work","$$work_id"]},order:0}}]}},
+                        {$unwind:"$index"},
+                        {$lookup:{from:"work_chapters",let:{chapter_id:"$index.chapter"},as:"chapter",pipeline:[{$match:{$expr:{$eq:["$_id","$$chapter_id"]}}},{$project:{contents:0}}]}},
+                        {$unwind:"$chapter"},
+                        {$lookup:{from:"work_chapters",let:{chapter_id:"$index.chapter"},as:"countChapter",pipeline:[{$match:{$expr:{$eq:["$_id","$$chapter_id"]},published:true}},{$project:{contents:0}}]}},
+                        {$set:{updated:"$work.updated",infoType:0}},
+                        {$project:{countChapter:0}}
+                    ]
+                }},
+            {$project:{all:{$setUnion:["$fanfic_chapter","$fanfic_works"]}}},
+            {$unwind:"$all"},
+            {$replaceRoot:{newRoot:"$all"}},
+            {$sort:{updated:-1}}
+            ]).exec()
+            .then(function(docs){
                 response.success = true;
-                let commandList = new Array(5);
-                for(let i=0;i<commandList.length;++i)
-                    commandList[i] = [];
-                if(replies)
-                    replies.forMap(function(item,i,arr){
-                        let index = item.type - 100;
-                        commandList[index-1].push(item.refer);
-                    });
-                else
-                    throw '没有获取任何记录';
-                let  finishedRequest = function(){
-                    data.success = true;
-                    response.result = JSON.parse(JSON.stringify(result));
-                    finalSend();
-                };
-                let requestResult = function(modelRefer){
-                    let model = null;
-                    if(modelRefer >= commandList.length)
-                    {
-                        finishedRequest();
-                        return;
-                    }
-                    switch(modelRefer){
-                        case 0:
-                            model = worksModel;
-                            break;
-                        default:
-                            break;
-                    }
-                    if(!model)
-                        requestResult(modelRefer+1);
-                    else
-                        model.find({_id:{$in:commandList[modelRefer]}},function(err,docs){
-                            if(err)
-                                throw err;
-                            docs.forMap(function(item,i,arr){
-                                result.forEach(function(resultItem,resultI,resultArr){
-                                    if(resultItem.refer == item._id)
-                                        resultItem.refer = JSON.parse(JSON.stringify(item));
-                                })});requestResult(modelRefer+1);})
-                }
-                requestResult(0);
+                response.maxLimit = docs.length;
+                let startIndex = data.perPage* data.subPage;
+                let result = docs.slice(startIndex,startIndex+data.perPage);
+                response.result = JSON.parse(JSON.stringify(result));
+                finalSend();
             })
             .catch(function(err){
                 console.log(err);
-                if(err.success)
-                    return;
+                response.msg = err;
+                response.success = false;
                 sendError(err);
-            });
-    }
+            })
+    },
 
+    calculate:function(req,res){
+        let sent = false;
+        let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let sendError = function(msg){
+            if(sent)
+                return;
+            sent = true;
+            response.info = msg;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+        let finalSend = function(){
+            if(sent)
+                return;
+            sent = true;
+            res.send(lzString.compressToBase64(JSON.stringify(response)));
+        };
+        let response = {
+            success:false,
+            result:null,
+            message:'userCalculationEnded'
+        };
+
+        worksModel.aggregate([
+            {$match:{user:mongoose.Types.ObjectId(data.user),published:true,type:{$lt:100}}},
+            {$facet:{
+                    "fanfic_works":[
+                        {$match:{type:{$lt:5}}},
+                        {$project:{_id:1}},
+                    ],
+                    "fanfic_recommendation":[
+                        {$match:{type:5}},
+                        {$count:"recommendCount"},
+                    ],
+                    "fanfic_series":[
+                        {$match:{type:10}},
+                        {$count:"seriesCount"},
+                    ]
+                }},
+        ]).exec()
+            .then(function(docs){
+                let result = docs[0];
+                if(!docs[0])
+                    throw '查询结果出错';
+                response.result = {};
+                response.result.workCount = result.fanfic_works.length;
+                response.result.recommendCount = result.fanfic_recommendation.length;
+                response.result.seriesCount = result.fanfic_series.length;
+                response.success = true;
+                finalSend();
+            })
+            .catch(function(err){
+                response.msg = err;
+                response.success = false;
+                sendError(err);
+            })
+    }
 
 
 };
