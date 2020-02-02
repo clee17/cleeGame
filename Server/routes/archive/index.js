@@ -32,7 +32,6 @@ global.__renderError = function(req,res,errMessage){
 };
 
 global.__readSettings = function (callBack,data) {
-    console.log('read files entered');
     let redisList = ['grade','warning'];
     let readResult = fs.readFile(path.join(__dataModel, '../json/fanficEdit.json'), {encoding: 'utf-8'},(err,File)=>{
         if(err)
@@ -52,7 +51,6 @@ global.__readSettings = function (callBack,data) {
                 multiRedisCommands.push(["set",keyString,JSON.stringify(settings[keyString])]);
             }
             redisClient.multi(multiRedisCommands).exec(function(err,docs){
-                console.log(docs);
                 if(callBack)
                     callBack();
             });
