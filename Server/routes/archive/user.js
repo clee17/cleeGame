@@ -20,7 +20,11 @@ let md5 = crypto.createHash('md5');
 let handler = {
     register:function(req,res,next){
         let registerId = req.params.registerId;
-
+        let userId = req.session.user;
+        if(userId)
+            userId = userId._id;
+        else
+            userId = '';
         let sent = false;
         let success = false;
         let error = '';
@@ -33,11 +37,13 @@ let handler = {
                     viewport: '/view/register.html',
                     controllers: ['/templates/login.js', '/templates/register_con.js'],
                     services: [],
-                    variables: {registerId:registerId,loginMode:1}
+                    variables: {registerId:registerId,loginMode:1},
+                    userId:userId
                 });
             else
                 __renderError(req, res, error);
         };
+
 
         if(req.session.user) {
             error = '您已经登录，无法注册新账号';

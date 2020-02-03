@@ -27,7 +27,10 @@ global.__renderIndex = function(req,res,renderInfo){
 };
 
 global.__renderError = function(req,res,errMessage){
-      let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,title:null,styles:[],variables:{}};
+      let userId = req.ip;
+      if(req.session.user)
+          userId = req.session.user._id;
+      let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
       res.render('cleeArchive/index.html',renderInfo);
 };
 
