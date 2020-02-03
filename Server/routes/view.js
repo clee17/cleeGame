@@ -17,6 +17,8 @@ let routeHandler = {
             sub = sub[0].toUpperCase()+sub.slice(1);
             sub = 'clee'+sub+'/';
         }
+        else if(index == 0)
+            sub = 'cleeGame/';
         else
             sub='cleeArchive/';
         if(__entryFile.indexOf(fileName)!=-1)
