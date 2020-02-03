@@ -131,6 +131,7 @@ input{
 
 .dashboard{
     color:rgba(108,95,93,255);
+    width:100%;
 }
 
 .dashboard #loginWindow{

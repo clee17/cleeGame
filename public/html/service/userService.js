@@ -1,4 +1,4 @@
-app.service('loginManager',function($http,$rootScope,LZString){
+app.service('loginManager',function($http,$rootScope){
     this.requestLogin = function(data){
         $http.post('/user/login',data)
             .then(function(response){

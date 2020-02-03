@@ -1,4 +1,4 @@
-app.service('userManager',function($http,$rootScope,LZString){
+app.service('userManager',function($http,$rootScope){
     this.saveSettings = function(data){
         $http.post('/settings/save',{data:LZString.compressToBase64(JSON.stringify(data))})
             .then(function(response){

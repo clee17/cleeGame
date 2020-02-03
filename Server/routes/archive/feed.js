@@ -1,6 +1,6 @@
 let express = require('express'),
     path = require('path'),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'),
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'),
     tagModel = require(path.join(__dataModel,'cleeArchive_tag'))),
     msgModel = require(path.join(__dataModel,'cleeArchive_msgPool'));
 

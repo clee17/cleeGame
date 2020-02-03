@@ -1,4 +1,4 @@
-app.service('adminManager',function($http,$rootScope,LZString){
+app.service('adminManager',function($http,$rootScope){
     let manager =this;
 
     this.requestContents = function(index,pageId,perPage){

@@ -1,4 +1,4 @@
-app.service('fanficManager',function($http,$rootScope,LZString){
+app.service('fanficManager',function($http,$rootScope){
     let manager =this;
 
     this.requestFanfic = function(currentIndex){

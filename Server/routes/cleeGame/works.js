@@ -4,7 +4,7 @@ let express = require('express'),
     chapterModel = require(path.join(__dataModel,'cleeGame_chapter')),
     visitModel = require(path.join(__dataModel,'cleeGame_visit')),
     likeModel = require(path.join(__dataModel,'cleeGame_liked')),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'));
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let handler = {
     getWorksList:function(req,res){

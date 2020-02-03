@@ -1,4 +1,4 @@
-app.service('feedManager',function($http,$rootScope,LZString){
+app.service('feedManager',function($http,$rootScope){
     this.getFeeds = function(type){
         $http.post('/feeds/'+type,{})
             .then(function(response){

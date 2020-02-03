@@ -2,7 +2,7 @@ let express = require('express'),
     path = require('path'),
     fs = require('fs'),
     gameList = require(path.join(__dataFormat,'/gamesList.js')),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'));
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 　
 let handler = {
     getIndex:function(req,res){

@@ -1,6 +1,6 @@
 var express = require('express'),
     path = require('path'),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string'));
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let userModel = require(path.join(__dataModel, 'user')),
     registerModel = require(path.join(__dataModel,'register'));

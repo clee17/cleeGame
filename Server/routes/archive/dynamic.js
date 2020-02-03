@@ -2,7 +2,7 @@ let express = require('express'),
     path = require('path'),
     fs = require('fs'),
     mongoose = require('mongoose'),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string')),
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4')),
 
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic')),

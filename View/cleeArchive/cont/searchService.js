@@ -1,4 +1,4 @@
-app.service('searchManager',function($http,$rootScope,LZString){
+app.service('searchManager',function($http,$rootScope){
     this.searchAll = function(data){
         $http.post('/search/all',{data:LZString.compressToBase64(JSON.stringify(data))})
             .then(function(response){

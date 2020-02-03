@@ -1,6 +1,6 @@
 let express = require('express'),
     path = require('path'),
-    lzString = require(path.join(__basedir, 'js/lib/angular-lz-string.min'));
+    lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     chapterModel = require(path.join(__dataModel,'cleeArchive_fanfic')),
