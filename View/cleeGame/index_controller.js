@@ -1,5 +1,5 @@
 
-app.service('newsManager',function($http,LZString){
+app.service('newsManager',function($http){
     let manager =this;
     this.requesting =false;
 
