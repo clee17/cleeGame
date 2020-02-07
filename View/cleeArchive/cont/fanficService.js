@@ -82,6 +82,19 @@ app.service('fanficManager',function($http,$rootScope){
             });
     };
 
+    this.removePost = function(indexData){
+        $http.post('/fanfic/post/delete',{data:LZString.compressToBase64(JSON.stringify(indexData))})
+            .then(function(response){
+                let data = JSON.parse(LZString.decompressFromBase64(response.data));
+                if(data.success)
+                    $rootScope.$broadcast('postRemoved',data);
+                else
+                    $rootScope.$broadcast('postRemoved',{success:false,message:data.message});
+            },function(err){
+                $rootScope.$broadcast('postRemoved',{success:false,message:'网络通信错误'});
+            });
+    };
+
     this.removeChapter = function(indexData){
         $http.post('/fanfic/chapter/remove',{data:LZString.compressToBase64(JSON.stringify(indexData))})
             .then(function(response){

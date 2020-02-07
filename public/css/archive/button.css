@@ -40,3 +40,51 @@
 .remove-line:hover{
     text-decoration:line-through;
 }
+
+.grand-button{
+    background-color: #a192a9;
+    border: 1px solid #73637b;
+    text-shadow: 0 1px 1px #73637b;
+    color: #FFFFFF;
+    text-align: center;
+    -webkit-box-shadow: inset -1px 2px 0 rgba(246, 227, 255, 0.3);
+    box-shadow: inset -1px 2px 0 rgba(246,227, 255, 0.3);
+    padding: 10px;
+    margin-right:10px;
+    height:90%;
+    min-width:4rem;
+    letter-spacing:2px;
+    font-size:14px;
+    cursor:pointer;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    margin-top:auto;
+    margin-bottom:auto;
+}
+
+.grand-button:hover{
+    background:#c1a6cf;
+}
+
+.back-button{
+    background-color: rgba(230,230,230,1);
+    border: 1px solid rgba(180,180,180,1);
+    color: rgba(130,130,130,1);
+    text-align: center;
+    -webkit-box-shadow: inset -1px 2px 0 rgba(255, 255, 255, 0.4);
+    box-shadow: inset -1px 2px 0 rgba(255,255, 255, 0.4);
+    padding: 10px;
+    height:90%;
+    min-width:4rem;
+    letter-spacing:2px;
+    font-size:14px;
+    cursor:pointer;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    margin-top:auto;
+    margin-bottom:auto;
+}
+
+.back-button:hover{
+    background:rgba(239,239,239,1);
+}

@@ -31,6 +31,8 @@ module.exports = new mongoose.Schema({
 
     liked:{type:Number,default:0},
 
+    visitorLiked:{type:Number,default:0},
+
     bookmarked: {type:Number,default:0}, //收藏人数
 
     visited:{type:Number,default:0}

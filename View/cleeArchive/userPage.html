@@ -6,6 +6,7 @@
                      count = '<%= JSON.stringify(workCount) %>';
                      gradeTemplate = '<%= JSON.stringify(fanfic_grade) %>';">
     </info-receiver>
+
     <div id="guideBar">
         <div id="userInfo" style="display:flex;flex-direction:column;">
             <div style="min-height:5rem;height:5rem;width:100%;display:flex;flex-direction:row;">
@@ -46,6 +47,7 @@
     </div>
 
 
+
     <div id="userPageContents">
         <div id="waitingBoard"  ng-show="!contentsLoaded" style="font-size:30px;font-weight:bold;padding-top:2rem;">
             等待加载<i class="fa fa-spinner fa-spin" style="margin-left:1rem;"></i>
@@ -59,7 +61,7 @@
                 <a  href="<%- '/users/'+user._id +'?pageId=1010' %>" style="margin-right:auto;" ng-show="count['10'] != undefined">系列({{count['10']}})</a>
             </div>
             <div ng-show="receivedList.length == 0" style="margin:auto;">当前作者没有任何更新记录</div>
-            <work-info ng-repeat="item in receivedList" type="1"></work-info>
+            <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
         </div>
 
         <div class="dashboard" ng-show="contentsLoaded && !showError && pageId == 1005">
@@ -77,12 +79,12 @@
         <div class="dashboard workDashboard" ng-show="contentsLoaded && !showError && pageId == 1000 ">
             <div style="min-height:4rem;height:4rem;width:100%;"></div>
             <div ng-show="receivedList.length == 0 && pageId == 1000" style="margin:auto;">当前作者没有发布任何作品</div>
-            <work-info ng-repeat="item in receivedList" type="0"></work-info>
+            <work-info ng-repeat="item in receivedList" infoType="0" info="{{item}}"></work-info>
         </div>
 
         <div class="dashboard workDashboard" ng-show="contentsLoaded && !showError && pageId == 1025 ">
             <div style="min-height:4rem;height:4rem;width:100%;"></div>
-            <work-info ng-repeat="item in receivedList" type="1"></work-info>
+            <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
         </div>
 
         <div style="display:flex;flex-direction:row;min-height:2rem;height:2rem;width:100%;margin-bottom:2rem;" class="pageIndex" ng-show="receivedList.length>0">

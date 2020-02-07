@@ -76,7 +76,8 @@ let  main = require(path.join(__routes,"/archive/main")),
      feed = require(path.join(__routes,"/archive/feed")),
      admin = require(path.join(__routes,"/archive/admin")),
      search = require(path.join(__routes,"/archive/search")),
-     edit = require(path.join(__routes,"/archive/edit"));
+     edit = require(path.join(__routes,"/archive/edit")),
+     fanfic = require(path.join(__routes,"/archive/fanfic"));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
@@ -93,7 +94,6 @@ router.get('/tech/:techId',main.tech);
 router.get('/fanfic/:fanficId',main.fanfic);
 router.post('/fanfic/validate/:fanficId',main.validate);
 router.get('/fanfic/work/:workId',main.work);
-
 
 //admin pages
 router.get('/admin/',main.index);
@@ -115,12 +115,16 @@ router.get('/fanfic/post/edit',edit.fanficEdit);
 router.post('/fanfic/post/previewRequest',edit.fanficPreview);
 router.post('/fanfic/post/publish',edit.publish);
 
-
 router.post('/fanfic/chapter/save',edit.saveChapter);
 router.post('/fanfic/chapter/add',edit.addChapter);
 router.post('/fanfic/book/save',edit.saveBook);
 router.post('/fanfic/post/loadChapter',edit.fanficGet);
 
+router.post('/fanfic/post/delete',fanfic.deletePost);
+router.post('/fanfic/post/deleteComment',fanfic.deleteComment);
+router.post('/fanfic/post/like',fanfic.likePost);
+router.post('/fanfic/post/bookmark',fanfic.bookmarkPost);
+router.post('/fanfic/post/comment',fanfic.commentPost);
 //index
 router.post('/search/all',search.all);
 

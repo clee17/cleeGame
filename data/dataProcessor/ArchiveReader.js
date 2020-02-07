@@ -2,7 +2,7 @@ let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
-    msgPoolModel = require('./../model/cleeArchive_msgPool'),
+    updatesModel = require('../model/cleeArchive_postUpdates'),
     userSettingModel = require('./../model/cleeArchive_userSetting');
 
 let fs = require('fs'),
@@ -51,14 +51,12 @@ let readSettings = function () {
 let initializeRecords = function(){
     chapterModel.updateMany({type:{$lt:1000}},{$set:{comments:0,liked:0,bookmarked:0}},function(err,docs){
         console.log(err);
-        console.log(docs);
     });
     worksModel.aggregate([
         {$lookup:{from: 'work_chapters', localField: "_id", foreignField: "book",as:"chapter"}},
         {$set:{visited:{$sum:"$chapter.visited"},liked:{$sum:"$chapter.liked"},comments:{$sum:"$chapter.comments"}}},
     ]).exec()
         .then(function(docs){
-            console.log(docs);
             let bulkWriteDocs = [];
             while(docs.length>0){
                 let record = docs.pop();
@@ -151,11 +149,11 @@ let updateTagMap = function(){
                                     {$project:{chapter:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
                         {$unwind:"$chapter"},
-                        {$set:{"chapter.date":"$updated"}},
+                        {$set:{"chapter.date":"$date","chapter.updated":"$updated"}},
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$fandom"},
                         {$set:{type:1,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_characters":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
@@ -178,11 +176,11 @@ let updateTagMap = function(){
                                     {$project:{chapter:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
                         {$unwind:"$chapter"},
-                        {$set:{"chapter.date":"$updated"}},
+                        {$set:{"chapter.date":"$date","chapter.updated":"$updated"}},
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$characters"},
                         {$set:{type:2,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_relationships":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
@@ -205,11 +203,11 @@ let updateTagMap = function(){
                                     {$project:{chapter:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
                         {$unwind:"$chapter"},
-                        {$set:{"chapter.date":"$updated"}},
+                        {$set:{"chapter.date":"$date","chapter.updated":"$updated"}},
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$relationships"},
                         {$set:{type:3,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_tag":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
@@ -232,11 +230,11 @@ let updateTagMap = function(){
                                     {$project:{chapter:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
                         {$unwind:"$chapter"},
-                        {$set:{"chapter.date":"$updated"}},
+                        {$set:{"chapter.date":"$date","chapter.updated":"$updated"}},
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$tag"},
                         {$set:{type:4,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1,updated:1}}
                     ],
                 }},
             {$project:{all:{$setUnion:["$fanfic_chapter_fandom", "$fanfic_works_fandom",
@@ -248,7 +246,6 @@ let updateTagMap = function(){
             {$group:{_id:"$name",totalCount:{$sum:1},list:{$push:"$$ROOT"}}}
         ]).allowDiskUse(true).exec()
             .then(function(docs){
-                console.log(docs);
                 processData.currentRecords = docs;
                 write();
             })
@@ -280,7 +277,7 @@ let updateTagMap = function(){
 let clearTagMap = function(dataName){
     let arr = {
         tagMap:tagMapModel,
-        msgPool:msgPoolModel,
+        updates:updatesModel,
     };
     if(arr[dataName])
         arr[dataName].deleteMany(null,function(err,response){
@@ -319,7 +316,7 @@ let updateMessagePool = function(){
             }
             let rec = processData.currentRecords[startIndex];
             startIndex++;
-            msgPoolModel.findOneAndUpdate({publisher:rec.user,infoType:rec.infoType,contents:rec.contents},rec,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+            updatesModel.findOneAndUpdate({publisher:rec.user,infoType:rec.infoType,contents:rec.contents},rec,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                 .then(function(doc){
                     if(!doc)
                         throw '没有找到该记录';
@@ -361,7 +358,7 @@ let updateMessagePool = function(){
                         {$lookup:{from:"work_chapters",as:"chapter",localField:"index.chapter",foreignField:"_id"}},
                         {$unwind:"$chapter"},
                         {$set:{infoType:0}},
-                        {$project:{infoType:1,contents:"$chapter._id",publisher:"$user",date:"$updated",work:"$_id",_id:0}}
+                        {$project:{infoType:1,contents:"$chapter._id",publisher:"$user",date:"$date",updated:"$updated",work:"$_id",_id:0}}
                     ],
                 }},
             {$project:{all:{$setUnion:["$fanfic_chapters", "$fanfic_works"]}}},
@@ -369,7 +366,6 @@ let updateMessagePool = function(){
             {$replaceRoot:{newRoot:"$all"}},
         ]).allowDiskUse(true).exec()
             .then(function(docs){
-                console.log(docs);
                 processData.currentRecords = docs;
                 write();
             })

@@ -1,3 +1,37 @@
+var _getAbsolutePosition = function(obj) {
+    if(!obj)return null;
+    let w = obj.offsetWidth, h = obj.offsetHeight;
+
+    let t = obj.offsetTop,l = obj.offsetLeft;
+    obj = obj.offsetParent;
+    while(obj)
+    {
+
+        t += obj.offsetTop;
+        l += obj.offsetLeft;
+        obj = obj.offsetParent;
+    }
+
+    let r = l+w;
+    let b = t-h;
+
+    return {width: w, height: h, top: t, left: l, right: r, bottom: b};
+};
+
+var _getInsideTheElement = function(pointer,area){
+    if(area.target && area.target == pointer.target)
+        return true;
+
+    let x = pointer.clientX-pointer.layerX;
+    let y = pointer.clientY-pointer.layerY;
+
+    let a = x>=area.left;
+    let b = x<=area.right;
+    let c = y>=area.bottom;
+    let d = y<=area.top;
+
+    return  a && b && c && d;
+};
 
 let disableSelect = function(ele){
     ele.css('userSelect','none');

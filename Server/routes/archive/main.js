@@ -28,7 +28,7 @@ let handler = {
             modules:['/view/modules/workInfo.js'],
             styles:['archive/user'],
             controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
-            services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/workManager.js'],
+            services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
             variables:{searchType:1,gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
@@ -50,6 +50,12 @@ let handler = {
                 __renderIndex(req,res,result);
             else
                 __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');
+        }
+        else if(req.url ==='/fanfic' && !req.session.user){
+            visitorModel.findOneAndUpdate({ipa:req.ip},{$bit:{status:{xor:1}}},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
+                if(doc &&!err)
+                    result.variables.visitorId = doc._id;
+            });
         }
         else
             __renderIndex(req,res,result);

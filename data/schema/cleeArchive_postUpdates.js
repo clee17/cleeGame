@@ -5,6 +5,7 @@ module.exports = new mongoose.Schema({
     receiver:{type:mongoose.Schema.ObjectId,default:null},
     infoType:{type:Number,default:0},
     date:{type:Date,default:Date.now(),index:true},
+    updated:{type:Date,default:Date.now(),index:true},
     work:{type:mongoose.Schema.ObjectId,default:null},
     contents:{type:mongoose.Schema.ObjectId,default:null},
     ExtA:{type:mongoose.Schema.ObjectId,default:null},

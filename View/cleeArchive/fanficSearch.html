@@ -21,7 +21,7 @@
     }
 </style>
 
-<div style="margin-left:auto;margin-right:auto;" ng-controller="searchCon">
+<div style="margin-left:auto;margin-right:auto;min-width:80rem;" ng-controller="searchCon">
     <div id="searchBar">
         <div>进阶搜索：
         </div>
@@ -33,7 +33,6 @@
         {{err}}
     </div>
     <div ng-show="!searching && !showErr" style="display:flex;flex-direction:column;padding-top:3rem;">
-        <work-info ng-repeat="item in receivedList" type="1"></work-info>
+        <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
     </div>
-
 </div>

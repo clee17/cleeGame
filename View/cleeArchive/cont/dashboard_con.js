@@ -34,8 +34,11 @@ app.directive('infoReceiver',function($rootScope){
 });
 
 
-app.controller("dashboard_con",function($scope,$rootScope,userManager){
+app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficManager){
     $scope.contentsLoaded = false;
+
+    $scope.alertInfo = '';
+    $scope.showAlert = false;
 
     $scope.error = '';
     $scope.showError = false;
@@ -50,6 +53,7 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager){
     $scope.tagList = [];
 
     $scope.receivedList = [];
+    $scope.deleteList = [];
 
     $scope.gradeTemplate = [];
 
@@ -70,6 +74,39 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager){
             $scope.showError =true;
             $scope.error = data.info;
         }
+    });
+
+    $scope.$on('deleteReceivedList',function(event,data){
+        for(let i=0;i<$scope.receivedList.length;++i)
+        {
+            if(i >= $scope.receivedList.length)
+                break;
+            let item = $scope.receivedList[i];
+            if(item.infoType == data.infoType && item.chapter._id == data.index.chapter)
+            {
+                $scope.deleteList.push({index:i,item:item});
+                $scope.receivedList.splice(i,1);
+                i--;
+            }
+            else if(data.infoType == 0 && item.work._id == data.index.work)
+            {
+                $scope.deleteList.push({index:i,item:item});
+                $scope.receivedList.splice(i,1);
+                i--;
+            }
+            else if(data.infoType == 1 && data.index.prev == null && item.work._id == data.index.work && item.work.chapterCount <= 1)
+            {
+                $scope.deleteList.push({index:i,item:item});
+                $scope.receivedList.splice(i,1);
+                i--;
+                data.infoType = 0;
+            }
+            if(data.infoType ==1 && item.work._id == data.index.work)
+            {
+                item.work.chapterCount --;
+            }
+        }
+        fanficManager.removePost(data);
     });
 
     let calcAddress = function(index){

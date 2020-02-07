@@ -206,8 +206,21 @@ app.directive('chapterSelect',function(){
                 })
                 .on('dblclick',function(event) {
                     if (scope.$parent.contentsLoaded){
+                        if(window.localStorage)
+                        {
+                            let item = localStorage.getItem(scope.$parent.currentIndex._id);
+                            if(item)
+                            {
+                                item = JSON.parse(LZString.decompress(item));
+                                item.chapter.chapter = scope.$parent.chapter;
+                                localStorage.setItem(scope.$parent.currentIndex._id,LZString.compress(JSON.stringify(item)));
+                            }
+                        }
                         scope.$parent.currentIndex = scope.list;
-                        scope.$parent.loadContent();
+                        if(window.localStorage && scope.$parent.currentIndex.chapter!= null && window.localStorage.getItem(scope.list._id))
+                            scope.$emit('fanficReceived',{success:true,chapter:JSON.parse(LZString.decompress(window.localStorage.getItem(scope.list._id)))});
+                        else
+                            scope.$parent.loadContent();
                     }
                 });
         }
@@ -525,102 +538,12 @@ app.directive('contenteditable', function ($compile) {
 });
 
 app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$window,$location,fanficManager,userManager){
-
     $scope.backupChapter = new Map();
     $scope.db = null;
     $scope.dbLoaded = false;
 
     $scope.error = '';
     $scope.acceptableError = [];
-
-    if(!window.indexedDB)
-        $scope.dbLoaded = true;
-    if(window.indexedDB)
-    {
-
-        let request = window.indexedDB.open('fanficEditor',3);
-        request.onerror = function(event) {
-            $scope.acceptableError.push('无法使用本地存储，会占用较大浏览器内存');
-            $scope.dbLoaded = true;
-        };
-        request.onsuccess = function(event){
-            $scope.db = event.target.result;
-            $scope.dbLoaded = true;
-
-        };
-        request.onupgradeneeded = function(event){
-            let db = event.target.result;
-            console.log('objectStore names created');
-            if(!db.objectStoreNames.contains('fanfic_chapter')){
-                let objectStore = db.createObjectStore('fanfic_chapter',{keyPath:'_id'});
-                objectStore.createIndex('_id','_id',{unique:true});
-                objectStore.createIndex('modified','modified',{unique:false});
-            }
-            $scope.db = db;
-            $scope.dbLoaded = true;
-        };
-
-        $scope.writeToDB =function(id,callBack){
-            if(!$scope.db)
-            {
-                if(callBack)
-                    callBack();
-                return;
-            }
-            let transaction = $scope.db.transaction(['fanfic_chapter']);
-            let objectStore = transaction.objectStore('fanfic_chapter');
-            objectStore.get(id)
-                .then(function(doc){
-                    console.log(doc);
-                    if(doc)
-                       return $scope.backupChapter.put($scope.backupChapter.get(id));
-                    else
-                        return $scope.backupChapter.add($scope.backupChapter.get(id));
-                })
-                .then(function(doc){
-                    console.log(doc);
-                    $scope.backupChapter.remove($scope.backupChapter.get(id));
-                    if(callBack)
-                        callBack();
-                })
-                .catch(function(err){
-                    console.log(err);
-                    if(callBack)
-                        callBack();
-                })
-        };
-
-        $scope.getFromDB = function(callBack){
-            let chapterId = $scope.currentIndex.chapter;
-            if(!$scope.db || !chapterId)
-            {
-                if(callBack)
-                    callBack();
-                return;
-            }
-            let transaction = $scope.db.transaction(['fanfic_chapter']);
-            let objectStore = transaction.objectStore('fanfic_chapter');
-            if(chapterId._id)
-                chapterId = chapterId._id;
-            let request = objectStore.get(chapterId);
-            request.onsuccess= function(doc){
-                    if(request.result)
-                    {
-                        $rootScope.$broadcast('fanficReceived',{success:true,chapter:{chapter:request.result}});
-                    }
-                    else
-                    {
-                        if(callBack)
-                            callBack();
-                    }
-                };
-            request.onerror = function(err){
-                console.log(err);
-                if(callBack)
-                    callBack();
-            }
-        }
-    }
 
     $scope.contentsLoaded = false;
 
@@ -693,42 +616,22 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        if(item.lockType !== $scope.chapter.lockType)
            return true;
        return item.passcode.use != $scope.chapter.passcode.use || item.passcode.code != $scope.chapter.passcode.code;
-
-   };
-
-   let backupChapter = function(callBack){
-       let entry = $scope.backupChapter.get($scope.chapter._id);
-       if(entry)
-       {
-           entry.modified = chapterModified(entry);
-           $scope.backupChapter.set(entry._id,entry);
-           if($scope.writeToDB)
-           {
-               $scope.writeToDB(entry._id,callBack);
-               return;
-           }
-       }
-       if(callBack)
-           callBack();
    };
 
    $scope.loadContent = function(){
-       let proceed = function(){
+       if($scope.contentsLoaded){
            $scope.contentsLoaded = false;
-           let getFromWeb = function(){
-               console.log('started from web');
-               fanficManager.requestFanfic($scope.currentIndex);
-           };
-           if($scope.getFromDB)
-               $scope.getFromDB(getFromWeb);
+           fanficManager.requestFanfic($scope.currentIndex);
+       }
+       else {
+           let localItem = null;
+           if(window.localStorage && $scope.currentIndex.chapter != '')
+               localItem = window.localStorage.getItem($scope.currentIndex.chapter);
+           if(localItem)
+               $scope.$parent.$broadcast('fanficReceived',JSON.parse(LZString.decompress(localItem)))
            else
-               getFromWeb();
-       };
-
-       if($scope.contentsLoaded)
-           backupChapter(proceed);
-       else
-           proceed();
+               fanficManager.requestFanfic($scope.currentIndex);
+       }
    };
 
    let refreshBookInfoDetail = function(data){
@@ -751,20 +654,15 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         {
 
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter.chapter));
-            let backup = $scope.chapter;
-            if(!backup.modified)
-                backup.modified = false;
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
             $scope.workIndex.map(function(item,i,arr){
                 if(item._id == $scope.chapter._id && item.chapter == null) {
                     $scope.workIndex[i].chapter = {_id:$scope.chapter._id,title:$scope.chapter.title,wordCount:$scope.chapter.wordCount};
-                    backup.prev = $scope.workIndex[i].prev;
-                    backup.order = $scope.workIndex[i].order;
-                    backup.next = $scope.workIndex[i].next;
                 }
             });
-            $scope.backupChapter.set(backup._id,backup);
+            if(window.localStorage)
+                  localStorage.setItem($scope.currentIndex._id,LZString.compress(JSON.stringify(data.chapter)));
             $scope.contentsLoaded = true;
 
             if(data.isFirst)
@@ -799,6 +697,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     $scope.$on('publish finished',function(event,data){
         $scope.publishing = false;
         let rootUrl = 'http://'+$location.host();
+        if(window.localStorage)
+            window.localStorage.clear();
         if(data.success)
             $window.location.href = rootUrl+'/fanfic/'+data._id;
     });
@@ -1035,11 +935,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
 
    $scope.$on('initialisation completed',function(){
        let initialize = function(){
-           console.log('initialisation');
-           if($scope.dbLoaded)
-               $scope.loadContent();
-           else
-               $timeout(initialize,500);
+           $scope.loadContent();
        };
 
        initialize();

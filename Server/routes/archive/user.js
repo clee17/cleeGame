@@ -10,10 +10,10 @@ let registerModel = require(path.join(__dataModel,'register')),
     indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     chapterModel = require(path.join(__dataModel,'cleeArchive_fanfic')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
-
+    visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagModel =  require(path.join(__dataModel,'cleeArchive_tag')),
     tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
-    msgModel = require(path.join(__dataModel,'cleeArchive_msgPool'));
+    updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates'));
 
 let md5 = crypto.createHash('md5');
 
@@ -74,18 +74,20 @@ let handler = {
 
     userPage:function(req,res){
         let userId = req.params.userId;
-        let readerId = '';
-        if(req.session.user)
-            readerId = req.session.user._id;
         let query = req.query;
-        let sent = false;
         let response = {
+            sent:false,
             success:false,
             userInfo:null,
+            visitorId:null,
+            readerId:null,
+            query:req.query,
             message:''
         };
+        if(req.session.user)
+            response.readerId = req.session.user._id;
         let finalSend = function(){
-            if(sent)
+            if(response.sent)
                 return;
             if(response.userInfo)
                 __renderIndex(req,res, {
@@ -94,8 +96,8 @@ let handler = {
                     controllers:['/view/cont/dashboard_con.js'],
                     styles:['archive/user'],
                     modules:['/view/modules/workInfo.js'],
-                    services: ['/view/cont/userService.js','/view/cont/filterWord.js','/view/cont/workManager.js'],
-                    variables:{userId:response.userInfo._id,readerId:readerId, query:query}});
+                    services: ['/view/cont/userService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
+                    variables:{userId:response.userInfo._id,readerId:response.readerId, query:query, visitorId:response.visitorId}});
             else
                 __renderError(req,res,response.message);
         };
@@ -105,6 +107,10 @@ let handler = {
                     throw '不存在该用户';
                 response.success = true;
                 response.userInfo = JSON.parse(JSON.stringify(reply));
+                return visitorModel.findOneAndUpdate({ipa:req.ip},{},{upsert:true,setDefaultsOnInsert: true,new:true}).exec();
+            })
+            .then(function(doc){
+                response.visitorId = doc._id;
                 finalSend();
             })
             .catch(function(err){
@@ -206,6 +212,12 @@ let handler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
 
+        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        if(req.session.user)
+            likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
+        else
+            likeModelMatch.$match.ipa  = req.ip;
+
        if(tagName)
            tagName  = unescape(tagName);
        else
@@ -226,6 +238,13 @@ let handler = {
                     {$unwind: "$chapter" },
                     {$lookup:{from:'works',localField:"chapter.book",foreignField:"_id",as:"work"}},
                     {$unwind: "$work" },
+                    {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$work.user"},as:"work.feedback",pipeline:[
+                                likeModelMatch,
+                                {$project:{status:1,type:1,userName:1,user:1}}]}},
+                    {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"work.feedbackAll",pipeline:[
+                                {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                                {$limit:15},
+                                {$project:{status:1,type:1,userName:1,user:1}}]}},
                     {$lookup:{from:'work_index',localField:"chapter._id",foreignField:"chapter",as:"index"}},
                     {$unwind: "$index" },
                     {$facet:{
@@ -235,13 +254,18 @@ let handler = {
                             ],
                             "fanfic_works":[
                                 {$match:{"work.type":{$lt:100},"index.order":0,"work.published":true,infoType:0}},
-                                {$set:{updated:"$work.updated"}}
+                                {$set:{updated:"$work.date"}}
                             ]
                         }},
                     {$project:{all:{$setUnion:["$fanfic_chapter","$fanfic_works"]}}},
                     {$unwind:"$all"},
                     {$replaceRoot:{newRoot:"$all"}},
-                    {$sort:{updated:-1}}
+                    {$sort:{updated:-1}},
+                    {$lookup:{from:"post_comment", let:{work_id:"$work._id",chapter_id:"$chapter._id",post_type:"$infoType"},as:"commentList",pipeline:[
+                                {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$infoType","$$post_type"]}}]}},
+                                {$sort:{date:-1}},
+                                {$limit:15},
+                                {$project:{work:0,chapter:0,infoType:0}}]}},
                 ]).exec();
             })
             .then(function(docs){
@@ -292,9 +316,22 @@ let handler = {
         if(data.type && data.type == 1)
             response.maxLimit = data.userSetting.workCount.maxChaptersCount || 0;
 
+        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        if(req.session.user)
+            likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
+        else
+            likeModelMatch.$match.ipa  = req.ip;
+
         worksModel.aggregate([
             {$match:{user:mongoose.Types.ObjectId(data.userId),type:{$lte:10},published:true}},
             {$sort:{updated:-1}},
+            {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedback",pipeline:[
+                        likeModelMatch,
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
+            {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedbackAll",pipeline:[
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$limit:15},
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$project:{work:"$$ROOT"}},
             {$set:{infoType:0}},
             {$lookup:{from:'work_index',as:"index",
@@ -311,7 +348,16 @@ let handler = {
                         {$project:{contents:0}}
                     ]}},
             {$unwind:"$chapter"},
-            {$set:{updated:"$work.updated"}}
+            {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
+                        {$match:{$expr:{$eq:["$_id","$$userId"]}}},
+                        {$project:{user:1,_id:1}}]}},
+            {$unwind:"$chapter.user"},
+            {$set:{updated:"$work.updated"}},
+            {$lookup:{from:"post_comment", let:{work_id:"$work._id",chapter_id:"$chapter._id",post_type:"$infoType"},as:"commentList",pipeline:[
+                        {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$infoType","$$post_type"]}}]}},
+                        {$sort:{date:-1}},
+                        {$limit:15},
+                        {$project:{work:0,chapter:0,infoType:0}}]}},
         ])
             .then(function(docs){
                 response.success = true;
@@ -350,6 +396,10 @@ let handler = {
             return;
 
         data.userId = mongoose.Types.ObjectId(data.userId);
+        let readerId = null;
+        if(req.session.user)
+            readerId = mongoose.Types.ObjectId(req.session.user._id);
+        let ip = req.ip;
         response.type = 0;
         if(!data.perPage)
             data.perPage = 10;
@@ -360,8 +410,21 @@ let handler = {
 
         response.maxLimit = data.maxMsgCount || 0;
 
+        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        if(readerId)
+            likeModelMatch.$match.user = readerId;
+        else
+            likeModelMatch.$match.ipa  = req.ip;
+
         worksModel.aggregate([
             {$match:{user:data.userId,published:true,type:{$lt:100}}},
+            {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedback",pipeline:[
+                        likeModelMatch,
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
+            {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedbackAll",pipeline:[
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$limit:15},
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$facet:{
                 "fanfic_chapter":[
                     {$match:{type:{$lt:100},$or:[{status:1},{chapterCount:{$gt:1}}],published:true}},
@@ -370,6 +433,10 @@ let handler = {
                         {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
                         {$project:{contents:0}}]}},
                     {$unwind:"$chapter"},
+                    {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
+                                {$match:{$expr:{$eq:["$_id","$$userId"]}}},
+                                {$project:{user:1,_id:1}}]}},
+                    {$unwind:"$chapter.user"},
                     {$set:{updated:"$chapter.date",infoType:1}},
                     {$lookup:{from:"work_index", localField:"chapter._id",foreignField:"chapter",as:"index"}},
                     {$unwind:"$index"}
@@ -381,15 +448,24 @@ let handler = {
                         {$unwind:"$index"},
                         {$lookup:{from:"work_chapters",let:{chapter_id:"$index.chapter"},as:"chapter",pipeline:[{$match:{$expr:{$eq:["$_id","$$chapter_id"]}}},{$project:{contents:0}}]}},
                         {$unwind:"$chapter"},
+                        {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
+                                    {$match:{$expr:{$eq:["$_id","$$userId"]}}},
+                                    {$project:{user:1,_id:1}}]}},
+                        {$unwind:"$chapter.user"},
                         {$lookup:{from:"work_chapters",let:{chapter_id:"$index.chapter"},as:"countChapter",pipeline:[{$match:{$expr:{$eq:["$_id","$$chapter_id"]},published:true}},{$project:{contents:0}}]}},
-                        {$set:{updated:"$work.updated",infoType:0}},
+                        {$set:{updated:"$work.date",infoType:0}},
                         {$project:{countChapter:0}}
                     ]
                 }},
             {$project:{all:{$setUnion:["$fanfic_chapter","$fanfic_works"]}}},
             {$unwind:"$all"},
             {$replaceRoot:{newRoot:"$all"}},
-            {$sort:{updated:-1}}
+            {$sort:{updated:-1}},
+            {$lookup:{from:"post_comment", let:{work_id:"$work._id",chapter_id:"$chapter._id",post_type:"$infoType"},as:"commentList",pipeline:[
+                        {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$infoType","$$post_type"]}}]}},
+                        {$sort:{date:-1}},
+                        {$limit:15},
+                        {$project:{work:0,chapter:0,infoType:0}}]}},
             ]).exec()
             .then(function(docs){
                 response.success = true;

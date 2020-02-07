@@ -28,41 +28,6 @@
     <script src="/service/userService.js"></script>
     <script src="/templates/log_con.js"></script>
     <script>
-        var _getAbsolutePosition = function(obj) {
-            if(!obj)return null;
-            let w = obj.offsetWidth, h = obj.offsetHeight;
-
-            let t = obj.offsetTop,l = obj.offsetLeft;
-            obj = obj.offsetParent;
-            while(obj)
-            {
-
-                t += obj.offsetTop;
-                l += obj.offsetLeft;
-                obj = obj.offsetParent;
-            }
-
-            let r = l+w;
-            let b = t-h;
-
-            return {width: w, height: h, top: t, left: l, right: r, bottom: b};
-        };
-
-        var _getInsideTheElement = function(pointer,area){
-            if(area.target && area.target == pointer.target)
-               return true;
-
-            let x = pointer.clientX-pointer.layerX;
-            let y = pointer.clientY-pointer.layerY;
-
-            let a = x>=area.left;
-            let b = x<=area.right;
-            let c = y>=area.bottom;
-            let d = y<=area.top;
-
-            return  a && b && c && d;
-        };
-
         app.controller('entryCon',function($scope,$rootScope,$window,$timeout,loginManager){
             window.addEventListener("click",function(event){
                 $rootScope.$broadcast('clicked',{event:event});
@@ -74,6 +39,33 @@
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
+
+            $scope.signal = '';
+            $scope.alertInfo = '';
+            $scope.alertData = null;
+            $scope.showAlert = false;
+
+            $scope.$on('showAlert',function(event,data){
+                $scope.showAlert = true;
+                $scope.alertInfo =  data.alertInfo || '';
+                $scope.signal = data.signal || '';
+                $scope.alertData = data.variables;
+            });
+
+
+            $scope.tellYes = function(){
+                $scope.showAlert = false;
+                let response = {signal:$scope.signal};
+                if($scope.alertData)
+                    response.variables = $scope.alertData;
+                $rootScope.$broadcast('tellYes',response);
+            };
+
+            $scope.tellNo = function(){
+                $scope.showAlert = false;
+                $rootScope.$broadcast('tellNo',{signal:$scope.signal});
+            };
+
             $scope.loggingOut = false;
             $scope.freezingClick = false;
 
@@ -161,6 +153,18 @@
 <style>
 </style>
 <body ng-app="cleeArchive" ng-controller="entryCon" style="display:flex;flex-direction:column;">
+<div ng-show="showAlert" style="position:fixed;z-index:99;left:0;top:0;width:100%;height:100%;display:flex;">
+    <div style="position:fixed;left:0;top:0;width:100%;height:100%;background:black;opacity:0.75;z-index:0"></div>
+    <div class="alert">
+        <div><div style="padding-top:3px;">提示信息</div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
+        <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;"></div>
+        <div ng-repeat="info in alertInfo">{{info}}</div>
+        <div>
+            <button ng-click="tellYes()" class="grand-button">确定</button>
+            <button ng-click="tellNo()" class="back-button">取消</button>
+        </div>
+    </div>
+</div>
 <div id="header">
     <div style="display:flex;flex-direction:row;width:100%;position:relative;" id="userBoard">
         <div style="font-family:'Microsoft YaHei UI';font-size:32px;font-weight:bold;margin-left:3rem;color:rgba(158,142,166,255);">ARCHIVE</div>
@@ -180,7 +184,7 @@
             <button ng-click="logout()" ng-disabled="loggingOut" class="dashboard">登出</button>
         </div>
         <% }else{ %>
-        <div class="dashboard" ng-show="showLoginboard" style="position:absolute;right:0;top:0;width:280px;max-width:280px;">
+        <div class="dashboard" ng-show="showLoginboard" style="position:absolute;right:0;top:0;width:480px;max-width:480px;">
             <div ng-include="'/templates/loginBoard.html'" ng-controller="loginCon"></div>
         </div>
         <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()">登录</a>
