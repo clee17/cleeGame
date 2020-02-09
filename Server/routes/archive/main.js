@@ -5,6 +5,7 @@ let express = require('express'),
 
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
+    visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic'));
 
 let handler = {
@@ -55,6 +56,7 @@ let handler = {
             visitorModel.findOneAndUpdate({ipa:req.ip},{$bit:{status:{xor:1}}},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
                 if(doc &&!err)
                     result.variables.visitorId = doc._id;
+                __renderIndex(req,res,result);
             });
         }
         else
