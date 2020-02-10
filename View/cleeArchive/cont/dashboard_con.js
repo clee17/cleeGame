@@ -64,7 +64,7 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
         let sl = document.getElementById('userPageContents');
         if(main.offsetHeight < sl.scrollHeight)
         {
-            main.style.minHeight = sl.scrollHeight+50+'px';
+            main.style.minHeight = sl.scrollHeight+'px';
         }
     };
 
