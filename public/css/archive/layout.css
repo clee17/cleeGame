@@ -166,6 +166,7 @@ input{
     color:rgba(108,95,93,255);
     font-family: SimSun-ExtB, Arial, "Microsoft YaHei UI", serif;
     height:auto;
+    overflow:hidden;
 }
 
 #footer{
