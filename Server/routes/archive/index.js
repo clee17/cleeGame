@@ -18,7 +18,8 @@ global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
-    };
+    }
+    renderPage.modules.push('/view/modules/errorBox.js');
     if(req.session.user)
         renderPage.userId = req.session.user._id;
     else
@@ -78,6 +79,7 @@ let  main = require(path.join(__routes,"/archive/main")),
      search = require(path.join(__routes,"/archive/search")),
      edit = require(path.join(__routes,"/archive/edit")),
      fanfic = require(path.join(__routes,"/archive/fanfic"));
+     feedback = require(path.join(__routes,"/archive/feedback"));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
@@ -125,6 +127,10 @@ router.post('/fanfic/post/deleteComment',fanfic.deleteComment);
 router.post('/fanfic/post/like',fanfic.likePost);
 router.post('/fanfic/post/bookmark',fanfic.bookmarkPost);
 router.post('/fanfic/post/comment',fanfic.commentPost);
+
+//feedback
+router.post('/feedback/request',feedback.request);
+
 //index
 router.post('/search/all',search.all);
 

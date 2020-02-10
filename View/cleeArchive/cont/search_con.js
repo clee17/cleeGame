@@ -1,16 +1,25 @@
 
-app.controller("searchCon",function($scope,$rootScope,searchManager){
+app.controller("searchCon",function($scope,$rootScope,$timeout,searchManager){
 
    $scope.searching = true;
    $scope.showErr = false;
    $scope.err = '';
    $scope.receivedList = [];
-   console.log($rootScope.readerId);
+
+   let resetHeight = function(){
+      let main = document.getElementById('main');
+      let sl = document.getElementById('searchList');
+      if(main.offsetHeight < sl.scrollHeight)
+      {
+         main.style.minHeight = sl.scrollHeight+'px';
+      }
+   };
 
    $scope.$on('searchFinished',function(event,data){
       $scope.searching = false;
       if(data.success){
          $scope.receivedList = data.result;
+         $timeout(resetHeight,100);
       }
       else{
          $scope.showErr = true;
@@ -19,5 +28,7 @@ app.controller("searchCon",function($scope,$rootScope,searchManager){
    });
 
    searchManager.searchAll({searchType:$rootScope.searchType});
+
+
 
 });

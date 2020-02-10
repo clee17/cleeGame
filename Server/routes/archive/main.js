@@ -1,6 +1,7 @@
 let express = require('express'),
     path = require('path'),
     crypto = require('crypto'),
+    mongoose = require('mongoose'),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
@@ -26,7 +27,7 @@ let handler = {
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
         viewPortMap.set('/fanfic',{viewport:'/view/fanficSearch.html',
-            modules:['/view/modules/workInfo.js'],
+            modules:['/view/modules/workInfo.js','/view/modules/commentList.js'],
             styles:['archive/user'],
             controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
@@ -53,8 +54,8 @@ let handler = {
                 __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');
         }
         else if(req.url ==='/fanfic' && !req.session.user){
-            visitorModel.findOneAndUpdate({ipa:req.ip},{$bit:{status:{xor:1}}},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
-                if(doc &&!err)
+            visitorModel.findOneAndUpdate({ipa:req.ip},{},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
+                if(doc && !err)
                     result.variables.visitorId = doc._id;
                 __renderIndex(req,res,result);
             });
@@ -112,30 +113,45 @@ let handler = {
     },
 
     fanficDetail:function(req,res,next,fileName){
-        let readerId = req.session.user? req.session.user._id :  null;
-        let data = {book:null,chapter:null,index:null,codeMatch:false,readerId:readerId};
+        let readerId = req.session.user? req.session.user._id :  req.ip;
+        let data = {book:null,chapter:null,index:null,codeMatch:false,readerId:readerId,sent:false};
         let noRes = null;
-        let sent = false;
+        let visitorId = '';
+
+        if(!req.session.user)
+            visitorModel.findOneAndUpdate({ipa:req.ip},{},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
+                if(doc &&!err)
+                    visitorId = doc._id;
+            });
 
         let finalSend = function(){
-            if(sent)
+            if(data.sent)
                 return;
-            sent = true;
+
+            data.visitorId = visitorId;
+            if(!req.session.user && visitorId.length==0)
+            {
+                let to  = setTimeout(finalSend,100);
+                return;
+            }
+            data.readerId = readerId;
+
+            data.sent = true;
             if(data.index &&  data.index.length && data.book)
             {
-                if(data.index.length == 1 && data.book.status == 0)
+                if(data.index.length === 1 && data.book.status === 0)
                     data.title = data.book.title;
                 else
                 {
-                    data.title = __chapterCount(data.currentIndex.order)+'    ' +data.chapter.title;
+                    data.title = __chapterCount(data.chapter.order)+'    ' +data.chapter.title;
                 }
             }
 
             if(noRes)
                 __renderError(req,res,noRes.message);
-            else if(data.chapter && data.chapter.lockType == 1 && !req.session.user)
+            else if(data.chapter && data.chapter.lockType === 1 && !req.session.user)
                 __renderError(req,res,'该作者为文章设置了站内可见，您必须成为注册用户才能阅览该文章');
-            else if(data.chapter && data.chapter.lockType == 2)
+            else if(data.chapter && data.chapter.lockType === 2)
                 __renderError(req,res,'该作者设置该文章为仅自己可见，您无法阅读该文章。');
             else if(!data.fanfic_grade)
                 __renderError(req,res,'后台网站设置出错，请联系管理员');
@@ -145,60 +161,125 @@ let handler = {
 
         if(!fileName.match(/^[0-9a-fA-F]{24}$/)){
             __renderError(req,res,'您输入的不是正确的文章目录网址，无法搜索');
-            sent = true;
+            data.sent = true;
             return;
         }
 
-        indexModel.findOne({chapter:fileName}).populate([{path:'work'},{path:'prev next',select:'_id title published'},{path:'chapter',select:'passcode published'}]).exec()
-            .then(function(doc){
-                if(!doc)
-                    throw '数据库中没有该章节';
-                if(!doc.chapter || !doc.chapter.published)
-                    throw '该章节还没有被发布，您无法阅览';
-                data.book = JSON.parse(JSON.stringify(doc.work));
-                data.currentIndex = JSON.parse(JSON.stringify(doc));
-                if(doc.chapter && doc.chapter.passcode.use)
+        let finalProcess = function(doc){
+            let copyData =JSON.parse(JSON.stringify(data));
+            data = JSON.parse(JSON.stringify(doc));
+            data.readerId = copyData.readerId;
+            data.sent = copyData.sent;
+            data.codeMatch = false;
+            if(doc.chapter && doc.chapter.passcode.use)
+            {
+                let md5 = crypto.createHash('md5');
+                let passCode =  md5.update(doc.chapter.passcode.code).digest('hex').toString();
+                passCode = '"'+passCode+'"';
+                if(passCode === req.cookies[doc.chapter._id])
+                    data.codeMatch = true;
+            }
+
+            redisClient.get('fanfic_grade',function(err,response){
+                if(!err && response)
                 {
-                    let md5 = crypto.createHash('md5');
-                    let passCode =  md5.update(doc.chapter.passcode.code).digest('hex').toString();
-                    if(passCode == req.cookies[doc.chapter._id])
-                        data.codeMatch = true;
+                    data.fanfic_grade =  JSON.parse(response);
+                    finalSend();
                 }
-                return chapterModel.findOneAndUpdate({_id:doc.chapter},{$inc:{visited:1}},{new: true}).populate('user','_id user group');
-            })
-            .then(function(doc){
-                data.chapter= JSON.parse(JSON.stringify(doc));
-                data.user = JSON.parse(JSON.stringify(doc.user));
-                return indexModel.find({work:data.book._id},null,{sort:{order: 1}}).populate('chapter','_id type title published').exec();
-            })
-            .then(function(docs){
-                if(!docs|| docs.length ==0)
-                    throw '没有这本作品的目录';
-                data.index =  JSON.parse(JSON.stringify(docs));
-                redisClient.get('fanfic_grade',function(err,response){
-                    if(!err && response)
-                    {
-                        data.fanfic_grade =  JSON.parse(response);
-                        finalSend();
-                    }
-                    else
-                       __readSettings(finalSend,data);
-                });
-            })
-            .catch(function(err){
-                console.log(err);
+                else
+                    __readSettings(finalSend,data);
+            });
+        };
+
+        let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
+        if(req.session.user)
+            likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
+        else {
+            likeModelMatch.$match.ipa = req.ip;
+            delete likeModelMatch.$match.$and;
+            likeModelMatch.$match.$expr = {$eq:["$work","$$work_id"]};
+        }
+
+        chapterModel.aggregate([
+            {$match:{_id:mongoose.Types.ObjectId(fileName)}},
+            {$lookup:{from:"work_index",as:"order",let:{chapter_id:"$_id"},pipeline:[
+                        {$match:{$expr:{$eq:["$chapter","$$chapter_id"]}}},
+                        {$project:{order:1,_id:1}},
+                    ]}},
+            {$unwind:"$order"},
+            {$set:{"order":"$order.order","indexId":"$order._id"}},
+            {$project:{chapter:"$$ROOT"}},
+            {$lookup:{from:"user",as:"user",let:{userId:"$chapter.user"},pipeline:[
+                        {$match:{$expr:{$eq:["$_id","$$userId"]}}},
+                        {$project:{_id:1,user:1,group:1}},
+                    ]}},
+            {$unwind:"$user"},
+            {$lookup:{from:'works',as:"book",localField:"chapter.book",foreignField:"_id"}},
+            {$unwind:"$book"},
+            {$lookup:{from:"work_index",as:"index",let:{workId:"$book._id"},pipeline:[
+                        {$match:{$expr:{$eq:["$work","$$workId"]}}},
+                        {$project:{prev:1,next:1,_id:1,chapter:1,order:1}},
+                    ]}},
+            {$unwind:"$index"},
+            {$lookup:{from:"work_chapters",as:"index.chapterInfo",let:{chapterId:"$index.chapter"},pipeline:[
+                        {$match:{$expr:{$eq:["$_id","$$chapterId"]}}},
+                        {$project:{published:1,title:1,visited:1,liked:1,comments:1,wordCount:1}},
+                    ]}},
+            {$unwind:"$index.chapterInfo"},
+            {$set:{"index.visited":"$index.chapterInfo.visited","index.published":"$index.chapterInfo.published",
+                    "index.title":"$index.chapterInfo.title","index.liked":"$index.chapterInfo.liked",
+                    "index.wordCount":"$index.chapterInfo.wordCount",
+                    "index.comments":"$index.chapterInfo.comments"}},
+            {$group:{
+                _id:"$_id",
+                index:{$push:"$index"},
+                book:{$first:"$book"},
+                user:{$first:"$user"},
+                chapter:{$first:"$chapter"}}},
+            {$set:{"book.visited":{$sum:"$index.visited"},"book.wordCount":{$sum:"$index.wordCount"}}},
+            {$lookup:{from:"post_like", let:{work_id:"$book._id",user_id:"$book.user"},as:"book.feedback",pipeline:[
+                        likeModelMatch,
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
+            {$lookup:{from:"post_comment", let:{work_id:"$book._id",chapter_id:"$chapter._id"},as:"chapterComment",pipeline:[
+                        {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}}],infoType:1}},
+                        {$sort:{date:-1}},
+                        {$limit:50},
+                        {$project:{work:0,chapter:0,infoType:0}}]}},
+            {$lookup:{from:"post_comment", let:{work_id:"$book._id",chapter_id:"$chapter._id"},as:"bookComment",pipeline:[
+                        {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}}],infoType:0}},
+                        {$sort:{date:-1}},
+                        {$limit:50},
+                        {$project:{work:0,chapter:0,infoType:0}}]}},
+            {$lookup:{from:"post_like", let:{work_id:"$book._id",user_id:"$book.user"},as:"likeList",pipeline:[
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
+                        {$limit:50},
+                        {$project:{status:1,type:1,userName:1,user:1}}]}},
+        ],function(err,doc){
+            if(err)
+            {
                 noRes = {message:err};
                 finalSend();
-            });
+            }
+            else{
+                if(doc.length>0)
+                   finalProcess(doc[0]);
+                else
+                {
+                    noRes = {message:"后端出错，请联系管理员"};
+                    finalSend();
+                }
+            }
+        });
     },
 
     validate:function(req,res,next){
         let sent = false;
-        let request = JSON.parse(req.body.request) || null;
+        let request = JSON.parse(req.body.data) || null;
+        console.log(request);
         let type = request.type || '-1';
         let index = req.params.fanficId;
 
-        let response = {status:0,code:null};
+        let response = {status:0,code:null,success:false,msg:''};
 
         let finalSend = function(){
             if(sent)
@@ -217,9 +298,15 @@ let handler = {
                         throw '数据库中没有这本书';
                     let md5 = crypto.createHash('md5');
                     let passCode =  md5.update(doc.passcode.code).digest('hex').toString();
+                    console.log(passCode);
+                    console.log(request.code);
                     if(request.code == passCode) {
                         response.code = passCode;
                         response.status = 1;
+                        response.success = true;
+                    }
+                    else{
+                        response.msg = '您输入的口令有误，请重新输入';
                     }
                     finalSend();
                 })

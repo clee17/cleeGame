@@ -393,6 +393,7 @@ let updateMessagePool = function(){
     calcAll();
 };
 
+
 switch(argv[2])
 {
     case 'setting':

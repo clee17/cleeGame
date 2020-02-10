@@ -110,18 +110,16 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.showFeedBack = false;
             scope.requestingFeed = false;
             scope.feedback = [];
-            scope.commentParent = null;
-            scope.currentComment = '';
             scope.type = Number(attr.type);
             scope.liked = false;
             scope.bookMarked = false;
-            scope.requestingComment = false;
+
             if (scope.item.work.feedback) {
                 let feedback = scope.item.work.feedback;
                 feedback.forEach(function (item) {
-                    if (item.type == 1)
+                    if (item.type === 1)
                         scope.liked = Boolean(item.status);
-                    else if (item.type == 2)
+                    else if (item.type === 2)
                         scope.bookMarked = Boolean(item.status);
                 })
             }
@@ -130,19 +128,14 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.workType = 1;
             if (scope.item.work.chapterCount <= 1 && scope.item.work.status == 0)
                 scope.workType = 0;
-            if (scope.item.infoType == 0)
+            if (scope.item.infoType === 0)
                 scope.item.user = scope.item.work.user;
             else
-                scope.item.user = scope.item.chapter.user;
+                scope.item.user = scope.item.chapter.user._id || scope.item.chapter.user;
+
             scope.type = Number(scope.type && scope.workType);
 
-
-            scope.getParentUser = function(parent){
-                     scope.item.commentList.forEach(function(comment){
-                         if(comment._id == parent)
-                             return comment.userName;
-                     })
-            };
+            scope.commentList = scope.item.commentList;
 
             scope.deleteItem = function () {
                 let alertInfo = [];
@@ -186,6 +179,21 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
                 scope.showFeedBack = !scope.showFeedBack;
             };
 
+            scope.initializeCommentData = function(){
+               scope.workId = scope.item.work._id;
+               scope.chapterId = scope.item.chapter._id;
+               scope.infoType = scope.item.infoType;
+               scope.targetUser = scope.item.chapter.user;
+               scope.userId = scope.item.user;
+            };
+
+            scope.updateCommentCount = function(data){
+                if (scope.item.infoType === 0)
+                    scope.item.work.comments = data.commentCount;
+                else if (scope.item.infoType === 1)
+                    scope.item.chapter.comments = data.commentCount;
+            };
+
             scope.updateFeedBackData = function (data) {
                 if (!data.user)
                     return;
@@ -206,47 +214,6 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
 
                 if(scope.feedback.length === 0)
                     scope.showFeedBack = false;
-            };
-
-            scope.deleteComment = function(comment){
-                let alertInfo = ["您是否确定要删除本条来自"+comment.userName+"的评论？"];
-                let data = {alertInfo: alertInfo};
-                data.signal = 'deleteComment' + scope.item.chapter._id + scope.item.infoType;
-                data.variables = {id:comment._id};
-                scope.$emit('showAlert', data);
-                scope.status = 8;
-            };
-
-            scope.deleteCommentById = function(commentId){
-                feedbackManager.deleteComment({_id:commentId,work:scope.item.work._id,chapter:scope.item.chapter._id,infoType:scope.item.infoType});
-            };
-
-            scope.sendComment = function () {
-                let matched = false;
-                if ($rootScope.readerId.match(/^[0-9a-fA-F]{24}$/))
-                    matched = true;
-                let error = null;
-                if (matched && scope.currentComment.length == 0)
-                    error = '作为注册用户，您的留言不能为空';
-                else if (!matched && scope.currentComment.length < 15)
-                    error = '作为非注册用户，您的留言不能少于15字';
-                if (error != null) {
-                    scope.$emit('showError', {error: error});
-                    return;
-                }
-                let data = {
-                    infoType: scope.item.infoType,
-                    contents: scope.currentComment,
-                    workId: scope.item.work._id,
-                    chapterId: scope.item.chapter._id,
-                    parent: scope.commentParent,
-                    targetUser: scope.item.chapter.user,
-                    necc: 'adw320931456t_e',
-                    readerId: $rootScope.readerId,
-                    visitorId: $rootScope.visitorId
-                };
-                feedbackManager.postComment(data);
-                scope.requestingComment = true;
             };
 
             scope.$on('likeFinished', function (event, data) {
@@ -270,68 +237,15 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
                 }
             });
 
-            scope.$on('commentFinished', function (event, data) {
-                scope.requestingComment = false;
-                if (scope.item.work._id !== data.work)
-                    return;
-                if (scope.item.infoType !== data.infoType)
-                    return;
-                if (data.chapter != null && data.chapter !== scope.item.chapter._id)
-                    return;
-                scope.currentComment = '';
-                if (data.success) {
-                    scope.item.commentList.unshift(data.doc);
-                    if (scope.item.infoType === 0)
-                        scope.item.work.comments = data.commentCount;
-                    else if (scope.item.infoType === 1)
-                        scope.item.chapter.comments = data.commentCount;
-                } else {
-                    console.log(data.message);
-                }
-            });
-
-            scope.$on('deleteCommentFinished',function(event,data){
-                if (scope.item.work._id !== data.work)
-                    return;
-                if (scope.item.chapter._id !== data.chapter)
-                    return;
-                if (scope.item.infoType !== data.infoType)
-                    return;
-                if(data.success)
-                {
-                    for(let i=0;i<scope.item.commentList.length;++i)
-                    {
-                        if(scope.item.commentList[i]._id === data._id)
-                        {
-                            scope.item.commentList.splice(i,1);
-                            break;
-                        }
-                    }
-                    console.log(data.commentCount);
-                    if (scope.item.infoType === 0)
-                        scope.item.work.comments = data.commentCount;
-                    else if (scope.item.infoType === 1)
-                        scope.item.chapter.comments = data.commentCount;
-                }
-                else
-                {
-                    console.log(data);
-                }
-            });
-
             scope.$on('tellYes', function (event, data) {
-                let index = [5,8];
-                if(index.indexOf(scope.status) == -1)
+                let index = [5];
+                if(index.indexOf(scope.status) === -1)
                     return;
                 if (scope.status === 5 && data.signal !== 'deleteChapter' + scope.item.chapter._id + scope.item.infoType)
-                    return;
-                if (scope.status === 8 && data.signal !== 'deleteComment' + scope.item.chapter._id + scope.item.infoType)
                     return;
                 let emitData = {infoType: scope.item.infoType, index: scope.item.index};
                 if (scope.status === 5)
                     scope.$emit('deleteReceivedList', emitData);
-                else if(scope.status === 8)
-                    scope.deleteCommentById(data.variables.id);
                 scope.status = 1;
             });
         }

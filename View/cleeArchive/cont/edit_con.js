@@ -937,7 +937,9 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        let initialize = function(){
            $scope.loadContent();
        };
-
+       let mainPanel = document.getElementById("main");
+       let editorPanel = document.getElementById("fanficEditor");
+       mainPanel.style.minHeight = (editorPanel.scrollHeight+350)+'px';
        initialize();
    });
 });

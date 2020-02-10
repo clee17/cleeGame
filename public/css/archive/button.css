@@ -52,7 +52,7 @@
     padding: 10px;
     margin-right:10px;
     height:90%;
-    min-width:4rem;
+    min-width:60px;
     letter-spacing:2px;
     font-size:14px;
     cursor:pointer;
@@ -88,3 +88,22 @@
 .back-button:hover{
     background:rgba(239,239,239,1);
 }
+
+.error-box{
+     min-height:2.5rem;
+     max-height:2.5rem;
+     height:auto;
+     margin-left:auto;
+     margin-right:auto;
+     min-width:10rem;
+     background:rgba(223,216,214,255);
+     border:5px solid rgba(181,163,160,218);
+     border-top:none;
+     transform:translateY(-100%);
+     line-height:2.5rem;
+     padding-left:15px;
+     padding-right:15px;
+     font-weight:bold;
+     font-size:16px;
+     color:rgba(108,95,93,255);
+ }

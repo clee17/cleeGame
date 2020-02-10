@@ -107,57 +107,33 @@
         color:orangered;
     }
 
-    .commentInfo{
+    .feedbackInfo{
         border-top:1px solid rgba(205,205,205,255);
         box-shadow:0px 0px 8px rgba(215,215,215,188) inset;
-        flex:1;
-        margin:0;
-        display:flex;
-        flex-direction:column;
         min-height:2rem;
     }
 
-    .commentInfo >div{
+    .feedbackInfo >div{
         padding-left:40px;
+        min-height:2rem;
+        border-bottom:1px solid rgba(205,205,205,255);
+        margin-left:0;
         display:flex;
         flex-direction:column;
-        min-height:2rem;
     }
 
-    .commentInfo >div:nth-last-child(n+3){
-        border-bottom:1px solid rgba(205,205,205,255);
-    }
-
-    .commentInfo >div >div{
+    .feedbackInfo >div >div{
         margin-top:auto;
         margin-bottom:auto;
-        display:flex;
-        flex-direction:row;
     }
 
-    .comment-window{
-        resize:none;
-        width:85%;
-        border:1px solid rgba(195,195,195,255);
-        margin-right:20px;
-        box-shadow:0px 0px 6px rgba(215,215,215,188) inset;
-        padding:10px;
-        height:2rem;
-        color:rgba(108,95,93,255);
+
+    .feedbackInfo >div:last-child{
+        border-bottom:none;
     }
 
-    .comment-edit{
-        padding-right:20px;
-    }
-
-    .comment-edit >button{
-        margin-right:10px;
-        margin-left:0px;
-    }
-
-    .comment-edit >button:first-child{
-        margin-right:10px;
-        margin-left:auto;
+    .feedbackEntry {
+        margin-left:40px;
     }
 
     .feedbackEntry a{
@@ -224,8 +200,9 @@
         <button ng-class="{'editButton':!bookMarked,'likedButton':bookMarked}" ng-show="item.work.user != readerId" ng-click="bookMarkIt()"><span ng-show="bookMarked">已收藏</span><span ng-show="!bookMarked">收藏</span>({{item.work.bookmarked}})</button>
         <button class="editButton" ng-click="showCommentList()">评论(<span ng-show="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
     </div>
-    <div ng-show="showFeedBack" class="commentInfo work-info-outer">
-        <div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有{{item.work.visitorLiked}}名游客点赞了您</div>
+    <div ng-show="showFeedBack" class="feedbackInfo work-info-outer">
+        <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有<b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b>名游客点赞了您</div></div>
+        <div style="min-height:15px;" ng-show="feedback.length>0"></div>
         <div ng-repeat="feedback in feedback">
            <div class="feedbackEntry"><a href="{{'/users/'+feedback.user}}" target="_blank">{{feedback.userName}}</a> <span ng-if="feedback.type==1">点赞了</span><span ng-if="feedback.type==2">收藏了</span>此作品</div>
         </div>
@@ -235,23 +212,7 @@
             <div style="margin-top:auto;margin-bottom:15px;"><button class="editButton" style="margin-right:auto;margin-left:0" ng-click="showFeedbackList()">收起 <i class="fas fa-angle-up"></i></button></div>
         </div>
     </div>
-    <div ng-show="showComment" class="commentInfo work-info-outer">
-        <div style="margin-top:10px;margin-bottom:15px;border-bottom:none;" >
-           <div> <textarea class="comment-window" ng-model="currentComment" ng-disabled="requestingComment"></textarea><button class="grand-button" ng-click="sendComment()"><div>发送</div></button> </div>
-        </div>
-        <div ng-repeat="comment in item.commentList" style="display:flex;flex-direction:row;">
-            <div style="flex:1;padding-top:15px;padding-bottom:15px;">
-             <a style="margin-right:15px;margin-left:5px;display:inline-block;" href="{{'/users/'+comment.user}}" ng-show="comment.user!=null" target="_blank">{{comment.userName}}</a>
-             {{comment.contents}}
-            </div>
-            <div class="comment-edit">
-                <button class="editButton">回复</button>
-                <button ng-show="item.work.user === readerId" class="editButton" ng-click="deleteComment(comment)">删除</button>
-            </div>
-        </div>
-        <div style="min-height:3rem;" ng-show="comments.length>15">
-            <div style="margin-top:auto;margin-bottom:15px;"><button class="editButton" style="margin-right:auto;margin-left:0" ng-click="showCommentList()">收起 <i class="fas fa-angle-up"></i></button></div>
-        </div>
+    <div ng-show="showComment" class="feedbackInfo work-info-outer">
+        <comment-info></comment-info>
     </div>
-
 </div>

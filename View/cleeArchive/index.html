@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="/css/archive/button.css">
     <link rel="stylesheet" href="/css/animation.css">
 
-    <script src="https://unpkg.com/pure-md5@latest/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js"></script>
 
     <script>var app = angular.module('cleeArchive',[]);</script>
     <script src="/service/userService.js"></script>
@@ -44,12 +44,18 @@
             $scope.alertInfo = '';
             $scope.alertData = null;
             $scope.showAlert = false;
+            $scope.showError = false;
 
             $scope.$on('showAlert',function(event,data){
                 $scope.showAlert = true;
                 $scope.alertInfo =  data.alertInfo || '';
                 $scope.signal = data.signal || '';
                 $scope.alertData = data.variables;
+            });
+
+            $scope.$on('showError',function(event,data){
+                $scope.showError = true;
+                $scope.$broadcast('showErrorText',data);
             });
 
 
@@ -153,9 +159,11 @@
 <style>
 </style>
 <body ng-app="cleeArchive" ng-controller="entryCon" style="display:flex;flex-direction:column;">
-<div ng-show="showAlert" style="position:fixed;z-index:99;left:0;top:0;width:100%;height:100%;display:flex;">
-    <div style="position:fixed;left:0;top:0;width:100%;height:100%;background:black;opacity:0.75;z-index:0"></div>
-    <div class="alert">
+<div ng-show="showAlert || showError" style="position:fixed;z-index:99;left:0;top:0;width:100%;height:100%;display:flex;pointer-events:none;">
+    <div class="error-box" ng-show="showError">
+    </div>
+    <div style="position:fixed;left:0;top:0;width:100%;height:100%;background:black;opacity:0.75;z-index:0" ng-show="showAlert"></div>
+    <div class="alert" ng-show="showAlert">
         <div><div style="padding-top:3px;">提示信息</div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
         <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;"></div>
         <div ng-repeat="info in alertInfo">{{info}}</div>
@@ -203,7 +211,7 @@
 <div id="main" ng-include="'<%= viewport %>'">
 </div>
 
-<div id="footer">
+<div id="footer" style="margin-top:0">
     <div id="publication" class="board" style="margin-left:auto;">
         <div class="headline">网站信息</div>
         <div><a>网站地图</a></div>

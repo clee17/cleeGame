@@ -34,7 +34,7 @@ app.directive('infoReceiver',function($rootScope){
 });
 
 
-app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficManager){
+app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficManager,$timeout){
     $scope.contentsLoaded = false;
 
     $scope.alertInfo = '';
@@ -68,6 +68,11 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
             $scope.pageMax = Math.ceil($scope.maxLimit / 10);
             if($scope.pageMax == 0)
                 $scope.pageMax += 1;
+            $timeout(function(){
+                let mainPanel = document.getElementById('main');
+                let pagePanel = document.getElementById('userPageContents');
+                mainPanel.style.minHeight = (pagePanel.scrollHeight+50)+'px';
+            },100);
         }
         else
         {

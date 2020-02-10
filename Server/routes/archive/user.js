@@ -95,7 +95,7 @@ let handler = {
                     title:response.userInfo.user+'的主页',
                     controllers:['/view/cont/dashboard_con.js'],
                     styles:['archive/user'],
-                    modules:['/view/modules/workInfo.js'],
+                    modules:['/view/modules/workInfo.js','/view/modules/commentList.js'],
                     services: ['/view/cont/userService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
                     variables:{userId:response.userInfo._id,readerId:response.readerId, query:query, visitorId:response.visitorId}});
             else
@@ -212,11 +212,14 @@ let handler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
 
-        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
         if(req.session.user)
             likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
-        else
-            likeModelMatch.$match.ipa  = req.ip;
+        else {
+            likeModelMatch.$match.ipa = req.ip;
+            delete likeModelMatch.$match.$and;
+            likeModelMatch.$match.$expr = {$eq:["$work","$$work_id"]};
+        }
 
        if(tagName)
            tagName  = unescape(tagName);
@@ -242,7 +245,7 @@ let handler = {
                                 likeModelMatch,
                                 {$project:{status:1,type:1,userName:1,user:1}}]}},
                     {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"work.feedbackAll",pipeline:[
-                                {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                                {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
                                 {$limit:15},
                                 {$project:{status:1,type:1,userName:1,user:1}}]}},
                     {$lookup:{from:'work_index',localField:"chapter._id",foreignField:"chapter",as:"index"}},
@@ -316,11 +319,14 @@ let handler = {
         if(data.type && data.type == 1)
             response.maxLimit = data.userSetting.workCount.maxChaptersCount || 0;
 
-        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
         if(req.session.user)
             likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
-        else
-            likeModelMatch.$match.ipa  = req.ip;
+        else {
+            likeModelMatch.$match.ipa = req.ip;
+            delete likeModelMatch.$match.$and;
+            likeModelMatch.$match.$expr = {$eq:["$work","$$work_id"]};
+        }
 
         worksModel.aggregate([
             {$match:{user:mongoose.Types.ObjectId(data.userId),type:{$lte:10},published:true}},
@@ -329,7 +335,7 @@ let handler = {
                         likeModelMatch,
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedbackAll",pipeline:[
-                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
                         {$limit:15},
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$project:{work:"$$ROOT"}},
@@ -410,11 +416,14 @@ let handler = {
 
         response.maxLimit = data.maxMsgCount || 0;
 
-        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
-        if(readerId)
-            likeModelMatch.$match.user = readerId;
-        else
-            likeModelMatch.$match.ipa  = req.ip;
+        let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
+        if(req.session.user)
+            likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
+        else {
+            likeModelMatch.$match.ipa = req.ip;
+            delete likeModelMatch.$match.$and;
+            likeModelMatch.$match.$expr = {$eq:["$work","$$work_id"]};
+        }
 
         worksModel.aggregate([
             {$match:{user:data.userId,published:true,type:{$lt:100}}},
@@ -422,7 +431,7 @@ let handler = {
                         likeModelMatch,
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$lookup:{from:"post_like", let:{work_id:"$_id",user_id:"$user"},as:"feedbackAll",pipeline:[
-                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
                         {$limit:15},
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$facet:{

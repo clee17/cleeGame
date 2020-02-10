@@ -36,6 +36,7 @@ a{
     webkitUserSelect:'none';
     msUserSelect:'none';
     mozeUserSelect:'none';
+    cursor:pointer;
 }
 
 .fadeLink:hover{
@@ -133,6 +134,20 @@ h2 >span >span{
     margin-left:-3px;
 }
 
+#guideBar >div:first-child{
+    margin-right:auto;
+    margin-left:0;
+}
+
+#guideBar >div:nth-last-child(2){
+    margin-left:auto;
+    margin-right:0;
+}
+
+.chapterJumberH{
+    min-width:4rem;
+}
+
 #guideBar a{
     color:white;
     text-decoration:none;
@@ -181,7 +196,6 @@ h2 >span >span{
 }
 
 #infoScroll{
-    display:none;
     min-height:5rem;
     height:calc(100% - 5rem);
     width:100%;
@@ -237,6 +251,7 @@ h2 >span >span{
     padding:2rem;
     padding-left:1rem;
     padding-right:1rem;
+    padding-bottom:0;
     width:100%;
     margin-top:3.5rem;
     flex:1;
@@ -321,8 +336,10 @@ h2 >span >span{
 
 .requestForm{
     margin:auto;
+    margin-top:0;
     display:flex;
     flex-direction:column;
+    padding-bottom:8rem;
 }
 
 .requestForm >div{
@@ -365,7 +382,7 @@ h2 >span >span{
 }
 
 .grade{
-    display:block;
+    display:inline-block;
     width:auto;
     border-radius:15px;
     padding-left:10px;
@@ -406,6 +423,122 @@ h2 >span >span{
     margin-left:1rem;
 }
 
+#feedbackRow{
+    display:flex;
+    flex-direction:row;
+    padding-top:10px;
+    min-height:1.5rem;
+    height:1.5rem;
+    max-height:1.5rem;
+    min-width:35rem;
+    margin-left:auto;
+    margin-right:auto;
+    margin-bottom:0;
+    border-top:1px solid rgba(180,180,180,255);
+}
+
+#arrowRow{
+    min-width:35rem;
+    margin-left:auto;
+    margin-right:auto;
+    display:flex;
+    flex-direction:row;
+    padding:0;
+    height:1.5rem;
+    min-height:1.5rem;
+    max-height:1.5rem;
+    overflow:hidden;
+}
+
+#arrowRow >div{
+    margin-left:0;
+    transition:transform 1s ease-in-out;
+    transform:translateX(-100%);
+}
+
+.feedbackButton{
+    border:none;
+    background:none;
+    margin-right:10px;
+    margin-left:0;
+    color:rgba(108,95,93,255);
+    cursor:pointer;
+}
+
+.likedButton{
+    color:darkred;
+    font-weight:bold;
+    background:none;
+    cursor:pointer;
+    border:none;
+    margin-left:15px;
+}
+
+.likedButton:hover{
+    color:orangered;
+}
+
+.feedbackButton:hover{
+    color:rgba(190,150,124,1);
+}
+
+#feedbackRow button:first-child{
+    margin-left:auto;
+}
+
+#feedback{
+    box-shadow:0px 0px 8px rgba(215,215,215,188) inset;
+    background:rgba(240,240,240,0.3);
+    pointer-events:none;
+    min-height:35rem;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+
+.feedback-content{
+    width:75%;
+    margin-left:auto;
+    margin-right:auto;
+    pointer-events:auto;
+    max-width:48rem;
+    height:auto;
+}
+
+.feedback-content >div{
+    padding-left:40px;
+    min-height:2rem;
+    border-bottom:1px solid rgba(205,205,205,255);
+    margin-left:0;
+    display:flex;
+    flex-direction:column;
+}
+
+.feedback-content >div >div{
+    margin-top:auto;
+    margin-bottom:auto;
+    display:inline-block;
+}
+
+.feedback-content >div:last-child{
+      border-bottom:none;
+}
+
+.feedbackEntry a{
+    margin-right:10px;
+    text-decoration:none;
+    color:rgba(158,142,166,255);
+    font-weight:bold;
+}
+
+.feedbackEntry a:hover{
+    margin-right:10px;
+    text-decoration:none;
+    color:rgba(139,100,127,255);
+}
+
+.clear{display: block;clear: both;}
 
 @media screen and (min-device-width:80rem){
     body {
@@ -471,7 +604,6 @@ h2 >span >span{
 
     #guideBar >div:nth-child(1){
         margin-left:0;
-        margin-top:15px;
     }
 
     #guideBar >div:nth-child(odd){
@@ -514,6 +646,22 @@ h2 >span >span{
         color:inherit;
     }
 
+    .chapterJumper {
+        min-height:4rem;
+    }
+
+
+    #guideBar >div:last-child{
+        margin-bottom:0;
+        margin-top:auto;
+    }
+
+    #guideBar >div:nth-child(2){
+        margin-top:0;
+        margin-bottom:2rem;
+    }
+
+
     .chapter{
         font-size:28px;
     }
@@ -529,8 +677,7 @@ h2 >span >span{
     #infoScroll{
         height:100vh;
         min-width:15rem;
-        width:10rem;
-        display:none;
+        width:15rem;
         top:0;
         left:2.5rem;
     }
@@ -538,7 +685,6 @@ h2 >span >span{
     .scrollButton:nth-child(odd){
         display:block;
     }
-
 
     .scrollButton:nth-child(even){
         display:none;
@@ -602,11 +748,21 @@ h2 >span >span{
     #bookInfo >div >div{
         display:flex;
         flex-direction:column;
-
     }
 
     .end{
         font-size:24px;
+    }
+
+
+    #feedback{
+        margin-top:-3.6rem;
+        margin-left:-4rem;
+        width:calc(100% + 8rem);
+        min-height:35rem;
+        height:auto;
+        padding-left:4rem;
+        display:inline-block;
     }
 
 }

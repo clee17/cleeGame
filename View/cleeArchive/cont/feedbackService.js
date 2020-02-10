@@ -3,17 +3,18 @@ app.service('feedbackManager',function($http,$rootScope){
         $http.post('/fanfic/post/like',{data:LZString.compressToBase64(JSON.stringify(postData))})
             .then(function(response){
                     let data = JSON.parse(LZString.decompressFromBase64(response.data));
+                    data.work = postData.work;
                     $rootScope.$broadcast('likeFinished',data);
                 },
                 function(err){
                     let data = {message:'网络通信错误，请刷新页面尝试',success:false};
                     data.work = postData.work;
-                    $rootScope.$broadcast('bookmarkFinished',data);
+                    $rootScope.$broadcast('likeFinished',data);
                 });
     };
 
     this.bookMarkIt = function(postData){
-        $http.post('fanfic/post/bookmark',{data:LZString.compressToBase64(JSON.stringify(postData))})
+        $http.post('/fanfic/post/bookmark',{data:LZString.compressToBase64(JSON.stringify(postData))})
             .then(function(response){
                     let data = JSON.parse(LZString.decompressFromBase64(response.data));
                      data.work = postData.work;
@@ -65,16 +66,19 @@ app.service('feedbackManager',function($http,$rootScope){
     };
 
 
-    this.requestFeedback = function(data){
-        $http.post('/feedback/request',{data:LZString.compressToBase64(JSON.stringify(data))})
+    this.requestFeedback = function(postData){
+        $http.post('/feedback/request',{data:LZString.compressToBase64(JSON.stringify(postData))})
             .then(function(response){
+                    data.work = postData.work;
+                    data.chapter = postData.chapter;
                     let data = JSON.parse(LZString.decompressFromBase64(response.data));
                      $rootScope.$broadcast('feedbackRequestFinished',data);
                 },
                 function(err){
-                    $rootScope.$broadcast('feedbackRequestFinished',{message:'网络通信错误，请刷新页面尝试',success:false});
+                    let data =  {message:'网络通信错误，请刷新页面尝试',success:false};
+                    data.work = postData.work;
+                    data.chapter = postData.chapter;
+                    $rootScope.$broadcast('feedbackRequestFinished',data);
                 });
     };
-
-
 });

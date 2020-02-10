@@ -8,6 +8,7 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic')),
     updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates')),
+    visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap'));
 
 let handler = {
@@ -40,11 +41,14 @@ let handler = {
             response.info = msg;
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
-        let likeModelMatch = {$match:{$expr:{$eq:["$work","$$work_id"],$eq:["$targetUser","$$user_id"]},status:1}};
+        let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
         if(req.session.user)
             likeModelMatch.$match.user = mongoose.Types.ObjectId(req.session.user._id);
-        else
-            likeModelMatch.$match.ipa  = req.ip;
+        else {
+            likeModelMatch.$match.ipa = req.ip;
+            delete likeModelMatch.$match.$and;
+            likeModelMatch.$match.$expr = {$eq:["$work","$$work_id"]};
+        }
         let queryChapter =  [
                 {$match:{infoType:1}},
                 {$lookup:{from:"work_chapters",as:"chapter",let:{chapterId:"$contents"},pipeline:[
@@ -63,7 +67,7 @@ let handler = {
                         likeModelMatch,
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
                 {$lookup:{from:"post_like", let:{work_id:"$work._id",user_id:"$user"},as:"work.feedbackAll",pipeline:[
-                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
                         {$limit:15},
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
                 {$lookup:{from:"work_index", foreignField:"chapter",localField:"chapter._id",as:"index"}},
@@ -80,7 +84,7 @@ let handler = {
                         likeModelMatch,
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$lookup:{from:"post_like", let:{work_id:"$work._id"},as:"work.feedbackAll",pipeline:[
-                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$not:{$eq:[null,"$user"]}}}},
+                        {$match:{$expr:{$eq:["$work","$$work_id"]},status:1,user:{$ne:null}}},
                         {$limit:15},
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$lookup:{from:"work_index",as:"index",let:{workId:"$work._id"},pipeline:[

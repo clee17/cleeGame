@@ -1,10 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<style>
+    .comment-info {
+        flex:1;
+        margin:0;
+        display:flex;
+        width:100%;
+        flex-direction:column;
+    }
+
+    .comment-info >div{
+        padding-left:40px;
+        display:flex;
+        flex-direction:column;
+        min-height:2rem;
+    }
+
+    .comment-info >div:nth-last-child(n+3){
+        border-bottom:1px solid rgba(205,205,205,255);
+    }
+
+    .comment-info >div >div{
+        margin-top:auto;
+        margin-bottom:auto;
+        display:flex;
+        flex-direction:row;
+    }
+
+    .comment-window{
+        resize:none;
+        width:85%;
+        border:1px solid rgba(195,195,195,255);
+        margin-right:20px;
+        box-shadow:0px 0px 6px rgba(215,215,215,188) inset;
+        padding:10px;
+        height:28px;
+        color:rgba(108,95,93,255);
+        z-index:80;
+    }
+
+    .comment-edit{
+        padding-right:20px;
+    }
+
+    .comment-edit >button{
+        margin-right:10px;
+        margin-left:0;
+    }
+
+    .comment-edit >button:first-child{
+        margin-right:10px;
+        margin-left:auto;
+    }
+</style>
+
+<div class="comment-info">
+    <div style="margin-top:10px;margin-bottom:15px;border-bottom:none;" >
+        <div style="position:relative;"><textarea style="position:absolute;width:85%;left:0;right:90px;padding:10px;height:28px;z-index:79;opacity:0;" ng-model="comment" id="shadowBox"></textarea>
+            <textarea class="comment-window" ng-model="comment" ng-disabled="requestingComment"></textarea>
+            <button class="grand-button" ng-click="sendComment()"><div>发送</div></button>
+        </div>
+    </div>
+    <div ng-repeat="comment in commentList" style="display:flex;flex-direction:row;">
+        <div style="flex:1;padding-top:15px;padding-bottom:15px;display:inline-block;word-break:break-all;">
+            <a style="margin-right:15px;margin-left:5px;display:inline-block;" href="{{'/users/'+comment.user}}" ng-show="comment.user!=null" target="_blank">{{comment.userName}}</a>
+            <span ng-show="comment.user === null" style="font-weight:bold;margin-right:25px;">{{comment.userName}}</span><span>{{comment.contents}}</span>
+        </div>
+        <div class="comment-edit">
+            <button class="editButton">回复</button>
+            <button ng-show="userId == readerId" class="editButton" ng-click="deleteComment(comment)">删除</button>
+        </div>
+    </div>
+    <div style="min-height:3rem;" ng-show="list.length>15">
+        <div style="margin-top:auto;margin-bottom:15px;"><button class="editButton" style="margin-right:auto;margin-left:0" ng-click="showCommentList()">收起 <i class="fas fa-angle-up"></i></button></div>
+    </div>
+</div>

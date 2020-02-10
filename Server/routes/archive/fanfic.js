@@ -178,7 +178,7 @@ let handler = {
             let step = result.status? 1 : -1;
             let updateQuery = {$inc:{liked:step}};
             if(!user)
-                updatedQuery.$inc.visitorLiked = step;
+                updateQuery.$inc.visitorLiked = step;
             worksModel.findOneAndUpdate({_id:postData.work},updateQuery,{new:true},function(err,doc){
                 if(err)
                 {
@@ -289,6 +289,7 @@ let handler = {
        let validateList = ['infoType','contents','workId','chapterId','targetUser','necc','readerId','visitorId','parent'];
        if(req.session.user)
            validateList.splice(validateList.indexOf('visitorId'),1);
+
        for(let i=0; i<validateList.length;++i)
        {
            if(postData[validateList[i]] === undefined)
@@ -299,6 +300,8 @@ let handler = {
                return;
            }
        }
+
+       console.log(' post data validation');
        if(!postData.necc || postData.necc != 'adw320931456t_e')
        {
            result.message = 'not valid visitor';
@@ -306,6 +309,7 @@ let handler = {
            return;
        }
 
+       console.log(' session user validation');
        if(!req.session.user && !__validateId(postData.visitorId))
        {
            result.message = 'not valid visitor';
@@ -361,7 +365,13 @@ let handler = {
            writeComment({type:1,user:req.session.user});
        else
            visitorModel.findById({_id:postData.visitorId},function(err,doc){
+               if(!err)
                       writeComment({type:2,ipa:doc.ipa});
+               else
+               {
+                   result.message = '不是有效的游客，请刷新页面';
+                   handler.finalSend(res,result);
+               }
            })
 
 
