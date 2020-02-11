@@ -129,7 +129,7 @@
                             <div style="margin-left:0;margin-top:auto;margin-bottom:auto;margin-right:auto;">您的订阅</div>
                         </div>
                         <div style="min-height:3rem;display:flex;flex-direction:column;padding-bottom:10px;">
-                            <waiting-anim ng-show="requesting" ></waiting-anim>
+                            <img src="/img/loading.gif" style="width:22px;height:22px;">
                             <div ng-show="initialized && list.length==0 && !requesting" style="margin-top:auto;margin-bottom:auto;margin-left:auto;margin-right:auto;font-weight:bold;">
                                 暂无订阅
                             </div>
@@ -137,7 +137,7 @@
                     </div>
                     <div class="feedBoard" style="margin-left:10px;margin-top:20px;">
                         <div ng-show="!updated" style="display:flex;flex-direction:row;">
-                            <div style="margin-left:auto;"><waiting-anim style="width:50px;height:50px;"></waiting-anim></div>
+                            <div style="margin-left:auto;"><img src="/img/loading.gif" style="width:22px;height:22px;"></div>
                             <div style="margin-left:1rem;width:6rem;margin-right:auto;font-weight:bold;margin-top:auto;margin-bottom:auto;">加载您的订阅</div>
                         </div>
                         <div ng-show="err && updated" style="font-weight:bold;display:flex;flex-direction:row;">

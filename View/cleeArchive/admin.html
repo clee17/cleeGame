@@ -44,7 +44,7 @@
     <div ng-show="!requested && !requesting" style="display:flex;flex:1;">
         <div style="margin:auto;text-align:center;font-weight:bold;">请先获取列表</div>
     </div>
-    <waiting-anim ng-show="requesting"></waiting-anim>
+    <img src="/img/loading.gif" style="width:22px;height:22px;" ng-show="requesting">
     <div ng-show="err && err!= ''">{{err}}</div>
 
     <div ng-show="requested" style="flex:1;display:flex;flex-direction:column;width:80%;margin-left:auto;margin-right:auto;margin-top:1rem;">
