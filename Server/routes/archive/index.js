@@ -176,7 +176,6 @@ module.exports = function(app)
 {
     app.use('*',function(req,res,next){
         let ip = req.ip;
-        ip = '101.85.4.25';
         if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
             req.ipData = ipSearcher.search(ip);
         next();
