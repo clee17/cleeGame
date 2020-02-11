@@ -159,7 +159,6 @@ let handler = {
                     'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
                     'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
                     'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
-            res.render('cleeArchive/index.html',renderInfo);
 
             if(noRes)
                 __renderError(req,res,noRes.message);
