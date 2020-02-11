@@ -18,7 +18,7 @@ global.__chapterCount = function(index){
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
-    if(req.ipData.country == '中国')
+    if(req.ipData && req.ipData.country == '中国')
         renderPage.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
