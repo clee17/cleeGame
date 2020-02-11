@@ -1,4 +1,5 @@
 let express = require('express'),
+    request = require('request'),
     path = require('path');
 
 let fs = require('fs');
@@ -16,6 +17,18 @@ global.__chapterCount = function(index){
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
+    if(req.country_id == 'CN')
+        renderPage.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+            'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
+            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+    else
+          renderPage.lib = ['https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js',
+            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
     }
@@ -32,6 +45,18 @@ global.__renderError = function(req,res,errMessage){
       if(req.session.user)
           userId = req.session.user._id;
       let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
+    if(req.country_id == 'CN')
+        renderInfo.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+            'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
+            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+    else
+        renderInfo.lib = ['https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js',
+            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
       res.render('cleeArchive/index.html',renderInfo);
 };
 
@@ -148,6 +173,25 @@ router.get('/dynamic/*',function(req,res){
 
 module.exports = function(app)
 {
+    app.use('*',function(req,res,next){
+        let ip = req.ip;
+        ip = '101.85.4.25';
+        if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
+        {
+            request('http://ip.taobao.com/service/getIpInfo.php?ip='+ip, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    {
+                        let result = JSON.parse(response.body);
+                        req.country_id = result.data.country_id;
+                    }
+                }
+                next();
+            });
+        }
+        else
+            next();
+    });
+
     app.use('*',function(req,res,next){
         if(!req.session.user)
         {
