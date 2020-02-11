@@ -4,9 +4,98 @@ let express = require('express'),
 
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     chapterModel = require(path.join(__dataModel,'cleeArchive_fanfic')),
+    tagModel = require(path.join(__dataModel,'cleeArchive_tag')),
+    tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
+    updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates')),
+    errModel = require(path.join(__dataModel,'error')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works'));
 
 let handler = {
+
+    finalSend:function(res,data){
+        if(data.sent)
+            return;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
+    updateTag:function(data){
+        if(!data.workId)
+            return;
+        if(!data.chapterId)
+            return;
+        let searchQuery = null;
+        let mapEntered = false;
+        if(data.infoType === 0)
+            searchQuery = {work:data.workId,aid:data.chapterId};
+        if(data.infoType === 1)
+            searchQuery = {aid:data.chapterId,infoType:1};
+
+        let startIndex = 0;
+        let updateTagListIndex = [];
+
+        for(let i=0;i<data.tagList.length;++i)
+        {
+            let name = data.tagList[i].name;
+            let type = data.tagList[i].type;
+            let update = {$inc:{totalNum:1}};
+            if(data.infoType === 0 )
+                update = {$inc:{workNum:1,totalNum:1}};
+            tagModel.findOneAndUpdate({'name':name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+                startIndex++;
+                let updateDoc = null;
+                if(doc)
+                    updateDoc = {tag:doc._id,date:data.date,update:data.updated,user:data.user,infoType:data.infoType,type:type,work:data.workId,aid:data.chapterId,user:data.user};
+                if(updateDoc)
+                    updateTagListIndex.push({insertOne:{document:updateDoc}});
+                if(startIndex >= data.tagList.length)
+                    updateMap();
+            })
+        }
+
+        let updateMap = function(){
+            if(mapEntered)
+                return;
+            mapEntered = true;
+
+            let updateList = [];
+            if(!searchQuery)
+                return;
+            tagMapModel.find(searchQuery).exec()
+                .then(function(docs){
+                    let update = {$inc:{'totalNum':-1}};
+                    docs.forEach(function(item){
+                        if(item.infoType === 0)
+                            update.$inc.workNum= -1;
+                        updateList.push({updateOne:{'filter':{'_id':item.tag},'update':update}});
+                    });
+                    return tagMapModel.deleteMany(searchQuery).exec();
+                })
+                .then(function(docs){
+                    if(updateList.length>0)
+                        tagModel.bulkWrite(updateList).exec();
+                    if(updateTagListIndex.length>0)
+                        tagMapModel.bulkWrite(updateTagListIndex,function(err,doc){
+                        });
+                })
+                .catch(function(err){
+                    let instance = new errModel;
+                    instance.comment = 'add tags in the tagMapFailed. query=' + JSON.stringify(data);
+                    instance.type = 1100;
+                    instance.message = err;
+                })
+        };
+    },
+
+    updateUpdates:function(data){
+        updatesModel.findOneAndUpdate({work:data.workId,infoType:data.infoType,contents:data.chapterId},{date:data.date,updated:data.updated,publisher:data.publisher},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+            let instance = new errModel;
+            instance.comment = 'update published updates failed. =' + JSON.stringify(data);
+            instance.type = 1101;
+            instance.message = err;
+        });
+    },
+
     newFanfic:function(req,res,next){
         let authorize = false;
         if(req.session.user)
@@ -54,9 +143,9 @@ let handler = {
 
     fanficGet:function(req,res){
         let indexData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sent = false;
         let proceed = 0;
         let data = {
+            sent:false,
             success:false,
             message:'',
             chapter:null,
@@ -66,17 +155,11 @@ let handler = {
 
         data.isFirst = (indexData.prev == null && indexData.order == 0);
 
-        let finalSend = function(){
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(data)));
-        };
-
         let nextS = function(){
-            if(sent)
+            if(data.sent)
                 return;
-
             if(data.finished)
-                finalSend();
+                handler.finalSend(res,data);
             else if(!indexData.chapter)
                 createChapter();
             else if(!data.chapter)
@@ -160,7 +243,6 @@ let handler = {
                 res.send(lzString.compressToBase64(JSON.stringify(data)));
             })
             .catch(function(err){
-                console.log(err);
                 data.message = err;
                 res.send(lzString.compressToBase64(JSON.stringify(data)));
             });
@@ -302,39 +384,77 @@ let handler = {
 
     publish:function(req,res){
         let saveData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sent = false;
         let data = {
+            sent:false,
             message:'',
             success:false
         };
-        if(!saveData.published)
-            saveData.chapter.date = Date.now();
+
+        if(!req.session.user || (req.session.user._id != saveData.chapter.user)){
+            data.message = '您的登录状态出现错误，请重新登录';
+            handler.finalSend(data);
+            return;
+        }
+        let updateModelUpdateList = [{chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,date:saveData.chapter.date,updated:saveData.chapter.updated,publisher:req.session.user._id},
+            {chapterId:saveData.chapter._id,infoType:0,workId:saveData.book._id,date:saveData.book.date,updated:saveData.book.updated,publisher:req.session.user._id}];
+
+        let countMap = [{infoType:0,increment:0},{infoType:1,increment:0}];
         saveData.chapter.updated = Date.now();
+        console.log(saveData.chapter);
+        if(!saveData.chapter.published)
+        {
+            saveData.chapter.date = saveData.chapter.updated;
+            saveData.chapter.published = true;
+            countMap[1].increment = 1;
+        }else{
+            updateModelUpdateList[0] = null;
+        }
+
         let updateIndex = [];
         updateIndex.push(saveData.chapter._id);
         saveData.index.map(function(item,i,arr){
-            if(item.chapter && saveData.ifAll && updateIndex.indexOf(item.chapter._id) ==-1)
+            if(item.chapter && saveData.ifAll && updateIndex.indexOf(item.chapter._id) === -1)
                 updateIndex.push(item.chapter._id);
         });
 
-
+        let isFirst = false;
+        isFirst = (saveData.index[0].chapter._id == saveData.chapter._id);
 
         if(!saveData.book.published)
         {
             saveData.book.published = true;
-            saveData.book.date = Date.now();
-            saveData.book.updated = Date.now();
+            saveData.book.date = saveData.book.updated = saveData.chapter.updated;
+            countMap[0].increment = 1;
         }
         else{
-            saveData.book.updated = Date.now();
+            saveData.book.updated = saveData.chapter.updated;
+            updateModelUpdateList[1] = null;
         }
 
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(data)));
-        };
+        let updateTagData = {chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,user:saveData.chapter.user,tagList:[]};
+        for(let i=0;i<saveData.chapter.fandom.length;++i)
+        {
+            let name = saveData.chapter.fandom[i];
+            updateTagData.tagList.push({name:name,type:1});
+        }
+
+        for(let i=0;i<saveData.chapter.characters.length;++i)
+        {
+            let name = saveData.chapter.characters[i];
+            updateTagData.tagList.push({name:name,type:2});
+        }
+
+        for(let i=0;i<saveData.chapter.relationships.length;++i)
+        {
+            let name = saveData.chapter.relationships[i];
+            updateTagData.tagList.push({name:name,type:3});
+        }
+
+        for(let i=0;i<saveData.chapter.tag.length;++i)
+        {
+            let name = saveData.chapter.tag[i];
+            updateTagData.tagList.push({name:name,type:4});
+        }
 
         chapterModel.findOneAndUpdate({_id:saveData.chapter._id},saveData.chapter,{new:true}).exec()
             .then(function(doc){
@@ -350,20 +470,27 @@ let handler = {
             .then(function(docs){
                 if(!docs)
                     throw '发布书籍失败';
-                return chapterModel.updateMany({_id:{$in:updateIndex},published:false},{published:true,Date:Date.now()}).exec();
-            })
-            .then(function(docs){
-                if(!docs)
-                    data.message += '没有成功发布所有章节目录';
                 data.success = true;
                 data._id = saveData.chapter._id;
-                finalSend();
+                handler.finalSend(res,data);
+                updateModelUpdateList.forEach(function(item){
+                    if(item)
+                        handler.updateUpdates(item);
+                });
+                handler.updateTag(updateTagData);
+                if(isFirst)
+                {
+                    let newData = JSON.parse(JSON.stringify(updateTagData));
+                    newData.infoType = 0;
+                    handler.updateTag(newData);
+                }
+
+                __updateCountMap(countMap);
             })
             .catch(function(err){
-                console.log(err);
                 data.message = err;
                 data.success = false;
-                finalSend();
+                handler.finalSend(res,data);
             });
     },
 

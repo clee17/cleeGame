@@ -18,7 +18,6 @@ let handler = {
             message:'',
             success:false
         };
-        console.log(receivedData);
         let finalSend = function(){
             if(sent)
                 return;

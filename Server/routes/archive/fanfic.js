@@ -9,6 +9,8 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     tagModel = require(path.join(__dataModel,'cleeArchive_tag')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
+    updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates')),
+    errModel = require(path.join(__dataModel,'error')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works'));
 
 let handler = {
@@ -21,17 +23,91 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    deleteAllRelevant:function(id){
-        // tagMap.updateMany({work:id})
+    deleteLikes:function(likeQuery,commentQuery){
+        likeModel.deleteMany(likeQuery).exec()
+            .then(function(doc){
+                return commentModel.deleteMany(commentQuery).exec();
+            })
+            .then(function(doc){
+            })
+            .catch(function(err){
+                let instance = new errModel;
+                instance.comment = 'delete works in like and comment Model failed. query=' + JSON.stringify(query);
+                instance.type = 1001;
+                instance.message = err;
+            })
+    },
 
-        likeModel.updateMany({work:id},{work:null},function(err,doc){
-            if(err){
-
+   deleteUpdates:function(query){
+       updatesModel.deleteMany(query,function(err,doc){
+            if(err)
+            {
+                let instance = new errModel;
+                instance.comment = 'delete works in updates list failed; query='+ JSON.stringify(query);
+                instance.type = 1002;
+                instance.message = err;
             }
-            if(doc){
+        });
+    },
 
-            }
-        })
+    deleteTags:function(query){
+        let deleteIds = [];
+        let updatesList = [];
+        tagMapModel.find(query,function(err,docs){
+            if(docs.length>0)
+                docs.forEach(function(item){
+                    deleteIds.push(item._id);
+                    let update = {$inc:{'totalNum':-1}};
+                    if(item.infoType === 0)
+                        update.$inc.workNum= -1;
+                    updatesList.push({updateOne:{'filter':{'_id':item.tag},'update':update}});
+                });
+            if(deleteIds.length>0)
+                tagMapModel.deleteMany({_id:{$in:deleteIds}},function(err,doc){
+                    if(err)
+                    {
+                        let instance = new errModel;
+                        instance.comment = 'delete works in tagMapModel failed; query='+ JSON.stringify(query);
+                        instance.type = 1003;
+                        instance.message = err;
+                    }
+                });
+
+            if(updatesList.length >0)
+                tagModel.bulkWrite(updatesList,function(err,docs){
+                    if(err)
+                    {
+                        let instance = new errModel;
+                        instance.comment = 'update new tag counts failed. query ='+ JSON.stringify(query);
+                        instance.type = 1004;
+                        instance.message = err;
+                    }
+                });
+        });
+    },
+
+    deleteAllRelevant:function(_id,infoType){
+        let likeQuery = null;
+        let updateQuery = null;
+        let commentQuery = null;
+        let tagQuery = null;
+        if(infoType === 0) {
+            likeQuery =  updateQuery = commentQuery = tagQuery = {work: _id};
+        }
+        else if (infoType === 1)
+        {
+            likeQuery = {chapter:_id};
+            updateQuery = {contents:_id,infoType:1};
+            commentQuery = {chapter:_id,infoType:1};
+            tagQuery = {aid:_id,infoType:1};
+        }
+        if(!likeQuery || !updateQuery || !commentQuery || !tagQuery)
+            return;
+
+        handler.deleteTags(tagQuery);
+        handler.deleteUpdates(updateQuery);
+        handler.deleteLikes(likeQuery,commentQuery);
+
     },
 
     deletePost:function(req,res){
@@ -61,10 +137,9 @@ let handler = {
             return;
 
         let deleteWork = function(){
-            worksModel.deleteOne({_id:data.index.work},function(err){
+            worksModel.deleteOne({_id:data.index.work},function(err,doc){
                 if(err)
                 {
-                    console.log(err);
                     result.message = err;
                     handler.finalSend(res,result);
                 }
@@ -73,6 +148,8 @@ let handler = {
                     result.success = true;
                     result.message = 'delete succeed';
                     handler.finalSend(res,result);
+                    handler.deleteAllRelevant(data.index.work,0);
+                    __updateCountMap([{infoType:0,increment:-1}]);
                 }
             })
         };
@@ -81,7 +158,6 @@ let handler = {
             indexModel.deleteMany({work:data.index.work},function(err){
                 if(err)
                 {
-                    console.log(err);
                     result.message = err;
                     handler.finalSend(res,result);
                 }
@@ -90,14 +166,19 @@ let handler = {
             })
         };
 
-        chapterModel.deleteMany({book:data.index.work},function(err){
+        chapterModel.deleteMany({book:data.index.work,published:true},function(err,doc){
+            __updateCountMap([{infoType:1,increment:-doc.deletedCount}]);
+            chapterModel.deleteMany({book:data.index.work},function(err,doc){
+
+            });
             if(err){
-                console.log(err);
                 result.message = err;
                 handler.finalSend(res,result);
             }
             else
                 deleteIndex();
+
+
         });
     },
 
@@ -111,8 +192,8 @@ let handler = {
                    result.message = 'failed updating the chapterCount';
                else
                    result.message = 'successfully update the chapterCount';
-               handler.deleteAllRelevant(data.index.work);
                handler.finalSend(res,result);
+               handler.deleteAllRelevant(data.index.chapter,1);
            });
        };
 
@@ -139,6 +220,7 @@ let handler = {
             else{
                 result.success = true;
                 result.message = 'successfully deleted the chapter';
+                __updateCountMap([{infoType:1,increment:-1}]);
                 deleteIndex();
             }
         });

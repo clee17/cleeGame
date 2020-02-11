@@ -19,7 +19,7 @@ global.__chapterCount = function(index){
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
     if(req.ipData && req.ipData.country == '中国')
-        renderPage.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+        renderPage.lib = ['https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css',
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
@@ -46,8 +46,8 @@ global.__renderError = function(req,res,errMessage){
       if(req.session.user)
           userId = req.session.user._id;
       let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
-    if(req.country_id == 'CN')
-        renderInfo.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+    if(req.ipData && req.ipData.country == '中国')
+        renderInfo.lib = ['https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css',
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
@@ -107,10 +107,25 @@ let  main = require(path.join(__routes,"/archive/main")),
      fanfic = require(path.join(__routes,"/archive/fanfic"));
      feedback = require(path.join(__routes,"/archive/feedback"));
 
-let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap')),
+    userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+
+
+global.__updateCountMap = function(countList) {
+    let updateList = [];
+    countList.forEach(function (item) {
+        if (item.increment !== 0)
+            updateList.push({query: {infoType: item.infoType}, update: {$inc: {number: item.increment}}});
+    });
+
+    if (updateList.length > 0)
+        updateList.forEach(function (item) {
+            countMapModel.findOneAndUpdate(item.query,item.update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+            });
+        });
+};
 
 let router = express.Router();
-
 //entry pages
 router.get('/',main.index);
 router.get('/fanfic/',main.index);
@@ -178,6 +193,10 @@ module.exports = function(app)
         let ip = req.ip;
         if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
             req.ipData = ipSearcher.search(ip);
+        else{
+            req.ipData = {};
+            req.ipData.country_id = '中国';
+        }
         next();
     });
 

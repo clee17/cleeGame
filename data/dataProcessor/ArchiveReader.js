@@ -3,6 +3,7 @@ let chapterModel = require('./../model/cleeArchive_fanfic'),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     updatesModel = require('../model/cleeArchive_postUpdates'),
+    countMapModel = require('../model/cleeArchive_countMap'),
     userSettingModel = require('./../model/cleeArchive_userSetting');
 
 let fs = require('fs'),
@@ -75,17 +76,29 @@ let initializeRecords = function(){
 let updateTagMap = function(){
     let processData = {};
 
+    let checkFinal = function(){
+        if(processData.currentIndex + processData.step < processData.all)
+        {
+            processData.currentIndex += processData.step;
+            proceed();
+        }
+        else
+            console.log('写入Tag表完成');
+    };
+
     let write = function(){
         let startIndex = 0;
         let writeOne = function(){
             if(startIndex >= processData.currentRecords.length)
-             {console.log(processData);return;}
-            console.log(processData.currentRecords[startIndex]);
+            {
+               checkFinal();
+               return;
+            }
             let rec = processData.currentRecords[startIndex];
             startIndex++;
-            let total = {'totalNum':rec.totalCount};
+            let total = {'totalNum':rec.totalCount,'workNum':rec.workCount};
             if(processData.currentIndex != 0)
-                total = { '$inc': {'totalNum':rec.totalCount}};
+                total = { '$inc': {'totalNum':rec.totalCount,'workNum':rec.workCount}};
             tagModel.findOneAndUpdate({'name':rec._id},total,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                 .then(function(doc){
                     if(!doc)
@@ -102,7 +115,6 @@ let updateTagMap = function(){
                         listIndex++;
                         if(item._id)
                             delete item._id;
-                        console.log(item);
                         tagMapModel.findOneAndUpdate({tag:doc._id,infoType:item.infoType,aid:item.aid},item,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                             .then(function(result){
                                 console.log(result);
@@ -112,7 +124,7 @@ let updateTagMap = function(){
                                 console.log(err);
                                 writeTagMap();
                             });
-                    }
+                    };
                     writeTagMap();
                 })
                 .catch(function(err){
@@ -133,12 +145,12 @@ let updateTagMap = function(){
                         {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
                                 pipeline:[
                                     {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
-                                    {$project:{_id:1,fandom:1,user:1,date:1}}]}},
+                                    {$project:{_id:1,fandom:1,user:1,date:1,book:1}}]}},
                         {$unwind:"$chapters"},
                         {$replaceRoot:{newRoot:"$chapters"}},
                         {$unwind:"$fandom"},
                         {$set:{type:1,infoType:1}},
-                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",work:"$book",user:1,date:1}}
                     ],
                     "fanfic_works_fandom":[
                         {$match:{"type":{$lt:100}}},
@@ -153,19 +165,19 @@ let updateTagMap = function(){
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$fandom"},
                         {$set:{type:1,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",user:1,date:1,updated:1}}
+                        {$project:{type:1,infoType:1,name:"$fandom",aid:"$_id",work:"$book",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_characters":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
                                 pipeline:[
                                     {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
-                                    {$project:{_id:1,characters:1,user:1,date:1}}]}},
+                                    {$project:{_id:1,characters:1,user:1,date:1,book:1}}]}},
                         {$unwind:"$chapters"},
                         {$replaceRoot:{newRoot:"$chapters"}},
                         {$unwind:"$characters"},
                         {$set:{type:2,infoType:1}},
-                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",work:"$book",user:1,date:1}}
                     ],
                     "fanfic_works_characters":[
                         {$match:{"type":{$lt:100},published:true}},
@@ -180,19 +192,19 @@ let updateTagMap = function(){
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$characters"},
                         {$set:{type:2,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",user:1,date:1,updated:1}}
+                        {$project:{type:1,infoType:1,name:"$characters",aid:"$_id",work:"$book",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_relationships":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
                                 pipeline:[
                                     {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
-                                    {$project:{_id:1,relationships:1,user:1,date:1}}]}},
+                                    {$project:{_id:1,relationships:1,user:1,date:1,book:1}}]}},
                         {$unwind:"$chapters"},
                         {$replaceRoot:{newRoot:"$chapters"}},
                         {$unwind:"$relationships"},
                         {$set:{type:3,infoType:1}},
-                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",work:"$book",user:1,date:1}}
                     ],
                     "fanfic_works_relationships":[
                         {$match:{"type":{$lt:100},published:true}},
@@ -207,19 +219,19 @@ let updateTagMap = function(){
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$relationships"},
                         {$set:{type:3,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",user:1,date:1,updated:1}}
+                        {$project:{type:1,infoType:1,name:"$relationships",aid:"$_id",work:"$book",user:1,date:1,updated:1}}
                     ],
                     "fanfic_chapter_tag":[
                         {$match:{"type":{$lt:100},published:true,$or:[{"status":1},{"chapterCount":{$gt:1}}]}},
                         {$lookup:{from:"work_chapters",as:"chapters", let:{work_id:"$_id"},
                                 pipeline:[
                                     {$match:{$expr:{$eq:["$book","$$work_id"]},published:true}},
-                                    {$project:{_id:1,tag:1,user:1,date:1}}]}},
+                                    {$project:{_id:1,tag:1,user:1,date:1,book:1}}]}},
                         {$unwind:"$chapters"},
                         {$replaceRoot:{newRoot:"$chapters"}},
                         {$unwind:"$tag"},
                         {$set:{type:4,infoType:1}},
-                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1}}
+                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",work:"$book",user:1,date:1}}
                     ],
                     "fanfic_works_tag":[
                         {$match:{"type":{$lt:100},published:true}},
@@ -234,7 +246,7 @@ let updateTagMap = function(){
                         {$replaceRoot:{newRoot:"$chapter"}},
                         {$unwind:"$tag"},
                         {$set:{type:4,infoType:0}},
-                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",user:1,date:1,updated:1}}
+                        {$project:{type:1,infoType:1,name:"$tag",aid:"$_id",work:"$book",user:1,date:1,updated:1}}
                     ],
                 }},
             {$project:{all:{$setUnion:["$fanfic_chapter_fandom", "$fanfic_works_fandom",
@@ -243,7 +255,7 @@ let updateTagMap = function(){
                             "$fanfic_chapter_tag","$fanfic_works_tag"]}}},
             {$unwind:"$all"},
             {$replaceRoot:{newRoot:"$all"}},
-            {$group:{_id:"$name",totalCount:{$sum:1},list:{$push:"$$ROOT"}}}
+            {$group:{_id:"$name",totalCount:{$sum:1},workCount:{$sum: { "$cond": [{ "$eq": ["$infoType", 0] }, 1, 0] }},list:{$push:"$$ROOT"}}}
         ]).allowDiskUse(true).exec()
             .then(function(docs){
                 processData.currentRecords = docs;
@@ -268,15 +280,14 @@ let updateTagMap = function(){
         })
     };
 
-
-
-            calcAll();
+    calcAll();
 
 };
 
 let clearTagMap = function(dataName){
     let arr = {
         tagMap:tagMapModel,
+        tag:tagModel,
         updates:updatesModel,
     };
     if(arr[dataName])
@@ -301,7 +312,6 @@ let updateMessagePool = function(){
         let writeOne = function(){
             if(startIndex >= processData.currentRecords.length)
             {
-                console.log(processData);
                 if(processData.currentIndex + processData.step < processData.max)
                    {
                        processData.currentIndex += processData.step;
@@ -389,8 +399,50 @@ let updateMessagePool = function(){
         })
     };
 
-
     calcAll();
+};
+
+let countAll = function(){
+    let countMap = [{infoType:0,number:0},{infoType:1,number:0}];
+    let startIndex = 0;
+    let maxIndex = 0;
+    let final = function(){
+        if(startIndex < countMap.length)
+            return;
+        maxIndex = startIndex;
+        countMap.forEach(function(item){
+            countMapModel.findOneAndUpdate({infoType:item.infoType},{number:item.number},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+                maxIndex --;
+                if(maxIndex === 0)
+                    console.log('写入完成');
+            });
+        })
+    };
+
+    worksModel.countDocuments({published:true,type:0},function(err,count){
+        if(!err)
+        {
+            countMap.forEach(function(item,i,arr){
+                if(item.infoType === 0)
+                     countMap[i].number = count;
+            })
+        }
+        startIndex++;
+        final();
+    });
+
+    chapterModel.countDocuments({published:true},function(err,count){
+        if(!err)
+        {
+            countMap.forEach(function(item,i,arr){
+                if(item.infoType === 1)
+                    countMap[i].number = count;
+            })
+        }
+        startIndex++;
+        final();
+    });
+
 };
 
 
@@ -410,6 +462,9 @@ switch(argv[2])
         break;
     case 'clearDataBase':
         clearTagMap(argv[3]);
+        break;
+    case 'countAll':
+        countAll();
         break;
     default:
         console.log('输入无效的指令');
