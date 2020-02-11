@@ -157,11 +157,13 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
 
             scope.likeIt = function () {
                 let data = {work: scope.item.work._id, user: scope.item.work.user};
+                scope.liked = !scope.liked;
                 feedbackManager.likeIt(data);
             };
 
             scope.bookMarkIt = function () {
                 let data = {work: scope.item.work._id, user: scope.item.work.user};
+                scope.bookMarked = !scope.bookMarked;
                 feedbackManager.bookMarkIt(data);
             };
 

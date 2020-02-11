@@ -657,9 +657,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
             $scope.workIndex.map(function(item,i,arr){
-                if(item._id == $scope.chapter._id && item.chapter == null) {
+                if((item.chapter && item.chapter._id == $scope.chapter._id) || item._id == $scope.currentIndex._id)
                     $scope.workIndex[i].chapter = {_id:$scope.chapter._id,title:$scope.chapter.title,wordCount:$scope.chapter.wordCount};
-                }
             });
             if(window.localStorage)
                   localStorage.setItem($scope.currentIndex._id,LZString.compress(JSON.stringify(data.chapter)));

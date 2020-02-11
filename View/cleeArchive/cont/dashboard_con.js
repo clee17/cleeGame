@@ -77,6 +77,11 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
     });
 
     $scope.$on('deleteReceivedList',function(event,data){
+        if($scope.deletingPost)
+        {
+            $scope.$emit('showError','您删除得太快了，请稍候再操作')
+            return;
+        }
         for(let i=0;i<$scope.receivedList.length;++i)
         {
             if(i >= $scope.receivedList.length)
@@ -106,7 +111,22 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
                 item.work.chapterCount --;
             }
         }
+        $scope.deletingPost = true;
         fanficManager.removePost(data);
+    });
+
+    $scope.$on('postRemoved',function(event,data){
+        $scope.deletingPost = false;
+        if(data.success)
+        {
+            $scope.deleteList = [];
+        }
+        else{
+            for(let i = $scope.deleteList.length; i>=0; --i)
+            {
+                $scope.receivedList.splice($scope.deleteList[i].index,0,$scope.deleteList[i].item);
+            }
+        }
     });
 
     let calcAddress = function(index){

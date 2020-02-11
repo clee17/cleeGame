@@ -30,6 +30,8 @@ module.exports = new mongoose.Schema({
 
     date: { type: Date, default: Date.now },
 
+    updated: { type: Date, default: Date.now },
+
     contents:{type:String,default:'<div class="paragraph"><br class="clear"></div>'},
 
     visited: {type:Number, default:0},
@@ -43,8 +45,4 @@ module.exports = new mongoose.Schema({
     published:{type:Boolean,default:false},
 
     comments:{type:Number,default:0},
-
-    liked:{type:Number,default:0},
-
-    bookmarked:{type:Number,default:0}
 });

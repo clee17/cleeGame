@@ -148,7 +148,7 @@ let handler = {
             }
 
             if(req.country_id == 'CN')
-                data.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+                data.lib = ['https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css',
                     'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
                     'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
                     'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
@@ -311,8 +311,6 @@ let handler = {
                         throw '数据库中没有这本书';
                     let md5 = crypto.createHash('md5');
                     let passCode =  md5.update(doc.passcode.code).digest('hex').toString();
-                    console.log(passCode);
-                    console.log(request.code);
                     if(request.code == passCode) {
                         response.code = passCode;
                         response.status = 1;

@@ -160,7 +160,7 @@
     </div>
     <div class="tagRow">
         <div>作者:</div>
-        <a href="{{'/users/'+item.chapter.user._id}}">{{item.chapter.user.user}}</a>
+        <a href="{{'/users/'+item.work.user}}">{{item.chapter.user.user}}</a>
         <div>总字数:</div>
         <div>{{item | workInfoWordCount:type}}</div>
         <div ng-show="item.infoType== 0">总章节数:</div>
@@ -168,7 +168,7 @@
         <div>浏览量:</div>
         <div>{{item | workInfoVisited:type}}</div>
         <div ng-show="item.infoType != 0">属于作品:</div>
-        <div ng-show="item.infoType != 0"><a href="{{'/fanfic/work/'+item.work.id}}">{{item.work.title}}</a></div>
+        <div ng-show="item.infoType != 0"><a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a></div>
         <div>更新状态:</div>
         <div>{{item.work.status | workInfoStatus}}</div>
     </div>
@@ -201,7 +201,7 @@
         <button class="editButton" ng-click="showCommentList()">评论(<span ng-show="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
     </div>
     <div ng-show="showFeedBack" class="feedbackInfo work-info-outer">
-        <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有<b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b>名游客点赞了您</div></div>
+        <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有<b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b>名游客点赞了该作品</div></div>
         <div style="min-height:15px;" ng-show="feedback.length>0"></div>
         <div ng-repeat="feedback in feedback">
            <div class="feedbackEntry"><a href="{{'/users/'+feedback.user}}" target="_blank">{{feedback.userName}}</a> <span ng-if="feedback.type==1">点赞了</span><span ng-if="feedback.type==2">收藏了</span>此作品</div>
