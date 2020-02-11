@@ -1,7 +1,8 @@
-let express = require('express'),
-    request = require('request'),
+const express = require('express'),
+    IP2Region = require('ip2region'),
     path = require('path');
 
+const ipSearcher = new IP2Region();
 let fs = require('fs');
 
 global.__msgList = new Array();
@@ -17,7 +18,7 @@ global.__chapterCount = function(index){
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
-    if(req.country_id == 'CN')
+    if(req.ipData.country == '中国')
         renderPage.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
@@ -177,19 +178,8 @@ module.exports = function(app)
         let ip = req.ip;
         ip = '101.85.4.25';
         if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
-        {
-            request('http://ip.taobao.com/service/getIpInfo.php?ip='+ip, function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    {
-                        let result = JSON.parse(response.body);
-                        req.country_id = result.data.country_id;
-                    }
-                }
-                next();
-            });
-        }
-        else
-            next();
+            req.ipData = ipSearcher.search(ip);
+        next();
     });
 
     app.use('*',function(req,res,next){
