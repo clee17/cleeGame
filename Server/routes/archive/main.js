@@ -147,6 +147,20 @@ let handler = {
                 }
             }
 
+            if(req.country_id == 'CN')
+                data.lib = ['https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css',
+                    'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
+                    'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
+                    'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+                    'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+            else
+                data.lib = ['https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js',
+                    'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+                    'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+                    'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+                    'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+            res.render('cleeArchive/index.html',renderInfo);
+
             if(noRes)
                 __renderError(req,res,noRes.message);
             else if(data.chapter && data.chapter.lockType === 1 && !req.session.user)
