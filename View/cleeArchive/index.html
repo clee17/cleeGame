@@ -9,20 +9,17 @@
     <title>cleeArchive</title>
     <% } %>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+    <% lib.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
 
     <script defer src="https://cdn.jsdelivr.net/npm/svgxuse@1.2.6/svgxuse.min.js"></script>
 
     <script src="/js/JsExt.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js"></script>
     <link rel="stylesheet" href="/css/archive/layout.css">
     <link rel="stylesheet" href="/css/archive/button.css">
     <link rel="stylesheet" href="/css/animation.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js"></script>
 
     <script>var app = angular.module('cleeArchive',[]);</script>
     <script src="/service/userService.js"></script>
