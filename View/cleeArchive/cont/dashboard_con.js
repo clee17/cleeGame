@@ -59,15 +59,6 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
 
     $scope.userSetting = null;
 
-    let resetHeight = function(){
-        let main = document.getElementById('main');
-        let sl = document.getElementById('userPageContents');
-        if(main.offsetHeight < sl.scrollHeight)
-        {
-            main.style.minHeight = sl.scrollHeight+'px';
-        }
-    };
-
     $scope.$on('dashboardRequestFinished',function(event,data){
         $scope.contentsLoaded = true;
         if(data.success)
@@ -77,7 +68,6 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
             $scope.pageMax = Math.ceil($scope.maxLimit / 10);
             if($scope.pageMax == 0)
                 $scope.pageMax += 1;
-            $timeout(resetHeight,100);
         }
         else
         {

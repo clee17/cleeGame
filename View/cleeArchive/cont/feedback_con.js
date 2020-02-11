@@ -379,19 +379,6 @@ app.controller("feedbackCon",function($scope,$rootScope,$cookies,$http,$timeout,
 
     };
 
-
-    let wp = document.getElementById("warningPanel");
-    if(wp && wp.scrollHeight-wp.offsetHeight >= 20)
-        wp.style.minHeight = wp.scrollHeight + "px";
-    let ti = document.getElementById("tagInfo");
-    if(ti && ti.scrollHeight-ti.offsetHeight  >= 20)
-    {
-        ti.style.minHeight = (ti.scrollHeight+10)+ "px";
-        console.log('entered');
-    }
-
-
-
     let initialize = function(){
         feedbackManager.requestFeedback({work:$scope.workId,chapter:$scope.chapterId});
     }
