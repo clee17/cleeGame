@@ -10,6 +10,7 @@ app.controller("searchCon",function($scope,$rootScope,$timeout,searchManager){
       $scope.searching = false;
       if(data.success){
          $scope.receivedList = data.result;
+         console.log('finished');
       }
       else{
          $scope.showErr = true;
@@ -18,7 +19,4 @@ app.controller("searchCon",function($scope,$rootScope,$timeout,searchManager){
    });
 
    searchManager.searchAll({searchType:$rootScope.searchType});
-
-
-
 });
