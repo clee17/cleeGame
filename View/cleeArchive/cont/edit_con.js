@@ -4,13 +4,10 @@ app.filter('lockType', function() { //可以注入依赖
         {
             case 0:
                 return '全网可见';
-                break;
             case 1:
                 return '仅站内可见';
-                break;
             case 2:
                 return '仅自己可见';
-                break;
         }
     }
 });
@@ -22,20 +19,18 @@ app.directive('iconBackground',function(){
           selected: '=',
           pointer: '@'
       },
-      link:function(scope,element,attr){
+      link:function(scope,element){
          let children = element.children();
          let svg = children[0];
 
          let getCurrentSelected = function(){
-             let currentSelected =false;
              let index = Number(scope.pointer);
              let str = scope.selected.toString(2);
              while(str.length <7)
              {
                  str = '0'+str;
              }
-             currentSelected = str[index]=='1';
-             return currentSelected;
+             return str[index]==='1';
          };
 
          let switchCurrentSelected = function(){
@@ -45,12 +40,11 @@ app.directive('iconBackground',function(){
              {
                  str = '0'+str;
              }
-             let newResult = str[index]=='0'? '1':'0';
+             let newResult = str[index]==='0'? '1':'0';
              let firstHalf = '';
-             let nextPart = '';
              for(let i=0;i<index;++i){
                  firstHalf += str[i];
-             };
+             }
              str = firstHalf + newResult + str.substring(index+1);
              scope.selected = parseInt(str,2);
          };
@@ -92,11 +86,13 @@ app.directive('iconBackground',function(){
 app.directive('infoReceiver',function(){
     return {
         restrict: 'E',
-        link:function(scope,element,attr){
+        link:function(scope){
+            scope.ifSingle = (scope.bookInfo.status === 0 && scope.bookInfo.chapterCount <= 1);
+            console.log(scope.ifSingle);
             scope.bookInfo.status = scope.bookInfo.status.toString();
             if(!scope.bookInfoDetail)
                 scope.initializeBookDetail();
-            let index = scope.workIndex.map(function(item,i,arr){
+            let index = scope.workIndex.map(function(item){
                 return item._id;
             });
             let i =0;
@@ -112,14 +108,14 @@ app.directive('infoReceiver',function(){
                     index[pos] = index[i];
                     index[i] = temp;
                 }
-                else{
+                else
                     ++i;
-                    continue;
-                }
             }
 
             if(scope.userSettings)
                 scope.fanficEdit = scope.userSettings.fanficEdit;
+
+
         }
     }
 });
@@ -127,16 +123,16 @@ app.directive('infoReceiver',function(){
 app.directive('chapterSelect',function(){
     return {
         restrict: 'C',
-        link:function(scope,element,attr){
+        link:function(scope,element){
             scope.selected = false;
 
             scope.$on('chapterTitle changed',function(event,data){
-                if(scope.list._id == data.id)
+                if(scope.list._id === data.id)
                     scope.list.chapter.title = data.title;
             });
 
-            scope.$on('chapter selected',function(event,data){
-                if(scope.$parent.selectedChapters.indexOf(scope.list._id) == -1)
+            scope.$on('chapter selected',function(){
+                if(scope.$parent.selectedChapters.indexOf(scope.list._id) === -1)
                 {
                     scope.selected = false;
                     element.css('background','rgba(0,0,0,0)');
@@ -150,9 +146,9 @@ app.directive('chapterSelect',function(){
             });
 
             scope.$on('clicked',function(event,data){
-                if(scope.$parent.selectedChapters.length == 0)
+                if(scope.$parent.selectedChapters.length === 0)
                     return;
-                if(data.event.target != element[0] && !window.event.ctrlKey)
+                if(data.event.target !== element[0] && !window.event.ctrlKey)
                 {
                     scope.selected = false;
                     element.css('background','rgba(0,0,0,0)');
@@ -173,8 +169,8 @@ app.directive('chapterSelect',function(){
             }
 
 
-            scope.$on('fanfic loaded',function(event,data){
-                if(scope.list._id == scope.$parent.currentIndex._id)
+            scope.$on('fanfic loaded',function(){
+                if(scope.list._id === scope.$parent.currentIndex._id)
                     element.css('font-weight','bold');
                 else
                     element.css('font-weight','normal');
@@ -204,7 +200,7 @@ app.directive('chapterSelect',function(){
                     scope.$parent.$apply();
                     scope.$parent.$broadcast('chapter selected',{});
                 })
-                .on('dblclick',function(event) {
+                .on('dblclick',function() {
                     if (scope.$parent.contentsLoaded){
                         if(window.localStorage)
                         {
@@ -240,10 +236,10 @@ app.directive('tagCollector',function(){
            '<div class="remove-line no-select" ng-repeat="item in list" ng-click="removeTag($index)" style="font-size:14px;height:1.9rem;margin-left:10px;line-height:1.9rem;color:rgba(133,109,105,255);">#{{item}}</div>\n' +
            '<div style="height:1.9rem;flex:1;margin-left:5px;padding:0;min-width:2rem;"><input maxlength="30" style="color:rgba(70,59,57,255);"></div>\n' +
            '</div>',
-        link:function(scope,element,attr){
+        link:function(scope,element){
            let root = element.find('input');
            let refresh = function(){
-               scope.showHint = root[0].value == ''&& scope.list.length == 0;
+               scope.showHint = root[0].value === ''&& scope.list.length === 0;
                scope.$apply();
            };
            let addList = function(){
@@ -254,7 +250,7 @@ app.directive('tagCollector',function(){
                 let input = value.split(',');
                 for(let i =0;i<input.length;++i)
                 {
-                    if(input[i]!= '' && scope.list.indexOf(input[i]) == -1)
+                    if(input[i]!== '' && scope.list.indexOf(input[i]) === -1)
                     {
                         scope.list.push(input[i]);
                     }
@@ -263,7 +259,7 @@ app.directive('tagCollector',function(){
            };
 
            let removeList = function(){
-               if(root[0].value=='')
+               if(root[0].value==='')
                    scope.list.pop();
                refresh();
            };
@@ -271,20 +267,20 @@ app.directive('tagCollector',function(){
            scope.removeTag = function(index)
            {
                scope.list.splice(index,1);
-               scope.showHint = root[0].value == ''&& scope.list.length == 0;
+               scope.showHint = root[0].value === ''&& scope.list.length === 0;
            };
 
            scope.$on('inputHintIni',function(){
-               scope.showHint = root[0].value == ''&& scope.list.length == 0;
+               scope.showHint = root[0].value === ''&& scope.list.length === 0;
            });
 
-           root.on('input',function(event,data){
+           root.on('input',function(){
                refresh();
            })
-               .on('keydown',function(event,data){
-                   if(event.keyCode == 13)
+               .on('keydown',function(event){
+                   if(event.keyCode === 13)
                        addList();
-                   else if(event.keyCode == 8)
+                   else if(event.keyCode === 8)
                        removeList();
                });
 
@@ -292,7 +288,7 @@ app.directive('tagCollector',function(){
     }
 });
 
-app.directive('contenteditable', function ($compile) {
+app.directive('contenteditable', function () {
     return {
         restrict: 'A',
         require:'ngModel',
@@ -304,18 +300,17 @@ app.directive('contenteditable', function ($compile) {
                 if(range.collapsed)
                 {
                     let innerSign = sign;
-                    if(innerSign == 's')
+                    if(innerSign === 's')
                         innerSign = 'strike';
                     let parentElement = range.startContainer;
-                    while(parentElement.nodeName != innerSign.toUpperCase())
+                    while(parentElement.nodeName !== innerSign.toUpperCase())
                     {
                         parentElement = parentElement.parentElement;
                         if(!parentElement)
                             break;
                     }
-                    if(parentElement && parentElement.nodeName == innerSign.toUpperCase()){
+                    if(parentElement && parentElement.nodeName === innerSign.toUpperCase()){
                           let ele = angular.element(parentElement);
-                          let html = ele.html();
                           range.selectNode(parentElement);
                           document.execCommand('insertHTML',false,ele.html());
                         return;
@@ -378,9 +373,9 @@ app.directive('contenteditable', function ($compile) {
                 html = html.replace(/<br \/>/gi,'<br>');
                 html = html.replace(/<p>/gi,'<div class="paragraph">');
                 html = html.replace(/<\/p>/gi,'<br class="clear"></div>');
-                if(html.indexOf('<br>') == 0)
+                if(html.indexOf('<br>') === 0)
                     html = '<div class="paragraph"><br class="clear"></div>' + html.substring(4);
-                if(html.indexOf('<')!=0)
+                if(html.indexOf('<')!==0)
                     html = '<div class="paragraph">'+html;
                 html = html.replace(/<br><br>/gi,'<br class="clear"></div><div class="paragraph">');
                 html = html.replace(/&nbsp;/gi,'<br class=clear>');
@@ -390,7 +385,7 @@ app.directive('contenteditable', function ($compile) {
                 html = html.replace(/(<br class="clear">)+/gi,'<br class="clear">');
                 html = html.replace(/<br>/gi,'<br class="clear"></div><div class="paragraph">');
                 let str = html;
-                while(str != '')
+                while(str !== '')
                 {
                     let endMark = '</div>';
                     let startMark = '<div';
@@ -399,7 +394,7 @@ app.directive('contenteditable', function ($compile) {
                     str = str.substring(endOfStartMark+1);
                     let nextIndexEnd = str.indexOf(endMark);
                     let nextIndexStart = str.indexOf(startMark);
-                    if(nextIndexEnd > nextIndexStart && nextIndexStart != -1)
+                    if(nextIndexEnd > nextIndexStart && nextIndexStart !== -1)
                     {
                         let htmlIndex =  html.indexOf(str)+nextIndexStart;
                         html= html.slice(0,htmlIndex)+'<br class="clear">'+endMark+html.substring(htmlIndex);
@@ -432,16 +427,16 @@ app.directive('contenteditable', function ($compile) {
                 let startSave = range.startContainer;
                 let startSaveOffset = range.startOffset;
                 let end = range.endContainer;
-                if(end.id == 'editBox' && end.childNodes[endSaveOffset] && end.childNodes[endSaveOffset].nodeName == 'BR')
+                if(end.id === 'editBox' && end.childNodes[endSaveOffset] && end.childNodes[endSaveOffset].nodeName === 'BR')
                 {
 
                     range.setEndAfter(end.childNodes[endSaveOffset]);
                 }
                 let max = end.wholeText?end.wholeText.length: end.childNodes.length;
                 scope.index.push(max - range.endOffset);
-                if(end.wholeText && end.wholeText.length != end.textContent.length)
+                if(end.wholeText && end.wholeText.length !== end.textContent.length)
                     scope.index[0] -= end.wholeText.indexOf(end.textContent);
-                while(end.id != "editBox")
+                while(end.id !== "editBox")
                 {
                     let temp = end;
                     end = end.parentElement;
@@ -456,7 +451,6 @@ app.directive('contenteditable', function ($compile) {
 
             let recoverRange = function(){
                 let selection = window.getSelection() || document.getSelection() || document.selection.createRange();
-                let range = selection.getRangeAt(0);
                 let ele = element[0];
                 let index = JSON.parse(JSON.stringify(scope.index));
                 while(index.length>0 && ele.childNodes.length>0)
@@ -472,7 +466,7 @@ app.directive('contenteditable', function ($compile) {
                     ele = ele.childNodes[order];
                 }
 
-                range = selection.getRangeAt(0);
+                let range = selection.getRangeAt(0);
                 if(index.length>0)
                 {
                     let diff = index.pop();
@@ -486,7 +480,7 @@ app.directive('contenteditable', function ($compile) {
                     range.setEnd(ele,diffMax);
                 }
 
-                if(ele.className == "clear")
+                if(ele.className === "clear")
                 {
                     range.setStartBefore(ele);
                     range.setEndBefore(ele);
@@ -502,7 +496,7 @@ app.directive('contenteditable', function ($compile) {
             };
 
              element
-                 .on('input',function($event){
+                 .on('input',function(){
                      recordRange();
                      let selection = window.getSelection() || document.getSelection() || document.selection.createRange();
                      let range = selection.getRangeAt(0);
@@ -513,8 +507,8 @@ app.directive('contenteditable', function ($compile) {
                      recordFullRange();
                      ctrl.$setViewValue(element.html());
                      scope.chapter.wordCount = element.text().length;
-                     scope.index.map(function(item,i,arr){
-                         if(item.chapter && item.chapter._id == scope.chapter._id)
+                     scope.index.map(function(item){
+                         if(item.chapter && item.chapter._id === scope.chapter._id)
                              item.chapter.wordCount = scope.chapter.wordCount;
                      })
                  })
@@ -592,32 +586,6 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    $scope.currentWarningSelect='';
    $scope.selectedChapters = [];
 
-   let chapterModified = function(item){
-       if(item.contents !== $scope.chapter.contents)
-           return true;
-       if(item.fandom != $scope.chapter.fandom)
-           return true;
-       if(item.tag != $scope.chapter.tag)
-           return true;
-       if(item.characters != $scope.chapter.characters)
-           return true;
-       if(item.relationships != $scope.chapter.relationships)
-           return true;
-       if(item.notes != $scope.chapter.notes)
-           return true;
-       if(item.title != $scope.chapter.title)
-           return true;
-       if(item.intro != $scope.chapter.intro)
-           return true;
-       if(item.warning != $scope.chapter.warning)
-           return true;
-       if(item.grade !== $scope.chapter.grade)
-           return true;
-       if(item.lockType !== $scope.chapter.lockType)
-           return true;
-       return item.passcode.use != $scope.chapter.passcode.use || item.passcode.code != $scope.chapter.passcode.code;
-   };
-
    $scope.loadContent = function(){
        if($scope.contentsLoaded){
            $scope.contentsLoaded = false;
@@ -625,16 +593,16 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        }
        else {
            let localItem = null;
-           if(window.localStorage && $scope.currentIndex.chapter != '')
+           if(window.localStorage && $scope.currentIndex.chapter !== '')
                localItem = window.localStorage.getItem($scope.currentIndex.chapter);
            if(localItem)
-               $scope.$parent.$broadcast('fanficReceived',JSON.parse(LZString.decompress(localItem)))
+               $scope.$parent.$broadcast('fanficReceived',JSON.parse(LZString.decompress(localItem)));
            else
                fanficManager.requestFanfic($scope.currentIndex);
        }
    };
 
-   let refreshBookInfoDetail = function(data){
+   let refreshBookInfoDetail = function(){
            $scope.bookInfoDetail.intro = $scope.chapter.intro;
            $scope.bookInfoDetail.grade = $scope.chapter.grade;
            $scope.bookInfoDetail.fandom = $scope.chapter.fandom;
@@ -645,8 +613,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    };
 
    $scope.valueAtBit = function(num,bit){
-       let result = (num >> bit) &1;
-       return result;
+         return (num >> bit) &1;
     };
 
    $scope.$on('fanficReceived',function(event,data){
@@ -656,8 +623,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter.chapter));
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
-            $scope.workIndex.map(function(item,i,arr){
-                if((item.chapter && item.chapter._id == $scope.chapter._id) || item._id == $scope.currentIndex._id)
+            $scope.workIndex.map(function(item,i){
+                if((item.chapter && item.chapter._id === $scope.chapter._id) || item._id === $scope.currentIndex._id)
                     $scope.workIndex[i].chapter = {_id:$scope.chapter._id,title:$scope.chapter.title,wordCount:$scope.chapter.wordCount};
             });
             if(window.localStorage)
@@ -681,14 +648,14 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         {
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter));
             $timeout(function(){$scope.$broadcast('inputHintIni')},10);
-            $scope.workIndex.map(function(item,i,arr){
-                if(item._id == data.chapter._id)
+            $scope.workIndex.map(function(item){
+                if(item._id === data.chapter._id)
                 {
                     item.chapter.title = data.chapter.chapter.title;
                     item.chapter.wordCount = data.chapter.chapter.wordCount;
                 }
             });
-            if(data.chapter._id == $scope.workIndex[0].chapter._id)
+            if(data.chapter._id === $scope.workIndex[0].chapter._id)
                refreshBookInfoDetail();
         }
     });
@@ -763,8 +730,9 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         $scope.saveBook();
     },10*60*1000);
 
+
     $scope.autoSettingSave = $interval(function(){
-      if($scope.settingSaving || $scope.fanficEdit == $scope.userSettings.fanficEdit)
+      if($scope.settingSaving || $scope.fanficEdit === $scope.userSettings.fanficEdit)
           return;
        $scope.settingSaving = true;
        userManager.saveSettings({fanficEdit:$scope.fanficEdit});
@@ -776,7 +744,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             $scope.bookSaving = true;
             $scope.bookInfo.status = Number($scope.bookInfo.status);
             let wordCount = 0;
-            $scope.workIndex.map(function(item,i,arr){
+            $scope.workIndex.map(function(item){
                 if(item.chapter)
                     wordCount += item.chapter.wordCount;
             });
@@ -792,15 +760,15 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
 
     //警告操作
    $scope.addWarningTemplate = function(){
-       if($scope.currentWarningSelect == '')
+       if($scope.currentWarningSelect === '')
            return;
-       if($scope.chapter.warning.indexOf($scope.currentWarningSelect) == -1)
+       if($scope.chapter.warning.indexOf($scope.currentWarningSelect) === -1)
            $scope.chapter.warning.push($scope.currentWarningSelect);
 
    };
 
    $scope.removeWarning = function(list){
-       if($scope.chapter.warning.indexOf(list)!= -1)
+       if($scope.chapter.warning.indexOf(list) !== -1)
        {
            let pos = $scope.chapter.warning.indexOf(list);
            $scope.chapter.warning.splice(pos,1);
@@ -808,7 +776,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    };
 
    $scope.submitWarning = function($event){
-       if($event.keyCode != 13)
+       if($event.keyCode !== 13)
            return;
        if($scope.chapter.warning.length>=10)
        {
@@ -816,7 +784,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
            $timeout($scope.removeError,10);
            return;
        }
-       if($scope.chapter.warning.indexOf($scope.warningInput) == -1)
+       if($scope.chapter.warning.indexOf($scope.warningInput) === -1)
        {
            $scope.chapter.warning.push($scope.warningInput);
            $scope.warningInput = '';
@@ -842,13 +810,13 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
           data.prevId = $scope.selectedChapters[$scope.selectedChapters.length-1];
       else
           data.prevId = $scope.workIndex[$scope.workIndex.length-1]._id;
-      $scope.workIndex.map(function(item,i,arr){
-          if(item._id == data.prevId)
+      $scope.workIndex.map(function(item,i){
+          if(item._id === data.prevId)
           {
               data.prevIndex = i;
               data.currentOrder = item.order;
           }
-          if(data.prevIndex>=0 && i-data.prevIndex == 1)
+          if(data.prevIndex>=0 && (i-data.prevIndex) === 1)
               data.nextIndex = i;
       });
 
@@ -865,8 +833,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        for(let i=0; i< $scope.selectedChapters.length;++i)
        {
            let tag=  $scope.selectedChapters[i];
-           $scope.workIndex.map(function(item,i,arr){
-               if(item._id == tag)
+           $scope.workIndex.map(function(item){
+               if(item._id === tag)
                    rmTag.push(item);
            });
        }
@@ -896,20 +864,24 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    };
 
    let checked = function(){
-       if($scope.bookInfo.title == '')
+       if($scope.bookInfo.title === '')
        {
            return false;
        }
        return $scope.chapter.contents.length > 30;
    };
 
-   let publish = function(IfAll){
+   let publish = function(){
        if(!checked())
            return;
        if($scope.publishing)
            return;
        $scope.publishing = true;
-       fanficManager.publish($scope.bookInfo,$scope.chapter,$scope.workIndex,IfAll);
+       fanficManager.publish($scope.bookInfo,$scope.chapter,$scope.workIndex,$scope.ifSingle);
+   };
+
+   let publishAll = function(){
+       $scope.$emit('showError','该功能尚在开发中，敬请等待');
    };
 
     $scope.preview = function(){
@@ -921,13 +893,13 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
        switch($scope.submitType)
        {
            case 0:
-               publish(false);
+               publish();
                break;
            case 1:
                saveDraft();
                break;
            case 2:
-               publish(true);  
+               publishAll();
                break; 
        }
    };

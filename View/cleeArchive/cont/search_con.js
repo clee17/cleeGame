@@ -1,12 +1,29 @@
-
-app.controller("searchCon",['$scope','$rootScope','$timeout','searchManager','fanficManager',function($scope,$rootScope,$timeout,searchManager,fanficManager){
-
-   $scope.searching = true;
+app.controller("searchCon",['$scope','$rootScope','$timeout','$location','searchManager','fanficManager',function($scope,$rootScope,$timeout,$location,searchManager,fanficManager){
+   $scope.searching = false;
    $scope.showErr = false;
    $scope.err = '';
    $scope.receivedList = [];
-
    $scope.deleteList = [];
+   $scope.listNumber = 0;
+
+   let searchQuery  = $location.search();
+   $scope.pageId = Number(searchQuery.pid) || 1;
+
+   let excludeList = [5];
+   $rootScope.countList.forEach(function(list){
+      if(list.infoType===5 && $rootScope.searchList.indexOf(1) !== -1)
+          $scope.listNumber -= list.number;
+      $rootScope.searchList.forEach(function(infoType){
+         if(list.infoType === infoType && excludeList.indexOf(infoType) === -1)
+               $scope.listNumber += list.number;
+      })
+   });
+
+   if(typeof $scope.pageId !== 'number' || $scope.pageId>Math.ceil($scope.listNumber/$scope.perPage))
+   {
+      $scope.err = '不是有效的页码ID';
+      $scope.showErr = true;
+   }
 
    $scope.$on('searchFinished',function(event,data){
       $scope.searching = false;
@@ -15,8 +32,9 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','searchManager','fa
       }
       else{
          $scope.showErr = true;
-         $scope.err = data.info;
+         $scope.err = data.message;
       }
+      $scope.$broadcast('pageChangeFinished');
    });
 
 
@@ -31,26 +49,26 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','searchManager','fa
          if(i >= $scope.receivedList.length)
             break;
          let item = $scope.receivedList[i];
-         if(item.infoType == data.infoType && item.chapter._id == data.index.chapter)
+         if(item.infoType === data.infoType && item.chapter._id === data.index.chapter)
          {
             $scope.deleteList.push({index:i,item:item});
             $scope.receivedList.splice(i,1);
             i--;
          }
-         else if(data.infoType === 0 && item.work._id == data.index.work)
+         else if(data.infoType === 0 && item.work._id === data.index.work)
          {
             $scope.deleteList.push({index:i,item:item});
             $scope.receivedList.splice(i,1);
             i--;
          }
-         else if(data.infoType === 1 && data.index.prev == null && item.work._id == data.index.work && item.work.chapterCount <= 1)
+         else if(data.infoType === 1 && data.index.prev == null && item.work._id === data.index.work && item.work.chapterCount <= 1)
          {
             $scope.deleteList.push({index:i,item:item});
             $scope.receivedList.splice(i,1);
             i--;
             data.infoType = 0;
          }
-         if(data.infoType === 1 && item.work._id == data.index.work)
+         if(data.infoType === 1 && item.work._id === data.index.work)
          {
             item.work.chapterCount --;
          }
@@ -73,5 +91,18 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','searchManager','fa
            }
    });
 
-   searchManager.searchAll({searchType:$rootScope.searchType});
+   $scope.$on('pageChange',function(event,data){
+      $scope.pageId = data.pid;
+      $location.search('pid',$scope.pageId);
+      $scope.receivedList.length = 0;
+      $scope.searching = true;
+      searchManager.searchAllFanfic({searchType:$rootScope.searchList,pageId:$scope.pageId,perPage:$scope.perPage,totalNum:$scope.listNumber});
+   });
+
+   if(!$scope.showErr)
+   {
+      $scope.searching = true;
+      searchManager.searchAllFanfic({searchType:$rootScope.searchList,pageId:$scope.pageId,perPage:$scope.perPage,totalNum:$scope.listNumber});
+   }
+
 }]);

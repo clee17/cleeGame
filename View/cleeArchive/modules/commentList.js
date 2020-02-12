@@ -21,7 +21,15 @@ app.directive('commentInfo',function($compile,$rootScope,feedbackManager) {
             scope.comment = '';
             scope.parent = null;
 
-            scope.initializeCommentData();
+            if(scope.initializeCommentData)
+                 scope.initializeCommentData();
+            else{
+                scope.workId = '';
+                scope.chapterId = '';
+                scope.infoTYpe = '';
+                scope.targetUser = '';
+                scope.userId = '';
+            }
 
             scope.getParentUser = function(parent){
                 scope.commentList.forEach(function(comment){

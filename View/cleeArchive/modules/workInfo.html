@@ -149,6 +149,51 @@
         color:rgba(139,100,127,255);
     }
 
+
+    .grade{
+        display:block;
+        width:auto;
+        border-radius:15px;
+        padding-left:10px;
+        padding-right:10px;
+        color:white;
+        font-family: "Microsoft YaHei UI",serif;
+        font-weight:bold;
+        background:rgba(182,161,147,255);
+        font-size:12px;
+        margin-right:1rem;
+        height:1.5rem;
+        line-height:1.5rem;
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    .tag {
+        border-radius:5px;
+        height:1rem;
+        line-height:1rem;
+        margin-left:10px;
+        padding:1px;
+        padding-left:4px;
+        padding-right:4px;
+        color:rgba(181,163,160,255);
+        border:1px solid rgba(181,163,160,255);
+        text-decoration:none;
+    }
+
+    .tag:hover{
+        background:rgba(181,163,160,255);
+        color:white;
+    }
+
+    .tagRow{
+
+        display:flex;
+        flex-direction:row;
+        flex-wrap:wrap;
+    }
+
+
 </style>
 
 <div style="display:flex;flex-direction:column;flex:1;" class="workInfo work-info-outer">
@@ -193,12 +238,12 @@
         <div style="margin-left:20px;">{{item.chapter.intro | introType}}</div>
     </div>
     <div class="editRow">
+        <button class="editButton" ng-click="showFeedbackList()" ng-if="(item.work.liked+ item.work.bookmarked )>0">热度({{item.work.liked+ item.work.bookmarked}})</button>
         <button class="editButton" ng-click="deleteItem()" ng-if="item.work.user == readerId">删除</button>
         <button class="editButton"><a href="{{'/fanfic/post/edit?id='+item.index._id}}" ng-if="item.work.user == readerId" target="_blank">编辑</a></button>
-        <button class="editButton" ng-click="showFeedbackList()" ng-show="(item.work.liked+ item.work.bookmarked )>0">热度({{item.work.liked+ item.work.bookmarked}})</button>
-        <button ng-class="{'editButton':!liked,'likedButton':liked}" ng-show="item.work.user != readerId" ng-click="likeIt()"><span ng-show="liked">已点赞</span><span ng-show="!liked">点赞</span>({{item.work.liked}})</button>
-        <button ng-class="{'editButton':!bookMarked,'likedButton':bookMarked}" ng-show="item.work.user != readerId" ng-click="bookMarkIt()"><span ng-show="bookMarked">已收藏</span><span ng-show="!bookMarked">收藏</span>({{item.work.bookmarked}})</button>
-        <button class="editButton" ng-click="showCommentList()">评论(<span ng-show="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
+        <button ng-class="{'editButton':!liked,'likedButton':liked}" ng-if="item.work.user != readerId" ng-click="likeIt()"><span ng-show="liked">已点赞</span><span ng-show="!liked">点赞</span>({{item.work.liked}})</button>
+        <button ng-class="{'editButton':!bookMarked,'likedButton':bookMarked}" ng-if="item.work.user != readerId" ng-click="bookMarkIt()"><span ng-show="bookMarked">已收藏</span><span ng-show="!bookMarked">收藏</span>({{item.work.bookmarked}})</button>
+        <button class="editButton" ng-click="showCommentList()">评论(<span ng-if="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
     </div>
     <div ng-show="showFeedBack" class="feedbackInfo work-info-outer">
         <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有<b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b>名游客点赞了该作品</div></div>

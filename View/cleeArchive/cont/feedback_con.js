@@ -131,7 +131,7 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
     };
 
     $scope.showBookComment = function(){
-        if($scope.infoType ===0)
+        if($scope.infoType === 0)
             return;
         $scope.infoType = 0;
         $scope.commentList = $scope.bookCommentList;
@@ -163,7 +163,8 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
     };
     $scope.likeIt = function(){
         let data = {work: $scope.workId, user: $scope.authorId};
-        $scope.liked = !$scope.liked;
+        $scope.liked++;
+        $scope.ifLiked = !$scope.ifLiked;
         feedbackManager.likeIt(data);
     };
 
