@@ -403,7 +403,7 @@ let updateMessagePool = function(){
 };
 
 let countAll = function(){
-    let countMap = [{infoType:0,number:0},{infoType:1,number:0}];
+    let countMap = [{infoType:0,number:0},{infoType:1,number:0},{infoType:5,number:0}];
     let startIndex = 0;
     let maxIndex = 0;
     let final = function(){
@@ -431,7 +431,19 @@ let countAll = function(){
         final();
     });
 
-    chapterModel.countDocuments({published:true},function(err,count){
+    worksModel.countDocuments({published:true,type:0,chapterCount:1,status:0},function(err,count){
+        if(!err)
+        {
+            countMap.forEach(function(item,i,arr){
+                if(item.infoType === 5)
+                    countMap[i].number = count;
+            })
+        }
+        startIndex++;
+        final();
+    });
+
+    chapterModel.countDocuments({type:{$lte:100},published:true},function(err,count){
         if(!err)
         {
             countMap.forEach(function(item,i,arr){

@@ -390,7 +390,10 @@ let handler = {
             success:false
         };
 
-        if(!req.session.user || (req.session.user._id != saveData.chapter.user)){
+        if(typeof saveData.book.status != 'number')
+            saveData.book.status = Number(saveData.book.status);
+
+        if(!req.session.user || (req.session.user._id !== saveData.chapter.user)){
             data.message = '您的登录状态出现错误，请重新登录';
             handler.finalSend(data);
             return;
@@ -398,9 +401,26 @@ let handler = {
         let updateModelUpdateList = [{chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,date:saveData.chapter.date,updated:saveData.chapter.updated,publisher:req.session.user._id},
             {chapterId:saveData.chapter._id,infoType:0,workId:saveData.book._id,date:saveData.book.date,updated:saveData.book.updated,publisher:req.session.user._id}];
 
-        let countMap = [{infoType:0,increment:0},{infoType:1,increment:0}];
+        let countMap = [{infoType:0,increment:0},{infoType:1,increment:0},{infoType:5,increment:0}];
         saveData.chapter.updated = Date.now();
-        console.log(saveData.chapter);
+
+        if(!saveData.book.published)
+        {
+            saveData.book.published = true;
+            saveData.book.date = saveData.book.updated = Date.now();
+            countMap[0].increment = 1;
+            if(saveData.book.status === 0 && saveData.book.chapterCount <= 1)
+                countMap[2].increment = 1;
+        }
+        else{
+            saveData.book.updated = Date.now();
+            updateModelUpdateList[1] = null;
+            if(saveData.ifSingle && (saveData.book.chapterCount >1 || saveData.book.status>0))
+                countMap[2].increment = -1;
+            else if(!saveData.ifSingle && (saveData.book.chapterCount <=1 && saveData.book.status === 0))
+                countMap[2].increment = 1;
+        }
+
         if(!saveData.chapter.published)
         {
             saveData.chapter.date = saveData.chapter.updated;
@@ -410,26 +430,9 @@ let handler = {
             updateModelUpdateList[0] = null;
         }
 
-        let updateIndex = [];
-        updateIndex.push(saveData.chapter._id);
-        saveData.index.map(function(item,i,arr){
-            if(item.chapter && saveData.ifAll && updateIndex.indexOf(item.chapter._id) === -1)
-                updateIndex.push(item.chapter._id);
-        });
-
         let isFirst = false;
-        isFirst = (saveData.index[0].chapter._id == saveData.chapter._id);
+        isFirst = (saveData.index[0].chapter._id === saveData.chapter._id);
 
-        if(!saveData.book.published)
-        {
-            saveData.book.published = true;
-            saveData.book.date = saveData.book.updated = saveData.chapter.updated;
-            countMap[0].increment = 1;
-        }
-        else{
-            saveData.book.updated = saveData.chapter.updated;
-            updateModelUpdateList[1] = null;
-        }
 
         let updateTagData = {chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,user:saveData.chapter.user,tagList:[]};
         for(let i=0;i<saveData.chapter.fandom.length;++i)

@@ -34,7 +34,7 @@ app.directive('infoReceiver',function($rootScope){
 });
 
 
-app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficManager,$timeout){
+app.controller("dashboard_con",['$scope','$rootScope','$location','userManager','fanficManager',function($scope,$rootScope,$location,userManager,fanficManager){
     $scope.contentsLoaded = false;
 
     $scope.alertInfo = '';
@@ -44,9 +44,10 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
     $scope.showError = false;
 
     $scope.maxLimit = 0;
-    $scope.pageMax = 1;
     $scope.pageId = $rootScope.query.pageId || 0;
-    $scope.subPageIndex = $rootScope.query.subPageIndex || 0;
+    $scope.perPage = 15;
+    let queryStr = $location.search();
+    $scope.pageIndex = queryStr.pid? Number(queryStr.pid) : 1;
 
     $scope.count = {};
 
@@ -59,21 +60,28 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
 
     $scope.userSetting = null;
 
+    $scope.$on('pageChange',function(event,data){
+        $scope.pageIndex = data.pid;
+        $location.search('pid',$scope.pageIndex);
+        $scope.receivedList.length = 0;
+        $scope.contentsLoaded = false;
+        $scope.initialize();
+    });
+
     $scope.$on('dashboardRequestFinished',function(event,data){
         $scope.contentsLoaded = true;
         if(data.success)
         {
             $scope.receivedList = data.result || [];
             $scope.maxLimit = data.maxLimit || 0;
-            $scope.pageMax = Math.ceil($scope.maxLimit / 10);
-            if($scope.pageMax == 0)
-                $scope.pageMax += 1;
+            $scope.$broadcast('updatePageIndex',{totalNum:$scope.maxLimit,pageId:$scope.pageIndex});
         }
         else
         {
             $scope.showError =true;
-            $scope.error = data.info;
+            $scope.error = data.message;
         }
+        $scope.$broadcast('pageChangeFinished');
     });
 
     $scope.$on('deleteReceivedList',function(event,data){
@@ -106,7 +114,7 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
                 i--;
                 data.infoType = 0;
             }
-            if(data.infoType ==1 && item.work._id == data.index.work)
+            if(data.infoType === 1 && item.work._id === data.index.work)
             {
                 item.work.chapterCount --;
             }
@@ -133,30 +141,29 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
         let query = $rootScope.query;
         let queryString = '?';
         for (let key in query){
-            if(queryString != '?')
+            if(queryString !== '?')
                 queryString += '&';
-            if(key != 'subPage')
+            if(key !== 'subPage')
                  queryString += key+'='+query[key];
             else
                 queryString  += key+'='+index.toString();
         };
-        if(queryString.indexOf('subPage') == -1)
+        if(queryString.indexOf('subPage') === -1)
             queryString  += key+'='+index.toString();
 
         return '/users/'+$rootScope.userId+queryString;
     };
 
-    $scope.gotoPage = function(index){
-        window.location.href = calcAddress(index);
-    };
-
     $scope.searchTag= function(tagName,type){
        return '/search/tag?id='+ escape(tagName);
     };
+
     //界面
 
     $scope.initialize = function(){
         let data = $rootScope.query;
+        data.subPage = $scope.pageIndex || 1;
+        data.perPage = $scope.perPage ||15;
         if(data.pageId == 1020)
         {
             $scope.contentsLoaded = true;
@@ -165,6 +172,6 @@ app.controller("dashboard_con",function($scope,$rootScope,userManager,fanficMana
         data.userSetting = $scope.userSetting;
         userManager.requestDashboard(data,$rootScope.userId);
     };
-});
+}]);
 
 

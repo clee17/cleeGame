@@ -168,81 +168,12 @@
     background:rgba(119,111,144,255);
 }
 
-.pageIndex >div:nth-child(1){
-    margin-left:auto;
-}
-
-.pageIndex >div:last-child{
-    margin-right:auto;
-}
-
-.grade{
-    display:block;
-    width:auto;
-    border-radius:15px;
-    padding-left:10px;
-    padding-right:10px;
-    color:white;
-    font-family: "Microsoft YaHei UI",serif;
-    font-weight:bold;
-    background:rgba(182,161,147,255);
-    font-size:12px;
-    margin-right:1rem;
-    height:1.5rem;
-    line-height:1.5rem;
-    margin-top:auto;
-    margin-bottom:auto;
-}
-
-.tag {
-    border-radius:5px;
-    height:1rem;
-    line-height:1rem;
-    margin-left:10px;
-    padding:1px;
-    padding-left:4px;
-    padding-right:4px;
-    color:rgba(181,163,160,255);
-    border:1px solid rgba(181,163,160,255);
-    text-decoration:none;
-}
-
-.tag:hover{
-    background:rgba(181,163,160,255);
-    color:white;
-}
-
-.tagRow{
-
+.dashboard{
     display:flex;
-    flex-direction:row;
-    flex-wrap:wrap;
+    flex:1;
+    flex-direction:column;
 }
 
-.pageIndex button{
-    color:rgba(181,163,160,218);
-    background:white;
-    font-weight:bold;
-    width:1.5rem;
-    min-width:1.5rem;
-    min-height:1.5rem;
-    line-height:1rem;
-    border-radius:5px;
-    border:1px solid rgba(181,163,160,218);
-    margin-left:15px;
-}
-
-.pageIndex button:disabled{
-    background:rgba(181,163,160,218);
-    color:white;
-    font-weight:bold;
-    width:1.5rem;
-    min-width:1.5rem;
-    min-height:1.5rem;
-    line-height:1rem;
-    border-radius:5px;
-    border:1px solid rgba(181,163,160,218);
-}
 
 #listInfo >div:first-child{
     margin-top:2rem;
@@ -260,8 +191,3 @@
     color:rgba(181,181,181,255);
 }
 
-.dashboard{
-    display:flex;
-    flex:1;
-    flex-direction:column;
-}

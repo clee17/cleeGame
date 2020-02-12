@@ -266,13 +266,13 @@
     <div class="end" style="padding-bottom:2rem;" ng-show="isEnd()">{{"· 全文完 · " | endClass:bookStatus}}</div>
     <% } %>
     <div id="feedbackRow">
-        <button id="likeCommentBtn" ng-click="showLikeList()" class="feedbackButton"><span>热度</span>({{liked+bookMarked}})</button>
+        <button id="likeCommentBtn" ng-click="showLikeList()" class="feedbackButton" ng-disabled="infoType == 2"><span>热度</span>({{liked+bookMarked}})</button>
         <% if(user._id != readerId){ %>
         <button ng-click="likeIt()" ng-class="{'feedbackButton':!ifLiked,'likedButton':ifLiked}"><span ng-show="ifLiked">已点赞</span><span ng-show="!ifLiked">点赞</span>({{liked}})</button>
         <button ng-click="bookMarkIt()" ng-class="{'feedbackButton':!ifBookMarked,'likedButton':ifBookMarked}"><span ng-show="ifBookMarked">已收藏</span><span ng-show="!ifBookMarked">收藏</span>({{bookMarked}})</button>
         <% } %>
-        <button id="chapterCommentBtn" ng-click="showChapterComment()" class="feedbackButton" ng-disabled="infoType==1"><span>评论</span><span>({{chapterCommented}})</span></button>
-        <button id="bookCommentBtn" ng-click="showBookComment()" class="feedbackButton" ng-disabled="infoType==0"><span>作品评论</span><span>({{commented}})</span></button>
+        <button id="chapterCommentBtn" ng-click="showChapterComment()" class="feedbackButton" ng-disabled="infoType ==1"><span>评论</span><span>({{chapterCommented}})</span></button>
+        <button id="bookCommentBtn" ng-click="showBookComment()" class="feedbackButton" ng-disabled="infoType===0"><span>作品评论</span><span>({{commented}})</span></button>
     </div>
     <div id="arrowRow">
         <div id="btnPointer"><i class="fa fa-angle-up fa-2x"></i></div>

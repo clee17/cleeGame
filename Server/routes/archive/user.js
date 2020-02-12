@@ -7,13 +7,10 @@ let express = require('express'),
 let registerModel = require(path.join(__dataModel,'register')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
-    indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
-    chapterModel = require(path.join(__dataModel,'cleeArchive_fanfic')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagModel =  require(path.join(__dataModel,'cleeArchive_tag')),
-    tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
-    updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates'));
+    tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap'));
 
 let md5 = crypto.createHash('md5');
 
@@ -95,7 +92,7 @@ let handler = {
                     title:response.userInfo.user+'的主页',
                     controllers:['/view/cont/dashboard_con.js'],
                     styles:['archive/user'],
-                    modules:['/view/modules/workInfo.js','/view/modules/commentList.js'],
+                    modules:['/view/modules/workInfo.js','/view/modules/commentList.js','/view/modules/pageIndex.js'],
                     services: ['/view/cont/userService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
                     variables:{userId:response.userInfo._id,readerId:response.readerId, query:query, visitorId:response.visitorId}});
             else
@@ -192,8 +189,9 @@ let handler = {
     },
 
     requestTagBoard(req,res,data,response){
-       let pageId = data.subPage || 0;
-       let perPage = 10;
+       let startPage = data.subPage || 1;
+       startPage--;
+       let perPage = data.perPage || 10;
        let tagName = data.tagId;
        let sent = false;
 
@@ -274,9 +272,7 @@ let handler = {
             .then(function(docs){
                 response.success = true;
                 response.maxLimit = docs.length;
-                let startIndex = pageId*perPage;
-                let endIndex = startIndex + perPage;
-                response.result = docs.slice(startIndex,endIndex);
+                response.result = docs.slice(startPage*perPage,startPage*perPage+perPage);
                 finalSend();
             })
 
@@ -298,7 +294,8 @@ let handler = {
     },
 
     requestWorkboard:function(req,res,data,response){
-        let pageId = data.subPage || 0;
+        let startPage = data.subPage || 1;
+        startPage--;
         let perPage = data.perPage || 10;
         let sent = false;
         let finalSend = function(){
@@ -368,9 +365,7 @@ let handler = {
             .then(function(docs){
                 response.success = true;
                 response.maxLimit = docs.length;
-                let startIndex = pageId*perPage;
-                let endIndex  = startIndex + perPage;
-                response.result = docs.slice(startIndex,endIndex);
+                response.result = docs.slice(startPage*perPage,startPage*perPage+perPage);
                 finalSend();
             })
             .catch(function(err){
@@ -383,6 +378,9 @@ let handler = {
 
     requestUpdates:function(req,res,data,response){
         let sent = false;
+        let startPage = data.subPage || 1;
+        startPage--;
+        let perPage = data.perPage || 10;
         let sendError = function(msg){
             if(sent)
                 return;
@@ -407,12 +405,6 @@ let handler = {
             readerId = mongoose.Types.ObjectId(req.session.user._id);
         let ip = req.ip;
         response.type = 0;
-        if(!data.perPage)
-            data.perPage = 10;
-        if(!data.pageId)
-            data.pageId = 0;
-        if(!data.subPage)
-            data.subPage = 0;
 
         response.maxLimit = data.maxMsgCount || 0;
 
@@ -479,8 +471,7 @@ let handler = {
             .then(function(docs){
                 response.success = true;
                 response.maxLimit = docs.length;
-                let startIndex = data.perPage* data.subPage;
-                let result = docs.slice(startIndex,startIndex+data.perPage);
+                let result = docs.slice(startPage*perPage,startPage*perPage + perPage);
                 response.result = JSON.parse(JSON.stringify(result));
                 finalSend();
             })

@@ -105,6 +105,7 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
         restrict: "E",
         templateUrl:'/view/modules/workInfo.html',
         link:function(scope,element,attr) {
+
             scope.status = 1;
             scope.showComment = false;
             scope.showFeedBack = false;
@@ -158,6 +159,7 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.likeIt = function () {
                 let data = {work: scope.item.work._id, user: scope.item.work.user};
                 scope.liked = !scope.liked;
+                scope.work.liked ++;
                 feedbackManager.likeIt(data);
             };
 

@@ -86,9 +86,6 @@
             <div style="min-height:4rem;height:4rem;width:100%;"></div>
             <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
         </div>
-
-        <div style="display:flex;flex-direction:row;min-height:2rem;height:2rem;width:100%;margin-bottom:2rem;" class="pageIndex" ng-show="receivedList.length>0">
-            <div ng-repeat="x in [].constructor(pageMax) track by $index"><button ng-click="gotoPage($index)" ng-disabled="subPageIndex  == $index">{{$index+1}}</button></div>
-        </div>
+        <page-index pid='pageIndex' tnm="maxLimit" ppg="perPage"></page-index>
     </div>
 </div>

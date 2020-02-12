@@ -7,6 +7,7 @@ let express = require('express'),
 let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
+    countMapModel = require(path.join(__dataModel,'cleeArchive_countMap')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic'));
 
 let handler = {
@@ -27,11 +28,11 @@ let handler = {
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
         viewPortMap.set('/fanfic',{viewport:'/view/fanficSearch.html',
-            modules:['/view/modules/workInfo.js','/view/modules/commentList.js'],
-            styles:['archive/user'],
+            modules:['/view/modules/workInfo.js','/view/modules/commentList.js','/view/modules/pageIndex.js'],
+            styles:[],
             controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
-            variables:{searchType:1,gradeTemplate:fanfic_grade}});
+            variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js']});
@@ -53,23 +54,45 @@ let handler = {
             else
                 __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');
         }
-        else if(req.url ==='/fanfic' && !req.session.user){
+        else if(req.url ==='/fanfic'){
+            handler.fanficSearch(req,res,result);
+        }
+        else
+            __renderIndex(req,res,result);
+    },
+
+    fanficSearch:function(req,res,result){
+        let error = null;
+        result.variables.searchList = [0,1];//default 是0,1，但如果有用户settings的话从settings里读取;
+        result.variables.perPage = 20; //default是20，但是用户有settings的话从settings里读取;
+        let visitorRequest = function(){
             visitorModel.findOneAndUpdate({ipa:req.ip},{},{upsert:true,setDefaultsOnInsert: true,new:true},function(err,doc){
                 if(doc && !err)
                     result.variables.visitorId = doc._id;
                 __renderIndex(req,res,result);
             });
-        }
-        else
-            __renderIndex(req,res,result);
+        };
+
+        countMapModel.find({infoType:{$lt:10,$gte:0}},function(err,docs){
+            if(err)
+                __renderError(req,res,err.errMsg || '无法获取文章总数');
+            else
+            {
+                result.variables.countList = JSON.parse(JSON.stringify(docs));
+                if(!req.session.user)
+                         visitorRequest();
+                else
+                    __renderIndex(req,res,result);
+            }
+        });
     },
     
     fanfic:function(req,res,next){
         let fileName = req.params.fanficId;
         let index = ['new','preview','validate'];
-        if(index.indexOf(fileName) ==-1)
+        if(index.indexOf(fileName) === -1)
         {
-            if(fileName && fileName.indexOf('.html')!= -1)
+            if(fileName && fileName.indexOf('.html')!== -1)
                 res.sendFile(path.join(__basedir,'public/html/',fileName));
             else
                 handler.fanficDetail(req,res,next,fileName);

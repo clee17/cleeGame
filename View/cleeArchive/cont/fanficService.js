@@ -27,8 +27,8 @@ app.service('fanficManager',function($http,$rootScope){
             });
     };
 
-    this.publish = function(bookInfo,chapterInfo,bookIndex,ifAll){
-        let data = {book:bookInfo,chapter:chapterInfo,index:bookIndex,ifAll:ifAll};
+    this.publish = function(bookInfo,chapterInfo,bookIndex,ifSingle){
+        let data = {book:bookInfo,chapter:chapterInfo,index:bookIndex,ifSingle:ifSingle};
         $http.post('/fanfic/post/publish',{data:LZString.compressToBase64(JSON.stringify(data))})
             .then(function(response){
                 let data = JSON.parse(LZString.decompressFromBase64(response.data));

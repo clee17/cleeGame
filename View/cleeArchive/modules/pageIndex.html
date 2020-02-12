@@ -1,0 +1,56 @@
+<style>
+    .pageIndex{
+        display:flex;
+        flex:1;
+        width:100%;
+        flex-direction:row;
+        min-height:2rem;
+        height:2rem;
+        margin-bottom:2rem;
+    }
+
+    .pageIndex >div{
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    .pageIndex >div:first-child{
+        margin-left:auto;
+    }
+
+    .pageIndex >div:last-child{
+        margin-right:auto;
+    }
+
+
+    .pageIndex button{
+        color:rgba(181,163,160,218);
+        background:white;
+        font-weight:bold;
+        width:1.5rem;
+        min-width:1.5rem;
+        min-height:1.5rem;
+        line-height:1rem;
+        border-radius:5px;
+        border:1px solid rgba(181,163,160,218);
+        margin-left:15px;
+    }
+
+    .pageIndex button:hover{
+        background:rgba(181,163,160,218);
+        color:white;
+    }
+
+    .pageIndex button:disabled{
+        background:rgba(181,163,160,218);
+        color:white;
+    }
+</style>
+
+<div class="pageIndex">
+    <div ng-if="startIndex>1"><button ng-click="gotoPage(1)">1</button></div>
+    <div ng-if="startIndex>2">…</div>
+    <div ng-repeat="x in [].constructor(7) track by $index" ng-if="$index+startIndex <= pageMax"><button ng-click="gotoPage($index+startIndex)" ng-disabled="(pid-startIndex)=== $index">{{$index+startIndex}}</button></div>
+    <div ng-if="startIndex+7 < pageMax">…</div>
+    <div ng-if="startIndex+7 <= pageMax"><button ng-click="gotoPage(pageMax)">{{pageMax}}</button></div>
+</div>

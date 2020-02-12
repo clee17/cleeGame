@@ -6,7 +6,8 @@
     #searchBar{
         background:rgba(223,216,214,255);
         color:rgba(108,95,93,255);
-        width:85%;
+        width:75%;
+        min-width:48rem;
         margin-left:auto;
         margin-right:auto;
         padding:10px;
@@ -30,18 +31,19 @@
     }
 </style>
 
-<div id="searchList" style="margin-left:auto;margin-right:auto;min-width:80rem;flex:1;" ng-controller="searchCon">
-    <div id="searchBar">
+<div id="searchList" style="margin-left:auto;margin-right:auto;flex:1;width:100%;display:flex;flex-direction:column;" ng-controller="searchCon">
+    <div id="searchBar" ng-show="!showErr">
         <div>进阶搜索：
         </div>
     </div>
     <div id="waitingBoard"  ng-show="searching" style="font-size:35px;font-weight:bold;padding-top:2rem;">
         等待加载<i class="fa fa-spinner fa-spin" style="margin-left:1rem;"></i>
     </div>
-    <div id="errBoard"  ng-show="showErr && !searching">
-        {{err}}
+    <div id="errBoard"  style="display:flex;flex:1;flex-direction:column;" ng-show="showErr && !searching">
+        <div style="margin:auto;font-weight:bold;">出现错误：{{err}}</div>
     </div>
     <div ng-show="!searching && !showErr" style="display:flex;flex-direction:column;padding-top:3rem;">
         <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
     </div>
+    <page-index pid='pageId' tnm="listNumber" ppg="perPage"></page-index>
 </div>

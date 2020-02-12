@@ -137,7 +137,7 @@ let handler = {
             return;
 
         let deleteWork = function(){
-            worksModel.deleteOne({_id:data.index.work},function(err,doc){
+            worksModel.findOneAndDelete({_id:data.index.work},function(err,doc){
                 if(err)
                 {
                     result.message = err;
@@ -149,7 +149,10 @@ let handler = {
                     result.message = 'delete succeed';
                     handler.finalSend(res,result);
                     handler.deleteAllRelevant(data.index.work,0);
-                    __updateCountMap([{infoType:0,increment:-1}]);
+                    let countMapUpdate = [{infoType:0,increment:-1}];
+                    if(doc.status === 0 && doc.chapterCount <=1)
+                        countMapUpdate.push({infoType:5,increment:-1});
+                    __updateCountMap(countMapUpdate);
                 }
             })
         };

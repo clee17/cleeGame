@@ -174,6 +174,7 @@ router.post('/feedback/request',feedback.request);
 
 //index
 router.post('/search/all',search.all);
+router.post('/search/count',search.count);
 
 //feed
 router.post('/feeds/channel',feed.channel);
