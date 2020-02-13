@@ -156,7 +156,6 @@ let handler = {
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));
                 response.success = true;
-                console.log('search finish sent');
                 handler.finalSend(res,response);
             })
             .catch(function(err){
