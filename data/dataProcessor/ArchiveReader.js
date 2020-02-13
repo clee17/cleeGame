@@ -1,5 +1,6 @@
 let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
+    indexModel = require('./../model/cleeArchive_workIndex'),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     updatesModel = require('../model/cleeArchive_postUpdates'),
@@ -457,6 +458,24 @@ let countAll = function(){
 
 };
 
+let tidyChapter = function(){
+   chapterModel.find({},{contents:0}).exec()
+       .then(function(docs){
+           docs.forEach(function(item){
+               indexModel.find({chapter:item._id},function(err,docs){
+                   if(docs.length === 0)
+                       chapterModel.deleteOne({_id:item._id},function(err,doc){
+                           if(!err)
+                               console.log(item._id+'deleted');
+                       })
+               })
+           })
+       })
+       .catch(function(err){
+           console.log(err);
+       })
+};
+
 
 switch(argv[2])
 {
@@ -477,6 +496,9 @@ switch(argv[2])
         break;
     case 'countAll':
         countAll();
+        break;
+    case 'tidyChapter':
+        tidyChapter();
         break;
     default:
         console.log('输入无效的指令');
