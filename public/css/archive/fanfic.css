@@ -22,17 +22,17 @@ button{
 }
 
 a{
-    color:rgba(181,163,160,255);
+    color:rgba(109,100,136,1);
     text-decoration:underline;
     font-family: 'Microsoft YaHei UI',serif;
 }
 
 a:hover{
-    color:rgba(181,181,181,255);
+    color:rgba(184,173,217,1);
 }
 
 .fadeLink{
-    color:rgba(181,163,160,255);
+    color:rgba(109,100,136,1);
     text-decoration:underline;
     font-family: 'Microsoft YaHei UI',serif;
     font-weight:bold;
@@ -44,7 +44,7 @@ a:hover{
 }
 
 .fadeLink:hover{
-    color:rgba(181,181,181,255);
+    color:rgba(184,173,217,1);
 }
 
 .emphasize{

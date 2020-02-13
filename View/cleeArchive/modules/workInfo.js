@@ -52,16 +52,15 @@ app.filter('workInfoVisited',function($filter){
 app.filter('workInfoDate',function($filter){
     return function(item,type){
         let prefix = '发布于:';
-        let chapterUpdate = item.updated;
-        let subType = item.infoType;
-        if(!chapterUpdate && subType == 0)
-            chapterUpdate = item.work.updated;
-        if(!chapterUpdate)
-            chapterUpdate = item.chapter.date;
         if(item.infoType == 1)
             prefix = '增加于:';
+        let date = '发生错误';
+        if(item.infoType == 0)
+            date = item.work.date;
+        if(item.infoType == 1)
+            date = item.chapter.date;
 
-        return prefix+ $filter('dateInfo')(chapterUpdate,0);
+        return prefix+ $filter('dateInfo')(date,0);
     }
 });
 
