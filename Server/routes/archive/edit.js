@@ -402,17 +402,19 @@ let handler = {
             {chapterId:saveData.chapter._id,infoType:0,workId:saveData.book._id,date:saveData.book.date,updated:saveData.book.updated,publisher:req.session.user._id}];
 
         let countMap = [{infoType:0,increment:0},{infoType:1,increment:0},{infoType:5,increment:0}];
-        saveData.chapter.updated = Date.now();
 
         if(!saveData.book.published)
         {
+            console.log('book created');
             saveData.book.published = true;
-            saveData.book.date = saveData.book.updated = Date.now();
+            saveData.book.updated = Date.now();
+            saveData.book.date = saveData.book.updated;
             countMap[0].increment = 1;
             if(saveData.book.status === 0 && saveData.book.chapterCount <= 1)
                 countMap[2].increment = 1;
         }
         else{
+            console.log('book updated');
             saveData.book.updated = Date.now();
             updateModelUpdateList[1] = null;
             if(saveData.ifSingle && (saveData.book.chapterCount >1 || saveData.book.status>0))
@@ -423,10 +425,14 @@ let handler = {
 
         if(!saveData.chapter.published)
         {
+            console.log('chapter created');
+            saveData.chapter.updated = Date.now();
             saveData.chapter.date = saveData.chapter.updated;
             saveData.chapter.published = true;
             countMap[1].increment = 1;
         }else{
+            console.log('chapter updated');
+            saveData.chapter.updated = Date.now();
             updateModelUpdateList[0] = null;
         }
 
