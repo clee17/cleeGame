@@ -299,7 +299,7 @@ let handler = {
                 bulkArr.push({updateOne:{'filter':{'_id':indexData.prev},'update':{'next':data.newIndex._id}}});
             if(indexData.next)
                 bulkArr.push({updateOne:{'filter':{'_id':indexData.next},'update':{'prev':data.newIndex._id}}});
-            bulkArr.push({updateMany:{'filter':{'order':{$gte:data.newIndex.order},'_id':{$not:{$in:[data.newIndex._id]}}},'update':{$inc:{order:1}}}});
+            bulkArr.push({updateMany:{'filter':{'order':{$gte:data.newIndex.order},'_id':{$not:{$in:[data.newIndex._id]}},'work':indexData.work},'update':{$inc:{order:1}}}});
             indexModel.bulkWrite(bulkArr)
                 .then(function(result){
                     process = 2;

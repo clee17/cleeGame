@@ -207,10 +207,24 @@
     }
 
     .tagRow{
-
         display:flex;
         flex-direction:row;
         flex-wrap:wrap;
+    }
+
+    .subInfoRow{
+        display:flex;
+        flex-direction:row;
+        flex-wrap:wrap;
+    }
+    .subInfoRow >a{
+        font-weight:bold;
+        color:rgba(109,100,136,1);
+        margin-left:3px;
+    }
+
+    .subInfoRow >a:hover{
+        color:rgba(184,173,217,1);
     }
 
 
@@ -219,12 +233,12 @@
 <div style="display:flex;flex-direction:column;flex:1;" class="workInfo work-info-outer">
     <div class="titleRow">
         <div class="grade" grade-show grade="{{item.chapter.grade}}">{{item.chapter.grade | grade:gradeTemplate }} </div>
-        <div ng-if="item.infoType==1"><span class="markerColor">作品</span> <a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a> <span class="markerColor">更新了</span></div>
+        <div ng-if="item.infoType==1"><span class="markerColor">作品</span> <a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a> <span class="markerColor" ng-if="item.index.prev != null">更新了</span><span class="markerColor" ng-if="item.index.prev == null">发布了</span></div>
         <div><a href="{{ item | workInfoLink:type }}">{{item | workInfoTitle:type}}</a></div>
         <div ng-if="item.infoType==0" class="marker markerColor" >新的作品</div>
         <div style="margin-left:auto;">{{item | workInfoDate:type}}</div>
     </div>
-    <div class="tagRow">
+    <div class="subInfoRow">
         <div>作者:</div>
         <a href="{{'/users/'+item.work.user}}">{{item.chapter.user.user}}</a>
         <div>总字数:</div>
