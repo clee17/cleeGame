@@ -47,8 +47,16 @@
     </div>
 </div>
 <div id="guideBar">
-    <div class="chapterJumberH"><a href="{{nextChapter(true)}}" ng-show="nextExist(true)">上一章</a></div>
-    <div class="chapterJumper" ><a href="{{nextChapter(true)}}" ng-show="nextExist(true)"><i class="chapter fas fa-arrow-left"></i></a></div>
+    <div class="chapterJumberH">
+        <% if(prev) { %>
+        <a href="<%- '/fanfic/'+prev.chapter %>">上一章</a>
+        <% } %>
+    </div>
+    <div class="chapterJumper" >
+        <% if(prev){ %>
+        <a href="<%- '/fanfic/'+prev.chapter %>"><i class="chapter fas fa-arrow-left"></i></a>
+        <% } %>
+    </div>
 
     <div class="miniInfo" ng-click="showBook()">作品</div>
     <div class="miniInfo" id="bookButton" ng-click="showBook()"><i class="fas fa-book fa-2x"></i></div>
@@ -68,8 +76,16 @@
     <div  class="ss-edit" ng-click="deleteItem()"><i class="fas fa-trash fa-2x"></i></div>
     <% } %>
 
-    <div class="chapterJumberH"><a href="{{nextChapter(false)}}" ng-show="nextExist(false)">下一章</a></div>
-    <div class="chapterJumper"><a href="{{nextChapter(false)}}" ng-show="nextExist(false)"><i class="chapter fas fa-arrow-right"></i></a></div>
+    <div class="chapterJumberH">
+        <% if(next) { %>
+        <a href="<%- '/fanfic/'+next.chapter %>">下一章</a>
+        <% } %>
+    </div>
+    <div class="chapterJumper">
+        <% if(next) { %>
+        <a href="<%- '/fanfic/'+next.chapter %>"><i class="chapter fas fa-arrow-right"></i></a>
+        <% } %>
+    </div>
 </div>
 
 <div id="infoScroll" ng-show="panelVisible" style="display:none;">

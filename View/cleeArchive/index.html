@@ -102,6 +102,8 @@
                 $scope.loggingOut = false;
                 if(data.success)
                     window.location.reload();
+                else
+                    $scope.$emit('showError',data.message);
             });
 
             $scope.$on('clicked',function(event,data) {

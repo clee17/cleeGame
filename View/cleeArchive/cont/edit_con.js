@@ -638,7 +638,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         }
         else{
             $scope.contentsLoaded = true;
-            $scope.error = data.message;
+            $scope.$emit("showError",data.message);
         }
     });
 
@@ -658,6 +658,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             if(data.chapter._id === $scope.workIndex[0].chapter._id)
                refreshBookInfoDetail();
         }
+        else
+            $scope.$emit('showError',data.message);
     });
 
     $scope.$on('publish finished',function(event,data){
@@ -667,6 +669,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             window.localStorage.clear();
         if(data.success)
             $window.location.href = rootUrl+'/fanfic/'+data._id;
+        else
+            $scope.$emit('showError',data.message);
     });
 
     $scope.$on('bookSaved',function(event,data){
@@ -677,6 +681,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             if($scope.bookInfo.hasOwnProperty('status'))
                $scope.bookInfo.status = $scope.bookInfo.status.toString();
         }
+        else
+            $scope.$emit('showError',data.message);
     });
 
     $scope.$on('chapterAdded',function(event,data){
@@ -703,6 +709,8 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             $scope.bookInfo.chapterCount = data.bookInfo.chapterCount;
             $scope.bookInfo.wordCount = data.bookInfo.wordCount;
         }
+        else
+            $scope.$emit('showError',data.message);
     });
 
 
@@ -710,12 +718,16 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     $scope.$on('preview ready',function(event,data){
            if(data.success)
                window.open("/fanfic/post/preview",'_blank');
+           else
+               $scope.$emit('showError',data.message);
     });
 
     $scope.$on('settingsSaveFinished',function(event,data){
         $scope.settingSaving = false;
         if(data.success)
            $scope.userSettings = data.info;
+        else
+            $scope.$emit('showError',data.message);
     });
 
     $scope.$watch('chapter.title',function(){

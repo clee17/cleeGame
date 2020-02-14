@@ -248,6 +248,8 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
                     scope.bookMarked = data.status;
                     scope.updateFeedBackData(data);
                 }
+                else
+                    scope.$emit('showError',data.message);
             });
 
             scope.$on('tellYes', function (event, data) {

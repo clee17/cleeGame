@@ -252,19 +252,19 @@
     </div>
     <div class="tagRow">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">基于作品:</div>
-        <a ng-repeat="fandom in item.chapter.fandom" href="{{searchTag(fandom,0)}}" class="tag">{{fandom}}</a>
+        <a ng-repeat="fandom in item.chapter.fandom" href="{{'/search/tag?id='+ escape(fandom)}}" class="tag">{{fandom}}</a>
     </div>
     <div class="tagRow">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">人物关系:</div>
-        <a ng-repeat="relation in item.chapter.relationships" href="{{searchTag(relation,1)}}" class="tag">{{relation}}</a>
+        <a ng-repeat="relation in item.chapter.relationships" href="{{'/search/tag?id='+ escape(relation)}}" class="tag">{{relation}}</a>
     </div>
     <div class="tagRow">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">登场角色:</div>
-        <a ng-repeat="character in item.chapter.characters" href="{{searchTag(character,2)}}" class="tag">{{character}}</a>
+        <a ng-repeat="character in item.chapter.characters" href="{{'/search/tag?id='+ escape(character)}}" class="tag">{{character}}</a>
     </div>
     <div class="tagRow">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">其他标签:</div>
-        <a ng-repeat="tag in item.chapter.tag" href="{{searchTag(tag,3)}}" class="tag">{{tag}}</a>
+        <a ng-repeat="tag in item.chapter.tag" href="{{'/search/tag?id='+ escape(tag)}}" class="tag">{{tag}}</a>
     </div>
     <div>
         <div><span ng-if="item.infoType===1">章节</span><span ng-show="item.infoType===0">作品</span>简介:</div>

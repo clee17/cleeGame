@@ -184,28 +184,6 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
         feedbackManager.likeIt(data);
     };
 
-    $scope.nextExist = function(backward){
-        let result = false;
-        let stamp = null;
-        let checkStamp = function(index){
-            if(stamp != null && index.published)
-                result = true;
-            if(index.chapter === $scope.chapterId)
-                stamp = $scope.chapterId;
-        };
-        if(backward)
-        {
-            for(let i = $scope.index.length-1;i>=0;--i)
-                checkStamp($scope.index[i]);
-        }
-        else{
-            let stamp = null;
-            for(let i =0;i<$scope.index.length;++i)
-                checkStamp($scope.index[i]);
-        }
-        return result;
-    };
-
     $scope.nextChapter = function(backward){
         let baseUrl = '/fanfic/';
         let stamp = null;

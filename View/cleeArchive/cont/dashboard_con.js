@@ -134,6 +134,7 @@ app.controller("dashboard_con",['$scope','$rootScope','$location','userManager',
             {
                 $scope.receivedList.splice($scope.deleteList[i].index,0,$scope.deleteList[i].item);
             }
+            $scope.$emit('showError',data.message);
         }
     });
 
@@ -152,10 +153,6 @@ app.controller("dashboard_con",['$scope','$rootScope','$location','userManager',
             queryString  += key+'='+index.toString();
 
         return '/users/'+$rootScope.userId+queryString;
-    };
-
-    $scope.searchTag= function(tagName,type){
-       return '/search/tag?id='+ escape(tagName);
     };
 
     //界面

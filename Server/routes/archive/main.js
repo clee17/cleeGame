@@ -174,7 +174,7 @@ let handler = {
                 chapterModel.findOneAndUpdate({_id:data.chapter._id},{$inc:{visited:1}},function(err,doc){
                 });
 
-            if(req.country_id == 'CN')
+            if(req.ipData && req.ipData.country == '中国')
                 data.lib = [
                     'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
                     'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
@@ -219,6 +219,20 @@ let handler = {
                 if(passCode === req.cookies[doc.chapter._id])
                     data.codeMatch = true;
             }
+
+            data.prev = null;
+            let current = null;
+            data.next = null;
+            data.index.forEach(function(item,i,arr){
+                if(item.published && item.chapter === data.chapter._id)
+                    current = item;
+                if(item.published){
+                    if(!current)
+                        data.prev = item;
+                    else if(current._id !== item._id)
+                        data.next = item;
+                }
+            });
 
             redisClient.get('fanfic_grade',function(err,response){
                 if(!err && response)

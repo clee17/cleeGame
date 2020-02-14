@@ -88,6 +88,7 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','$location','search
               {
                  $scope.receivedList.splice($scope.deleteList[i].index,0,$scope.deleteList[i].item);
               }
+              $scope.$emit('showError',data.message);
            }
    });
 
