@@ -160,7 +160,6 @@ let handler = {
         ]).allowDiskUse(true).exec()
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));
-				console.log(docs[0]);
                 response.success = true;
                 handler.finalSend(res,response);
             })

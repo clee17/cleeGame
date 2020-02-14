@@ -26,7 +26,9 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','$location','search
    }
 
    $scope.$on('searchFinished',function(event,data){
-      $scope.searching = false;
+      $timeout(function(){
+         $scope.searching = false;
+      },100);
       if(data.success){
          $scope.receivedList = data.result;
       }
@@ -95,7 +97,6 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','$location','search
    $scope.$on('pageChange',function(event,data){
       $scope.pageId = data.pid;
       $location.search('pid',$scope.pageId);
-      $scope.receivedList.length = 0;
       $scope.searching = true;
       searchManager.searchAllFanfic({searchType:$rootScope.searchList,pageId:$scope.pageId,perPage:$scope.perPage,totalNum:$scope.listNumber});
    });

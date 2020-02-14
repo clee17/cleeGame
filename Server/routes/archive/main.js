@@ -170,7 +170,7 @@ let handler = {
                 }
             }
 
-            if(data.codeMatch || !data.chapter.passcode.use)
+            if(data.chapter && (data.codeMatch  || !data.chapter.passcode))
                 chapterModel.findOneAndUpdate({_id:data.chapter._id},{$inc:{visited:1}},function(err,doc){
                 });
 
