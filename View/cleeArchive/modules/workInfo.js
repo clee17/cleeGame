@@ -158,7 +158,10 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.likeIt = function () {
                 let data = {work: scope.item.work._id, user: scope.item.work.user};
                 scope.liked = !scope.liked;
-                scope.work.liked ++;
+                if(scope.liked)
+                    scope.item.work.liked ++;
+                else
+                    scope.item.work.liked --;
                 feedbackManager.likeIt(data);
             };
 
@@ -225,10 +228,18 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
                 if (data.success) {
                     scope.item.work.liked = data.liked;
                     scope.item.work.visitorLiked = data.visitorLiked;
-                    scope.liked = data.status;
+                    scope.liked = Boolean(data.status);
                     scope.updateFeedBackData(data);
                 }
-            });
+                else{
+                    scope.liked = !scope.liked;
+                    if(scope.liked)
+                        scope.item.work.liked++;
+                    else
+                        scope.item.work.liked--;
+                    scope.$emit('showError',data.message);
+                }}
+            );
 
             scope.$on('bookmarkFinished', function (event, data) {
                 if (scope.item.work._id !== data.work)

@@ -116,6 +116,9 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
 
     $scope.isRequesting = false;
 
+    let item = document.getElementById('infoScroll');
+    item.style.display = 'flex';
+
     $scope.initializeCommentData = function(){
         $scope.infoType = 0;
         $scope.targetUser = $scope.authorId;
