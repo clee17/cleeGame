@@ -7,6 +7,7 @@ body{
     font-family: SimSun, "Microsoft YaHei UI",serif;
     display:flex;
     flex-direction:column;
+    min-height:100vh;
     color:rgba(108,95,93,255);
 }
 
@@ -197,6 +198,7 @@ h2 >span >span{
 }
 /*展示相关信息*/
 .scrollFunc{
+    width:100%;
     display:flex;
     flex-direction:column;
 }
@@ -205,6 +207,7 @@ h2 >span >span{
     margin-left:auto;
     margin-right:15px;
     font-size:28px;
+    width:auto;
     color:rgba(158,142,166,255);
 }
 
@@ -232,6 +235,7 @@ h2 >span >span{
     height:calc(100% - 5rem);
     width:100%;
     position:fixed;
+    z-index:85;
     top:4rem;
     padding-top:10px;
 }
@@ -280,6 +284,8 @@ h2 >span >span{
 
 #infoScroll{
     background:white;
+    display:flex;
+    flex-direction:column;
     border-right:1px solid rgba(205,205,205,255);
     box-shadow:5px 0px 5px rgba(215,215,215,115);
     position:fixed;
@@ -447,13 +453,14 @@ h2 >span >span{
 #feedbackRow{
     display:flex;
     flex-direction:row;
-    height:2rem;
     padding-top:10px;
     min-width:35rem;
     width:100%;
     margin-left:auto;
     margin-right:auto;
     margin-bottom:0;
+    min-height:40px;
+    max-height:40px;
     border-top:1px solid rgba(180,180,180,255);
 }
 
@@ -465,14 +472,17 @@ h2 >span >span{
     flex-direction:row;
     padding:0;
     width:100%;
-    height:1.5rem;
-    min-height:1.5rem;
-    max-height:1.5rem;
+    height:auto;
+    min-height:40px;
+    max-height:40px;
     overflow:hidden;
 }
 
 #arrowRow >div{
     margin-left:0;
+    margin-top:auto;
+    margin-bottom:auto;
+    font-size:19px;
     transition:transform 1s ease-in-out;
     transform:translateX(-100%);
 }
@@ -508,7 +518,8 @@ h2 >span >span{
 }
 
 #feedbackRow button{
-    font-size:1.5rem;
+    font-size:26px;
+    margin-right:13px;
 }
 
 #feedbackRow button:first-child{
@@ -527,7 +538,9 @@ h2 >span >span{
     display:flex;
     flex-direction:column;
     flex:1;
-    margin-top:-4.5rem;
+    margin-top:-90px;
+    padding-top:90px;
+    padding-bottom:2rem;
 }
 
 .feedback-content{
@@ -798,18 +811,26 @@ h2 >span >span{
     }
 
     #feedbackRow{
-        height:1.5rem;
+        max-height:20px;
+        min-height:20px;
         width:65%;
     }
 
     #arrowRow{
         width:65%;
+        font-size:14px;
+        max-height:20px;
+        min-height:20px;
+    }
+
+    #arrowRow >div{
+        font-size:14px;
     }
 
     #feedback{
-        margin-top:-3.6rem;
+        margin-top:-50px;
         margin-left:-4rem;
-        width:calc(100% + 8rem);
+        width:calc(100% + 4rem);
         flex:1;
         padding-left:4rem;
         display:inline-block;
@@ -818,6 +839,7 @@ h2 >span >span{
 
     #feedbackRow button{
         font-size:14px;
+        margin-right:8px;
     }
 
     #feedbackRow button:last-child{

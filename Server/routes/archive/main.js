@@ -272,12 +272,13 @@ let handler = {
             {$unwind:"$book"},
             {$lookup:{from:"work_index",as:"index",let:{workId:"$book._id"},pipeline:[
                         {$match:{$expr:{$eq:["$work","$$workId"]}}},
+                        {$sort:{order:1}},
                         {$project:{prev:1,next:1,_id:1,chapter:1,order:1}},
                     ]}},
             {$unwind:"$index"},
             {$lookup:{from:"work_chapters",as:"index.chapterInfo",let:{chapterId:"$index.chapter"},pipeline:[
                         {$match:{$expr:{$eq:["$_id","$$chapterId"]}}},
-                        {$project:{published:1,title:1,visited:1,liked:1,comments:1,wordCount:1}},
+                        {$project:{published:1,title:1,visited:1,liked:1,comments:1,wordCount:1,intro:1,fandom:1,relationships:1,characters:1,tag:1}},
                     ]}},
             {$unwind:"$index.chapterInfo"},
             {$set:{"index.visited":"$index.chapterInfo.visited","index.published":"$index.chapterInfo.published",
@@ -288,9 +289,15 @@ let handler = {
                 _id:"$_id",
                 index:{$push:"$index"},
                 book:{$first:"$book"},
+                bookInfo:{$first:"$index"},
                 user:{$first:"$user"},
                 chapter:{$first:"$chapter"}}},
             {$set:{"book.visited":{$sum:"$index.visited"},"book.wordCount":{$sum:"$index.wordCount"}}},
+            {$lookup:{from:"work_chapters",as:"bookInfo",let:{chapterId:"$bookInfo.chapter"},pipeline:[
+                        {$match:{$expr:{$eq:["$_id","$$chapterId"]}}},
+                        {$project:{intro:1,fandom:1,relationships:1,characters:1,tag:1,warning:1}},
+                    ]}},
+            {$unwind:"$bookInfo"},
             {$lookup:{from:"post_like", let:{work_id:"$book._id",user_id:"$book.user"},as:"book.feedback",pipeline:[
                         likeModelMatch,
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
@@ -312,6 +319,7 @@ let handler = {
             if(err)
             {
                 noRes = {message:err};
+                console.log(err);
                 finalSend();
             }
             else{

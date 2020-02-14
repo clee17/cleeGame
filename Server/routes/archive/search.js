@@ -147,6 +147,11 @@ let handler = {
             {$sort:{date:-1}},
             {$skip:perPage*pageId},
             {$limit:perPage},
+            {$lookup:{from:"work_chapters",as:"chapterInfo",let:{workId:"$work.id"},pipeline:[
+                        {$match:{$expr:{$eq:["$book","$$workId"]},published:true}},
+                        {$project:{visited:1,wordCount:1}}]}},
+            {$set:{"book.visited":{$sum:"chapterInfo.visited"},"book.wordCount":{$sum:"chapterInfo.wordCount"}}},
+            {$project:{chapterInfo:0}},
             {$lookup:{from:"post_comment", let:{work_id:"$work._id",chapter_id:"$chapter._id",post_type:"$infoType"},as:"commentList",pipeline:[
                         {$match:{$and:[{$expr:{$eq:["$chapter","$$chapter_id"]}},{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$infoType","$$post_type"]}}]}},
                         {$sort:{date:-1}},

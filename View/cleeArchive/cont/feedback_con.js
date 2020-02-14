@@ -279,6 +279,7 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
             $scope.visitorLiked = data.visitorLiked;
             $scope.ifLiked = Boolean(data.status);
             $scope.updateFeedBackData(data);
+            adjustPointer($scope.infoType);
         }
         else{
             $rootScope.$broadcast('showErrorText',data.message);
@@ -292,6 +293,7 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
             $scope.bookMarked = data.bookmarked;
             $scope.ifBookMarked = data.status;
             $scope.updateFeedBackData(data);
+            adjustPointer($scope.infoType);
         }
         else
         {
