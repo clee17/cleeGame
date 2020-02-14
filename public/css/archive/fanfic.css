@@ -658,6 +658,7 @@ h2 >span >span{
         width:2.5rem;
         position:fixed;
         display:flex;
+        z-index:90;
         flex-direction:column;
         overflow:hidden;
     }
