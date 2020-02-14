@@ -8,10 +8,11 @@ app.directive('infoReceiver',['$rootScope',function($rootScope){
             scope.chapterCommented = Number(scope.chapterCommented);
             scope.commented = Number(scope.commented);
             scope.bookStatus = Number(scope.bookStatus);
-            scope.index.replace(/\n/gi,'<br>');
+            scope.index = scope.index.replace(/\n/gi,'<br>');
             scope.index = JSON.parse(scope.index);
             scope.bookCommentList = scope.bookCommentList.replace(/\n/g,'<br>');
             scope.bookCommentList = JSON.parse(scope.bookCommentList);
+			scope.chapterCommentList = scope.chapterCommentList.replace(/\n/g,'<br>');
             scope.chapterCommentList = JSON.parse(scope.chapterCommentList);
             scope.likePostList = JSON.parse(scope.likePostList);
             scope.chapterCount = Number(scope.chapterCount);
