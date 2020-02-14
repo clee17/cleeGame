@@ -152,7 +152,7 @@ let handler = {
                 return;
 
             data.visitorId = visitorId;
-            if(!req.session.user && visitorId.length==0)
+            if(!req.session.user && visitorId.length===0)
             {
                 let to  = setTimeout(finalSend,100);
                 return;
@@ -169,6 +169,10 @@ let handler = {
                     data.title = __chapterCount(data.chapter.order)+'    ' +data.chapter.title;
                 }
             }
+
+            if(data.codeMatch || !data.chapter.passcode.use)
+                chapterModel.findOneAndUpdate({_id:data.chapter._id},{$inc:{visited:1}},function(err,doc){
+                });
 
             if(req.country_id == 'CN')
                 data.lib = [
