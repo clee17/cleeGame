@@ -54,10 +54,7 @@ a:hover{
 #main{
     display:flex;
     flex-direction:column;
-    padding:2rem;
-    padding-left:1rem;
-    padding-right:1rem;
-    padding-bottom:0;
+    padding-top:2rem;
     min-width:100vw;
     margin-top:3.5rem;
     flex:1;
@@ -199,6 +196,11 @@ h2 >span >span{
     min-width:4rem;
 }
 /*展示相关信息*/
+.scrollFunc{
+    display:flex;
+    flex-direction:column;
+}
+
 .scrollButton{
     margin-left:auto;
     margin-right:15px;
@@ -221,6 +223,8 @@ h2 >span >span{
 
 #contents{
     font-size:24px;
+    padding-left:0.6em;
+    padding-right:0.6rem;
 }
 
 #infoScroll{
@@ -334,7 +338,8 @@ h2 >span >span{
 #tagInfo >div >div{
     margin-top:3px;
     margin-bottom:3px;
-    height:1.3rem;
+    padding-top:2px;
+    padding-bottom:2px;
 }
 
 .infoPanel >div:not(:last-child){
@@ -442,11 +447,10 @@ h2 >span >span{
 #feedbackRow{
     display:flex;
     flex-direction:row;
+    height:2rem;
     padding-top:10px;
-    min-height:1.5rem;
-    height:1.5rem;
-    max-height:1.5rem;
     min-width:35rem;
+    width:100%;
     margin-left:auto;
     margin-right:auto;
     margin-bottom:0;
@@ -460,6 +464,7 @@ h2 >span >span{
     display:flex;
     flex-direction:row;
     padding:0;
+    width:100%;
     height:1.5rem;
     min-height:1.5rem;
     max-height:1.5rem;
@@ -502,8 +507,16 @@ h2 >span >span{
     color:rgba(190,150,124,1);
 }
 
+#feedbackRow button{
+    font-size:1.5rem;
+}
+
 #feedbackRow button:first-child{
     margin-left:auto;
+}
+
+#feedbackRow button:last-child{
+    margin-right:auto;
 }
 
 #feedback{
@@ -514,6 +527,7 @@ h2 >span >span{
     display:flex;
     flex-direction:column;
     flex:1;
+    margin-top:-4.5rem;
 }
 
 .feedback-content{
@@ -783,6 +797,15 @@ h2 >span >span{
         font-size:24px;
     }
 
+    #feedbackRow{
+        height:1.5rem;
+        width:65%;
+    }
+
+    #arrowRow{
+        width:65%;
+    }
+
     #feedback{
         margin-top:-3.6rem;
         margin-left:-4rem;
@@ -790,5 +813,14 @@ h2 >span >span{
         flex:1;
         padding-left:4rem;
         display:inline-block;
+    }
+
+
+    #feedbackRow button{
+        font-size:14px;
+    }
+
+    #feedbackRow button:last-child{
+        margin-right:2rem;
     }
 }
