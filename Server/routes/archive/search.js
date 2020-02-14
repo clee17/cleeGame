@@ -147,7 +147,7 @@ let handler = {
             {$sort:{date:-1}},
             {$skip:perPage*pageId},
             {$limit:perPage},
-            {$lookup:{from:"work_chapters",as:"chapterInfo",let:{workId:"$work.id"},pipeline:[
+            {$lookup:{from:"work_chapters",as:"chapterInfo",let:{workId:"$work._id"},pipeline:[
                         {$match:{$expr:{$eq:["$book","$$workId"]},published:true}},
                         {$project:{visited:1,wordCount:1}}]}},
             {$set:{"book.visited":{$sum:"chapterInfo.visited"},"book.wordCount":{$sum:"chapterInfo.wordCount"}}},
