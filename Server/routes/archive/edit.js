@@ -304,29 +304,11 @@ let handler = {
                 .then(function(result){
                     process = 2;
                     proceed();
+                    send();
                 })
                 .catch(function(err){
                     console.log(err);
                     data.message = '更新原目录错误'+err;
-                    send();
-                })
-        };
-
-        let updateBook = function(){
-            indexModel.find({work:indexData.work}).exec()
-                .then(function(docs){
-                    return worksModel.updateOne({_id:indexData.work},{chapterCount:docs.length},{new:true}).exec()
-                })
-                .then(function(doc){
-                    if(!doc)
-                        throw '更新书籍信息错误';
-                    data.success =  true;
-                    data.bookInfo = JSON.parse(JSON.stringify(doc));
-                    send();
-                })
-                .catch(function(err){
-                    console.log(err);
-                    data.message = '更新目录错误'+err;
                     send();
                 })
         };
@@ -425,6 +407,7 @@ let handler = {
             saveData.chapter.updated = Date.now();
             saveData.chapter.date = saveData.chapter.updated;
             saveData.chapter.published = true;
+            saveData.book.chapterCount++;
             countMap[1].increment = 1;
             updateModelUpdateList.push({chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,date:saveData.chapter.date,updated:saveData.chapter.updated,publisher:req.session.user._id});
         }else{

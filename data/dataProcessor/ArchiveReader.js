@@ -477,6 +477,18 @@ let tidyChapter = function(){
 };
 
 
+let chapterCount = function(){
+    worksModel.find({},function(err,docs){
+        docs.forEach(function(item){
+            chapterModel.countDocuments({published:true,book:item._id},function(err,count){
+                worksModel.findOneAndUpdate({_id:item._id},{chapterCount:count},{new:true},function(err,doc){
+                    console.log(doc._id+'章节更新为'+doc.chapterCount);
+                });
+            })
+        })
+    })
+};
+
 switch(argv[2])
 {
     case 'setting':
@@ -499,6 +511,9 @@ switch(argv[2])
         break;
     case 'tidyChapter':
         tidyChapter();
+        break;
+    case 'chapterCount':
+        chapterCount();
         break;
     default:
         console.log('输入无效的指令');

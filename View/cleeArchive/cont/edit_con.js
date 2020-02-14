@@ -687,9 +687,9 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
            $scope.workIndex.splice(data.insertId+1,0,data.newIndex);
            for(let i = data.inserId+2;i<$scope.workIndex.length;++i)
                $scope.workIndex[i].order++;
-           $scope.bookInfo.chapterCount = data.bookInfo.chapterCount;
-           $scope.bookInfo.wordCount = data.bookInfo.wordCount;
         }
+        else
+            $scope.$emit('showError',data.message);
     });
 
     $scope.$on('chapterRemoved',function(event,data){
