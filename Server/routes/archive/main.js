@@ -337,7 +337,6 @@ let handler = {
     validate:function(req,res,next){
         let sent = false;
         let request = JSON.parse(req.body.data) || null;
-        console.log(request);
         let type = request.type || '-1';
         let index = req.params.fanficId;
 

@@ -21,8 +21,6 @@ module.exports = new mongoose.Schema({
 
     date: { type: Date, default: Date.now },
 
-    wordCount: {type:Number,default:0},
-
     chapterCount: {type:Number,default:1},
 
     updated: {type:Date,default:Date.now()},
@@ -34,6 +32,4 @@ module.exports = new mongoose.Schema({
     visitorLiked:{type:Number,default:0},
 
     bookmarked: {type:Number,default:0}, //收藏人数
-
-    visited:{type:Number,default:0}
 });

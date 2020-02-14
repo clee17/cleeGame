@@ -38,14 +38,12 @@ app.filter('workInfoLink',function($filter){
 
 app.filter('workInfoVisited',function($filter){
     return function(item,type){
-        let workVisited = item.work.visited || 0;
-        let subType = item.infoType;
-        if(subType == undefined)
-            subType = type;
-        if(subType==0)
-            return workVisited;
+        let visited = 0;
+        if(item.infoType === 0)
+            visited = item.work.visited;
         else
-            return item.chapter.visited;
+            visited = item.chapter.visited;
+        return $filter('wordCount')(visited);
     }
 });
 

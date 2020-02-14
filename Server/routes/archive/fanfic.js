@@ -246,7 +246,6 @@ let handler = {
         if(!__validateId(postData.work))
         {
             result.message = 'no valid id received';
-            console.log(result);
             handler.finalSend(res,result);
             return;
         }

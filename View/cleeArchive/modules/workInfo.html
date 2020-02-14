@@ -242,7 +242,7 @@
         <div>作者:</div>
         <a href="{{'/users/'+item.work.user}}">{{item.chapter.user.user}}</a>
         <div>总字数:</div>
-        <div>{{item | workInfoWordCount:type}}</div>
+        <div>{{item | workInfoWordCount:type}}字</div>
         <div ng-show="item.infoType== 0">总章节数:</div>
         <div ng-show="item.infoType== 0">{{item.work.chapterCount}}</div>
         <div>浏览量:</div>
