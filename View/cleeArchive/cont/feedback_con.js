@@ -118,6 +118,19 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
 
     let item = document.getElementById('infoScroll');
     item.style.display = 'flex';
+    let preloads = [];
+    preloads.push(document.getElementById('preLoad1'));
+    preloads.forEach(function(item){
+        if(item)
+            item.style.display = 'none';
+    });
+
+    let afterLoads = [];
+    afterLoads.push(document.getElementById('preLoad1'));
+    afterLoads.forEach(function(item){
+        if(item)
+            item.style.display = 'inline-block';
+    });
 
     $scope.initializeCommentData = function(){
         $scope.infoType = 0;
