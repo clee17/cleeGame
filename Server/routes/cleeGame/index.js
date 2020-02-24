@@ -5,10 +5,54 @@ let main = require(path.join(__routes,"/cleeGame/main")),
     admin = require(path.join(__routes,"/cleeGame/admin")),
     info = require(path.join(__routes,"/cleeGame/info")),
     game = require(path.join(__routes,"/cleeGame/game")),
-    works = require(path.join(__routes,"/cleeGame/works")),
-    root = require(path.join(__routes,"root"));
+    works = require(path.join(__routes,"/cleeGame/works"));
 
 let router = express.Router();
+
+global.__renderIndex = function(req,res,renderInfo){
+    let renderPage = {controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
+    if(req.ipData && req.ipData.country == '中国')
+        renderPage.lib = [
+            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+    else
+        renderPage.lib = [
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+    for(let attr in renderInfo){
+        renderPage[attr] = renderInfo[attr];
+    }
+    if(req.session.user)
+        renderPage.userId = req.session.user._id;
+    else
+        renderPage.userId = req.ip;
+    if(renderInfo.viewport)
+         res.render('cleeGame/'+renderInfo.viewport,renderPage);
+    else
+        res.render('cleeGame/index.html',renderPage);
+};
+
+global.__renderError = function(req,res,errMessage){
+    let userId = req.ip;
+    if(req.session.user)
+        userId = req.session.user._id;
+    let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
+    if(req.ipData && req.ipData.country == '中国')
+        renderInfo.lib = [
+            'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
+            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+    else
+        renderInfo.lib = [
+            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+    res.render('cleeGame/error.html',renderInfo);
+};
 
 //主界面
 router.get('/',main.index);
@@ -16,7 +60,6 @@ router.get('/news',main.index);
 router.get('/downloads/',main.index);
 router.get('/manual',main.index);
 router.get('/contact',main.index);
-router.get('/:fileId',root.getFile);
 
 //新闻与单页信息
 router.post('/getNewsList',main.getNewsList);
@@ -28,16 +71,14 @@ router.post('/getManual',main.getManual);
 router.get('/info/:infoId',info.getInfo);
 
 //游戏界面
-router.get('/games/dev/:gameId/',game.getDevIndex);
-router.get('/games/:gameId/',game.getIndex);
-router.get('/games/:gameId/img/title',game.getTitle);
-router.get('/games/:gameId/img/title/request',game.getTitleResource);
-router.get('/games/:gameId/img/:imgType/:imgId',game.getTypeImg);
-router.get('/games/:gameId/img/:imgId',game.getImg);
-router.get('/games/:gameId/css/:styleName',game.getCss);
-router.get('/games/:gameId/js/:jsId',game.getJs);
-router.get('/games/:gameId/data/:dataId',game.getJson);
-router.get('/games/:gameId/audio/:audioType/:audioName',game.getAudio);
+router.get('/games/admin',admin.index);
+router.post('/games/admin/addGame',admin.add);
+router.post('/games/admin/gameList',admin.fullList);
+
+router.get('/games/request',game.getResource);
+router.get('/games/load',game.loadScripts);
+router.get('/games/:gameId/',game.getGame);
+router.get('/games/:gameId/',game.getGame);
 router.post('/games/:gameId/requestPreview',game.getPreview);
 
 
@@ -69,8 +110,9 @@ module.exports = function(app)
     app.use('/',router);
 
     app.get('*', function(req, res){
-        res.render('cleeGame/generic/error404.html', {
-            title: '出错啦!'
+        res.render('cleeGame/error.html', {
+            title: '出错啦!',
+            message:'对不起，我们没有找到该网页。<br>该网页或许尚在施工中，敬请期待。'
         })
     });
 };

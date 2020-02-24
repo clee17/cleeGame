@@ -135,7 +135,6 @@ Graphics.preLoadTitle = function(){
                         Graphics._reference = JSON.parse(reader.result);
                         if(Graphics._reference)
                             Graphics.loadResource();
-
                     });
                     reader.readAsBinaryString(blob);
                 }
@@ -274,7 +273,6 @@ Graphics._centerElement = function(element){
 };
 Graphics.render = function(stage) {
     if (this._skipCount === 0) {
-
         var startTime = Date.now();
         if (stage) {
             this._renderer.render(stage);

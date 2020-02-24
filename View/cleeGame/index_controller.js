@@ -311,8 +311,9 @@ app.controller('guideBarCon',function($scope,newsManager,$timeout){
                 $scope.$apply();
             })
             .catch(function(err){
+                console.log(err);
                 $scope.requesting =false;
-                $timeout($scope.refresh,5);
+                $scope.error = '没有获取到新闻，后端出错';
             })
     };
 

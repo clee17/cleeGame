@@ -1,14 +1,16 @@
-var path = require('path'),
-    bodyparser = require('body-parser'),
+var bodyparser = require('body-parser'),
     cookie = require('cookie-parser'),
     session = require('express-session'),
     ejs = require('ejs'),
     redisStore = require('connect-redis')(session),
+    IP2Region = require('ip2region'),
 
     statics = require('./statics'),
     lib = require('./routes/lib'),
     view = require('./routes/view'),
     user = require('./routes/user');
+
+const ipSearcher = new IP2Region();
 
 module.exports=function(app){
     app.set('trust proxy',true);
@@ -37,6 +39,35 @@ module.exports=function(app){
             maxAge:null
         }
     }));
+
+    app.use('*',function(req,res,next){
+        let ip = req.ip;
+        if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
+            req.ipData = ipSearcher.search(ip);
+        else{
+            req.ipData = {};
+            req.ipData.country_id = '中国';
+        }
+        next();
+    });
+
+    app.use('*',function(req,res,next){
+        if(!req.session.user)
+        {
+            res.cookie('userId','',{maxAge:0});
+        }
+        if(req.session.user && !req.session.user.settings)
+        {
+            userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
+                if(!err)
+                    req.session.user.settings = JSON.parse(JSON.stringify(doc));
+                next();
+            });
+        }
+        else
+            next();
+    });
+
 
     app.use('/lib/',lib);
 

@@ -125,7 +125,8 @@ let handler = {
             })
             .catch(function(err){
                 err.title = '出错啦!';
-                res.render('cleeGame/generic/error404.html',err);
+                err.message = err;
+                res.render('cleeGame/error.html',err);
             });
     },
 
@@ -135,7 +136,7 @@ let handler = {
         worksModel.findOne({_id:workId},function(err,data){
             if(err)
             {
-                res.render('cleeGame/generic/error404.html', {title: '出错啦!'});
+                res.render('cleeGame/error.html', {title: '出错啦!',message:err});
             }
             else{
                 if(__allowedIP.indexOf(req.ip) != -1)
@@ -144,7 +145,7 @@ let handler = {
                     chapterModel.find({ works:workId}, '_id ext4 type title order wordCount prev next index', {sort:{order:1}},function (err, docs) {
                         if(err)
                         {
-                            res.render('/cleeGame/generic/error404.html',{title:'后端出错啦!'});
+                            res.render('/cleeGame/error.html',{title:'出错啦!',message:err});
                         }
                         else
                         {
@@ -156,7 +157,7 @@ let handler = {
                 }
                 else
                 {
-                    res.render('/cleeGame/generic/forbidden505.html');
+                    res.render('/cleeGame/error.html',{message:'您没有权限访问该页面',title:'权限不足'});
                 }
             }
         });

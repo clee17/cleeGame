@@ -1,8 +1,6 @@
 const express = require('express'),
-    IP2Region = require('ip2region'),
     path = require('path');
 
-const ipSearcher = new IP2Region();
 let fs = require('fs');
 
 global.__msgList = new Array();
@@ -190,34 +188,6 @@ router.get('/dynamic/*',function(req,res){
 
 module.exports = function(app)
 {
-    app.use('*',function(req,res,next){
-        let ip = req.ip;
-        if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
-            req.ipData = ipSearcher.search(ip);
-        else{
-            req.ipData = {};
-            req.ipData.country_id = '中国';
-        }
-        next();
-    });
-
-    app.use('*',function(req,res,next){
-        if(!req.session.user)
-        {
-            res.cookie('userId','',{maxAge:0});
-        }
-        if(req.session.user && !req.session.user.settings)
-        {
-            userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
-                if(!err)
-                    req.session.user.settings = JSON.parse(JSON.stringify(doc));
-                next();
-            });
-        }
-        else
-            next();
-    });
-
     app.use('/',router);
 
     app.use('*', function(req, res){

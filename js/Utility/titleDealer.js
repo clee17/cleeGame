@@ -4,7 +4,6 @@ const args = process.argv.slice(2);
 if(typeof(args[0])!== 'string')
     return;
 
-
 let rootDir = path.resolve(__dirname);
 rootDir = path.join(rootDir,'../../Directory');
 let gameDir = path.join(rootDir,args[0],'/img/titles');

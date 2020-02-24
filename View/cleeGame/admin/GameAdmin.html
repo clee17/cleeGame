@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>游戏管理</title>
+
+    <% lib.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js"></script>
+    <script>
+    var app = angular.module('cleeGameAdmin',[]);
+    </script>
+
+    <% controllers.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
+</head>
+<style>
+    *{
+        padding:0;
+        margin:0;
+        font-family: "simsun", serif;
+    }
+
+    body{
+        display:flex;
+        flex-direction:column;
+        min-height:100vh;
+        width:100vw;
+        overflow:hidden;
+    }
+
+    button{
+        color:inherit;
+        font-size:inherit;
+        font-weight:bold;
+        padding:3px;
+    }
+
+    .buttonStyle1 {
+        opacity:0.3;
+        transition: opacity 0.4s;
+        background:none;
+        border:none;
+    }
+
+    .buttonStyle1:hover{
+        opacity:1;
+    }
+
+    .buttonStyle1:disabled{
+        opacity:1;
+    }
+
+    body >div{
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    body >div:first-child{
+        margin-top:0;
+        padding:3px;
+        font-weight:bold;
+        height:auto;
+        color:#b09284;
+        background:#ecc7b8;
+        width:100%;
+    }
+
+    body >div:nth-child(2){
+        margin-top:1.5rem;
+        height:2rem;
+        color:#a93f61;
+    }
+
+    body >div:last-child{
+        z-index:99;
+        width:100%;
+        height:100%;
+        position:fixed;
+        display:flex;
+        flex-direction:column;
+        pointer-events:none;
+    }
+
+    body >div:last-child >div{
+        z-index:10;
+        height:1px;
+        transition:height 0.4s;
+        pointer-events:auto;
+    }
+
+    #list{
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        width:80%;
+        padding-top:3rem;
+        color:rgba(90,90,90,255);
+    }
+
+    #list >div{
+        height:auto;
+        min-height:2rem;
+        padding-left:25px;
+        display:flex;
+        flex-direction:row;
+        padding-top:5px;
+        padding-bottom:5px;
+        border-bottom:1px solid darkgray;
+    }
+
+    #list button{
+        margin-top:auto;
+        margin-bottom:auto;
+        padding-top:3px;
+        padding-bottom:3px;
+
+    }
+
+    #list >div >div{
+        min-width:10rem;
+        width:10rem;
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    #list >div>div:nth-child(1){
+        min-width:13rem;
+        width:13rem;
+    }
+
+    #list >div>div:nth-child(2){
+        text-overflow:ellipsis;
+        word-break:break-all;
+        overflow:hidden;
+    }
+
+    #list >div>div:nth-child(3){
+        min-width:5rem;
+        width:5rem;
+    }
+
+    #list >div>div:nth-child(4){
+        min-width:5rem;
+        width:5rem;
+    }
+
+    #list >div>div:nth-child(5){
+        min-width:12rem;
+        width:12rem;
+        margin-right:15px;
+    }
+
+    #list >div:first-child{
+        background:rgba(223,216,214,255);
+        border-bottom:solid 1px rgba(181,163,160,218);
+        border-top:solid 1px rgba(181,163,160,218);
+    }
+
+    #funcBoard{
+        display:flex;flex-direction:row;
+        width:80%;
+        border-top: 1px solid #b09284;
+        padding-bottom:4rem;
+        padding-top:3px;
+    }
+
+    #funcBoard >button{
+        margin-right:20px;
+    }
+
+    #funcBoard >button:first-child{
+        margin-left:auto;
+    }
+
+    #addPanel {
+        display:flex;
+        flex-direction:column;
+        padding:1.5rem;
+        width:22rem;
+        margin:auto;
+        background:white;
+        border:1px solid darkgray;
+        transition:width 0.05s ease-in;
+        overflow:hidden;
+    }
+
+    #addPanel button{
+        padding-top:3px;
+        padding-bottom:3px;
+        margin-left:auto;
+        color:dimgray;
+    }
+
+    #addPanel >div:nth-last-child(n+1){
+        display:flex;
+        flex-direction:column;
+    }
+
+    #addPanel >div:last-child{
+        display:flex;
+        flex-direction:row;
+    }
+
+    #addPanel >div:last-child button{
+        margin-right:5px;
+    }
+
+    #addPanel >div:nth-last-child(n+1)>div{
+        color:#b09284;
+        display:flex;
+        flex-direction:row;
+        min-height:20px;
+        width:100%;
+        padding-top:5px;
+        padding-bottom:5px;
+    }
+
+    #addPanel >div:nth-last-child(n+1)>div:nth-last-child(n+2){
+        border-bottom:1px solid rgba(190,190,190,0.7);
+    }
+
+    #addPanel input{
+        flex:1;
+        min-width:1rem;
+        padding-left:3px;
+    }
+
+    #addPanel span{
+        margin-right:5px;
+        min-width:6rem;
+        font-weight:bold;
+    }
+
+    #addPanel textArea{
+        resize:none;
+        flex:1;
+    }
+
+    @media screen and (min-device-width:80rem){
+        body >div:nth-child(2){
+            font-size:20px;
+        }
+
+
+        #addPanel span{
+            font-size:16px;
+        }
+    }
+
+</style>
+
+<body ng-app="cleeGameAdmin" ng-controller="gameAdminCon">
+    <div>欢迎来到Clee_Archive管理界面，请选择您要管理的项目: </div>
+    <div>
+        <button ng-click="request()" class="buttonStyle1" ng-disabled="page==='gameList'">游戏列表</button>
+        <button ng-click="request()" class="buttonStyle1" ng-disabled="page==='newGame'">管理游戏</button>
+    </div>
+
+   <div>
+       <div ng-show="showError">{{err}}</div>
+   </div>
+
+    <div  id="list">
+        <div>
+            <div ng-repeat="item in attributes">{{item}}</div>
+        </div>
+        <div ng-repeat="item in receivedList">
+            <div>{{item._id}}</div>
+            <div>{{item.title}}</div>
+            <div>{{item.version}}</div>
+            <div>{{item.exchangeRate}}</div>
+            <div>{{item.description}}</div>
+            <div>
+                <div ng-repeat="module in item.modules">{{module}}</div>
+            </div>
+            <button style="margin-left:auto;margin-right:10px;">编辑</button>
+            <button style="margin-right:10px;" ng-click="removeItem(item._id,$index)">删除</button>
+        </div>
+    </div>
+    <div id="funcBoard">
+        <button ng-disabled="requesting" ng-click="requestAdd()">添加</button>
+    </div>
+    <div style="pointer-events:none;">
+        <div style="background:rgba(130,130,130,0.4);position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;" ng-show="showPanel || requesting"></div>
+        <div id="addPanel" ng-show="showPanel">
+            <div id="addGame">
+            <div><span>游戏名称</span> <input ng-model="gameSubmit.title"></div>
+            <div><span>游戏路径</span> <input ng-model="gameSubmit.path"></div>
+            <div><span>游戏版本</span> <input ng-model="gameSubmit.version.root">.<input ng-model="gameSubmit.version.sub">. <input ng-model="gameSubmit.version.branch"></div>
+            <div>
+                <span>游戏类型</span>
+                <select ng-model="gameSubmit.gameType" ng-options="gameType.refer for gameType in gameTypes"></select>
+            </div>
+            <div>
+                <span>分辨率</span>
+                <select ng-model="gameSubmit.resolution" ng-options="resolution.refer for resolution in resolutions"></select>
+            </div>
+                <div ng-show="gameSubmit.resolution.refer ==='other'">
+                    <input style="margin-left:5rem;" ng-model="gameSubmit.resolution.width"> : <input ng-model="gameSubmit.resolution.height">
+                </div>
+            <div><span>积分汇率</span><input ng-model="gameSubmit.exchangeRate"></div>
+            <div>
+                <span>依赖模块</span>
+                <select ng-model="gameSubmit.tempModule" ng-options="module.refer for module in modules" style="height:22px;"></select>
+                <button style="font-size:14px;padding-top:1px;padding-bottom:1px;margin-right:auto;margin-left:1rem;" ng-click="addModule()">添加</button>
+            </div>
+            <div style="display:flex;flex-direction:column" ng-show="gameSubmit.module.length>0"><div ng-repeat="module in gameSubmit.modules">{{module.refer}}</div></div>
+            <div><span>游戏说明</span><textarea ng-model="gameSubmit.description"></textarea></div>
+            </div>
+            <div>
+                <span style="flex:1;"></span>
+                <button ng-click="submitResult()">提交</button>
+                <button ng-click="cancelAdd()">关闭</button>
+            </div>
+        </div>
+        <div style="margin:auto;color:#b09284;padding-bottom:10rem;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-5x"></i></div>
+        <div style="position:fixed;width:100%;height:100%;pointer-events:none;display:flex;">
+            <div class="error-box" style="pointer-events:none;margin:auto;border:1px solid darkgray;background:white;height:auto;padding:15px;font-weight:bold;display:none;flex-direction:row;">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

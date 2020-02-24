@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="user-scalable=no">
+    <title><%- title %></title>
+    <script>
+        var resolution = JSON.parse('<%- JSON.stringify(resolution) %>');
+        var version =' <%- version %>';
+        var path = '/games/'+'<%- path %>';
+        var libs  = JSON.parse('<%- JSON.stringify(lib) %>');
+        var id = '<%- _id %>';
+        var config = '<%- JSON.stringify(config) %>';
+        var Md5Info = '<%- md5 %>';
+        var updateManager = function(){
+            throw 'this is a static function';
+        };
+        updateManager.initialize = function(){
+            if(this._initialized)
+                return;
+            this._initialized = true;
+            this._updateQueue = [];
+            this._updateCall = [];
+            this._stashedQueue = [];
+        };
+        updateManager.getQueue = function(){
+            if(!this._initialized)
+                this.initialize();
+            return this._updateQueue;
+        };
+        updateManager.isRegistered = function(obj){
+            for(let i =0; i<this._updateQueue.length;++i)
+            {
+                if(obj === this._updateQueue[i])
+                    return true;
+            }
+            return false;
+        };
+        updateManager.stashUpdate = function(obj){
+            this.removeUpdate(obj);
+        };
+        updateManager.restoreUpdate = function(obj){
+            this._updateQueue.push(obj);
+        };
+        updateManager.registerUpdate = function(obj){
+            if(!this._initialized)
+                this.initialize();
+            if(typeof obj !== 'function')
+                return;
+            for(let i=0;i<this._updateQueue.length;++i)
+            {
+                if(this._updateQueue[i] === obj )
+                    return;
+            }
+            this._updateQueue.push(obj);
+        };
+        updateManager.removeUpdate = function(obj){
+            if(!this._initialized)
+                this.initialize();
+            if(typeof obj !== 'function')
+                return;
+            this._updateQueue.forEach(function(item,i,arr){
+                if(item === obj)
+                    updateManager._updateQueue.splice(i,1);
+            })
+        };
+    </script>
+    <script src="/js/scriptManager.js" defer="defer"></script>
+    <script src="/js/loader.js" defer="defer"></script>
+</head>
+<style>
+    *{
+        padding:0;
+        margin:0;
+    }
+    body{
+        min-width:100vw;
+        min-height:100vh;
+    }
+</style>
+<%- style_root %>
+<body>
+<script src="/js/JsExt.js"></script>
+<script src="/js/viewport.js"></script>
+<%- scene_load %>
+</body>
+</html>

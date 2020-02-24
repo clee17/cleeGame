@@ -9,7 +9,7 @@ let handler = {
         let infoId = req.params.infoId;
         newsModel.findOneAndUpdate({_id:infoId},{$inc:{visited:1}},function(err,data){
             if(err) {
-                res.render('cleeGame/generic/error404.html',{title:'出错啦'});
+                res.render('cleeGame/error.html',{title:'出错啦',message:err});
             }
             else
             {

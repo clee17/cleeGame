@@ -1,174 +1,180 @@
-let express = require('express'),
-    path = require('path'),
+let path = require('path'),
     fs = require('fs'),
     gameList = require(path.join(__dataFormat,'/gamesList.js')),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
+
+let gameInfoModel = require(path.join(__dataModel,'cleeGame_gameInfo')),
+    gameModuleModel = require(path.join(__dataModel,'cleeGame_gameModules'));
+
 　
 let handler = {
-    getIndex:function(req,res){
-        let gameName = req.params.gameId;
-        if(gameList[gameName])
-        {
-            let entry = gameList[gameName];
-            let data ={
-                title: entry.name,
-                path: '/games'+entry.path,
-                srcList:entry.src.join(',')
-            };
-            res.render('cleeGame/gameEntry/index.html',data);　
-        }
-        else
-            res.render('cleeGame/generic/error404.html',{title:'游戏未找到'});
+    finalSend:function(res,data)
+    {
+          if(data.sent)
+              return;
+          data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    getDevIndex:function(req,res){
-        let gameName = req.params.gameId;
-        if(gameList[gameName])
-        {
-            let entry = gameList[gameName];
-            let data ={
-                title: entry.name,
-                path: '/games'+entry.path,
-                srcList:entry.src.join(',')
-            };
-            if(__allowedIP.indexOf(req.ip)!= -1)
-               res.render('cleeGame/gameEntry/index_dev.html',data);
-            else
-                res.status(503).send('你没有权限访问该页面');
-        }
-        else
-            res.render('cleeGame/generic/error404.html',{title:'游戏未找到'});
+    finalStr:function(res,data){
+        if(data.sent)
+            return;
+        data.sent = true;
+       res.status(data.status).send(lzString.compressToBase64(data.contents));
     },
 
-    getImg:function(req,res){
-        console.log('getImg entered');
+    finalRender:function(res,data){
+        if(data.rendered)
+            return;
+        data.rendered = true;
+        res.render('cleeGame/game/index2.html',data);
+    },
+
+    renderError:function(res,data,message,title){
+        if(data.rendered)
+            return;
+        data.rendered = true;
+        if(title)
+            data.title = title;
+        data.message = message;
+        res.render('cleeGame/error.html',data);
+    },
+
+    getGame:function(req,res){
+        let data = {rendered:false};
         let gameName = req.params.gameId;
-        let imgName = req.params.imgId;
-        console.log(imgName);
-        let suffix = ['.png','.jpg'];
-        let filePath = '';
-        if(gameList[gameName])
-             filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/img/'+imgName);
-        console.log(filePath);
-        fs.access(filePath,function(err){
-            if(err)
+        if(!gameName)
+            handler.renderError(res,data,"请输入正确的游戏路径名称",'游戏未找到');
+        gameInfoModel.findOne({path:gameName},function(err,doc){
+            if(!err && doc)
             {
-                console.log(err);
-                res.status(404).send("Sorry can't find that!");
+                let render = data.rendered;
+                data = JSON.parse(JSON.stringify(doc));
+                data.rendered = render;
+                if(!doc.published && !req.session.user)
+                    handler.getModules(req,res,data);
+                else
+                    handler.renderError(res,data,"我们的数据库中没有找到这款游戏",'游戏未找到');
             }
             else
-                res.sendFile(filePath);
-        })
+                handler.renderError(res,data,"我们的数据库中没有找到这款游戏",'游戏未找到');
+        });
     },
 
-    getTitleImg:function(req,res)
-    {
-        let gameName = req.params.gameId;
-        let imgName = req.params.imgId;
-        let filePath = '';
-        if(gameList[gameName])
-            filePath = 'Directory'+gameList[gameName].path+'/img/titles/'+imgName;
-    },
-
-    compressTitle:function(req,res)
-    {
-        let gameName = req.params.gameId;
-        let imgName = req.params.imgId;
-        let filePath = '';
-        if(gameList[gameName])
-            filePath = 'Directory'+gameList[gameName].path+'/img/titles/';
-    },
-
-    getTypeImg:function(req,res)
-    {
-        console.log('get type image entered');
-        let gameName = req.params.gameId;
-        let imgType = req.params.imgType;
-        let imgName = req.params.imgId;
-        let filePath = '';
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/img/'+imgType+'/'+imgName);
-        console.log(filePath);
-        fs.access(filePath,function(err){
+    getModules:function(req,res,data){
+        let files = ['lzString','boot','JSZip'];
+        let countryCode = __getCounryCode(req.ipData);
+        gameModuleModel.aggregate([
+                {$match:{name:{$in:files}}},
+                {$facet:{
+                    "dependencies":[
+                        {$match:{}},
+                        {$unwind:"$dependencies"},
+                        {$lookup:{from:"game_modules",localField:"dependencies",foreignField:"name",as:"depend"}},
+                        {$unwind:"$depend"},
+                        {$replaceRoot:{newRoot:"$depend"}},
+                    ],
+                    "basics":[
+                        {$match:{}}
+                    ]
+                }},
+                {$project:{all:{$setUnion:["$dependencies","$basics"]}}},
+                {$unwind:"$all"},
+                {$replaceRoot:{newRoot:"$all"}}
+            ],function(err,docs){
             if(err)
             {
-                console.log(err);
-                res.status(404).send("Sorry can't find that!");
+                handler.renderError(res,data,err);
+                return;
             }
-            else
-            {
-                res.sendFile(filePath);
-            }
+            data.lib = [];
+            docs.forEach(function(item){
+                let tmp = JSON.parse(JSON.stringify(item));
+                tmp.path = tmp.path[countryCode];
+                data.lib.push(tmp);
+            });
+            handler.newGame(req,res,data);
         })
     },
 
-    getCss:function(req,res)
+    newGame:function(req,res,data)
     {
-        console.log('getCss entered');
-        let gameName = req.params.gameId;
-        let styleName = req.params.styleName;
-        let filePath = '';
-        if(gameList[gameName])
-             filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/css/'+styleName);
-        fs.access(filePath,function(err){
-            if(err)
-                res.status(404).send("Sorry can't find that!");
-            else
-                res.sendFile(filePath);
-        })
+        let resourceList = [{path:'/css/root.css',name:'style_root',type:'css'},
+            {path:'/Scene/load.js',name:'scene_load',type:'js'}];
+        let loadCount = 0;
+        resourceList.forEach(function(item,i,arr){
+            fs.readFile(path.join(__basedir, 'Directory/'+data._id+item.path), {encoding: 'utf-8'},(err,file)=> {
+                if(err)
+                    handler.renderError(res,data,"游戏尚在开发中，敬请期待",'游戏开发中');
+                else
+                    data[item.name] = file;
+                if(item.type === 'css')
+                    data[item.name] = '<style>'+data[item.name]+'</style>';
+                else if(item.type === 'js')
+                    data[item.name] = '<script>'+data[item.name]+'</script>';
+                loadCount++;
+                if(loadCount === resourceList.length)
+                    handler.finalRender(res,data);
+            });
+        });
     },
 
-    getJs:function(req,res)
-    {
-        let gameName = req.params.gameId;
-        let jsName = req.params.jsId;
-        let filePath = '';
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/js/'+jsName);
-        fs.access(filePath,function(err){
-            if(err)
-                res.status(404).send("Sorry can't find that!");
-            else
-                res.sendFile(filePath);
-        })
-    },
-
-    getJson:function(req,res)
-    {
-        let gameName = req.params.gameId;
-        let dataId = req.params.dataId;
-        let filePath = '';
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/data/'+dataId.toLowerCase());
-        fs.readFile(filePath,'utf-8',function(err,data){
-            if(err)
-                res.status(404).send("Sorry can't find that!");
-            else
-            {
-                let newData = JSON.parse(data);
-                res.status(200).send(lzString.compressToBase64(JSON.stringify(newData)));
-            }
-        })
-    },
-
-
-    getAudio:function(req,res)
-    {
-        let gameName = req.params.gameId;
-        let audioType = req.params.audioType;
-        let audioName = req.params.audioName;
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/audio/'+audioType+'/'+audioName.toLowerCase());
+    getResource:function(req,res){
+        let id = req.query.id;
+        if(!id)
+            res.status(404).send({message:'请输入正确的游戏路径名'});
+        let filePath = path.join(__game,id+'/'+id+'.zip');
         fs.readFile(filePath,function(err,data){
-            if(err)
-            {
-                res.status(404).send("Sorry can't find that!");
+            res.status(200).send(data);
+        });
+    },
+
+    loadDir:function(data,path,res) {
+        fs.readdir(data.subPath+path,function(err,docs){
+            data.loadList.splice(data.loadList.indexOf(path),1);
+            if(docs && docs.length>0){
+                if(docs && docs.length >0)
+                {
+                    for(let i =0; i< docs.length; ++i)
+                    {
+                        let doc = docs[i];
+                        if(path === 'Scene' && data.loadedScene.indexOf(docs[i]) !== -1)
+                            continue;
+                        if(doc.slice(doc.lastIndexOf('.'))=== '.js')
+                            data.contents += fs.readFileSync(data.subPath+'/'+path+'/'+docs[i],{encoding:'utf-8'});
+                    }
+
+                }
             }
-            else
+            if(data.loadList.length === 0)
             {
-                res.status(200).send(data);
+                data.status = 200;
+                handler.finalStr(res,data);
             }
         })
+    },
+
+    loadScripts:function(req,res){
+        let id = req.query.id;
+        let list = req.query.load || [];
+        if(typeof list === 'string')
+            list = lzString.decompressFromBase64(list);
+        if(!id)
+            res.status(404).send({message:'请输入正确的游戏路径名'});
+        let finalSend = {
+            contents: '',
+            loadList:['Scene','Display'],
+            id:id,
+            loadedScene:list,
+            subPath:path.join(__game,id+'/'),
+            sent:false,
+            status:404,
+        };
+        finalSend.contents = fs.readFileSync(path.join(__game,'Sprite_Base.js'),{encoding:'utf-8'});
+        finalSend.contents += fs.readFileSync(path.join(__game,'Window_Base.js'),{encoding:'utf-8'});
+        finalSend.contents += fs.readFileSync(path.join(__game,'Scene_Base.js'),{encoding:'utf-8'});
+        handler.loadDir(finalSend,'Scene',res);
+        handler.loadDir(finalSend,'Display',res);
     },
 
     getPreview: function(req,res){
@@ -182,54 +188,6 @@ let handler = {
         }
     },
 
-    getTitle: function(req,res){
-        let id = req.query.id;
-        if(!id || id>=3 || id<0)
-            res.status(503).send('you need to pass an index');
-        else
-            id=parseInt(id);
-        let gameName=req.params.gameId;
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/img/clgTitles/index.clg');
-        if(gameList[gameName])
-        {
-            fs.readFile(filePath,function(err,data){
-                if(err)
-                    res.status(404).send("Sorry can't find that!");
-                else
-                {
-                    let firstIndex = parseInt(data.length/3);
-                    let secondIndex = firstIndex*2;
-                    let indexList = [0,firstIndex,secondIndex,data.length];
-                    let buffer = data.slice(indexList[id],indexList[id+1]);
-                    res.status(200).send(buffer);
-                }
-            });
-        }
-    },
-
-    getTitleResource:function(req,res)
-    {
-        let id = req.query.id;
-        if(!id || id<0)
-            res.status(503).send('you need to pass an valid index');
-        else
-            id=parseInt(id);
-        let gameName=req.params.gameId;
-        if(gameList[gameName])
-            filePath = path.join(__basedir,'Directory'+gameList[gameName].path+'/img/clgTitles/Encrypt'+id+'.clg');
-        if(gameList[gameName])
-        {
-            fs.readFile(filePath,function(err,data){
-                if(err)
-                    res.status(404).send("Sorry can't find that!");
-                else
-                {
-                    res.status(200).send(data);
-                }
-            });
-        }
-    }
 };
 
 module.exports = handler;

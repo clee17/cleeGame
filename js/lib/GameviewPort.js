@@ -271,6 +271,7 @@ Graphics.startLoading = function(){
     this._loadingCount = 0;
     this._loading=true;
 };
+
 Graphics.updateLoading = function() {
     if(!this._loading)
         return;

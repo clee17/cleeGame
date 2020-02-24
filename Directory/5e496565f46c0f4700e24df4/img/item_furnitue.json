@@ -1,0 +1,39 @@
+{"frames": {
+
+"item00000.png":
+{
+	"frame": {"x":1,"y":1,"w":307,"h":321},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":307,"h":321},
+	"sourceSize": {"w":307,"h":321}
+},
+"item00001.png":
+{
+	"frame": {"x":1,"y":310,"w":251,"h":221},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":251,"h":221},
+	"sourceSize": {"w":251,"h":221}
+},
+"item00002.png":
+{
+	"frame": {"x":254,"y":310,"w":118,"h":144},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":118,"h":144},
+	"sourceSize": {"w":118,"h":144}
+}},
+"animations": {
+	"item": ["item00000.png","item00001.png","item00002.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "item_furnitue.png",
+	"format": "RGBA8888",
+	"size": {"w":373,"h":532},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4f321789df2660932c4ae62a78d32b45:f9a900f33aa050b2a6f063a1b3081d91:c21d0a73e2333572aaf6f1341ad353db$"
+}
+}
