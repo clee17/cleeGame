@@ -16,6 +16,7 @@ loader.initialize = function() {
     this._downloadProgress = 0;
     this._extractProgress = 0;
     this._extracted = false;
+    this._isLoaded = false;
 
     this._infoMatch = {
         version:false,
