@@ -25,16 +25,15 @@ info.innerHTML = '';
 let oldUpdate = cover.updateChildren;
 cover.updateChildren = function(){
     oldUpdate.bind(this);
-    if(window['loader'])
-    {
-        let resourceProgress = 0;
-        let scriptProgress = 0;
-        if (window['loader'])
-            resourceProgress = window['loader'].getProgress();
-        if (window['scriptManager'])
-            scriptProgress = window['scriptManager'].getProgress();
-        let finalProgress =  resourceProgress / 100 * 70 + scriptProgress / 100 * 30;
-        div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-60)+'px)';
-    }
-
+    let resourceProgress = 0;
+    let scriptProgress = 0;
+    let bootProgress = 0;
+    if (window['loader'])
+        resourceProgress = window['loader'].getProgress();
+    if (window['scriptManager'])
+        scriptProgress = window['scriptManager'].getProgress();
+    if( window['Game_Boot'])
+        bootProgress = window['Game_Boot'].getProgress();
+    let finalProgress =  resourceProgress / 100 *40 + scriptProgress / 100 * 30 +bootProgress/100*30;
+    div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-60)+'px)';
 };

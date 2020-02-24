@@ -4568,6 +4568,8 @@ Game_Boot.initialize = function(){
         return;
     this._initialized = true;
     this._booted = false;
+    this._downloadProgress = 0;
+    this._loadingProgress = 0;
 };
 
 Game_Boot.loadGame = function(){
@@ -4577,6 +4579,7 @@ Game_Boot.loadGame = function(){
     requestFile.open("GET", newUrl);
     requestFile.responseType = "text/plain";
     requestFile.send();
+    requestFile.addEventListener('progress',this._onDownloadProgress.bind(this));
     requestFile.onload = function () {
         if(requestFile.response && requestFile.status <= 400){
             let script = document.createElement('script');
@@ -4607,6 +4610,12 @@ Game_Boot.initInput = function(){
     TouchInput.initialize();
 };
 
+
+Game_Boot._onDownloadProgress = function(event){
+    if(event.lengthComputable)
+        this._downloadProgress = event.loaded/event.total * 100;
+};
+
 Game_Boot.initAudio = function() {
     let noAudio = Utils.isOptionValid('noaudio');
     if (!WebAudio.initialize(noAudio) && !noAudio) {
@@ -4628,4 +4637,13 @@ Game_Boot.run = function(){
     } catch (e) {
         SceneManager.catchException(e);
     }
+};
+
+Game_Boot.updateBootProgress = function(value){
+    this._loadingProgress+= value;
+    this._loadingProgress =   this._loadingProgress.clamp(0,100);
+};
+
+Game_Boot.getProgress = function(){
+    return this._loadingProgress/100*50 + this._downloadProgress/100*50;
 };

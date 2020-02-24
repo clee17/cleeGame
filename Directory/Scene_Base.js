@@ -162,7 +162,7 @@ Scene_Boot.prototype.initialize = function() {
 
 Scene_Boot.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
-
+    Game_Boot.updateBootProgress(20);
 };
 
 Scene_Boot.prototype.loadSystemWindowImage = function() {
@@ -177,8 +177,7 @@ Scene_Boot.prototype.attachReservation = function() {
 };
 
 Scene_Boot.prototype.isReady = function() {
-    if (Scene_Base.prototype.isReady.call(this) && loader._isLoaded) {
-        console.log('entered');
+    if (Scene_Base.prototype.isReady.call(this) && window['loader'] && loader._isLoaded) {
         return DataManager.isDatabaseLoaded();
     } else {
         return false;
@@ -187,6 +186,7 @@ Scene_Boot.prototype.isReady = function() {
 
 Scene_Boot.prototype.start = function() {
     Scene_Base.prototype.start.call(this);
+    Game_Boot.updateBootProgress(30);
     SoundManager.preloadImportantSounds();
     DataManager.setupNewGame();
     SceneManager.goto(Scene_Title);

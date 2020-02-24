@@ -13,6 +13,7 @@ Scene_Title.prototype.createScene = function() {
 
 Scene_Title.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
+    Game_Boot.updateBootProgress(30);
     this.createScene();
 };
 
@@ -60,6 +61,7 @@ Scene_Title.prototype.positionElement = function(){
 
 Scene_Title.prototype.start = function() {
     Scene_Base.prototype.start.call(this);
+    Game_Boot.updateBootProgress(20);
     this.positionElement();
     viewport.endLoading();
     TouchInput.registerTriggerEvent(this.onClick.bind(this));
