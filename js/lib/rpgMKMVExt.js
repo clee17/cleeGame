@@ -2348,8 +2348,8 @@ TouchInput._onTouchMove = function(event) {
 TouchInput._onTouchEnd = function(event) {
     for (var i = 0; i < event.changedTouches.length; i++) {
         var touch = event.changedTouches[i];
-        var x = Graphics.pageToCanvasX(touch.pageX);
-        var y = Graphics.pageToCanvasY(touch.pageY);
+        var x = viewport.pageToCanvasX(touch.pageX);
+        var y = viewport.pageToCanvasY(touch.pageY);
         this._screenPressed = false;
         this._onRelease(x, y);
     }
@@ -2361,9 +2361,9 @@ TouchInput._onTouchCancel = function(event) {
 
 TouchInput._onPointerDown = function(event) {
     if (event.pointerType === 'touch' && !event.isPrimary) {
-        var x = Graphics.pageToCanvasX(event.pageX);
-        var y = Graphics.pageToCanvasY(event.pageY);
-        if (Graphics.isInsideCanvas(x, y)) {
+        var x = viewport.pageToCanvasX(event.pageX);
+        var y = viewport.pageToCanvasY(event.pageY);
+        if (viewport.isInsideCanvas(x, y)) {
             // For Microsoft Edge
             this._onCancel(x, y);
             event.preventDefault();
