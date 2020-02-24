@@ -104,6 +104,7 @@ loader.finishRequest = function(){
     this._downloadProgress = 100;
     this._extractProgress = 100;
     this._extracted = true;
+    this._isLoaded = true;
 };
 
 loader.loadDatabaseFiles = function(docs){
@@ -281,6 +282,7 @@ loader.checkFullyCached = function(){
          }
          loader._db.transaction('info','readwrite').objectStore('info').put({name:'version',type:'String',val:version});
          loader._db.transaction('info','readwrite').objectStore('info').put({name:'md5',type:'String',val:Md5Info});
+         this._isLoaded = true;
          this._extractProgress = 100;
      }
 };

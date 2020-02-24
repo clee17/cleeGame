@@ -177,7 +177,7 @@ Scene_Boot.prototype.attachReservation = function() {
 };
 
 Scene_Boot.prototype.isReady = function() {
-    if (Scene_Base.prototype.isReady.call(this)) {
+    if (Scene_Base.prototype.isReady.call(this) && loader.isLoaded) {
         return DataManager.isDatabaseLoaded();
     } else {
         return false;
