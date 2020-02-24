@@ -489,6 +489,16 @@ let chapterCount = function(){
     })
 };
 
+let fixUser = function(){
+    worksModel.find({},function(err,docs){
+        docs.forEach(function(item){
+            chapterModel.findOneAndUpdate({book:item._id},{user:item.user},function(err,count){
+                console.log(item._id +'更新作者完成');
+            })
+        })
+    })
+};
+
 switch(argv[2])
 {
     case 'setting':
@@ -514,6 +524,9 @@ switch(argv[2])
         break;
     case 'chapterCount':
         chapterCount();
+        break;
+    case 'fixUser':
+        fixUser();
         break;
     default:
         console.log('输入无效的指令');
