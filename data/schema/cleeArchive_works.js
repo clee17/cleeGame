@@ -21,7 +21,7 @@ module.exports = new mongoose.Schema({
 
     date: { type: Date, default: Date.now },
 
-    chapterCount: {type:Number,default:1},
+    chapterCount: {type:Number,default:0},
 
     updated: {type:Date,default:Date.now()},
 
