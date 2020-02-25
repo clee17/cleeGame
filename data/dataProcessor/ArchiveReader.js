@@ -492,11 +492,16 @@ let chapterCount = function(){
 let fixUser = function(){
     worksModel.find({},function(err,docs){
         docs.forEach(function(item){
-            chapterModel.findOneAndUpdate({book:item._id},{user:item.user},function(err,count){
+            let infoFilter = [0,1];
+            updatesModel.update({infoType:{$in:infoFilter},work:item._id},{publisher:item.user},function(err,doc){
+                 if(err)
+                     console.log(item._id+'更新表格更新用户错误');
+            });
+            chapterModel.update({book:item._id},{user:item.user},function(err,count){
                 console.log(item._id +'更新作者完成');
             })
         })
-    })
+    });
 };
 
 let changeChapterId = function(prevId, nextId){
@@ -522,9 +527,16 @@ let changeChapterId = function(prevId, nextId){
 
     indexModel.findOneAndUpdate({chapter:prevId},{chapter:nextId},function(err,doc){
         if(doc)
-            console.log('目录表'+prevId+'已经被更改为'+doc._id);
+            console.log('目录表'+prevId+'已经被更改为'+nextId);
         else
             console.log('目录表'+err);
+    });
+
+    updatesModel.findOneAndUpdate({content:prevId},{content:nextId},function(err,doc){
+        if(doc)
+            console.log('信息表'+prevId+'已经被更改为'+nextId);
+        else
+            console.log('信息表'+err);
     });
 
 };
