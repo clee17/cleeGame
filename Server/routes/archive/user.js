@@ -255,7 +255,7 @@ let handler = {
                             ],
                             "fanfic_works":[
                                 {$match:{"work.type":{$lt:100},"index.order":0,"work.published":true,infoType:0}},
-                                {$set:{updated:"$work.date"}}
+                                {$set:{"visited":{$sum:"$index.visited"},"book.wordCount":{$sum:"$index.wordCount"},updated:"$work.date"}},
                             ]
                         }},
                     {$project:{all:{$setUnion:["$fanfic_chapter","$fanfic_works"]}}},
@@ -453,8 +453,8 @@ let handler = {
                                     {$match:{$expr:{$eq:["$_id","$$userId"]}}},
                                     {$project:{user:1,_id:1}}]}},
                         {$unwind:"$chapter.user"},
-                        {$lookup:{from:"work_chapters",let:{chapter_id:"$index.chapter"},as:"countChapter",pipeline:[{$match:{$expr:{$eq:["$_id","$$chapter_id"]},published:true}},{$project:{contents:0}}]}},
-                        {$set:{updated:"$work.date",infoType:0}},
+                        {$lookup:{from:"work_chapters",let:{bookId:"$work._id"},as:"countChapter",pipeline:[{$match:{$expr:{$eq:["$book","$$bookId"]},published:true}},{$project:{contents:0}}]}},
+                        {$set:{updated:"$work.date",infoType:0,"work.visited":{$sum:"$countChapter.visited"},"work.wordCount":{$sum:"$countChapter.wordCount"}}},
                         {$project:{countChapter:0}}
                     ]
                 }},
