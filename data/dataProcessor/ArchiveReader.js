@@ -525,7 +525,14 @@ let changeChapterId = function(prevId, nextId){
             console.log(prevId+'已经被更改为'+doc._id);
         else
             console.log('没有找到该内容');
-    })
+    });
+
+    indexModel.findOneAndUpdate({chapter:prevId},{chapter:nextId},function(err,doc){
+        if(doc)
+            console.log(prevId+'已经被更改为'+doc._id);
+        else
+            console.log('没有找到该内容');
+    });
 
 };
 
