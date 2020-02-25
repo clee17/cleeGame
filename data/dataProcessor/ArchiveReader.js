@@ -518,13 +518,6 @@ let changeChapterId = function(prevId, nextId){
             console.log('标签表'+err);
     });
 
-    chapterModel.findOneAndUpdate({_id:prevId},{_id:nextId},function(err,doc){
-        if(doc)
-            console.log('chapter表'+prevId+'已经被更改为'+nextId);
-        else
-            console.log('chapter表'+err);
-    });
-
     indexModel.findOneAndUpdate({chapter:prevId},{chapter:nextId},function(err,doc){
         if(doc)
             console.log('目录表'+prevId+'已经被更改为'+nextId);
@@ -532,7 +525,7 @@ let changeChapterId = function(prevId, nextId){
             console.log('目录表'+err);
     });
 
-    updatesModel.findOneAndUpdate({content:prevId},{content:nextId},function(err,doc){
+    updatesModel.findOneAndUpdate({contents:prevId},{contents:nextId},function(err,doc){
         if(doc)
             console.log('信息表'+prevId+'已经被更改为'+nextId);
         else
