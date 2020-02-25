@@ -505,6 +505,7 @@ let changeChapterId = function(prevId, nextId){
     if(!nextId)
         console.log('请输入更改后的ID');
 
+    console.log(typeof prevId);
     tagMapModel.findOneAndUpdate({contents:prevId},{contents:nextId},function(err,doc){
         if(doc)
             console.log(prevId+'已经被更改为'+nextId);

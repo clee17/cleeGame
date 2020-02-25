@@ -263,8 +263,6 @@ let handler = {
                 saveIndex();
             else if(process == 1)
                 updateIndex();
-            else if(process == 2)
-                updateBook();
         };
 
         let send = function(){
