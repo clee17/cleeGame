@@ -499,6 +499,36 @@ let fixUser = function(){
     })
 };
 
+let changeChapterId = function(prevId, nextId){
+    if(!prevId)
+        console.log('请输入更改前的ID');
+    if(!nextId)
+        console.log('请输入更改后的ID');
+
+    tagMapModel.findOneAndUpdate({aid:prevId},{aid:nextId},function(err,doc){
+        if(doc)
+          console.log(prevId+'已经被更改为'+doc._id);
+        else
+            console.log('没有找到该内容');
+    });
+
+
+    tagMapModel.findOneAndUpdate({contents:prevId},{contents:nextId},function(err,doc){
+        if(doc)
+            console.log(prevId+'已经被更改为'+doc._id);
+        else
+            console.log('没有找到该内容');
+    });
+
+    chapterModel.findOneAndUpdate({_id:prevId},{_id:nextId},function(err,doc){
+        if(doc)
+            console.log(prevId+'已经被更改为'+doc._id);
+        else
+            console.log('没有找到该内容');
+    })
+
+};
+
 switch(argv[2])
 {
     case 'setting':
@@ -527,6 +557,9 @@ switch(argv[2])
         break;
     case 'fixUser':
         fixUser();
+        break;
+    case 'changeChapter':
+        changeChapterId(argv[3],argv[4]);
         break;
     default:
         console.log('输入无效的指令');
