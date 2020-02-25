@@ -505,33 +505,25 @@ let changeChapterId = function(prevId, nextId){
     if(!nextId)
         console.log('请输入更改后的ID');
 
-    tagMapModel.findOneAndUpdate({aid:prevId},{aid:nextId},function(err,doc){
-        if(doc)
-          console.log(prevId+'已经被更改为'+doc._id);
-        else
-            console.log('没有找到该内容');
-    });
-
-
     tagMapModel.findOneAndUpdate({contents:prevId},{contents:nextId},function(err,doc){
         if(doc)
-            console.log(prevId+'已经被更改为'+doc._id);
+            console.log(prevId+'已经被更改为'+nextId);
         else
-            console.log('没有找到该内容');
+            console.log('标签表'+err);
     });
 
     chapterModel.findOneAndUpdate({_id:prevId},{_id:nextId},function(err,doc){
         if(doc)
-            console.log(prevId+'已经被更改为'+doc._id);
+            console.log('chapter表'+prevId+'已经被更改为'+nextId);
         else
-            console.log('没有找到该内容');
+            console.log('chapter表'+err);
     });
 
     indexModel.findOneAndUpdate({chapter:prevId},{chapter:nextId},function(err,doc){
         if(doc)
-            console.log(prevId+'已经被更改为'+doc._id);
+            console.log('目录表'+prevId+'已经被更改为'+doc._id);
         else
-            console.log('没有找到该内容');
+            console.log('目录表'+err);
     });
 
 };
