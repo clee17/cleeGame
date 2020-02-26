@@ -39,6 +39,6 @@ cover.updateChildren = function(){
         scriptProgress = window['scriptManager'].getProgress();
     if( window['Game_Boot'])
         bootProgress = window['Game_Boot'].getProgress();
-    let finalProgress =  resourceProgress / 100 *40 + scriptProgress / 100 * 30 +bootProgress/100*30;
+    let finalProgress =  resourceProgress / 100 *25 + scriptProgress / 100 * 25 +bootProgress/100*50;
     div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-200)+'px)';
 };
