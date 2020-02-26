@@ -20,7 +20,7 @@ let routeHandler = {
         else if(index == 0)
             sub = 'cleeGame/';
         else
-            sub='cleeGame/';
+            sub='cleeArchive/';
         if(__entryFile.indexOf(fileName)!=-1)
             next();
         if(fileName.indexOf('.html')!= -1)
@@ -45,7 +45,7 @@ let routeHandler = {
         else if(index == 0)
             sub = 'cleeGame/';
         else
-            sub='cleeGame/';
+            sub='cleeArchive/';
         let subFolder = req.params.subFolder;
         subFolder+='/';
         if(fileName.indexOf('.html')!= -1)
