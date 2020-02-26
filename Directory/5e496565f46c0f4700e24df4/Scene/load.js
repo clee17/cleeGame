@@ -29,7 +29,7 @@ let info = cover.getElementById('info');
 info.innerHTML = '';
 
 cover.updateChildren = function(){
-    let finalProgress = cover.getProgress();
+    let finalProgress = this.getProgress();
     div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-200)+'px)';
 };
 
