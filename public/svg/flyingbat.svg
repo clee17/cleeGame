@@ -1,6 +1,4 @@
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-        <symbol id="bat" viewBox="300 380 550 1180" width="120px" height="200px">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="300 380 550 1180" width="120px" height="200px">
             <g id="fbt1">
                 <g id="XMLID_335_">
                     <g id="XMLID_30_">
@@ -191,6 +189,4 @@
                         repeatCount="indefinite" />
              </g>
             <animateMotion path="M-35 35 C -15 25, -10 25, -10 35 S 0 50, 5 35Z" dur="1.5s" repeatCount="indefinite" />
-        </symbol>
-    </defs>
 </svg>

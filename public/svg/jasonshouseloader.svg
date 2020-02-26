@@ -1,6 +1,4 @@
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <symbol id="rootJason" viewBox="300 380 550 1180" width="120px" height="200px">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="300 380 550 1180" width="120px" height="200px">
             <g  id="XMLID_34_">
                 <g id="XMLID_382_">
                     <g id="XMLID_43_">
@@ -1527,8 +1525,4 @@
                         begin="0s"
                         repeatCount="indefinite" />
             </g>
-        </symbol>
-        <symbol id="bat">
-        </symbol>
-    </defs>
 </svg>
