@@ -32,3 +32,5 @@ cover.updateChildren = function(){
     let finalProgress = cover.getProgress();
     div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-200)+'px)';
 };
+
+viewport.startLoading();

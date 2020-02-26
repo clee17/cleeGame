@@ -123,7 +123,7 @@ viewport.initialize = function(type) {
     this._maxSkip = 3;
     this._rendered = false;
     this._stretchEnabled = true;
-    this._loading = true;
+    this._loading = false;
 
 
     this._canUseDifferenceBlend = false;
@@ -397,8 +397,9 @@ viewport._createCover = function(){
      this._cover = new Cover_Layer();
      this._cover.setId('gameCover');
      this._cover.setStyle('overflow','hidden');
-    this._cover.setStyle('zIndex','5');
-    this._cover.setStyle('transition','opacity 0.4s');
+     this._cover.setStyle('zIndex','5');
+     this._cover.setStyle('opacity','0');
+     this._cover.setStyle('transition','opacity 0.4s');
      this._updateCover();
      document.body.appendChild(this._cover._div);
 };
@@ -407,7 +408,6 @@ viewport._createUpperCanvas = function() {
     this._upperCanvas = document.createElement('canvas');
     this._upperCanvas.id = 'UpperCanvas';
     this._upperCanvas.style.background = 'black';
-    this._upperCanvas.style.opacity = '0';
     this._updateUpperCanvas();
     document.body.appendChild(this._upperCanvas);
 };
@@ -697,6 +697,8 @@ viewport.updateLoading = function(){
 
 viewport.endLoading = function(){
     this._loading = false;
+    if(this._upperCanvas)
+        this._upperCanvas.style.opacity = '0';
     if(this._cover)
         this._cover.setStyle('opacity','0');
 };
