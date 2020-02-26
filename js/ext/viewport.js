@@ -44,15 +44,21 @@ Cover_Layer.prototype.pause = function(){
     this._div.style.filter = 'blur(10px)';
 };
 
-Cover_Layer.prototype.updateProgress = function(){
+Cover_Layer.prototype.getProgress = function(){
     let resourceProgress = 0;
     let scriptProgress = 0;
+    let bootProgress = 0;
     if (window['loader'])
         resourceProgress = window['loader'].getProgress();
     if (window['scriptManager'])
         scriptProgress = window['scriptManager'].getProgress();
-    let finalProgress =  resourceProgress / 100 * 70 + scriptProgress / 100 * 30;
-    this.updateProgressAnimation(finalProgress)
+    if( window['Game_Boot'])
+        bootProgress = window['Game_Boot'].getProgress();
+    return resourceProgress / 100 *25 + scriptProgress / 100 * 25 +bootProgress/100*50;
+};
+
+Cover_Layer.prototype.updateProgress = function(){
+    this.updateProgressAnimation(this.getProgress());
 };
 
 Cover_Layer.prototype.updateProgressAnimation = function(finalProgress){

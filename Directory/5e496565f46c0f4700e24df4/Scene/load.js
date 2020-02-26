@@ -22,23 +22,13 @@ if(bar)
 {
     bar.style.background = 'red';
     bar.style.bottom = '20px';
+    bar.style.width  = '1px';
 }
 
 let info = cover.getElementById('info');
 info.innerHTML = '';
 
-let oldUpdate = cover.updateChildren;
 cover.updateChildren = function(){
-    oldUpdate.bind(this);
-    let resourceProgress = 0;
-    let scriptProgress = 0;
-    let bootProgress = 0;
-    if (window['loader'])
-        resourceProgress = window['loader'].getProgress();
-    if (window['scriptManager'])
-        scriptProgress = window['scriptManager'].getProgress();
-    if( window['Game_Boot'])
-        bootProgress = window['Game_Boot'].getProgress();
-    let finalProgress =  resourceProgress / 100 *25 + scriptProgress / 100 * 25 +bootProgress/100*50;
+    let finalProgress = this.getProgress();
     div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-200)+'px)';
 };
