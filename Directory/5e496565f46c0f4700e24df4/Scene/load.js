@@ -3,9 +3,11 @@ let div = document.createElement('div');
 div.style.position = 'absolute';
 div.id = 'anim';
 div.style.left = '5px';
-div.style.bottom = '25px';
-div.innerHTML =  '<svg style="transform:translate(-60px,90px);"><use xlink:href="/svg/flyingbat.svg#bat"></use></svg>' +
-    '<svg style="transform:translateX(0px);"><use xlink:href="/svg/jasonshouseloader.svg#rootJason"></use></svg>';
+div.style.bottom = '0px';
+div.style.display = "flex";
+div.style.flexDirection = "row";
+div.innerHTML =  '<img style="transform:translate(20px,-40px);" src="/svg/flyingbat.svg#bat" alt="">' +
+    '<img style="transform:translateX(-60px,20px);" src="/svg/jasonshouseloader.svg#rootJason" alt="Jason is coming">';
 cover.appendChild(div);
 let date = new Date(Date.now());
 let hour = date.getHours();
@@ -17,10 +19,13 @@ else if((hour >=18 && hour <19) || (hour >=5 && hour <8))
    cover.setStyle('background','linear-gradient(to bottom, #a3182b 0%, #fdc971 100%)');
 let bar = cover.getElementById('bar');
 if(bar)
-   bar.style.background = 'red';
+{
+    bar.style.background = 'red';
+    bar.style.bottom = '20px';
+}
+
 let info = cover.getElementById('info');
 info.innerHTML = '';
-
 
 let oldUpdate = cover.updateChildren;
 cover.updateChildren = function(){
@@ -35,5 +40,5 @@ cover.updateChildren = function(){
     if( window['Game_Boot'])
         bootProgress = window['Game_Boot'].getProgress();
     let finalProgress =  resourceProgress / 100 *40 + scriptProgress / 100 * 30 +bootProgress/100*30;
-    div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-60)+'px)';
+    div.style.transform = 'translateX('+Math.floor(finalProgress/100*viewport.width-200)+'px)';
 };
