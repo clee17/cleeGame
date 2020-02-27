@@ -190,7 +190,7 @@ router.get('/dynamic/*',function(req,res){
 module.exports = function(app)
 {
 
-    app.use('*',function(req,res,next){
+	 app.use('*',function(req,res,next){
         if(!req.session.user)
         {
             res.cookie('userId','',{maxAge:0});
