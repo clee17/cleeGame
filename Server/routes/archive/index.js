@@ -105,8 +105,9 @@ let  main = require(path.join(__routes,"/archive/main")),
      fanfic = require(path.join(__routes,"/archive/fanfic"));
      feedback = require(path.join(__routes,"/archive/feedback"));
 
-let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap')),
-    userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+
+let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
 
 global.__updateCountMap = function(countList) {
@@ -188,6 +189,24 @@ router.get('/dynamic/*',function(req,res){
 
 module.exports = function(app)
 {
+
+    app.use('*',function(req,res,next){
+        if(!req.session.user)
+        {
+            res.cookie('userId','',{maxAge:0});
+        }
+        if(req.session.user && !req.session.user.settings)
+        {
+            userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
+                if(!err)
+                    req.session.user.settings = JSON.parse(JSON.stringify(doc));
+                next();
+            });
+        }
+        else
+            next();
+    });
+
     app.use('/',router);
 
     app.use('*', function(req, res){

@@ -88,7 +88,6 @@ app.directive('infoReceiver',function(){
         restrict: 'E',
         link:function(scope){
             scope.ifSingle = (scope.bookInfo.status === 0 && scope.bookInfo.chapterCount <= 1);
-            console.log(scope.ifSingle);
             scope.bookInfo.status = scope.bookInfo.status.toString();
             if(!scope.bookInfoDetail)
                 scope.initializeBookDetail();
@@ -114,8 +113,6 @@ app.directive('infoReceiver',function(){
 
             if(scope.userSettings)
                 scope.fanficEdit = scope.userSettings.fanficEdit;
-
-
         }
     }
 });
@@ -207,14 +204,14 @@ app.directive('chapterSelect',function(){
                             let item = localStorage.getItem(scope.$parent.currentIndex._id);
                             if(item)
                             {
-                                item = JSON.parse(LZString.decompress(item));
+                                item = JSON.parse(LZString.decompressFromBase64(item));
                                 item.chapter.chapter = scope.$parent.chapter;
-                                localStorage.setItem(scope.$parent.currentIndex._id,LZString.compress(JSON.stringify(item)));
+                                localStorage.setItem(scope.$parent.currentIndex._id,LZString.compressToBase64(JSON.stringify(item)));
                             }
                         }
                         scope.$parent.currentIndex = scope.list;
                         if(window.localStorage && scope.$parent.currentIndex.chapter!= null && window.localStorage.getItem(scope.list._id))
-                            scope.$emit('fanficReceived',{success:true,chapter:JSON.parse(LZString.decompress(window.localStorage.getItem(scope.list._id)))});
+                            scope.$emit('fanficReceived',{success:true,chapter:JSON.parse(LZString.decompressFromBase64(window.localStorage.getItem(scope.list._id)))});
                         else
                             scope.$parent.loadContent();
                     }
@@ -587,18 +584,22 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    $scope.selectedChapters = [];
 
    $scope.loadContent = function(){
+
        if($scope.contentsLoaded){
            $scope.contentsLoaded = false;
+
            fanficManager.requestFanfic($scope.currentIndex);
+
        }
        else {
            let localItem = null;
            if(window.localStorage && $scope.currentIndex.chapter !== '')
                localItem = window.localStorage.getItem($scope.currentIndex.chapter);
            if(localItem)
-               $scope.$parent.$broadcast('fanficReceived',JSON.parse(LZString.decompress(localItem)));
+               $scope.$parent.$broadcast('fanficReceived',JSON.parse(LZString.decompressFromBase64(localItem)));
            else
                fanficManager.requestFanfic($scope.currentIndex);
+
        }
    };
 
@@ -628,13 +629,16 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
                     $scope.workIndex[i].chapter = {_id:$scope.chapter._id,title:$scope.chapter.title,wordCount:$scope.chapter.wordCount};
             });
             if(window.localStorage)
-                  localStorage.setItem($scope.currentIndex._id,LZString.compress(JSON.stringify(data.chapter)));
+            {
+                console.log($scope.currentIndex);
+                localStorage.setItem($scope.currentIndex._id,LZString.compressToBase64(JSON.stringify(data.chapter)));
+            }
             $scope.contentsLoaded = true;
 
             if(data.isFirst)
                 refreshBookInfoDetail();
             $timeout(function(){$scope.$broadcast('inputHintIni')},10);
-            $scope.$broadcast('fanfic loaded',null);
+            $scope.$broadcast('fanfic loaded',{});
         }
         else{
             $scope.contentsLoaded = true;
