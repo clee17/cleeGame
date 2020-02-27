@@ -188,6 +188,24 @@ router.get('/dynamic/*',function(req,res){
 
 module.exports = function(app)
 {
+	 app.use('*',function(req,res,next){
+        if(!req.session.user)
+        {
+            res.cookie('userId','',{maxAge:0});
+        }
+        if(req.session.user && !req.session.user.settings)
+        {
+            userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
+                if(!err)
+                    req.session.user.settings = JSON.parse(JSON.stringify(doc));
+                next();
+            });
+        }
+        else
+            next();
+    });
+
+
     app.use('/',router);
 
     app.use('*', function(req, res){
