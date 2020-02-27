@@ -135,6 +135,6 @@ ScreenSprite.prototype.setColor = function (r, g, b) {
         graphics.clear();
         var intColor = (r << 16) | (g << 8) | b;
         graphics.beginFill(intColor, 1);
-        graphics.drawRect(-Graphics.width * 5, -Graphics.height * 5, Graphics.width * 10, Graphics.height * 10);
+        graphics.drawRect(-viewport.width * 5, -viewport.height * 5, viewport.width * 10, viewport.height * 10);
     }
 };

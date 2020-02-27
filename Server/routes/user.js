@@ -25,12 +25,13 @@ let routeHandler = {
                     if (!user) {
                         throw '没有该用户';
                     }
-                    if(user && user.pwd != data.pwd)
+                    if(user && user.pwd !== data.pwd)
                     {
                         throw '密码错误';
                     }
                     response.success = true;
                     response.message = '登录成功';
+                    response.name = user.user;
                     req.session.user = user;
                     res.cookie('userId',user._id.toString(),{maxAge:7*24*60*60*1000});
                     res.send(lzString.compressToBase64(JSON.stringify(response)));

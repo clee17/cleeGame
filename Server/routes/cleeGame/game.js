@@ -172,7 +172,6 @@ let handler = {
         };
         finalSend.contents = fs.readFileSync(path.join(__game,'Sprite_Base.js'),{encoding:'utf-8'});
         finalSend.contents += fs.readFileSync(path.join(__game,'Window_Base.js'),{encoding:'utf-8'});
-        finalSend.contents += fs.readFileSync(path.join(__game,'Scene_Base.js'),{encoding:'utf-8'});
         handler.loadDir(finalSend,'Scene',res);
         handler.loadDir(finalSend,'Display',res);
     },

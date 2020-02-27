@@ -1,0 +1,144 @@
+<style>
+    #loginBoardContents >div{
+        display:flex;
+        flex-direction:row;
+        margin-bottom:10px;
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    #loginBoardContents input{
+        border-radius:5px;
+    }
+
+    .loginButton {
+        margin-right:1.2rem;
+        font-size:0.8rem;
+        letter-spacing:0.5rem;
+        margin-top:auto;
+        margin-bottom:auto;
+        background:rgba(155,60,84,1);
+        color:white;
+        font-weight:bold;
+        border-radius:5rem;
+        min-height:1.5rem;
+        padding-left:0.8rem;
+        padding-right:0.3rem;
+    }
+
+    .loginButton:hover{
+         background:rgba(252,162,177,1);
+    }
+</style>
+<script>
+    function loginManager(){
+        return new Error('this is a s static class');
+    };
+
+    loginManager._finishLoad = null;
+    loginManager._errorLoad = null;
+    loginManager._boardHeight = '12rem';
+    loginManager._statusChange = null;
+
+    loginManager.hideLoginBoard = function(){
+        let lg = document.getElementById('loginBoard');
+        if(lg)
+           lg.style.height = '0';
+    };
+
+    loginManager.requestLoginBoard = function(){
+        let lg = document.getElementById('loginBoard');
+        if(lg)
+           lg.style.height = '12rem';
+    };
+
+    loginManager.registerLoadListener = function(callback){
+        this._finishLoad = callback;
+    };
+
+    loginManager.registerErrorListener = function(callback){
+        this._errorLoad = callback;
+    };
+
+    loginManager.registerLogoutListener = function(callback){
+        this._logout = callback;
+    };
+
+    loginManager.registerStatusChanger = function(callback){
+        this._statusChange = callback;
+    }
+
+    loginManager.requestLogin = function(){
+        var xhr = new XMLHttpRequest();
+        xhr.open('post','/user/login');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        let contents = '';
+        let id = document.getElementById('lgName');
+        let pwd = document.getElementById('lgPwd');
+        if(pwd)
+            contents +='pwd='+ md5(pwd.value);
+        if(id)
+            contents += '&user='+id.value;
+        xhr.send(contents);
+        xhr.onload = function(){
+            if(this._statusChange)
+                this._statusChange(true);
+            if(xhr.response && xhr.status <= 400){
+                let result = LZString.decompressFromBase64(xhr.response);
+                if(loginManager._finishLoad)
+                    loginManager._finishLoad(JSON.parse(result));
+            }
+            else
+            {
+                if(loginManager._errorLoad)
+                    loginManager._errorLoad();
+            }
+        };
+    };
+
+    loginManager.requestLogout = function(){
+        var xhr = new XMLHttpRequest();
+        xhr.open('post','/user/logout');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        let contents = '';
+        xhr.send(contents);
+        xhr.onload = function(){
+            if(xhr.response && xhr.status <= 400){
+                let result = LZString.decompressFromBase64(xhr.response);
+                if(loginManager._logout)
+                    loginManager._logout(JSON.parse(result));
+            }
+            else
+            {
+                if(loginManager._errorLoad)
+                    loginManager._errorLoad();
+            }
+        };
+    };
+
+</script>
+<div id="loginBoard" style="background:rgba(236,225,219,1);pointer-events:auto;height:0;
+min-width:22rem;position:fixed;top:calc(50% - 11rem);left:calc(50% - 4rem);
+overflow:hidden;
+background-image:url('/img/pattern_001.png');
+background-repeat:no-repeat;
+background-size:100% 100%;
+background-position-x: 100%;
+background-position-y:-30px;
+transition:height 0.4s;
+display:flex;flex-direction:column;border-radius:0.4rem;">
+    <div style="width:100%;height:2rem;font-weight:bold;background:rgba(236,199,184,1);
+    letter-spacing:1rem;
+    display:flex;
+    text-align:center;color:rgba(155,60,84,1);">
+        <div style="margin:auto;">登录</div>
+    </div>
+    <div id="loginBoardContents" style="display:flex;color:rgba(190,150,124,1);flex-direction:column;flex:1;">
+        <div style="margin-top:auto;"><div style="min-width:4rem;">用户名:</div><input id="lgName"></div>
+        <div style="margin-bottom:auto;"><div style="min-width:4rem;">密码:</div><input type="password" id="lgPwd"></div>
+    </div>
+    <div style="width:100%;display:flex;height:3.5rem;">
+        <button class="loginButton" style="margin-left:auto" onclick="loginManager.requestLogin()">登录</button>
+        <button class="loginButton" style="margin-right:0.8rem;" onclick="loginManager.hideLoginBoard()">取消</button>
+    </div>
+</div>

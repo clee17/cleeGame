@@ -20,7 +20,7 @@ let routeHandler = {
         else if(index == 0)
             sub = 'cleeGame/';
         else
-            sub='cleeArchive/';
+            sub='cleeGame/';
         if(__entryFile.indexOf(fileName)!=-1)
             next();
         if(fileName.indexOf('.html')!= -1)
@@ -33,7 +33,7 @@ let routeHandler = {
         let fileName = req.params.fileName;
         let sub ='';
         let hostName = req.hostname;
-        if(hostName.indexOf('www.')!= -1)
+        if(hostName.indexOf('www.')!== -1)
             hostName = hostName.slice(4);
         let index = hostName.indexOf('cleegame.com');
         if(index >1)
@@ -45,7 +45,7 @@ let routeHandler = {
         else if(index == 0)
             sub = 'cleeGame/';
         else
-            sub='cleeArchive/';
+            sub='cleeGame/';
         let subFolder = req.params.subFolder;
         subFolder+='/';
         if(fileName.indexOf('.html')!= -1)

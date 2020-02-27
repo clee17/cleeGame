@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <base href="/">
     <title>cleeGame</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js"></script>
+    <% lib.forEach(function(item){ %>
+    <script src='<%= item %>'></script>
+    <% }) %>
     <script src="/lib/angular-route.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
     <script src="/modules/page-split.js"></script>
-    <script src="/js/JsExt.js"></script>
 
+    <script src="/js/JsExt.js"></script>
     <link rel="stylesheet" href="/css/root.css">
     <link rel="stylesheet" href="/css/button.css">
-
     <script>
         var app = angular.module('cleeGame',['ngRoute','page-split']);
 
@@ -41,7 +41,6 @@
             $locationProvider.html5Mode(true);
         });
 
-
         app.controller('rootCon',function($rootScope,$timeout,$location){
             $rootScope.callBack = {};
             $rootScope.name = '';
@@ -64,8 +63,6 @@
                 $rootScope.pageTurning = false;
             });
         });
-
-
     </script>
     <script src="/view/index_directive.js"></script>
     <script src="/view/index_controller.js"></script>
@@ -73,7 +70,6 @@
 </head>
 
 <style>
-
     #indexLeftGuideBar{
         display:none;
     }
@@ -109,8 +105,10 @@
     #headGuideBarContents{
         top:0.5rem;
         display:flex;
+        flex-direction:row;
         margin-top:1rem;
         position:absolute;
+        width:100%;
         margin-left:2rem;
     }
 
@@ -129,7 +127,6 @@
         -ms-user-select: none;
         user-select:none;
     }
-
 
 
     @media only screen and (min-device-width: 1024px)
@@ -164,27 +161,103 @@
       ng-controller="rootCon">
 
   <div style="margin-left:auto;margin-right:auto;height:100vw;min-width:51rem;">
-
       <div id="headGuideBar"></div>
 
       <div id="mainBoard">
           <div ng-view style="flex:1;"></div>
-          <div class="logoInBoard">
-          </div>
           <div id="headGuideBarContents" ng-controller="headControl">
               <head-button class="headOptions" name="GAME" link="/"></head-button>
               <head-button class="headOptions" name="NEWS" link="/news"></head-button>
               <head-button class="headOptions" name="DOWNLOADS" link="/downloads"></head-button>
               <head-button class="headOptions" name="MANUAL" link="/manual"></head-button>
               <head-button class="headOptions" name="CONTACT" link="/contact"></head-button>
+
           </div>
       </div>
-
       <div id="indexLeftGuideBar"  ng-include="'/view/index_guideBar.html'"></div>
-
   </div>
 
+  <div id="loginRow" style="position:absolute;top:0.5rem;height:2rem;width:100%;pointer-events:none;display:flex;flex-direction:row;">
+      <% if(user) { %>
+      <button onclick="showUserBoard()" class="link2 logButtons" style="margin-left:auto;pointer-events:auto;background:none;border:none;font-size:1rem;display:flex;flex-direction:row;">
+          <div style="line-height:1.3rem;font-weight:bold;"><%- user.user %></div>
+          <i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:3px;padding-top:1px;"></i>
+      </button>
+      <button onclick="requestLogout()" class="link2 logButtons" style="margin-left:1rem;pointer-events:auto;background:none;border:none;font-size:1rem;">
+          登出
+      </button>
+      <% } else { %>
+      <button onclick="showLoginBoard()" class="link2 logButtons" style="margin-left:auto;pointer-events:auto;background:none;border:none;font-size:1rem;">登录</button>
+      <% } %>
+  </div>
+  <div  id="userBoard" class="floatBoard">
+      <div>个人主页</div>
+      <div>游戏列表</div>
+  </div>
   <div id="topLine"></div>
+   <%- loginBoard %>
+  <script>
+      loginManager.registerLoadListener(function(result){
+          if(result.success){
+              if(loginManager)
+                  loginManager.hideLoginBoard();
+              let row = document.getElementById('loginRow');
+              let childrenNodes=  row.children;
+              for(let i =0; i< childrenNodes.length;++i){
+                  row.removeChild(childrenNodes[i]);
+              }
 
+              row.innerHTML = '<button onclick="showUserBoard()" class="link2 logButtons" style="margin-left:auto;pointer-events:auto;background:none;border:none;font-size:1rem;display:flex;flex-direction:row;">' +
+                  '          <div style="line-height:1.3rem;font-weight:bold;">' +
+                      result.name +
+                  '</div>' +
+                  '          <i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:3px;padding-top:1px;"></i>' +
+                  '      </button>' +
+                  '      <button onclick="requestLogout()" class="link2 logButtons" style="margin-left:1rem;pointer-events:auto;background:none;border:none;font-size:1rem;">' +
+                  '          登出' +
+                  '      </button>';
+          }
+          else{
+
+          }
+
+      });
+
+      loginManager.registerLogoutListener(function(){
+          let row = document.getElementById('loginRow');
+           let childrenNodes=  row.children;
+           for(let i =0; i< childrenNodes.length;++i){
+               row.removeChild(childrenNodes[i]);
+           }
+           row.innerHTML = '  <button onclick="showLoginBoard()" class="link2 logButtons" style="margin-left:auto;pointer-events:auto;background:none;border:none;font-size:1rem;">登录</button>';
+      });
+
+      loginManager.registerStatusChanger(function(status){
+          let childrenNodes = document.getElementsByClassName('logButtons');
+          for(let i = 0; i< childrenNodes[i];++i){
+              childrenNodes[i].disabled = status ? null : "";
+          }
+      });
+
+      function showLoginBoard(){
+          if(window['loginManager'])
+          {
+              loginManager.requestLoginBoard();
+          }
+      }
+
+      function showUserBoard(){
+          this._show = !this._show;
+          let ub = document.getElementById('userBoard');
+          if(ub)
+              ub.style.height = this._show? 'auto': '0';
+      };
+      showUserBoard._show = false;
+
+      function requestLogout(){
+          if(window['loginManager'])
+              loginManager.requestLogout();
+      };
+  </script>
 </body>
 </html>

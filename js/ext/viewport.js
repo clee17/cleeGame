@@ -711,8 +711,6 @@ viewport.stop = function(){
     this._clearUpperCanvas();
 };
 
-
-
 viewport.update = function(){
     this.requestUpdate();
     if(this._stopped)

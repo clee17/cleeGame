@@ -5,13 +5,15 @@ let main = require(path.join(__routes,"/cleeGame/main")),
     admin = require(path.join(__routes,"/cleeGame/admin")),
     info = require(path.join(__routes,"/cleeGame/info")),
     game = require(path.join(__routes,"/cleeGame/game")),
-    works = require(path.join(__routes,"/cleeGame/works"));
+    works = require(path.join(__routes,"/cleeGame/works"))
+
+    userSettingModel = require(path.join(__dataModel,'cleeGame_userSetting.js'));
 
 let router = express.Router();
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
-    if(req.ipData && req.ipData.country == '中国')
+    if(req.ipData && req.ipData.country === '中国')
         renderPage.lib = [
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
@@ -38,19 +40,9 @@ global.__renderError = function(req,res,errMessage){
     let userId = req.ip;
     if(req.session.user)
         userId = req.session.user._id;
-    let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
-    if(req.ipData && req.ipData.country == '中国')
-        renderInfo.lib = [
-            'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
-            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
-            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
-            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
-    else
-        renderInfo.lib = [
-            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
-            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
-            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
-            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+    let renderInfo = {user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
+    renderInfo.lib = [];
+    renderInfo.message = errMessage;
     res.render('cleeGame/error.html',renderInfo);
 };
 
@@ -104,6 +96,22 @@ router.post('/works/edit/addChapter/',works.addChapter);
 
 module.exports = function(app)
 {
+    app.use('*',function(req,res,next){
+        if(!req.session.user)
+        {
+            res.cookie('userId','',{maxAge:0});
+        }
+        if(req.session.user && !req.session.user.settings)
+        {
+            userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
+                if(!err)
+                    req.session.user.settings = JSON.parse(JSON.stringify(doc));
+                next();
+            });
+        }
+        else
+            next();
+    });
 
     app.use('/info',express.static(path.join(__basedir,'/public/html/basic')));
 

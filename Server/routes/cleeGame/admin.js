@@ -11,7 +11,10 @@ let handler = {
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
-        __renderIndex(req,res,result);
+        if(req.session.user)
+           __renderIndex(req,res,result);
+        else
+            __renderError(req,res,'你没有权限获取该页面');
     },
 
     publish:function(req,res){
