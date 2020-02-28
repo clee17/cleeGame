@@ -49,7 +49,7 @@ let handler = {
         }
         else if(req.url == '/admin')
         {
-            if(req.session.user && req.session.user.group[0] >= 99)
+            if(req.session.user && req.session.user.userGroup >= 999)
                 __renderIndex(req,res,result);
             else
                 __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');

@@ -276,8 +276,10 @@
             <div>
                 <div ng-repeat="module in item.modules">{{module}}</div>
             </div>
-            <button style="margin-left:auto;margin-right:10px;">编辑</button>
-            <button style="margin-right:10px;" ng-click="removeItem(item._id,$index)">删除</button>
+            <div style="display:flex;flex-direction:column;flex:1;width:4rem;">
+                <button style="width:4rem;margin-bottom:10px;">编辑</button>
+                <button style="width:4rem;" ng-click="removeItem(item._id,$index)">删除</button>
+            </div>
         </div>
     </div>
     <div id="funcBoard">

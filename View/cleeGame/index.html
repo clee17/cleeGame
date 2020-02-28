@@ -190,9 +190,9 @@
       <button onclick="showLoginBoard()" class="link2 logButtons" style="margin-left:auto;pointer-events:auto;background:none;border:none;font-size:1rem;">登录</button>
       <% } %>
   </div>
-  <div  id="userBoard" class="floatBoard">
-      <div>个人主页</div>
-      <div>游戏列表</div>
+  <div  id="userBoard" class="floatBoard" style="height:0;position:absolute;top:3rem;right:4rem;width:5rem;">
+      <div onclick="gotoPage(0)">个人主页</div>
+      <div onclick="gotoPage(1)">游戏列表</div>
   </div>
   <div id="topLine"></div>
    <%- loginBoard %>
@@ -258,6 +258,19 @@
           if(window['loginManager'])
               loginManager.requestLogout();
       };
+
+      function gotoPage(index){
+          switch(index){
+              case 0:
+                  window.location.href='/users/settings';
+                  break;
+              case 1:
+                  window.location.href = '/games/admin';
+                  break;
+              default:
+                  return '';
+          }
+      }
   </script>
 </body>
 </html>

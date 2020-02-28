@@ -3,6 +3,8 @@ var mongoose = require('mongoose');
 module.exports = new mongoose.Schema({
     title:{type:String,default:""},
 
+    user:{type:mongoose.Schema.ObjectId,default:null},
+
     version:{type:String,default:""},
 
     path:{type:String,default:""},

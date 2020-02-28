@@ -85,8 +85,16 @@
                 this._statusChange(true);
             if(xhr.response && xhr.status <= 400){
                 let result = LZString.decompressFromBase64(xhr.response);
+                if(result && result !== "")
+                    result = JSON.parse(result);
+                if(!result.success)
+                {
+                    let errorInfo = document.getElementById('loginBoardError');
+                    if(errorInfo)
+                        errorInfo.innerHTML = result.message;
+                }
                 if(loginManager._finishLoad)
-                    loginManager._finishLoad(JSON.parse(result));
+                    loginManager._finishLoad(result);
             }
             else
             {
@@ -137,6 +145,7 @@ display:flex;flex-direction:column;border-radius:0.4rem;">
         <div style="margin-top:auto;"><div style="min-width:4rem;">用户名:</div><input id="lgName"></div>
         <div style="margin-bottom:auto;"><div style="min-width:4rem;">密码:</div><input type="password" id="lgPwd"></div>
     </div>
+    <div id="loginBoardError" style="height:0.8rem;font-size:0.8rem;color:rgba(155,60,84,1);text-align:center;font-weight:bold;"> </div>
     <div style="width:100%;display:flex;height:3.5rem;">
         <button class="loginButton" style="margin-left:auto" onclick="loginManager.requestLogin()">登录</button>
         <button class="loginButton" style="margin-right:0.8rem;" onclick="loginManager.hideLoginBoard()">取消</button>

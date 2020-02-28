@@ -32,6 +32,7 @@
 
 .buttonPink:hover{
     background:var(--shadeColor);
+    cursor:pointer;
 }
 
 .buttonPinkSmall{

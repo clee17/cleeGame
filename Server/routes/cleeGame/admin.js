@@ -4,14 +4,25 @@ let express = require('express'),
     worksModel = require(path.join(__dataModel,'cleeGame_works')),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
+let gameInfoModel = require(path.join(__dataModel,'cleeGame_gameInfo'));
+
 let handler = {
+    finalSend:function(res,data)
+    {
+        if(data.sent)
+            return;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
     index:function(req,res,next){
         let viewPortMap = new Map();
         viewPortMap.set('/games/admin',{viewport:'admin/GameAdmin.html',controllers:['/view/cont/gameAdminController.js'],services:[]});
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
-        if(req.session.user)
+        console.log(req.session.user.settings);
+        if(req.session.user && req.session.user.settings.accessLevel >=10)
            __renderIndex(req,res,result);
         else
             __renderError(req,res,'你没有权限获取该页面');
@@ -175,6 +186,19 @@ let handler = {
 
         receivedData.pageId --;
 
+        let searchCriteria = null;
+        if(req.session.user && req.session.user.settings.accessLevel>= 99)
+            searchCriteria = {};
+        else if (req.session.user)
+            searchCriteria = {user:req.session.user._id};
+        if(!searchCriteria)
+        {
+            result.docs = [];
+            result.success = false;
+            result.message = '您的登录状态已过期，请重新登录';
+            handler.finalSend(res,result);
+            return;
+        }
         gameInfoModel.find({},function(err,docs){
             if(err)
                 result.message = JSON.stringify(err);
