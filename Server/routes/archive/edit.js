@@ -456,7 +456,6 @@ let handler = {
                     proceed();
                     data.message = '成功添加';
                     data.success = true;
-                    console.log(data);
                     handler.finalSend(res,data);
                 })
                 .catch(function(err){

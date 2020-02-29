@@ -324,6 +324,7 @@
 }
 
 #workIndexPanel{
+    position:relative;
     min-height:15rem;
     height:15rem;
     overflow-y:auto;

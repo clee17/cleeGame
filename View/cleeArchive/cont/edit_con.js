@@ -742,7 +742,6 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     $scope.$on('chapterRemoved',function(event,data){
         $scope.indexEditing = false;
         $scope.contentsLoaded = true;
-        console.log(data);
         if(data.success)
         {
 
