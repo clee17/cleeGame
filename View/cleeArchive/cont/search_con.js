@@ -31,6 +31,10 @@ app.controller("searchCon",['$scope','$rootScope','$timeout','$location','search
       },100);
       if(data.success){
          $scope.receivedList = data.result;
+         if(data.blocked)
+            $scope.$emit('showHeadSign',{message:'有部分内容根据国家相关法律政策被屏蔽，您可以浏览剩余内容'});
+         else
+            $scope.$emit('showHeadSign',{message:''});
       }
       else{
          $scope.showErr = true;

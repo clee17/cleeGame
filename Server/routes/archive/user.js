@@ -15,6 +15,55 @@ let registerModel = require(path.join(__dataModel,'register')),
 let md5 = crypto.createHash('md5');
 
 let handler = {
+    finalSend:function(res,data){
+        if(data.sent)
+            return;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
+    sendError:function(res,data,msg){
+        if(data.sent)
+            return;
+        data.info = msg;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
+    filterContents:function(res,data){
+        let pushData = [];
+        for(let i=0; i<data.result.length;++i){
+            if(data.result[i].chapter.grade>0)
+                pushData.push(data.result[i]._id);
+        }
+        if(pushData.length>0)
+            data.blocked = true;
+        while(pushData.length>0){
+            let tmp = pushData.shift();
+            console.log(pushData);
+            for(let i=0; i< data.result.length;++i){
+                if(data.result[i]._id === tmp){
+                    data.result.splice(i,1);
+                    break;
+                }
+            }
+        }
+        handler.finalSend(res,data);
+    },
+
+    filter:function(req,res,data){
+        if(req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
+            handler.finalSend(res,data);
+        else if(req.session.user && req.session.user._id === data.userId)
+            handler.finalSend(res,data);
+        else if(req.session.user && req.session.user.userGroup >= 999)
+            handler.finalSend(res,data);
+        else if( __getCounryCode(req.ipData) !== 'CN')
+            handler.finalSend(res,data);
+        else
+            handler.filterContents(res,data);
+    },
+
     register:function(req,res,next){
         let registerId = req.params.registerId;
         let userId = req.session.user;
@@ -119,11 +168,11 @@ let handler = {
 
     saveSetting:function(req,res){
         let settingData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sent = false;
         let data = {
             success:false,
             status:200,
-            message:''
+            message:'',
+            sent:false
         };
 
         if(!req.session.user)
@@ -149,27 +198,18 @@ let handler = {
 
     requestDashboard:function(req,res){
         let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sent =false;
         let response = {
+            sent:false,
             success:false,
             message:'dashboardRequestFinished',
-            info:''
-        };
-
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
+            info:'',
+            userId:data.userId,
         };
 
         let validateUserId = data.userId && __validateId(data.userId);
 
         if(!validateUserId)
-        {
-            response.info = '不是有效的用户ID。';
-            finalSend();
-        }
+            handler.sendError(res,response,'不是有效的用户ID');
 
         if(!data.pageId)
             handler.requestUpdates(req,res,data,response);
@@ -182,10 +222,7 @@ let handler = {
         else if(data.pageId == 1025)
             handler.requestTagBoard(req,res,data,response);
         else
-            {
-                response.info = '查询参数错误';
-                finalSend();
-            }
+            handler.sendError(res,response,'查询参数错误');
     },
 
     requestTagBoard(req,res,data,response){
@@ -200,13 +237,6 @@ let handler = {
                 return;
             sent = true;
             response.info = msg;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
-
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
 
@@ -274,7 +304,7 @@ let handler = {
                 response.success = true;
                 response.maxLimit = docs.length;
                 response.result = docs.slice(startPage*perPage,startPage*perPage+perPage);
-                finalSend();
+                handler.filter(req,res,response);
             })
 
 
@@ -298,21 +328,6 @@ let handler = {
         let startPage = data.subPage || 1;
         startPage--;
         let perPage = data.perPage || 10;
-        let sent = false;
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
-
-        let sendError = function(msg){
-            if(sent)
-                return;
-            sent = true;
-            response.info = msg;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
 
         if(data.type && data.type == 1)
             response.maxLimit = data.userSetting.workCount.maxChaptersCount || 0;
@@ -368,13 +383,12 @@ let handler = {
                 response.success = true;
                 response.maxLimit = docs.length;
                 response.result = docs.slice(startPage*perPage,startPage*perPage+perPage);
-                finalSend();
+                handler.filter(req,res,response);
             })
             .catch(function(err){
-                console.log(err);
                 if(err.success)
                     return;
-                sendError(err);
+                handler.sendError(res,response,err);
             });
     },
 
@@ -383,21 +397,9 @@ let handler = {
         let startPage = data.subPage || 1;
         startPage--;
         let perPage = data.perPage || 10;
-        let sendError = function(msg){
-            if(sent)
-                return;
-            sent = true;
-            response.info = msg;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
+
         if(!data.userId)
-            sendError('不是有效的用户ID');
+            handler.sendError(res,response,'不是有效的用户ID');
         if(sent)
             return;
 
@@ -475,35 +477,23 @@ let handler = {
                 response.maxLimit = docs.length;
                 let result = docs.slice(startPage*perPage,startPage*perPage + perPage);
                 response.result = JSON.parse(JSON.stringify(result));
-                finalSend();
+                handler.filter(req,res,response);
             })
             .catch(function(err){
                 console.log(err);
                 response.msg = err;
                 response.success = false;
-                sendError(err);
+                handler.sendError(res,response,err);
             })
     },
 
     calculate:function(req,res){
         let sent = false;
         let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sendError = function(msg){
-            if(sent)
-                return;
-            sent = true;
-            response.info = msg;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
         let response = {
             success:false,
             result:null,
+            sent:false,
             message:'userCalculationEnded'
         };
 
@@ -533,12 +523,12 @@ let handler = {
                 response.result.recommendCount = result.fanfic_recommendation.length;
                 response.result.seriesCount = result.fanfic_series.length;
                 response.success = true;
-                finalSend();
+                handler.finalSend(res,response);
             })
             .catch(function(err){
                 response.msg = err;
                 response.success = false;
-                sendError(err);
+                handler.sendError(res,response,err);
             })
     }
 

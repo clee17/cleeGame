@@ -72,6 +72,10 @@ app.controller("dashboard_con",['$scope','$rootScope','$location','userManager',
         $scope.contentsLoaded = true;
         if(data.success)
         {
+            if(data.blocked)
+                $scope.$emit('showHeadSign',{message:'有部分内容根据国家相关法律政策被屏蔽，您可以浏览剩余内容'});
+            else
+                $scope.$emit('showHeadSign',{message:''});
             $scope.receivedList = data.result || [];
             $scope.maxLimit = data.maxLimit || 0;
             $scope.$broadcast('updatePageIndex',{totalNum:$scope.maxLimit,pageId:$scope.pageIndex});

@@ -330,3 +330,9 @@ input{
 .alert  >div:last-child button:first-child{
     margin-left:auto;
 }
+
+#headSign{
+    margin-top:auto;
+    margin-bottom:auto;
+    padding-right:14rem;
+}

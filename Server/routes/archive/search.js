@@ -15,6 +15,40 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
+    filterContents:function(res,data){
+        let pushData = [];
+        for(let i=0; i<data.result.length;++i){
+            if(data.result[i].chapter.grade>0)
+                pushData.push(data.result[i]._id);
+        }
+        if(pushData.length>0)
+            data.blocked = true;
+        while(pushData.length>0){
+            let tmp = pushData.shift();
+            console.log(pushData);
+            for(let i=0; i< data.result.length;++i){
+                if(data.result[i]._id === tmp){
+                    data.result.splice(i,1);
+                    break;
+                }
+            }
+        }
+        handler.finalSend(res,data);
+    },
+
+    filter:function(req,res,data){
+        if(req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
+            handler.finalSend(res,data);
+        else if(req.session.user && req.session.user._id === data.userId)
+            handler.finalSend(res,data);
+        else if(req.session.user && req.session.user.userGroup >= 999)
+            handler.finalSend(res,data);
+        else if( __getCounryCode(req.ipData) !== 'CN')
+            handler.finalSend(res,data);
+        else
+            handler.filterContents(res,data);
+    },
+
     all:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let searchList = receivedData.searchList || [0,1];
@@ -161,14 +195,16 @@ let handler = {
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));
                 response.success = true;
-                handler.finalSend(res,response);
+                if(req.session.user && (req.session.user.userGroup >= 999 || req.session.user.settings.access.indexOf(202) !== -1))
+                    handler.finalSend(res,response);
+                else
+                     handler.filter(req,res,response);
             })
             .catch(function(err){
                 if(typeof err !== 'string')
                     err = err.errMsg || '不知名的错误';
                 response.success = false;
                 response.message = err;
-                console.log(err);
                 handler.finalSend(res,response);
             });
     },
