@@ -102,7 +102,7 @@ let handler = {
         {
             if(req.session.user.userGroup>= 999)
                 authorize = true;
-            else if(req.session.user.setting&& req.session.user.setting.access.indexOf(101) !== -1)
+            else if(req.session.user.settings&& req.session.user.settings.access.indexOf(101) !== -1)
                 authorize = true;
         }
 
