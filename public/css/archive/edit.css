@@ -20,6 +20,12 @@
     font-family: SimSun,serif, Arial, "Microsoft YaHei UI";
 }
 
+#editorDisplay{
+    display:flex;
+    flex:1;
+    flex-direction:row-reverse;
+}
+
 #headerTitle{
     width:45rem;
     margin-left:auto;
@@ -102,7 +108,8 @@
 #leftEditBoard{
     display:flex;
     flex-direction:column;
-    padding-right:3rem;
+    padding-left:1.5rem;
+    padding-right:1.5rem;
     padding-top:1rem;
     margin-left:auto;
     margin-bottom:4rem;
@@ -141,7 +148,8 @@
 #rightEditBoard{
     display:flex;
     flex-direction:column;
-    padding-left:2rem;
+    padding-right:1rem;
+    padding-left:1rem;
     margin-right:auto;
     width:20rem;
     font-size:14px;
@@ -159,28 +167,6 @@
     padding-left:10px;
     padding-right:10px;
     margin:auto;
-}
-
-.subIcon{
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select:none;
-    fill:rgba(108,95,93,255);
-    color:rgba(108,95,93,255);
-}
-
-.subIcon div{
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select:none;
-    justify-content: center;
-}
-
-.subIcon:hover{
-    fill:rgba(181,163,160,218);
-    color:rgba(181,163,160,218);
 }
 
 #workInfo{
@@ -337,6 +323,25 @@
     font-size:14px;
 }
 
+#workIndexPanel{
+    min-height:15rem;
+    height:15rem;
+    overflow-y:auto;
+    background:white;
+    margin:2rem;
+    margin-bottom:0;
+    border:solid 1px rgba(181,163,160,128);
+    box-shadow:0px 0px 4px gray inset;
+}
+
+#chapterEditorKeys{
+    margin-left:2rem;
+    margin-right:2rem;
+    display:flex;
+    flex-direction:row;
+    padding-right:10px;
+}
+
 #chapterEditorKeys button{
     background:rgba(0,0,0,0);
     border:none;
@@ -352,6 +357,16 @@
     color:gray;
 }
 
+#chapterEditorKeys >div:nth-child(n+1){
+    margin-left:10px;
+}
+
+#chapterEditorKeys >div:nth-last-child(2){
+    margin-left:auto;
+}
+
+
+
 .paragraph{
     margin-bottom:1rem;
     text-indent:2rem;
@@ -364,4 +379,49 @@
 
 #indexInfo a:hover{
     text-decoration:underline;
+}
+
+
+.subIcon{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select:none;
+    fill:rgba(108,95,93,255);
+    color:rgba(108,95,93,255);
+    font-weight:bold;
+    justify-content: center;
+    font-size:1.2rem;
+}
+
+.subIcon:hover{
+    fill:rgba(181,163,160,218);
+    color:rgba(181,163,160,218);
+}
+
+.expand-button{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select:none;
+    line-height:1.8rem;
+    font-weight:bold;
+    margin-left:10px;
+    margin-right:1rem;
+}
+
+.expand-button:hover{
+    color:rgba(181,163,160,218);
+}
+
+.infoIcon{
+    margin-left:auto;margin-top:auto;margin-bottom:auto;
+}
+
+.panelTitle{
+    margin-top:auto;margin-bottom:auto;margin-left:5px;border-left:solid 4px rgba(181,163,160,218);font-weight:bold;padding-left:10px;
+}
+
+.float-parent{
+    display:flex;flex-direction:row;width:100%;font-size:14px;height:1.5rem;background:rgba(223,216,214,255);position:relative;
 }

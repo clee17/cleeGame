@@ -99,18 +99,21 @@ app.service('fanficManager',function($http,$rootScope){
         $http.post('/fanfic/chapter/remove',{data:LZString.compressToBase64(JSON.stringify(indexData))})
             .then(function(response){
                 let data = JSON.parse(LZString.decompressFromBase64(response.data));
-                if(data.success)
-                    $rootScope.$broadcast('chapterRemoved',data);
-                else
-                    $rootScope.$broadcast('chapterRemoved',{success:false,message:data.message});
+                 $rootScope.$broadcast('chapterRemoved',data);
             },function(err){
-                $rootScope.$broadcast('chapterRemoved',{success:false,message:'网络通信错误'});
+                console.log(err);
+                $rootScope.$broadcast('chapterRemoved',{success:false,message:'服务器内部错误'});
             });
     };
 
-    this.saveInfo = function(bookData,fanficData)
-    {
-        manager.saveBook(bookData);
-        manager.saveFanfic(fanficData);
+    this.swapChapter = function(indexData){
+        $http.post('/fanfic/chapter/swap',{data:LZString.compressToBase64(JSON.stringify(indexData))})
+            .then(function(response){
+                let data = JSON.parse(LZString.decompressFromBase64(response.data));
+                $rootScope.$broadcast('chapterSwapped',data);
+            },function(err){
+                console.log(err);
+                $rootScope.$broadcast('chapterSwapped',{success:false,message:'服务器内部错误'});
+            });
     }
 });

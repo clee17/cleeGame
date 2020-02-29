@@ -95,22 +95,6 @@ app.directive('infoReceiver',function(){
                 return item._id;
             });
             let i =0;
-            while(scope.workIndex[i] && scope.workIndex[i].next)
-            {
-                let pos = index.indexOf(scope.workIndex[i].next);
-                let temp = JSON.stringify(scope.workIndex[pos]);
-                if(pos >= 0)
-                {
-                    scope.workIndex[pos] = JSON.parse(JSON.stringify(scope.workIndex[++i]));
-                    scope.workIndex[i] = JSON.parse(temp);
-                    temp = index[pos];
-                    index[pos] = index[i];
-                    index[i] = temp;
-                }
-                else
-                    ++i;
-            }
-
             if(scope.userSettings)
                 scope.fanficEdit = scope.userSettings.fanficEdit;
         }
@@ -129,7 +113,8 @@ app.directive('chapterSelect',function(){
             });
 
             scope.$on('chapter selected',function(){
-                if(scope.$parent.selectedChapters.indexOf(scope.list._id) === -1)
+                if(scope.$parent.
+                selectedChapters.indexOf(scope.list._id) === -1)
                 {
                     scope.selected = false;
                     element.css('background','rgba(0,0,0,0)');
@@ -143,9 +128,7 @@ app.directive('chapterSelect',function(){
             });
 
             scope.$on('clicked',function(event,data){
-                if(scope.$parent.selectedChapters.length === 0)
-                    return;
-                if(data.event.target !== element[0] && !window.event.ctrlKey)
+                if(data.event.target !== element[0] && !window.event.ctrlKey && !window.event.shiftKey)
                 {
                     scope.selected = false;
                     element.css('background','rgba(0,0,0,0)');
@@ -191,9 +174,35 @@ app.directive('chapterSelect',function(){
                     if(scope.selected)
                         return;
                     event.stopPropagation();
-                    if(!window.event.ctrlKey)
+                    if(!window.event.ctrlKey && !window.event.shiftKey)
+                    {
                         scope.$parent.selectedChapters.length = 0;
-                    scope.$parent.selectedChapters.push(scope.list._id);
+                    }
+                    if(window.event.shiftKey){
+                        if(!scope.$parent.selectedChapter)
+                            return;
+                        let currentOrder = -1;
+                        let targetOrder = -1;
+                        for(let i=0; i< scope.$parent.workIndex.length;++i){
+                            if(scope.$parent.workIndex[i]._id === scope.list._id)
+                                currentOrder = i;
+                            else if (scope.$parent.workIndex[i]._id === scope.$parent.selectedChapter._id)
+                                targetOrder = i;
+                        }
+                        if(currentOrder < 0 || targetOrder<0 || currentOrder === targetOrder)
+                            return;
+                        scope.$parent.selectedChapters = [scope.list._id];
+                        let step = currentOrder >= targetOrder ? 1 : -1;
+                        while(targetOrder !==currentOrder){
+                            scope.$parent.selectedChapters.push(scope.$parent.workIndex[targetOrder]._id);
+                            targetOrder += step;
+                        }
+                    }
+                    else{
+                        scope.$parent.selectedChapters.push(scope.list._id);
+                        if(!window.event.ctrlKey)
+                              scope.$parent.selectedChapter = scope.list;
+                    }
                     scope.$parent.$apply();
                     scope.$parent.$broadcast('chapter selected',{});
                 })
@@ -548,7 +557,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
 
     $scope.bookSaving = false;
     $scope.chapterSaving = false;
-    $scope.chapterAdding = false;
+    $scope.indexEditing = false;
 
     //当前界面章节变量
     $scope.chapter = {};
@@ -584,12 +593,10 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    $scope.selectedChapters = [];
 
    $scope.loadContent = function(){
-
+       $scope.requestingFanfic = true;
        if($scope.contentsLoaded){
            $scope.contentsLoaded = false;
-
            fanficManager.requestFanfic($scope.currentIndex);
-
        }
        else {
            let localItem = null;
@@ -618,9 +625,9 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     };
 
    $scope.$on('fanficReceived',function(event,data){
+        $scope.requestingFanfic = false;
         if(data.success)
         {
-
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter.chapter));
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
@@ -630,7 +637,6 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
             });
             if(window.localStorage)
             {
-                console.log($scope.currentIndex);
                 localStorage.setItem($scope.currentIndex._id,LZString.compressToBase64(JSON.stringify(data.chapter)));
             }
             $scope.contentsLoaded = true;
@@ -690,33 +696,83 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     });
 
     $scope.$on('chapterAdded',function(event,data){
-        $scope.chapterAdding = false;
+        $scope.indexEditing = false;
         $scope.contentsLoaded = true;
         if(data.success)
         {
            $scope.workIndex.splice(data.insertId+1,0,data.newIndex);
            for(let i = data.inserId+2;i<$scope.workIndex.length;++i)
                $scope.workIndex[i].order++;
+           $scope.bookInfo.chapterCount++;
         }
         else
             $scope.$emit('showError',data.message);
     });
 
+    $scope.removeIndex = function(item){
+        if(!item)
+            return;
+        for(let i =0; i< $scope.workIndex.length;++i){
+            if($scope.workIndex[i]._id === item._id)
+            {
+                if(item._id === $scope.currentIndex._id)
+                {
+                    $scope.currentIndex = null;
+                    $scope.contentsLoaded = false;
+                }
+
+                $scope.workIndex.splice(i,1);
+                break;
+            }
+        }
+    };
+
+    $scope.updateIndex = function(item){
+        if(!item)
+            return;
+        for(let i =0; i< $scope.workIndex.length;++i){
+            if($scope.workIndex[i]._id === item._id)
+            {
+                $scope.workIndex[i] = JSON.parse(JSON.stringify($scope.workIndex[i]));
+                return;
+            }
+        }
+    };
+
     $scope.$on('chapterRemoved',function(event,data){
-        $scope.chapterAdding = false;
+        $scope.indexEditing = false;
         $scope.contentsLoaded = true;
         if(data.success)
         {
-            $scope.workIndex.splice(data.insertId+1,0,data.newIndex);
-            for(let i = data.inserId+2;i<$scope.workIndex.length;++i)
-                $scope.workIndex[i].order++;
-            $scope.bookInfo.chapterCount = data.bookInfo.chapterCount;
-            $scope.bookInfo.wordCount = data.bookInfo.wordCount;
+            for(let i =0; i< data.deleted.length;++i)
+                $scope.removeIndex(data.deleted[i]);
+            for(let i =0; i<data.updated.length;++i)
+                $scope.updateIndex(data.updated[i]);
+            $scope.bookInfo.chapterCount = data.chapterCount;
         }
         else
             $scope.$emit('showError',data.message);
     });
 
+    $scope.$on('chapterSwapped',function(event,data){
+        $scope.indexEditing = false;
+        $scope.contentsLoaded = true;
+        if(data.success)
+        {
+            for(let i =0 ;i<$scope.workIndex.length;++i){
+                if($scope.workIndex[i]._id == data.current._id)
+                    $scope.workIndex[i].chapter = JSON.parse(JSON.stringify(data.current.chapter));
+                else if($scope.workIndex[i]._id == data.target._id)
+                    $scope.workIndex[i].chapter = JSON.parse(JSON.stringify(data.target.chapter));
+            };
+            if($scope.currentIndex._id === data.current._id)
+                $scope.currentIndex.chapter = data.current.chapter._id;
+            else if ($scope.currentIndex._id === data.target._id)
+                $scope.currentIndex.chapter = data.target.chapter._id;
+        }
+        else
+            $scope.$emit('showError',data.message);
+    });
 
 
     $scope.$on('preview ready',function(event,data){
@@ -808,11 +864,12 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    };
 
    $scope.addChapter = function(){
-      if($scope.chapterAdding)
+      if($scope.indexEditing)
            return;
       if($scope.selectedChapters>1)
           return;
-      $scope.chapterAdding = true;
+      $scope.indexEditing = true;
+      $rootScope._buttonClicked = true;
       let data = {
           prev:null,
           next:null,
@@ -845,16 +902,45 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    };
 
    $scope.removeChapter = function(){
-       let rmTag = [];
-       for(let i=0; i< $scope.selectedChapters.length;++i)
+       $rootScope._buttonClicked = true;
+       $scope.indexEditing = true;
+       let newChapterCount = $scope.bookInfo.chapterCount - $scope.selectedChapters.length;
+       let data ={list:[],chapterCount:newChapterCount,bookId:$scope.bookInfo._id};
+       if($scope.selectedChapters.length === $scope.workIndex.length)
        {
-           let tag=  $scope.selectedChapters[i];
-           $scope.workIndex.map(function(item){
-               if(item._id === tag)
-                   rmTag.push(item);
-           });
+           $scope.$emit('showError','您不能删除全部章节');
+           return;
        }
-       fanficManager.removeChapter({rm:rmTag});
+       for(let i=0; i< $scope.workIndex.length;++i)
+       {
+           let item = $scope.workIndex[i];
+           item.deleted = $scope.selectedChapters.indexOf(item._id) !== -1;
+           data.list.push(item);
+       }
+       fanficManager.removeChapter(data);
+   };
+
+   $scope.chapterSwap = function(step){
+       $rootScope._buttonClicked = true;
+       let currentIndex = -1;
+       for(let i=0; i<$scope.workIndex.length;++i){
+           if($scope.workIndex[i]._id === $scope.selectedChapter._id)
+               currentIndex = i;
+       }
+       if(currentIndex >0){
+           if(currentIndex+step >= $scope.workIndex.length)
+               $scope.$emit("showError",'已为最后一位，无法调换');
+           else if(currentIndex+step <0)
+               $scope.$emit("showError",'已为首位，无法调换');
+           else{
+               let data = {
+                   current: $scope.workIndex[currentIndex]._id,
+                   target: $scope.workIndex[currentIndex+step]._id
+               };
+               fanficManager.swapChapter(data);
+           }
+
+       }
    };
 
    $scope.initializeBookDetail = function(){

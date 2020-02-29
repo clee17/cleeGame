@@ -51,7 +51,7 @@ let handler = {
                 let render = data.rendered;
                 data = JSON.parse(JSON.stringify(doc));
                 data.rendered = render;
-                if(!doc.published && !req.session.user)
+                if(doc)
                     handler.getModules(req,res,data);
                 else
                     handler.renderError(res,data,"我们的数据库中没有找到这款游戏",'游戏未找到');

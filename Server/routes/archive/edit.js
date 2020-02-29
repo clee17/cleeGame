@@ -100,7 +100,6 @@ let handler = {
         let authorize = false;
         if(req.session.user)
         {
-            console.log(req.session.user);
             if(req.session.user.userGroup>= 999)
                 authorize = true;
             else if(req.session.user.setting&& req.session.user.setting.access.indexOf(101) !== -1)
@@ -249,28 +248,172 @@ let handler = {
             });
     },
 
-    addChapter:function(req,res){
+    swapChapter:function(req,res){
+        let indexData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let data = {
+            message:'',
+            sent:false,
+            current:null,
+            target:null,
+            error:null,
+            success:false
+        };
+
+        let targetList = [indexData.current,indexData.target];
+
+        indexModel.find({_id:{$in:targetList}},function(err,docs){
+            if(err)
+                data.message = err;
+            else {
+                for(let i=0;i<docs.length;++i){
+                    if(docs[i]._id == indexData.current) {
+
+                        data.current = JSON.parse(JSON.stringify(docs[i]));
+                    } else if (docs[i]._id == indexData.target)
+                        data.target = JSON.parse(JSON.stringify(docs[i]));
+                }
+
+                let bulkWriteDocs  = [
+                    {updateOne:{'filter':{'_id':data.current._id},'update':{chapter:data.target.chapter._id}}},
+                    {updateOne:{'filter':{'_id':data.target._id},'update':{chapter:data.current.chapter._id}}},
+                ];
+
+                console.log(bulkWriteDocs);
+
+                indexModel.bulkWrite(bulkWriteDocs,function(err,docs){
+                    if(err){
+                        handler.finalSend(res,data);
+                    }else{
+                        data.success = true;
+                        let tmp = data.current.chapter;
+                        data.current.chapter = data.target.chapter;
+                        data.target.chapter = tmp;
+                        data.message = '成功调换';
+                        console.log(data);
+                        handler.finalSend(res,data);
+                    }
+                });
+            }
+        }).populate('chapter','title _id wordCount fandom relationships characters tag');
+
+    },
+
+    removeChapter:function(req,res){
         let indexData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let sent = false;
         let process = 0;
         let data = {
+            message:'',
+            deleted:[],
+            updated:[],
+            chapterDeleted: false,
+            indexDeleted: false,
+            chapterCount: -1,
+            tableUpdated:0,
+            error:null,
+            success:false
+        };
+
+        let checkFinal = function(){
+            if(data.chapterDeleted && data.indexDeleted && data.chapterCount> 0)
+                data.success = true;
+            if(data.error)
+                data.success = false;
+            if(data.tableUpdated < 3)
+                return;
+            handler.finalSend(res,data);
+        };
+        let getUndeleted = function(step,i){
+            let result = null;
+            while(i>=0 && i < indexData.list.length){
+                 i+= step;
+                 if(!indexData.list[i].deleted)
+                     return indexData.list[i]._id;
+            }
+            return result;
+        };
+
+        let updateIndex = function(i){
+            let edited = false;
+            if(i-1>=0 && indexData.list[i-1].deleted){
+                indexData.list[i].prev = getUndeleted(-1,i);
+                edited = true;
+            }
+            if(i+1 < indexData.list.length && indexData.list[i+1].deleted){
+                indexData.list[i].next = getUndeleted(-1,i);
+                edited = true;
+            }
+            if(edited)
+                data.updated.push(indexData.list[i]);
+        };
+
+        for(let i =0; i<indexData.list.length;++i){
+            if(indexData.list[i].deleted)
+                data.deleted.push(indexData.list[i]);
+            else{
+                 updateIndex(i);
+            }
+        }
+        let bulkWriteOpts = [];
+        for(let i=0; i<data.updated.length;++i){
+            if(data.updated[i])
+            {
+                let updated = data.updated[i];
+                let update = {prev:updated.prev,next:updated.next};
+                bulkWriteOpts.push({updateOne:{'filter':{'_id':data.updated[i]._id},'update':update}});
+            }
+        }
+
+        let deleteIndex = data.deleted.map(function(item,i){
+            return item._id;
+        });
+
+        let deletedChapter = data.deleted.map(function(item,i){
+            return item.chapter;
+        });
+        indexModel.deleteMany({_id:{$in:deleteIndex}},function(err,docs){
+                data.error = err;
+                data.indexDeleted = true;
+                data.tableUpdated++;
+                checkFinal();
+        });
+
+        chapterModel.deleteMany({_id:{$in:deletedChapter}},function(err,docs){
+            data.error = err;
+            data.chapterDeleted = true;
+            data.tableUpdated++;
+            checkFinal();
+        });
+
+        indexModel.bulkWrite(bulkWriteOpts,function(err,docs){
+            data.error = err;
+            checkFinal();
+        });
+
+        worksModel.findOneAndUpdate({_id:indexData.bookId},{chapterCount:indexData.chapterCount},{new:true},function(err,doc){
+            data.error = err;
+            if(doc)
+               data.chapterCount = doc.chapterCount;
+            data.tableUpdated++;
+            checkFinal();
+        });
+    },
+
+    addChapter:function(req,res){
+        let indexData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let process = 0;
+        let data = {
+            sent:false,
             message:'',
             insertId:indexData.prevIndex,
             success:false
         };
 
         let proceed = function() {
-            if (process == 0)
+            if (process === 0)
                 saveIndex();
-            else if(process == 1)
+            else if(process === 1)
                 updateIndex();
-        };
-
-        let send = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(data)));
         };
 
         let saveIndex = function(){
@@ -282,7 +425,7 @@ let handler = {
             index.save(function(err,index){
                 if(err){
                     data.message = err;
-                    send();
+                    handler.finalSend(res,data);
                 }
                 else{
                     data.newIndex = JSON.parse(JSON.stringify(index));
@@ -303,12 +446,14 @@ let handler = {
                 .then(function(result){
                     process = 2;
                     proceed();
-                    send();
+                    data.message = '成功添加';
+                    data.success = true;
+                    console.log(data);
+                    handler.finalSend(res,data);
                 })
                 .catch(function(err){
-                    console.log(err);
                     data.message = '更新原目录错误'+err;
-                    send();
+                    handler.finalSend(res,data);
                 })
         };
 

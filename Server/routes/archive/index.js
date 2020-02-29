@@ -159,6 +159,8 @@ router.post('/fanfic/post/publish',edit.publish);
 
 router.post('/fanfic/chapter/save',edit.saveChapter);
 router.post('/fanfic/chapter/add',edit.addChapter);
+router.post('/fanfic/chapter/remove',edit.removeChapter);
+router.post('/fanfic/chapter/swap',edit.swapChapter);
 router.post('/fanfic/book/save',edit.saveBook);
 router.post('/fanfic/post/loadChapter',edit.fanficGet);
 

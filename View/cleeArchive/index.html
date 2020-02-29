@@ -28,7 +28,10 @@
     <script>
         app.controller('entryCon',function($scope,$rootScope,$window,$timeout,loginManager){
             window.addEventListener("click",function(event){
-                $rootScope.$broadcast('clicked',{event:event});
+                if($rootScope._buttonClicked)
+                    $rootScope._buttonClicked = false;
+                else
+                    $rootScope.$broadcast('clicked',{event:event});
             });
 
             $rootScope.err = '<%- err %>';

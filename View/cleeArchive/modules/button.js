@@ -1,38 +1,3 @@
-var _getAbsolutePosition = function(obj) {
-    if(!obj)return null;
-    let w = obj.offsetWidth, h = obj.offsetHeight;
-
-    let t = obj.offsetTop,l = obj.offsetLeft;
-    obj = obj.offsetParent;
-    while(obj)
-    {
-
-        t += obj.offsetTop;
-        l += obj.offsetLeft;
-        obj = obj.offsetParent;
-    }
-
-    let r = l+w;
-    let b = t-h;
-
-    return {width: w, height: h, top: t, left: l, right: r, bottom: b};
-};
-
-var _getInsideTheElement = function(pointer,area){
-    if(area.target && area.target == pointer.target)
-        return true;
-
-    let x = pointer.clientX-pointer.layerX;
-    let y = pointer.clientY-pointer.layerY;
-
-    let a = x>=area.left;
-    let b = x<=area.right;
-    let c = y>=area.bottom;
-    let d = y<=area.top;
-
-    return  a && b && c && d;
-};
-
 let disableSelect = function(ele){
     ele.css('userSelect','none');
     ele.css('webkitUserSelect','none');
@@ -136,27 +101,21 @@ app.directive('expandPanel',function(){
 
 app.directive('expandButton',function(){
     return {
-        restrict: 'A',
+        restrict: 'AC',
         require:"^expandParent",
         scope:{
         },
         link:function(scope,element,attr,pCtrl){
             scope.switch = true;
             scope.$watch('switch',function(){
-                let icon = element.children();
-                icon = icon[0];
-                var url =  icon.href.baseVal;
-                let mark = url.lastIndexOf('-');
-                var type = url.substring(mark+1);
-
-                var newType = scope.switch?'down':'up';
-                let newLink = url.substring(0,mark+1)+newType;
-
-                icon.href.baseVal = newLink;
-                icon.href.animVal = newLink;
+               let innerHTML  = scope.switch? '<i class="fas fa-chevron-down subIcon"></i>':'<i class="fas fa-chevron-up subIcon"></i>';
+                element.html(innerHTML);
             });
 
             element
+                .on('mouseover',function(){
+                    element.css('color','');
+                })
                 .on('click',function(){
                     if(pCtrl.changeSwitch)
                     {
@@ -204,13 +163,10 @@ app.directive('floatPage',function($rootScope,$timeout){
             scope.$on('clicked',function(event,data){
                 if(scope.showSub && !scope.freezing)
                 {
-                    if(!_getInsideTheElement(data.event,_getAbsolutePosition(element[0])))
+                    if(data.event.target !== element[0] && data.event.target.parentElement !== element[0])
                     {
-                        scope.showSub = !scope.showSub;
-                        if(scope.showSub)
-                            element.css('display','block');
-                        else
-                            element.css('display','none');
+                        scope.showSub = false;
+                        element.css('display','none');
                     }
                 }
             });

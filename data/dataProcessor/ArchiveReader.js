@@ -1,6 +1,7 @@
 let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
     indexModel = require('./../model/cleeArchive_workIndex'),
+    likeModel = require(path.join(__dataModel,'cleeArchive_postLike')),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     updatesModel = require('../model/cleeArchive_postUpdates'),
@@ -15,6 +16,68 @@ let redis = require('redis'),
 
 var argv = process.argv;
 console.log(argv);
+
+function dataEditor(){
+    throw new Error(' this is a static class');
+}
+
+dataEditor.initialize = function(){
+    this._processing = false;
+    this._likes = [];
+};
+
+dataEditor.getAllLikes = function(works,callback){
+    likeModel.find({work:{$in:works}},function(err,docs) {
+        if(err)
+            console.log(err);
+        else
+        {
+            dataEditor.likes = JSON.parse(JSON.stringify(docs));
+            if(callback)
+                callback(true);
+        }
+    };
+};
+
+dataEditor.mergeFanfic = function(doc){
+    if(doc.contents.length <=2)
+    {
+        console.log('没有收到复数的章节');
+        return;
+    }
+    let data = {
+        index:0
+    };
+
+        let processIndex = function(){
+            let bulkWriteDocs = [];
+            for(let i = 0;i<rootIndex[i].length;++i){
+                rootIndex[i].next = i+1>=rootIndex.length? null : rootIndex[i+1];
+                rootIndex[i].prev = i-1>=0? rootIndex[i-1] : null;
+                rootIndex[i].work = works[0];
+                let update = JSON.parse(JSON.stringify(rootIndex[i]));
+                delete update._id;
+                bulkWriteDocs.push({updateOne:{'filter':{'_id':rootIndex[i]._id},'update':update}});
+                indexModel.bulkWrite(bulkWriteDocs,function(err,docs){
+                    if(!err)
+                        processLike();
+                });
+            }
+        };
+        let readIndex = function(data){
+            if(!data.index >= works.length)
+            {
+                processIndex();
+            }
+            indexModel.find({work:works[data.index]},function(err,docs){
+                rootIndex.concat(docs);
+                data.index++;
+                readIndex(data);
+            })
+        };
+
+        readIndex(data);
+};
 
 let readSettings = function () {
     redisList = ['grade','warning'];
@@ -531,8 +594,8 @@ let changeChapterId = function(prevId, nextId){
         else
             console.log('信息表'+err);
     });
-
 };
+
 
 switch(argv[2])
 {
@@ -565,6 +628,9 @@ switch(argv[2])
         break;
     case 'changeChapter':
         changeChapterId(argv[3],argv[4]);
+        break;
+    case 'mergeWork':
+        mergeWork([argv[3],argv[4]]);
         break;
     default:
         console.log('输入无效的指令');
