@@ -385,7 +385,6 @@ let handler = {
            }
        }
 
-       console.log(' post data validation');
        if(!postData.necc || postData.necc != 'adw320931456t_e')
        {
            result.message = 'not valid visitor';
@@ -393,7 +392,6 @@ let handler = {
            return;
        }
 
-       console.log(' session user validation');
        if(!req.session.user && !__validateId(postData.visitorId))
        {
            result.message = 'not valid visitor';
