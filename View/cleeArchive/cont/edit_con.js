@@ -742,8 +742,10 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     $scope.$on('chapterRemoved',function(event,data){
         $scope.indexEditing = false;
         $scope.contentsLoaded = true;
+        console.log(data);
         if(data.success)
         {
+
             for(let i =0; i< data.deleted.length;++i)
                 $scope.removeIndex(data.deleted[i]);
             for(let i =0; i<data.updated.length;++i)
@@ -904,8 +906,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
    $scope.removeChapter = function(){
        $rootScope._buttonClicked = true;
        $scope.indexEditing = true;
-       let newChapterCount = $scope.bookInfo.chapterCount - $scope.selectedChapters.length;
-       let data ={list:[],chapterCount:newChapterCount,bookId:$scope.bookInfo._id};
+       let data ={list:[],chapterCount:$scope.bookInfo.chapterCount,bookId:$scope.bookInfo._id};
        if($scope.selectedChapters.length === $scope.workIndex.length)
        {
            $scope.$emit('showError','您不能删除全部章节');

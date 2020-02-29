@@ -294,7 +294,7 @@ let handler = {
                     }
                 });
             }
-        }).populate('chapter','title _id wordCount fandom relationships characters tag');
+        }).populate('chapter','title _id wordCount fandom relationships characters tag published');
 
     },
 
@@ -315,7 +315,7 @@ let handler = {
         };
 
         let checkFinal = function(){
-            if(data.chapterDeleted && data.indexDeleted && data.chapterCount> 0)
+            if(data.chapterDeleted && data.indexDeleted && data.chapterCount>= 0)
                 data.success = true;
             if(data.error)
                 data.success = false;
@@ -325,10 +325,11 @@ let handler = {
         };
         let getUndeleted = function(step,i){
             let result = null;
+            i+=step;
             while(i>=0 && i < indexData.list.length){
-                 i+= step;
                  if(!indexData.list[i].deleted)
                      return indexData.list[i]._id;
+                i+= step;
             }
             return result;
         };
@@ -340,7 +341,7 @@ let handler = {
                 edited = true;
             }
             if(i+1 < indexData.list.length && indexData.list[i+1].deleted){
-                indexData.list[i].next = getUndeleted(-1,i);
+                indexData.list[i].next = getUndeleted(1,i);
                 edited = true;
             }
             if(edited)
@@ -355,6 +356,13 @@ let handler = {
             }
         }
         let bulkWriteOpts = [];
+
+        let newChapterCount = indexData.chapterCount;
+        for(let i=0;i<data.deleted.length;++i){
+            if(data.deleted.published)
+                newChapterCount--;
+        }
+
         for(let i=0; i<data.updated.length;++i){
             if(data.updated[i])
             {
@@ -390,7 +398,7 @@ let handler = {
             checkFinal();
         });
 
-        worksModel.findOneAndUpdate({_id:indexData.bookId},{chapterCount:indexData.chapterCount},{new:true},function(err,doc){
+        worksModel.findOneAndUpdate({_id:indexData.bookId},{chapterCount:newChapterCount},{new:true},function(err,doc){
             data.error = err;
             if(doc)
                data.chapterCount = doc.chapterCount;

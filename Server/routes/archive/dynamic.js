@@ -118,7 +118,7 @@ let handler = {
                     data.chapters.push(JSON.parse(JSON.stringify(doc)));
                     if(data.currentIndex.chapter && data.currentIndex.chapter.chapter) 
                         data.currentIndex.chapter = data.currentIndex.chapter._id;
-                    return indexModel.find({work:data.book._id}).populate('chapter','title _id wordCount fandom relationships characters tag').exec();
+                    return indexModel.find({work:data.book._id}).populate('chapter','title _id wordCount fandom relationships characters tag published').exec();
                 })
                 .then(function(docs){
                     if(!docs)
