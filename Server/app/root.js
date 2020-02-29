@@ -2,7 +2,7 @@ global = require('../global');
 
 var express = require('express'),
     config = require('../configure');
-    route = require('../routes/cleegame/index');
+    route = require('../routes/cleeGame/index');
 
 var app = express();
 
