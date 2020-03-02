@@ -40,6 +40,43 @@ input{
     color:white;
     text-decoration:none;
 }
+
+#logo{
+    font-family:'Microsoft Yahei UI',serif;
+    display:flex;
+    flex-direction:row;
+    margin-left:0;
+    margin-right:auto;
+
+}
+
+#logo >a{
+    display:flex;
+    flex-direction:row;
+}
+
+#logo >a>div:first-child{
+    font-size:32px;
+    font-weight:bold;
+    margin-left:3rem;
+    color:rgba(158,142,166,255);
+}
+
+#logo >a>div:last-child{
+    font-size:14px;
+    height:18px;
+    line-height:18px;
+    font-weight:bold;
+    margin-left:8px;
+    margin-bottom:5px;
+    margin-top:auto;
+    border-radius:5px;
+    color:white;
+    padding-left:5px;
+    padding-right:5px;
+    background:rgba(158,142,166,255);
+}
+
 #userBoard{
     display:flex;
     flex-direction:row;

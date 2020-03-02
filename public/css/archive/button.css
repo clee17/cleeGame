@@ -62,6 +62,16 @@
     margin-bottom:auto;
 }
 
+.grand-button:disabled{
+    background-color: rgba(158,158,158,1);
+    border: 1px solid dimgray;
+    cursor:default;
+}
+
+.grand-button:disabled:hover{
+    background-color: rgba(158,158,158,1);
+}
+
 .grand-button:hover{
     background:#c1a6cf;
 }

@@ -36,7 +36,7 @@ dataEditor.getAllLikes = function(works,callback){
             if(callback)
                 callback(true);
         }
-    };
+    });
 };
 
 dataEditor.mergeFanfic = function(doc){
@@ -629,9 +629,9 @@ switch(argv[2])
     case 'changeChapter':
         changeChapterId(argv[3],argv[4]);
         break;
-    case 'mergeWork':
-        mergeWork([argv[3],argv[4]]);
-        break;
+    // case 'mergeWork':
+        // mergeWork([argv[3],argv[4]]);
+        // break;
     default:
         console.log('输入无效的指令');
         break;
