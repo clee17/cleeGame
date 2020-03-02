@@ -153,7 +153,7 @@ let handler = {
             isFirst:false,
         };
 
-        data.isFirst = (indexData.prev == null && indexData.order == 0);
+        data.isFirst = (indexData.prev == null && indexData.order === 0);
 
         let nextS = function(){
             if(data.sent)
@@ -166,6 +166,20 @@ let handler = {
                 getChapter();
         };
 
+        let updateIndexModel  =function(doc){
+           indexModel.findOneAndUpdate({_id:indexData._id},{chapter:doc._id},{new:true}).exec()
+               .then(function(doc){
+                   if(!doc)
+                       throw '更新章节索引失败';
+                   nextS();
+               })
+               .catch(function(err){
+                   data.finished = true;
+                   data.success = false;
+                   data.message = err;
+                   nextS();
+               })
+        };
 
        let createChapter = function(){
            if(!indexData._id)
@@ -178,29 +192,15 @@ let handler = {
            let userId = req.session.user;
            if(userId)
                userId = userId._id;
-           chapterModel.findOneAndUpdate({book:indexData.work,linked:false,user:userId},{},{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
-               .then(function(doc){
-                   if(!doc)
-                       throw '创建章节失败';
-                   indexData.chapter = JSON.parse(JSON.stringify(doc));
-                   return indexModel.findOneAndUpdate({_id:indexData._id},{chapter:doc._id},{new:true}).exec();
-               })
-               .then(function(doc){
-                   if(!doc)
-                       throw '更新章节索引失败';
-                   return chapterModel.updateOne({_id:doc.chapter},{linked:true},{new:true}).exec();
-               })
-               .then(function(doc){
-                   if(!doc)
-                       throw '更新章节与索引链接失败';
-                   nextS();
-               })
-               .catch(function(err){
-                   data.finished = true;
-                   data.success = false;
-                   data.message = err;
-                   nextS();
-               })
+           let newChapter = new chapterModel();
+           newChapter.work = indexData.work;
+           newChapter.user = indexData.user;
+           newChapter.save(function(err,doc){
+               if(!doc)
+                   throw '创建章节失败';
+               indexData.chapter = JSON.parse(JSON.stringify(doc));
+               updateIndexModel(doc);
+           });
        };
 
         let getChapter = function(){
