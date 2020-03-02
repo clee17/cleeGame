@@ -553,7 +553,7 @@ let handler = {
                 countMap[2].increment = 1;
         }
 
-        if(!saveData.chapter.published )
+        if(!saveData.chapter.published)
         {
             saveData.chapter.updated = Date.now();
             saveData.chapter.date = saveData.chapter.updated;
