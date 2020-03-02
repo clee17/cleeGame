@@ -193,8 +193,8 @@ let handler = {
            if(userId)
                userId = userId._id;
            let newChapter = new chapterModel();
-           newChapter.work = indexData.work;
-           newChapter.user = indexData.user;
+           newChapter.book = indexData.work;
+           newChapter.user = userId;
            newChapter.save(function(err,doc){
                if(!doc)
                    throw '创建章节失败';
@@ -289,7 +289,6 @@ let handler = {
                         data.current.chapter = data.target.chapter;
                         data.target.chapter = tmp;
                         data.message = '成功调换';
-                        console.log(data);
                         handler.finalSend(res,data);
                     }
                 });
@@ -526,9 +525,9 @@ let handler = {
         if(typeof saveData.book.status != 'number')
             saveData.book.status = Number(saveData.book.status);
 
-        if(!req.session.user || (req.session.user._id !== saveData.chapter.user)){
+        if(!req.session.user || (req.session.user._id != saveData.chapter.user)){
             data.message = '您的登录状态出现错误，请重新登录';
-            handler.finalSend(data);
+            handler.finalSend(res,data);
             return;
         }
 
@@ -593,7 +592,7 @@ let handler = {
             let name = saveData.chapter.tag[i];
             updateTagData.tagList.push({name:name,type:4});
         }
-
+		
         chapterModel.findOneAndUpdate({_id:saveData.chapter._id},saveData.chapter,{new:true}).exec()
             .then(function(doc){
                 if(!doc)
@@ -622,10 +621,10 @@ let handler = {
                     newData.infoType = 0;
                     handler.updateTag(newData);
                 }
-
                 __updateCountMap(countMap);
             })
             .catch(function(err){
+				console.log(err);
                 data.message = err;
                 data.success = false;
                 handler.finalSend(res,data);

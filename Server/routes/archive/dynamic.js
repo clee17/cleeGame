@@ -114,6 +114,7 @@ let handler = {
                 .then(function(doc){
                     if(!doc)
                         throw '无法为作者创建编辑中作品信息，数据库出错';
+					console.log(doc);
                     data.book = JSON.parse(JSON.stringify(doc));
                     searchCriteria = {work:doc._id,prev:null,order:0};
                     updateCondition = {};
