@@ -15,20 +15,32 @@ let express = require('express'),
 let readDatabase = null;
 
 let handler = {
+    finalSend:function(res,data){
+        if(data.sent)
+            return;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
     bookedit:function(req,res,next) {
         let requestIndex = req.query.id;
         let data = {ready:false,currentIndex:null,bookDetail:null};
         if(!requestIndex)
         {
-            handler.getBookPage(req,res,data)
+            res.render('cleeArchive/errorB.html',{error:'请输入准确的书籍页码'});
         }
         else{
             indexModel.findOne({_id:requestIndex},function(err,doc){
-                if(err)
+                if(err){
                     data.currentIndex = null;
+                    res.render('cleeArchive/errorB.html',{error:'请输入准确的书籍页码'});
+                }
                 else
+                {
                     data.currentIndex = JSON.parse(JSON.stringify(doc));
-                handler.getBookPage(req,res,data,true);
+                    handler.getBookPage(req,res,data,true);
+                }
+
             }).populate('chapter');
         }
     },
@@ -141,10 +153,19 @@ let handler = {
     },
 
     entry:function(req,res){
-        let id = req.session.user;
+        let id = JSON.parse(JSON.stringify(req.session.user));
         delete id.password;
         if(req.session.user)
             res.render('cleeArchive/entry.html',id);
+    },
+
+    userSetting:function(req,res){
+        let userId = req.params.userId;
+        let readerId = '';
+        if(!req.session.user)
+            res.render('cleeArchive/errorB.html',{error:'您没有获取该页面的权限'});
+        else
+            res.render('cleeArchive/userSetting.html',{user:req.session.user});
     },
 
     userPage:function(req,res,next){
