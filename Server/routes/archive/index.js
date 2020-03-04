@@ -21,7 +21,7 @@ global.__renderIndex = function(req,res,renderInfo){
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
-            'https://cdn.bootcss.com/angular-cookie/4.1.0/angular-cookie.min.js'];
+            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
     else
           renderPage.lib = [
             'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
