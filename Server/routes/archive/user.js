@@ -30,7 +30,7 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    filterContents: function (res, data) {
+    filterContents: function (req,res, data) {
         let pushData = [];
         let userId = req.session.user? req.session.user._id :null;
         for (let i = 0; i < data.result.length; ++i) {
@@ -54,14 +54,14 @@ let handler = {
     filter: function (req, res, data) {
         if (req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
             handler.finalSend(res, data);
-        else if (req.session.user && req.session.user._id === data.userId)
+        else if (req.session.user && req.session.user._id == data.userId)
             handler.finalSend(res, data);
         else if (req.session.user && req.session.user.userGroup >= 999)
             handler.finalSend(res, data);
         else if (__getCounryCode(req.ipData) !== 'CN')
             handler.finalSend(res, data);
         else
-            handler.filterContents(res, data);
+            handler.filterContents(req,res, data);
     },
 
     register: function (req, res, next) {

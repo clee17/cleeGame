@@ -44,7 +44,7 @@ let handler = {
         else if( __getCounryCode(req.ipData) !== 'CN')
             handler.finalSend(res,data);
         else
-            handler.filterContents(res,data);
+            handler.filterContents(req,res,data);
     },
 
     all:function(req,res){
