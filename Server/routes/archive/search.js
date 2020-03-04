@@ -15,25 +15,30 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    filterContents:function(res,data){
-        let pushData = [];
-        let userId = req.session.user? req.session.user._id :null;
-        for(let i=0; i<data.result.length;++i){
-            if(data.result[i].chapter.grade>0 && data.result[i].work.user != userId)
-                pushData.push(data.result[i]._id);
-        }
-        if(pushData.length>0)
-            data.blocked = true;
-        while(pushData.length>0){
-            let tmp = pushData.shift();
-            for(let i=0; i< data.result.length;++i){
-                if(data.result[i]._id === tmp){
-                    data.result.splice(i,1);
-                    break;
+    filterContents:function(req,res,data){
+        try{
+            let pushData = [];
+            let userId = req.session.user? req.session.user._id :null;
+            for(let i=0; i<data.result.length;++i){
+                if(data.result[i].chapter.grade>0 && data.result[i].work.user != userId)
+                    pushData.push(data.result[i]._id);
+            }
+            if(pushData.length>0)
+                data.blocked = true;
+            while(pushData.length>0){
+                let tmp = pushData.shift();
+                for(let i=0; i< data.result.length;++i){
+                    if(data.result[i]._id === tmp){
+                        data.result.splice(i,1);
+                        break;
+                    }
                 }
             }
+            handler.finalSend(res,data);
+        }catch(e){
+            console.log(e);
         }
-        handler.finalSend(res,data);
+
     },
 
     filter:function(req,res,data){
