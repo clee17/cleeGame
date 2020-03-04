@@ -18,15 +18,15 @@ global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
     if(req.ipData && req.ipData.country === '中国')
         renderPage.lib = [
-            'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
-            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
-            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
     else
           renderPage.lib = [
             'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
             'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
-            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+              'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
             'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
