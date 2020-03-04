@@ -51,7 +51,6 @@ global.__sendMail = function(mailContents,userMail){
         subject        : '感谢申请注册cleeArchive',
         html           : mailContents,
     };
-    console.log('entered');
 
     mailTransport.sendMail(options,function(err,result){
     });

@@ -4,7 +4,7 @@ let express = require('express'),
     crypto = require('crypto'),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
-let registerModel = require(path.join(__dataModel,'register')),
+let applicationModel = require(path.join(__dataModel,'application')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
@@ -64,58 +64,32 @@ let handler = {
             handler.filterContents(req,res, data);
     },
 
-    register: function (req, res, next) {
+    register: function (req, res) {
         let registerId = req.params.registerId;
-        let userId = req.session.user;
-        if (userId)
-            userId = userId._id;
-        else
-            userId = '';
-        let sent = false;
-        let success = false;
-        let error = '';
-        let finalSend = function () {
-            if (sent)
-                return;
-            sent = true;
-            if (success)
+
+        if (req.session.user) {
+             __renderError(req,res,'您已经登录，无法注册新账号');
+            return;
+        }
+        applicationModel.findOne({_id:registerId},function(err,doc){
+            if(err){
+                __renderError(req,res,err);
+            }else if(!doc){
+                __renderError(req,res,'您的注册链接已失效');
+            }else if (doc.status < 1){
+                __renderError(req,res,'您的审核尚未通过');
+            }else if (doc.status === 2){
+                __renderError(req,res,'您的审核已被拒绝，我们已将您加入等待名单，下次开放时您将作为第一次批次考虑');
+            }else if(doc.status === 3){
+                __renderError(req,res,'您已经完成注册，请勿重复注册');
+            }else{
                 __renderIndex(req, res, {
                     viewport: '/view/register.html',
                     controllers: ['/templates/login.js', '/templates/register_con.js'],
                     services: [],
-                    variables: {registerId: registerId, loginMode: 1},
-                    userId: userId
-                });
-            else
-                __renderError(req, res, error);
-        };
-
-
-        if (req.session.user) {
-            error = '您已经登录，无法注册新账号';
-            finalSend();
-        }
-
-        if (sent)
-            return;
-        registerModel.findOne({_id: registerId}).exec()
-            .then(function (doc) {
-                if (!doc)
-                    throw "不存在该注册链接<br>请检查您的输入。";
-                if (Date.now().value - doc.date.value >= 24 * 60 * 60 * 1000)
-                    return registerModel.deleteOne({_id: doc._id}).exec();
-                else {
-                    success = true;
-                    finalSend();
-                }
-            })
-            .then(function (reply) {
-                throw "您的注册链接已经过期。<br>请重新联系管理员申请。";
-            })
-            .catch(function (err) {
-                error = err;
-                finalSend();
-            });
+                    variables: {registerId: registerId, mail:doc.mail,intro:doc.statements, loginMode: 1}});
+            }
+        });
     },
 
     reloadSettings:function(req,res){

@@ -17,7 +17,7 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
     $scope.mail = '';
     $scope.existed = false;
     $scope.statements = '';
-    $scope.$requesting = false;
+    $scope.requesting = false;
 
     $scope.donate = function(){
         $scope.$emit('showExplain',$scope.message[0]);
@@ -30,11 +30,12 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
     $scope.checkExisted = function(){
         if($cookies.getObject($scope.mail.toLowerCase())){
             $scope.existed = true;
-            let existedSign = document.getElementById('existedSign');
-            if(existedSign)
-                existedSign.style.display =$scope.existed? 'block' :'none';
+        }else{
+            $scope.existed = false;
         }
-
+        let existedSign = document.getElementById('existedSign');
+        if(existedSign)
+            existedSign.style.display =$scope.existed? 'block' :'none';
     };
 
     $scope.$watch('mail',function(){
@@ -49,8 +50,7 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
     });
 
     $scope.$on('requestRegisterFinished',function(err,data){
-        console.log('date received');
-        $scope.requsting = false;
+        $scope.requesting = false;
         if(data.success){
             $scope.checkExisted();
         }else{

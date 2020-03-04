@@ -1,5 +1,20 @@
 app.service('adminManager',function($http,$rootScope){
-    let manager =this;
+    let manager = this;
+    this.request = function(site,info,data,ifInfoReceived){
+
+        $http.post(site,{data:LZString.compressToBase64(JSON.stringify(data))})
+            .then(function(response){
+                    let receivedData = JSON.parse(LZString.decompressFromBase64(response.data));
+                    if(ifInfoReceived)
+                        $rootScope.$broadcast(receivedData.message,receivedData);
+                    else
+                        $rootScope.$broadcast(info,receivedData);
+                },
+                function(err){
+
+                    $rootScope.$broadcast(info,{success:false,info:'网络通信错误，请刷新页面尝试'});
+                });
+    };
 
     this.requestContents = function(index,pageId,perPage){
         $http.post('/admin/getTable',{data:LZString.compressToBase64(JSON.stringify({name:index,pageId:pageId,perPage:perPage}))})
@@ -40,6 +55,15 @@ app.service('adminManager',function($http,$rootScope){
             });
     };
 
+    this.requestRegister =function(pageId,perPage){
+          let data = {type:0,pageId:pageId,perPage:perPage};
+          manager.request('/admin/getRegister','admin table received',data);
+    };
+
+    this.answerApplication = function(data){
+        manager.request('/admin/answerRegister','request replied',data);
+    }
+
 });
 
 app.directive('tableHeader',function($compile) {
@@ -52,51 +76,61 @@ app.directive('tableHeader',function($compile) {
             element.css('border-bottom','solid 1px rgba(181,163,160,218)');
             element.css('border-top','solid 1px rgba(181,163,160,218)');
             scope.$on('table refreshed',function(event,data){
-                let header = data.table[0];
+                let header = data.head;
                 if(!header)
                     return;
-                let message = '<div style="min-width:12.8rem;line-height:2rem;font-weight:bold;">ID号</div>';
-                for(let i in header)
-                {
-                    if(i == '__v')
-                        continue;
-                    if(i!='_id')
-                      message += '<div style="min-width:12.8rem;line-height:2rem;font-weight:bold;">'+i+'</div>';
+                let message = '';
+                for(let i =0;i <header.length;++i){
+                      message += '<div style="width:8rem;min-width:8rem;line-height:2rem;font-weight:bold;">'+header[i]+'</div>';
                 }
                 element.empty();
                 element.html(message);
-            })
+            });
         }
     }
 });
 
-app.directive('tableContent',function(){
+app.directive('tableContent',['adminManager',function(adminManager){
     return {
         restrict: "A",
-        template:'<div ng-repeat="val in list" style="display:flex;flex-direction:row;">' +
-            '<div ng-show="$index != 0" style="height:60%;background:rgba(181,163,160,218);width:1px;margin-top:auto;margin-bottom:auto;margin-left:5px;margin-right:5px;"></div>' +
-            '<div style="margin-top:auto;margin-bottom:auto;line-height:1.5rem;min-width:12rem;">{{val}}</div></div>',
-        scope:{
-           contents: '='
-        },
         link: function (scope, element, attr) {
-            scope.list = [];
-            for(let i in scope.contents)
-            {
-                if(i == '__v')
-                    continue;
-                if(i == '$$hashKey')
-                    continue;
-                if(i == '_id')
-                {
-                    scope.list.splice(0,0,scope.contents[i]);
-                    continue;
+            scope.refreshHTML = function(){
+                scope.val = [];
+                for(let attr in scope.item){
+                    scope.val.push({key:attr,value:scope.item[attr]});
                 }
-                scope.list.push(scope.contents[i]);
+                let innerHTML = '<div style="display:flex;flex-direction:row;">';
+                for(let i=0; i<scope.$parent.head.length;++i){
+                    for(let j=0;j<scope.val.length;++j){
+                        if(scope.val[j].key === scope.$parent.head[i]) {
+                            let val = scope.val[j].value;
+                            if(scope.$parent.tableId === '2' && scope.val[j].key === 'statements')
+                                scope.val[j].value = LZString.decompressFromBase64(scope.val[j].value);
+                            innerHTML += '<div style="padding-right:1rem;width:7rem;word-break:break-all;">' + scope.val[j].value + '</div>';
+                        }
+                    }
+                }
+                innerHTML += '</div>';
+                element.html(innerHTML);
+            };
+
+            scope.refreshHTML();
+
+            scope.$on('table content refreshed',function(event,data){
+                if(data._id == scope.item._id)
+                    scope.refreshHTML();
+            });
+
+            scope.answerRegister = function(agree){
+                let status = agree? 1 : 2;
+                adminManager.answerApplication({item:scope.item,status:status,mail:scope.item.mail,subType:9999});
             }
+
         }
+
     }
-});
+}]);
+
 app.directive('addError',function($timeout){
     return {
         restrict: "E",
@@ -119,7 +153,7 @@ app.directive('addError',function($timeout){
                     element.css('opacity','100%');
                     element.css('transition','opacity 0.1s');
                 },3*1000);
-            })
+            });
         }
     }
 });
@@ -134,14 +168,24 @@ app.controller("adminCon",function($scope,adminManager){
     $scope.requesting = false;
     $scope.contents = [];
 
+    $scope.btn  = {
+        editNeeded:false,
+        deleteNeeded:false,
+        registerPermitNeeded: false,
+        registerDeclineNeeded:false,
+
+    }
+
     $scope.request = function(){
         if($scope.requesting)
             return;
         $scope.err = null;
         $scope.requesting = true;
         $scope.requested = false;
-        adminManager.requestContents($scope.tableId,$scope.pageId,$scope.perPage);
-
+        if($scope.tableId ===  '2'){
+             adminManager.requestRegister($scope.pageId,$scope.perPage);
+        } else
+            adminManager.requestContents($scope.tableId,$scope.pageId,$scope.perPage);
     };
 
     $scope.requestAdd = function(){
@@ -158,16 +202,35 @@ app.controller("adminCon",function($scope,adminManager){
          adminManager.requestRemove({name:$scope.tableId,_id:_id,index:index});
     };
 
+    $scope.initializeBtn = function(){
+        for(let attr in $scope.btn){
+            $scope.btn[attr] = false;
+        }
+        if($scope.tableId === '0'){
+            $scope.btn.deleteNeeded = true;
+        }
+        else if($scope.tableId === '2'){
+            $scope.btn.registerPermitNeeded = true;
+            $scope.btn.registerDeclineNeeded = true;
+        }
+    }
+
     $scope.$on('admin table received',function(event,data){
         $scope.requesting = false;
         if(data.success)
         {
             $scope.requested = true;
+            $scope.head = [];
+            if($scope.tableId === '0')
+                $scope.head = ['_id','date'];
+            else if($scope.tableId === '2')
+                $scope.head = ['_id','mail','count','date','statements','status','subType'];
+            $scope.initializeBtn();
+            $scope.$broadcast('table refreshed',{head:$scope.head});
             $scope.contents = JSON.parse(JSON.stringify(data.contents));
-            $scope.$broadcast('table refreshed',{table:$scope.contents});
         }
         else{
-            $scope.err = data.message;
+            $scope.$emit('showError',data.message);
         }
     });
 
@@ -184,6 +247,22 @@ app.controller("adminCon",function($scope,adminManager){
         }
         $scope.$broadcast('action finished',{message:data.message});
     });
+
+    $scope.$on('request replied',function(event,data){
+        if(data.success){
+            for(let i=0; i<$scope.contents.length;++i){
+                if(data.contents._id == $scope.contents[i]._id){
+                    $scope.contents[i].status = data.contents.status;
+                    $scope.contents[i].subType = data.contents.subType;
+                    $scope.$broadcast('table content refreshed',data.contents);
+                }
+            }
+        }else{
+            $scope.$emit('showError',data.message);
+        }
+        $scope.requesting = false;
+    });
+
 
     $scope.$on('record remove finished',function(event,data){
         $scope.requesting = false;

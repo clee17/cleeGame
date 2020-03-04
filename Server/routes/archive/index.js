@@ -147,6 +147,8 @@ router.get('/admin/',main.index);
 router.post('/admin/getTable',admin.getTable);
 router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);
+router.post('/admin/getRegister',admin.getRegister);
+router.post('/admin/answerRegister',admin.answerRegister);
 
 //user
 router.get('/register/:registerId',subUser.register);

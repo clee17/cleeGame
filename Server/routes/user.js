@@ -78,37 +78,30 @@ let routeHandler = {
             success:false,
             message: ''
         };
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(response)));
-        };
-        registerModel.findOne({_id:receivedData._id}).exec()
-            .then(function(reply) {
-                if (!reply)
-                    throw '您的注册链接已经失效';
-                else
-                    return userModel.findOne({user:receivedData.user});
-            })
+            userModel.findOne({user:receivedData.user}).exec()
             .then(function(reply){
                 if(reply)
                     throw '该用户名已经被注册';
                 let newModel = new userModel();
                 newModel.user = receivedData.user;
                 newModel.pwd = receivedData.pwd;
-               newModel.save(function(err,savedObj){
+                newModel.mail = receivedData.mail;
+                newModel.intro = receivedData.intro;
+                newModel.save(function(err,savedObj){
                    if(err)
                        throw '注册失败'+err;
                    response.message = '注册成功';
                    response.success = true;
-                   registerModel.deleteOne({_id: receivedData._id}).exec();
-                   finalSend();
+                   req.session.user = newModel;
+                   res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
+                   applicationModel.findOneAndUpdate({mail:receivedData.mail},{status:3},function(err,doc){
+                       routeHandler.finalSend(res,response);
+                   });
                });
             })
             .catch(function(err){
                 response.message = err.message || err;
-                finalSend();
+                routeHandler.finalSend(res,response);
             });
     },
 
@@ -316,21 +309,21 @@ let routeHandler = {
             message: '',
             sent: false,
         };
-        if(!receivedData._id){
-            response.message = '没有收到申请码';
-        } else if(!__validateId(receivedData._id)){
-            response.message = '请输入正确的申请码';
+        if(!receivedData.mail){
+            response.message = '没有收到邮箱地址';
         }
+
         if(response.message !== ''){
             routeHandler.finalSend(res,response);
             return;
         }
-        applicationModel.findOne({_id:receivedData._id},function(err,doc){
+        applicationModel.findOne({mail:receivedData.mail},function(err,doc){
             if(err)
                 response.message = err;
             else if(doc){
                 response.result = doc.status;
                 response.subType = doc.subType;
+                response._id = doc._id;
             }
             if(response.message === '')
                 response.success = true;

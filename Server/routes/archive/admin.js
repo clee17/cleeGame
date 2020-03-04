@@ -6,10 +6,18 @@ let express = require('express'),
 
 let registerModel = require(path.join(__dataModel,'register'));
 let userModel = require(path.join(__dataModel,'user'));
+let applicationModel = require(path.join(__dataModel,'application'));
 let tableIndex = [registerModel,userModel];
 
 let handler = {
-    getTable:function(req,res,next){
+    finalSend:function(res,data){
+        if(data.sent)
+            return;
+        data.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
+    getTable:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let pageId = receivedData.pageId || 0;
         let perPage = receivedData.perPage || 30;
@@ -140,6 +148,76 @@ let handler = {
             response.message='你没有执行该功能的权限';
             finalSend();
         }
+    },
+
+
+    getRegister:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent:false,
+            message:'',
+            success:false
+        };
+
+        let pageId = receivedData.pageId;
+        let perPage = receivedData.perPage;
+
+        if(!req.session.user || req.session.user.userGroup < 999)
+            response.message = '您没有相应的权限';
+
+        if(response.message !== '')
+            handler.finalSend(res,response);
+
+
+
+        applicationModel.find({type:receivedData.type},{},{skip:pageId*perPage,limit:perPage,sort:{subType:1}},function(err,docs){
+            if(err)
+                response.message = err;
+            else if(docs)
+                response.contents = JSON.parse(JSON.stringify(docs));
+            if(response.message === '')
+                response.success = true;
+            handler.finalSend(res,response);
+        });
+    },
+
+    answerRegister:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent:false,
+            message:'',
+            success:false
+        };
+
+        if(!req.session.user || req.session.user.userGroup < 999)
+            response.message = '您没有相应的权限';
+
+        if(response.message !== '')
+            handler.finalSend(res,response);
+
+
+        applicationModel.findOneAndUpdate({_id:receivedData.item._id},
+            {status:receivedData.status,subType:receivedData.subType},
+            {new:true},
+            function(err,doc){
+                if(err)
+                    response.message = err;
+                else if(doc)
+                    response.contents = JSON.parse(JSON.stringify(doc));
+                if(response.message === '')
+                    response.success = true;
+                if(response.success && doc.status === 1){
+                    let id = doc._id.toString();
+                    let mailContents = '<h1 style="color:rgba(158,142,166,255);">感谢您加入cleeArchive，您已经通过审核</h1>'+
+                        '<p>接下来您可以前往<a href="archive.cleegame.com/register/'+id+'">archive.cleegame.com/register/'+id+'</a>页面完成注册，如果无法直接跳转该链接，请复制到浏览器中打开</p>';
+                    __sendMail(mailContents,doc.mail);
+                }else if(response.success && doc.status === 2){
+                    let mailContents = '<h1 style="color:rgba(158,142,166,255);">感谢您申请cleeArchive，非常抱歉我们暂时无法通过您的申请</h1>'+receivedData.statements;
+                    __sendMail(mailContents,doc.mail);
+                }
+
+                handler.finalSend(res,response);
+            });
     }
 };
 

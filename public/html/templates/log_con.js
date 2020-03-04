@@ -10,6 +10,7 @@ app.controller('registerInfoCon',function($scope){
 app.controller('loginCon',function($scope,$window,loginManager){
     $scope.data  = ['',''];
     $scope.error = null;
+    $scope.loginMode = 0;
 
     $scope.userResult = '';
     $scope.submitSign = '提交';
@@ -50,13 +51,13 @@ app.controller('loginCon',function($scope,$window,loginManager){
 app.controller('registerCon',function($scope,$window,$location,$rootScope,loginManager){
     $scope.data  = ['',''];
     $scope.error = null;
-    $scope.submitSign = '提交';
+    $scope.submitSign = '注册';
     $scope.userChecking = false;
     $scope.requesting = false;
+    $scope.loginMode = 1;
     $scope.id = $rootScope.registerId || '';
     $scope.userErr = '';
-
-    console.log($scope.registerId);
+    $rootScope.intro = LZString.decompressFromBase64($rootScope.intro);
 
     $scope.checkUser = function(){
         if($scope.userChecking)
@@ -90,14 +91,14 @@ app.controller('registerCon',function($scope,$window,$location,$rootScope,loginM
         if($scope.error == null)
         {
             $scope.requesting = true;
-            let cryptoData = {_id:$scope.id,user:$scope.data[0],pwd:md5($scope.data[1]).toString()};
+            let cryptoData = {_id:$scope.id,user:$scope.data[0],pwd:md5($scope.data[1]).toString(),intro:LZString.compressToBase64($rootScope.intro),mail:$rootScope.mail};
             loginManager.requestRegister(cryptoData);
         }
     };
 
     $scope.$on('registerFailed',function(event,data){
         $scope.requesting = false;
-        $scope.error=data.message;
+        $scope.error= data.message;
     });
 
     $scope.$on('registerSuccess',function(event,data){
