@@ -35,7 +35,6 @@ app.service('loginManager',function($http,$rootScope){
                         $rootScope.$broadcast('registerFailed',data);
                 },
                 function(err){
-                    console.log(err);
                     $rootScope.$broadcast('registerFailed',{message:'网络通信错误，请刷新页面尝试'});
                 });
     };

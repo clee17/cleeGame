@@ -21,7 +21,6 @@ let handler = {
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
-        console.log(req.session.user.settings);
         if(req.session.user && req.session.user.settings.accessLevel >=10)
            __renderIndex(req,res,result);
         else
@@ -123,7 +122,6 @@ let handler = {
 
         let errorMessage = null;
 
-        console.log(receivedData);
         if(receivedData.title.length === 0)
             errorMessage = '游戏名称不能为空';
         else if(receivedData.path.length ===0)

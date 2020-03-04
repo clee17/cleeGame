@@ -1,5 +1,6 @@
 var path = require('path');
-let aRedis = require("async-redis");
+let aRedis = require("async-redis"),
+    nodeMailer=require('nodemailer');
 
 global.__basedir = path.join(path.resolve(__dirname),'../');
 
@@ -21,6 +22,17 @@ let redis = require('redis');
 global.redisClient = redis.createClient();
 global.asyncRedis = aRedis.createClient();
 
+let mailTransport = nodeMailer.createTransport({
+    host : 'smtp.office365.com',
+    port : 587,
+    secureConnection: true, // 使用SSL方式（安全方式，防止被窃取信息）
+    auth : {
+        user : 'cleegame@outlook.com',
+        pass : 'Qjlcj1989.*'
+    }
+});
+
+
 global.__getCounryCode = function(ipData){
     if(ipData.country === '中国')
         return 'CN';
@@ -28,6 +40,22 @@ global.__getCounryCode = function(ipData){
         return 'OTHER';
 };
 
+global.__updateUserSetting = function(applicationId){
+
+};
+
+global.__sendMail = function(mailContents,userMail){
+    var options = {
+        from        : '"cleegame admin" <cleegame@outlook.com>',
+        to          : ' <'+userMail+'>',
+        subject        : '感谢申请注册cleeArchive',
+        html           : mailContents,
+    };
+    console.log('entered');
+
+    mailTransport.sendMail(options,function(err,result){
+    });
+};
 
 module.exports = global;
 

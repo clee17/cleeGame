@@ -1,0 +1,64 @@
+<style>
+    #registerStatusBoard{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+    }
+
+    #registerStatusBoard a{
+        color:rgba(109,100,136,1);
+        font-weight:bold;
+        margin-left:0.5rem;
+        margin-right:0.5rem;
+    }
+
+    #registerStatusBoard a:hover {
+        color:rgba(184,173,217,1);
+    }
+
+    #headTitle{
+        margin-left:auto;
+        margin-right:auto;
+        font-weight:bold;
+        font-size:1.5rem;
+        margin-bottom:2rem;
+    }
+
+   #requestInput{
+       min-width:12rem;
+       height:2rem;
+       padding:5px;
+   }
+
+   #mainAnswer{
+       margin-left:auto;
+       margin-right:auto;
+       margin-top:3rem;
+       display:flex;
+       flex-direction:column;
+       text-align:center;
+   }
+
+   #mainAnswer >div{
+       margin-bottom:0.5rem;
+   }
+
+   .grand-button{
+       padding-top:5px;
+       margin-left:1rem;
+   }
+
+    @media screen and (min-device-width:80rem){}
+</style>
+
+<div id="registerStatusBoard" ng-controller="registerStatusCon">
+    <div id="headTitle">申请进度查询</div>
+   <div style="margin-left:auto;margin-right:auto;">
+       <input  ng-model="requestId" id="requestInput" placeholder="请输入您的注册申请码">
+       <button class="grand-button" ng-disabled="requesting" ng-click="submitRequest()">提交</button>
+   </div>
+    <div style="margin-left:auto;margin-right:auto;">您可以在注册中使用的邮箱里发现你的注册申请码，使用该申请码来查询您的申请状态。</div>
+     <div style="margin-left:auto;margin-right:auto;">如果您始终没有收到邮件，请检查垃圾邮件收件箱或联系我。</div>
+    <div id="mainAnswer">
+    </div>
+</div>

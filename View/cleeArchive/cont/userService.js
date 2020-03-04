@@ -1,45 +1,58 @@
 app.service('userManager',function($http,$rootScope){
-    this.saveSettings = function(data){
-        $http.post('/settings/save',{data:LZString.compressToBase64(JSON.stringify(data))})
+    let manager = this;
+    this.requestAll = function(site,info,data,ifInfoReceived){
+        $http.post(site,{data:LZString.compressToBase64(JSON.stringify(data))})
             .then(function(response){
-                    let data = JSON.parse(LZString.decompressFromBase64(response.data));
-                    if(data.success)
-                        $rootScope.$broadcast('settingsSaveFinished',data);
+                    let receivedData = JSON.parse(LZString.decompressFromBase64(response.data));
+                    if(ifInfoReceived)
+                        $rootScope.$broadcast(receivedData.message,receivedData);
                     else
-                        $rootScope.$broadcast('settingsSaveFinished',{message:data.message});
+                        $rootScope.$broadcast(info,receivedData);
                 },
                 function(err){
-                    $rootScope.$broadcast('settingsSaveFinished',{message:'网络通信错误，请刷新页面尝试'});
+                    console.log(err);
+                    $rootScope.$broadcast(info,{success:false,info:'网络通信错误，请刷新页面尝试'});
                 });
+    };
+
+    this.saveSettings = function(data){
+        manager.requestAll('/settings/save','settingsSaveFinished',data);
+    };
+
+    this.savePreference = function(data){
+        manager.requestAll('/settings/savePreference','preferenceSaveFinished',data);
     };
 
     this.requestDashboard = function(data,userId){
         data.userId = userId;
-        $http.post('/users/request/dashboard',{data:LZString.compressToBase64(JSON.stringify(data))})
-            .then(function(response){
-                    let receivedData = JSON.parse(LZString.decompressFromBase64(response.data));
-                    if(receivedData.success)
-                        $rootScope.$broadcast(receivedData.message,receivedData);
-                    else
-                        $rootScope.$broadcast(receivedData.message,receivedData);
-                },
-                function(err){
-                    console.log(err);
-                    $rootScope.$broadcast('dashboardRequestFinished',{success:false,info:'网络通信错误，请刷新页面尝试'});
-                });
+        manager.requestAll('/users/request/dashboard','dashboardRequestFinished',data,true);
     };
 
     this.requestCalculate = function(data){
-        $http.post('/users/request/calculate',{data:LZString.compressToBase64(JSON.stringify(data))})
-            .then(function(response){
-                    let receivedData = JSON.parse(LZString.decompressFromBase64(response.data));
-                    if(receivedData.success)
-                        $rootScope.$broadcast(receivedData.message,receivedData);
-                    else
-                        $rootScope.$broadcast(receivedData.message,receivedData);
-                },
-                function(err){
-                    $rootScope.$broadcast('userCalculationEnded',{success:false,info:'网络通信错误，请刷新页面尝试'});
-                });
+        manager.requestAll('/users/request/calculate','userCalculationEnded',data,true);
+    };
+
+    this.requestApplication = function(data){
+        manager.requestAll('/user/apply','applicationEnded',data);
+    };
+
+    this.saveBasicInfo = function(data){
+        manager.requestAll('/user/saveInfo','basicInfoSaveFinished',data);
+    };
+
+    this.requestBill = function(data){
+        manager.requestAll('/user/requestBill','requestBillFinished',data);
+    };
+
+    this.reloadSettings = function(){
+        manager.requestAll('/users/settings/reload','requestSettingFinished',{});
+    };
+
+    this.submitRegisterRequest = function(data){
+        manager.requestAll('/user/registerRequest','requestRegisterFinished',data);
+    };
+
+    this.getStatus = function(data){
+        manager.requestAll('/user/getStatus','requestStatusFinished',data);
     }
 });

@@ -1,10 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<style>
+    #introBoard {
+        display:flex;
+        flex-direction:column;
+        flex-wrap:wrap;
+        margin-left:auto;
+        margin-right:auto;
+        width:60rem;
+        padding-left:5rem;
+        max-height:calc(100vh + 15rem);
+    }
+
+    .badges{
+        background-image:url('/img/badges.png');
+        min-width:70px;
+        min-height:70px;
+        height:70px;
+        width:70px;
+    }
+
+    .badges:hover{
+        border-bottom:solid 4px rgba(158,142,166,255);
+        transition: border-bottom-width 0.2s;
+    }
+
+    .unknown{
+        animation:blink 1s infinite ease-in-out;
+        font-weight:bold;
+        color: rgba(158,142,166,255);
+        margin-right:0.5rem;
+        margin-left:0.5rem;
+    }
+
+    .known{
+        margin-right:0.5rem;
+        margin-left:0.5rem;
+        font-weight:bold;
+        color:inherit;
+    }
+
+    #badgeRow{
+        display:flex;
+        flex-direction:row;
+        min-height:70px;
+        margin-top:0.5rem;
+        margin-bottom:1rem;
+        text-decoration:underline;
+    }
+
+    #badgeRow >div{
+        margin-right:0.5rem;
+        margin-left:0.5rem;
+    }
+
+    #applyBoard{
+        display:flex;
+        flex-direction:column;
+        border:1px solid rgba(181,163,160,218);
+        margin-bottom:0.5rem;
+        margin:0.5rem;
+    }
+
+    #applyBoard textarea{
+        resize:none;
+        margin-top:0.5rem;
+        min-height:15rem;
+        width:calc(100% - 4.75rem);
+        margin-bottom:1rem;
+        padding:5px;
+    }
+
+    #applyBoard input{
+        height:1.5rem;
+        padding:5px;
+        width:calc(100% - 4rem);
+    }
+
+    .contents{
+        max-width:25rem;
+        font-size:0.85rem;
+        text-indent:1.5rem;
+        margin-bottom:2rem;
+    }
+
+    h1{
+        font-size:1rem;
+        text-indent:0;
+        margin-bottom:0.5rem;
+    }
+
+    p{
+        margin-bottom:0.5rem;
+    }
+
+    @media screen and (min-device-width:80rem){}
+</style>
+
+<div id="introBoard" ng-controller="introCon">
+    <div class="contents" style="text-indent:1rem;">
+        <h1>本站数据</h1>
+        <p>本站尚未正式上线,目前仅处于内测状态 </p>
+        <p><b>同人创作者</b>：<span class="unknown">??</span>人。</p>
+        <div style="padding-left:2rem;">
+            <p><b>文章创作者</b>：<span class="unknown">??</span>人。</p>
+            <p><b>游戏设计者</b>：<span class="unknown">??</span>人。</p>
+            <p><b>绘图艺术家</b>：<span class="unknown">??</span>人。</p>
+        </div>
+        <p><b>同人创作共<span class="unknown">??</span>篇</b></p>
+        <div style="padding-left:2rem;">
+            <p><b>同人文章</b>：<span class="unknown">??</span> 篇。</p>
+            <p><b>绘图作品</b>：<span class="unknown">??</span> 张。</p>
+            <p><b>同人游戏</b>：<span class="unknown">??</span> 作。</p>
+        </div>
+    </div>
+    <div class="contents">
+        <h1>创站历史</h1>
+        <p>本站的创建之初原本只是作为创站者个人在开发过程中使用的资料、剧本、技术文章归档网站。 </p>
+        <p>在开发过程中，创站者逐渐意识到有那么多种才华横溢的同人作者活跃在世界各地，却因为同人这种特殊的表达形式而无法尽情地表达自己，因此站长决定将本站面向社会开放，力图为各种各样的同人开发者提供一个表现自己与交流的平台。</p>
+        <p>在这里您可以选择成为<b>同人文章创作者、同人游戏设计师、同人绘师</b>等等，获取来自世界各地阅览者的评价，发布自己的作品（不管您发布的是<b>游戏、音乐、绘图还是文字</b>）,本站都是非常欢迎的，如果您有提交任何其他作品形式的需求，也请欢迎联系站主。</p>
+        <p>尽管同人的价值或许在一些地区不为社会所认可，但相信每一个从事着、从事过同人创作的创作者都明白自己可以做些什么。</p>
+        <p>那么让我们告诉世界，我们是无所不能的。</p>
+    </div>
+    <div class="contents">
+        <h1>法律适用</h1>
+        <p>本站的服务器地点位于日本——目前同人文化最为发达的国家。 </p>
+        <p>本站会争取最大程度适应日本的法律，这意味着您必须准确地为您的作品标注分级。</p>
+        <p>与此同时，本站会针对世界各地的法律进行浏览内容的调整，<b>因为您所在国家、地区的法律政策原因，您可能无法浏览全部内容，但您所发布的一切内容都将被永久保存在服务器上。</b></p>
+        <p>即使在本站因为资金不继等原因而不得不闭站的情况下，站长都将为使用者提供已备份的所有数据，以供使用者事后取回自己寄存的资料与作品。</p>
+    </div>
+    <div class="contents">
+        <h1>帮助本站</h1>
+        <p>您可以通过捐赠的方式来帮助本站的发展。 </p>
+        <p>您可以指定您投资的作品形式：如，文章、绘图、游戏等等，也可以在不指定的情况下交由站长分配给不同形式的开发进程。</p>
+        <p>下方罗列了我们所有的创作形式，灰色表示尚在开发中，创作形式会持续更新</p>
+        <div id="badgeRow">
+            <div class="badges" style="" ng-click="showExplain(1)"></div>
+            <div class="badges" style="background-position-x:-70px;filter:grayScale(1);" ng-click="showExplain(2)"></div>
+        </div>
+        <div style="display:flex;"><button class="grand-button" style="height:2rem;padding-top:5px;margin-left:auto;margin-right:auto;" ng-click="donate()">捐赠</button></div>
+    </div>
+    <div class="contents">
+        <h1>加入本站</h1>
+        <p>如果您已经拥有本站的账号，可以<b>点击右上角直接登录。</b> </p>
+        <p>即使没有本站账号，您也可以浏览符合您国家与地区政策法规的内容，但只有拥有账号后才能发布作品。</p>
+        <div id="applyBoard">
+            <div style="margin-top:1.5rem;"><input ng-model="mail" placeholder="请输入您的邮箱地址"></div>
+            <div style="min-height:0.8rem;"><span id="existedSign" style="display:none;">&nbsp&nbsp&nbsp&nbsp您已用该邮箱完成过申请，请勿重复申请</span></div>
+            <div><textarea ng-model="statements" placeholder="请输入您的个人陈述,您可以在个人陈述中阐述您想要创作什么作品、喜好什么作品，越详细的个人陈述越有可能帮助您尽快获得注册链接,最长不超过500字。" maxlength="500"></textarea></div>
+            <div  style="display:flex;margin-bottom:1rem;">
+                <button class="grand-button" ng-click="submitApplication()" ng-disabled="requesting || existed" style="height:2rem;padding-top:5px;margin-left:auto;margin-right:1rem;margin-bottom:1rem;">发送</button>
+            </div>
+        </div>
+        <p>请仔细填写您的邮箱地址（确保真实可收到的）与个人陈述。</p>
+    </div>
+</div>

@@ -278,7 +278,6 @@ let handler = {
                     {updateOne:{'filter':{'_id':data.target._id},'update':{chapter:data.current.chapter._id}}},
                 ];
 
-                console.log(bulkWriteDocs);
 
                 indexModel.bulkWrite(bulkWriteDocs,function(err,docs){
                     if(err){

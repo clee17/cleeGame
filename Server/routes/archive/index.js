@@ -16,12 +16,12 @@ global.__chapterCount = function(index){
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
-    if(req.ipData && req.ipData.country == '中国')
+    if(req.ipData && req.ipData.country === '中国')
         renderPage.lib = [
             'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
             'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
             'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
-            'https://cdn.bootcss.com/angular.js/1.7.8/angular-cookies.min.js'];
+            'https://cdn.bootcss.com/angular-cookie/4.1.0/angular-cookie.min.js'];
     else
           renderPage.lib = [
             'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
@@ -124,12 +124,31 @@ global.__updateCountMap = function(countList) {
         });
 };
 
+global.__updateUserSetting = function(applicationId,data,req,callback){
+    if(!__validateId(applicationId))
+        return;
+    if(!req.session.user)
+        return;
+    let userId = req.session.user._id;
+
+    if(data.type == 1){
+        req.session.user.settings.access.push(data.subType);
+    }
+
+    userSettingModel.findOneAndUpdate({user:userId},{$push:{access:data.subType}},function(err,doc){});
+    if(callback)
+        callback();
+};
+
 let router = express.Router();
 //entry pages
 router.get('/',main.index);
 router.get('/fanfic/',main.index);
 router.get('/tech/',main.index);
 router.get('/design/',main.index);
+router.get('/donate',main.index);
+router.get('/registerProcess',main.index);
+router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 
 //fanfic pages
@@ -146,8 +165,11 @@ router.post('/admin/removeRec',admin.removeRec);
 //user
 router.get('/register/:registerId',subUser.register);
 router.get('/users/:userId',subUser.userPage);
+router.post('/users/settings/reload',subUser.reloadSettings);
+router.get('/users/settings/:userId',subUser.userSetting);
 router.post('/users/request/dashboard',subUser.requestDashboard);
 router.post('/settings/save',subUser.saveSetting);
+router.post('/settings/savePreference',subUser.savePreference);
 router.post('/users/request/calculate',subUser.calculate);
 
 //edit routes;
@@ -184,6 +206,7 @@ router.post('/feeds/channel',feed.channel);
 router.get('/dynamic/booknew',dynamic.bookNew);
 router.get('/dynamic/bookedit',dynamic.bookedit);
 router.get('/dynamic/entry',dynamic.entry);
+router.get('/dynamic/users/setting/:userId',dynamic.userSetting);
 router.get('/dynamic/users/:userId',dynamic.userPage);
 router.get('/dynamic/*',function(req,res){
     res.render('cleeArchive/errorB.html',{error:'对不起，我们没有找到该网页。<br>该网页或许尚在施工中，敬请期待。'});

@@ -1,10 +1,297 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<style>
+    #userSettingBoard{
+        width:100%;
+        padding-bottom:3rem;
+        font-family:SimSun, serif, Arial, "Microsoft YaHei UI";
+    }
+
+    #userSettingBoard >div{
+        display:flex;
+        flex-direction:row;
+        padding-top:1rem;
+    }
+
+
+   .infoEditBtn{
+        color:rgba(109,100,136,1);
+        margin-left:3px;
+        background:none;
+        border:none;
+    }
+
+   .infoEditBtn:hover{
+        color:rgba(184,173,217,1);
+    }
+
+
+    #userSettingPreference .contents >div{
+        margin-bottom:0.5rem;
+    }
+
+    .title {
+        margin-left:2rem;
+        background:rgba(223,216,214,255);
+        color:rgba(108,95,93,255);
+        padding:5px;
+        padding-left:1rem;
+        padding-right:1rem;
+        height:1.5rem;
+    }
+
+    .info {
+        border-left:solid 0.5rem rgba(181,163,160,218);
+        padding-left:0.5rem;
+    }
+
+    .subInfo{
+        margin-left:1rem;
+    }
+
+    #mailBoard{
+        min-height:1.5rem;
+        position:absolute;
+        left:6rem;
+        opacity:0;
+        pointer-events:none;
+        z-index:99;
+        min-width:15rem;
+        padding-left:2px;
+        font-size:1rem;
+        color:rgba(108,95,93,255);
+        font-family:SimSun, serif, Arial, "Microsoft YaHei UI";
+    }
+
+    #introBoard{
+        resize:none;
+        height:100%;
+        min-width:20rem;
+        overflow-y:auto;
+        left:1rem;
+        top:0;
+        padding:0.5rem;
+        position:absolute;
+        pointer-events:none;
+        opacity:0;
+        z-index:99;
+        font-family:SimSun, serif, Arial, "Microsoft YaHei UI";
+    }
+
+    .contents{
+        display:flex;
+        flex-direction:column;
+        margin-left:2rem;
+        padding-bottom:1rem;
+        border-bottom:solid 1px rgba(181,163,160,0.4);
+        flex:1;
+    }
+
+    #userAccessApplication{
+        height:0;
+        transition:height 0.4s;
+        width:32rem;
+        margin:auto;
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+        background:white;
+        outline:solid 1px rgba(108,95,93,255);
+        outline-offset:-1px;
+        pointer-events:auto;
+    }
+
+    #userAccessApplication b{
+        color:rgba(158,142,166,255);
+        margin-left:5px;
+        margin-right:5px;
+    }
+
+    #userAccessApplication button{
+        padding-top:5px;
+    }
+
+    #userHead{
+        min-width:6rem;
+        min-height:6rem;
+        height:8rem;
+        border:solid 1px gray;
+        display:flex;
+        padding:0;
+    }
+
+    .explainBtn:hover{
+        background:rgba(184,173,217,1);
+    }
+
+    .explainBtn{
+        margin:auto;
+        background:rgba(158,142,166,255);
+        width:100%;
+        text-align:center;
+        color:white;
+        padding:5px;
+        border:none;
+    }
+
+    #application{
+        padding-left:2rem;
+        font-size:0.8rem;
+        color:gray;
+    }
+
+    #badgeRow{
+        display:flex;
+        flex-direction:row;
+        text-shadow: 0 1px 1px white;
+        color:rgba(251,161,0,255);
+    }
+    #badgeRow >div{
+        margin-right:0.5rem;
+    }
+
+    .contents >div{
+        padding:5px;
+        padding-left:1rem;
+        padding-right:1rem;
+    }
+
+    .listInfo >div{
+        margin-bottom:0.5rem;
+    }
+
+    #badgeRow{
+        display:flex;
+        flex-direction:row;
+        min-height:70px;
+    }
+
+    #badgeRow >div{
+       width:70px;
+        height:70px;
+        min-width:70px;
+        min-height:70px;
+    }
+
+    @media screen and (min-device-width:80rem){
+        #userSettingBoard{
+            width:80%;
+            margin-left:auto;
+            margin-right:auto;
+        }
+    }
+</style>
+
+<div id="userSettingBoard" ng-controller="userSetCon">
+    <div class="topBoard">
+        <div id="userAccessApplication">
+            <div id="AccessApplicationState" style="margin:2rem;margin-bottom:0;"></div>
+            <textarea style="resize:none;flex:1;margin:2rem;overflow-y:auto;padding:0.5rem;" maxlength="800"></textarea>
+            <div style="display:flex;flex-direction:row;margin-bottom:1rem;">
+                <button class="grand-button" style="margin-left:auto;margin-right:1.5rem;" ng-click="applyConfirm(true)">确定</button>
+                <button class="grand-button" style="margin-right:2rem;" ng-click="applyConfirm(false)">取消</button>
+            </div>
+        </div>
+    </div>
+    <div id="userSettingInfo">
+        <div class="title">
+            <div class="info">基本信息</div>
+        </div>
+        <div class="contents" style="display:flex;flex-direction:row;">
+            <div id="userHead">
+                <button class="explainBtn" ng-click="showExplain(0)">暂未开放</button>
+            </div>
+            <div class="listInfo">
+                <div>用户名称:<span class="subInfo"><b><%= user.user %></b></span></div>
+                <div style="position:relative;">邮箱账号:
+                    <input ng-model="settings.mail" id="mailBoard">
+                    <% if(user.mail && user.mail.length >0) { %>
+                    <span class="subInfo"><%= user.mail %></span>
+                    <% }else{ %>
+                    <span class="subInfo">暂无邮箱</span>
+                    <% } %>
+                    <button class="infoEditBtn" style="margin-left:4rem;" ng-click="editMail($event)">编辑</button>
+                </div>
+                <div>个人简介: <button class="infoEditBtn" style="margin-left:3rem;margin-bottom:-1rem;" ng-click="editIntro($event)">编辑</button></div>
+                <div style="padding-left:2rem;position:relative;min-height:6rem;display:flex;padding-top:0.5rem;">
+                    <textarea id="introBoard" ng-model="settings.intro" maxlength="100"></textarea>
+                    <% if(user.intro && user.intro.length >0) { %>
+                    <span><%= user.intro %></span>
+                    <% }else{ %>
+                    <span>暂无简介</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="userSettingAccess">
+        <div class="title">
+            <div class="info">创作权限</div>
+        </div>
+        <div class="contents" style="display:flex;flex-direction:column;">
+            <div>您当前已拥有的创作者身份是：</div>
+            <div id="badgeRow">
+                <img id="loadingBadge" src="/img/loading.gif" style="width:22px;height:22px;margin:auto;display:block;">
+            </div>
+            <div>申请权限：
+                <select id="accessSelect" ng-model="application" ng-options="badge.name for badge in badges" style="height:1.5rem;" ng-disabled="true"></select>
+                <button id="submitButton" class="grand-button" style="padding:3px;padding-bottom:8px;margin-left:2rem;" ng-click="accessApply()" ng-disabled="true">申 请</button>
+                <span>{{application.error}}</span>
+            </div>
+            <div id="application">{{application.description}}</div>
+        </div>
+    </div>
+
+    <div id="userSettingPreference">
+        <div class="title">
+            <div class="info">使用设置</div>
+        </div>
+        <div class="contents" style="display:flex;flex-direction:column;">
+            <div>非注册用户评论：
+                <select style="height:1.5rem;" ng-model="preference[0]">
+                <option value="1">是</option>
+                <option value="0">否</option>
+                </select>
+                <span style="margin-left:3rem;font-size:0.8rem;color:gray;line-height:1.5rem;"><br>&nbsp&nbsp&nbsp开放该选项，非本站会员也可以在您的作品下留言，他们的留言将以'游客'的名称显示</span>
+            </div>
+            <div>是否接受邮件提醒：
+                <select style="height:1.5rem;" ng-model="preference[1]">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+                <span style="margin-left:3rem;font-size:0.8rem;color:gray;line-height:1.5rem;"><br>&nbsp&nbsp&nbsp开放该选项，您在本站收到的通知将会通过邮件形式发送给您</span>
+            </div>
+            <div>是否隐藏个人信息：
+                <select style="height:1.5rem;" ng-model="preference[2]">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+                <span style="margin-left:3rem;font-size:0.8rem;color:gray;line-height:1.5rem;"><br>&nbsp&nbsp&nbsp开放该选项，其他人将无法在您的个人主页浏览您的隐私信息，如邮箱等。</span>
+            </div>
+            <div>开放邮箱接收文章申请：
+                <select style="height:1.5rem;" ng-model="preference[3]">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+                <span style="margin-left:3rem;font-size:0.8rem;color:gray;line-height:1.5rem;"><br>&nbsp&nbsp&nbsp开放该选项，非本站会员也可以通过提供自己的邮箱来向你的文章进行密码申请</span></div>
+            <div>
+                <div style="display:flex;flex-direction:row;">
+                    <div style="margin-right:1rem;">阅读模式：</div>
+                    <input type="radio" name="readMode" value="0" ng-model="preference[4]">
+                    <span style="margin-left:0.2rem;">精简模式</span>
+                    <input type="radio" name="readMode" value="1" ng-model="preference[4]" style="margin-left:1.5rem;">
+                    <span style="margin-left:0.2rem;">更新模式</span>
+                </div>
+                <div style="margin-left:0.5rem;" id="modeExplanation"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="userSettingTemplate">
+        <div class="title">
+            <div class="info">主页模板</div>
+        </div>
+        <div class="contents" style="display:flex;flex-direction:row;padding-left:1rem;padding-top:0.5rem;border-bottom:none;">
+                <input type="radio" name="rd" class="rd"  checked="true">
+                <span style="margin-left:1rem;">默认模板</span>
+        </div>
+    </div>
+</div>

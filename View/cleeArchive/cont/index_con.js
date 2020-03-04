@@ -77,20 +77,6 @@ app.controller("tagUpdateCon",function($scope,$http,$rootScope,$window,$location
             return;
         }
         feedManager.getPosts(data);
-            // .then(function(res){
-            //     if(!res)
-            //         throw '网络通信错误';
-            //     if(res.data.length ==0)
-            //         throw '您的订阅中当前没有文章';
-            //     $scope.updated = true;
-            //     $scope.posts = JSON.parse(JSON.stringify())
-            //
-            // })
-            // .catch(function(err){
-            //     $scope.err=err;
-            //     $scope.updated = true;
-            //     $scope.$apply();
-            // })
     };
 
     let getList = function(){

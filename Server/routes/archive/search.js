@@ -17,15 +17,15 @@ let handler = {
 
     filterContents:function(res,data){
         let pushData = [];
+        let userId = req.session.user? req.session.user._id :null;
         for(let i=0; i<data.result.length;++i){
-            if(data.result[i].chapter.grade>0)
+            if(data.result[i].chapter.grade>0 && data.result[i].work.user != userId)
                 pushData.push(data.result[i]._id);
         }
         if(pushData.length>0)
             data.blocked = true;
         while(pushData.length>0){
             let tmp = pushData.shift();
-            console.log(pushData);
             for(let i=0; i< data.result.length;++i){
                 if(data.result[i]._id === tmp){
                     data.result.splice(i,1);
@@ -38,8 +38,6 @@ let handler = {
 
     filter:function(req,res,data){
         if(req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
-            handler.finalSend(res,data);
-        else if(req.session.user && req.session.user._id === data.userId)
             handler.finalSend(res,data);
         else if(req.session.user && req.session.user.userGroup >= 999)
             handler.finalSend(res,data);

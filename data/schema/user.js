@@ -4,5 +4,7 @@ module.exports = new mongoose.Schema({
     user: {type:String,default:''},
     pwd:{type:String,default:''},
     userGroup: {type:Number,default:0},
+    mail:{type:String,default:''},
+    intro:{type:String,default:''},
     points:{type:Number,default:0},
 });

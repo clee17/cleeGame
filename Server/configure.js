@@ -8,6 +8,7 @@ var bodyparser = require('body-parser'),
     statics = require('./statics'),
     lib = require('./routes/lib'),
     view = require('./routes/view'),
+    count = require('./routes/count'),
     user = require('./routes/user');
 
 const ipSearcher = new IP2Region();
@@ -56,6 +57,8 @@ module.exports=function(app){
     app.use('/view/',view);
 
     app.use('/user/',user);
+
+    app.use('/count/',count);
 
     statics(app);
 

@@ -8,6 +8,7 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     countMapModel = require(path.join(__dataModel,'cleeArchive_countMap')),
+    applicationModel = require(path.join(__dataModel,'application')),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic'));
 
 let handler = {
@@ -24,6 +25,26 @@ let handler = {
         });
     },
 
+    visitorDonate:function(req,res){
+          let visitorId = req.query.id;
+          if(!visitorId)
+              __renderError(req,res,'您必须输入申请码');
+          else if(!__validateId(visitorId))
+              __renderError(req,res,'请输入正确的申请码');
+          else {
+
+              applicationModel.findOne({_id:visitorId},function(err,doc){
+                  if(!err && doc){
+                      let data = {viewport:'/view/donate.html',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{visitorId:visitorId,mail:doc.mail,noUser:true}};
+                      __renderIndex(req,res,data);
+                  }
+                  else
+                      __renderError(req,res,err || '数据库中不存在该申请码');
+              })
+          }
+
+    },
+
     indexDetail:function(req,res,next,fanfic_grade){
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
@@ -36,7 +57,10 @@ let handler = {
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js']});
+        viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
+        viewPortMap.set('/donate',{viewport:'/view/donate.html',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js']});
         viewPortMap.set('/register',{viewport:'/view/register.html',controllers:['/templates/login.js','/templates/log_con.js'],services:[],variables:{loginMode:0}});
+        viewPortMap.set('/registerProcess',{viewport:'/view/registerProcess.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
@@ -45,14 +69,21 @@ let handler = {
             if(req.session.user)
                 __renderIndex(req,res,result);
             else
-                __renderIndex(req,res,viewPortMap.get('/register'));
+                __renderIndex(req,res,viewPortMap.get('/welcome'));
         }
-        else if(req.url == '/admin')
+        else if(req.url === '/admin')
         {
             if(req.session.user && req.session.user.userGroup >= 999)
                 __renderIndex(req,res,result);
             else
                 __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');
+        }
+        else if(req.url ==='/donate'){
+            if(req.session.user){
+                result.variables.mail = {mail:req.session.user.mail || ''};
+                __renderIndex(req,res,result);
+            } else
+                __renderError(req,res,'该页面仅对用户开放');
         }
         else if(req.url ==='/fanfic'){
             handler.fanficSearch(req,res,result);
