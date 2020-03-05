@@ -183,9 +183,7 @@ let routeHandler = {
                 });
             else
                 processMail();
-
         });
-
     },
 
     requestRegister:function(req,res){

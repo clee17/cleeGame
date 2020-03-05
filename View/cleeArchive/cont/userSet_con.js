@@ -12,6 +12,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.badgeImage = null;
     $scope.preferenceUploading = false;
     $scope.mailEditing = false;
+    $rootScope.settings.intro = LZString.decompressFromBase64($rootScope.settings.intro);
     $scope.splitStr = function(str){
         let list = [];
         for(let i=0;i<str.length;++i){

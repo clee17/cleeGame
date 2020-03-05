@@ -36,7 +36,7 @@
 
             $rootScope.err = '<%- err %>';
             $rootScope.readerId = '<%- userId %>';
-            $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
+            $rootScope.variables = '<%= JSON.stringify(variables) %>';
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
@@ -241,7 +241,8 @@
     </div>
     <div style="background:rgba(158,142,166,255);width:100%;height:2rem;display:flex;flex-direction:row;">
         <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:auto;"><a href="/fanfic">同 人 创 作</a></guide_button>
-        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-right:auto;"><a href="/tech">技 术 文 档</a></guide_button>
+        <guide_button color="rgba(119,111,144,255)" height="1.8rem"><a href="/tech">技 术 文 档</a></guide_button>
+        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-right:auto;"><a href="/develop">开 发 公 告</a></guide_button>
     </div>
 </div>
 

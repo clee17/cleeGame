@@ -59,6 +59,7 @@ let handler = {
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/view/donate.html',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
+        viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/view/registerProcess.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
         let result = viewPortMap.get(req.url);
         if(!result)
