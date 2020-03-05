@@ -33,16 +33,16 @@ app.controller('loginCon',function($scope,$window,loginManager){
             let cryptoData = {user:$scope.data[0],pwd:md5($scope.data[1]).toString()};
             loginManager.requestLogin(cryptoData);
         }
+    };
 
-        $scope.$on('loginFinished',function(event,data){
-            $scope.requesting = true;
-            if(data.success){
-                $window.location.reload();
-            }
-            else
-                $scope.error = data.message;
-        });
-    }
+    $scope.$on('loginFinished',function(event,data){
+        $scope.requesting = false;
+        if(data.success){
+            $window.location.reload();
+        }
+        else
+            $scope.error = data.message;
+    });
 });
 
 

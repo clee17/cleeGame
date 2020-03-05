@@ -19,7 +19,7 @@ let routeHandler = {
     },
 
     login:function(req,res){
-        let data = req.body || null;
+        let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success:false,
             message: ''
@@ -30,6 +30,7 @@ let routeHandler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         }
         if(data) {
+            console.log(data);
             userModel.findOne({user: data.user}).exec()
                 .then(function (user) {
                     if (!user) {

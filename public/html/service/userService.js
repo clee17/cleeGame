@@ -15,7 +15,7 @@ app.service('loginManager',function($http,$rootScope){
     };
 
     this.requestLogin = function(data){
-        manager.request('/user/logout','loginFinished',data);
+        manager.request('/user/login','loginFinished',data);
     };
 
     this.requestRegister = function(data){
