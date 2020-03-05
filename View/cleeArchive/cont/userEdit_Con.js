@@ -39,11 +39,22 @@ app.controller("userEditCon",['$scope','$rootScope','loginManager',function($sco
             $scope.$emit('showError','请反复确认您的密码');
         else if($scope.pwd !== $scope.rpPwd)
             $scope.$emit('showError','您两次输入的密码不一致');
-        else
+        else{
+            $scope.requesting = true;
             loginManager.saveNewPwd({info:$scope.pwd,_id:$rootScope.userId,requestId:$rootScope.requestId});
+        }
+
     };
 
     $scope.$on('pwdSaved',function(event,data){
-        console.log(data);
+        $scope.requesting = false;
+        if(data.success){
+            $scope.$emit('showExplain','<p>密码重设完成，请使用右上角登录按钮进行登录</p>');
+            let btn = document.getElementById('resetPwBtn');
+            if(btn)
+                btn.disabled = true;
+        }
+        else
+            $scope.$emit('showError',data.message);
     })
 }]);
