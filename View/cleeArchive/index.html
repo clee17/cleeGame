@@ -36,7 +36,7 @@
 
             $rootScope.err = '<%- err %>';
             $rootScope.readerId = '<%- userId %>';
-            $rootScope.variables = '<%= JSON.stringify(variables) %>';
+            $rootScope.variables = JSON.parse('<%= JSON.stringify(variables) %>');
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
