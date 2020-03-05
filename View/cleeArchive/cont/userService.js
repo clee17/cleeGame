@@ -10,7 +10,6 @@ app.service('userManager',function($http,$rootScope){
                         $rootScope.$broadcast(info,receivedData);
                 },
                 function(err){
-                    console.log(err);
                     $rootScope.$broadcast(info,{success:false,info:'网络通信错误，请刷新页面尝试'});
                 });
     };

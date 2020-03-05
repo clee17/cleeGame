@@ -52,8 +52,7 @@ app.controller("registerStatusCon",['$scope','$rootScope','$cookies','userManage
             let element = document.getElementById('mainAnswer');
             if(element)
                 element.innerHTML = '<div>您的申请当前状态为：<b>'+$scope.getStatusText()+'</b></div>'+
-                    '<div>'+$scope.getStatusExplain()+'</div>'+
-                '<div style="margin-top:2rem;">如果您对此有兴趣，现在您可以凭借您的申请码前往<a href="/visitorDonate?id='+$scope.requestId+'">捐赠</a>页面查阅捐赠相关细则</div>';
+                    '<div>'+$scope.getStatusExplain()+'</div>';
         }else{
             $scope.$emit('showError',data.message);
         }

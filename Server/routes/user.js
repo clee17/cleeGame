@@ -30,7 +30,6 @@ let routeHandler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         }
         if(data) {
-            console.log(data);
             userModel.findOne({user: data.user}).exec()
                 .then(function (user) {
                     if (!user) {
