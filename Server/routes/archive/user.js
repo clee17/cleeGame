@@ -133,7 +133,7 @@ let handler = {
             __renderError(req, res, '您没有权限访问该页面');
         else {
             let settings=  {mail:req.session.user.mail || '',
-            intro:req.session.user.intro || ''};
+            intro:req.session.user.intro ? lzString.decompressFromBase64(req.session.user.intro) : ''};
             __renderIndex(req, res, {
                 viewport: '/dynamic/users/setting/' + userId,
                 title: req.session.user.user + '的个人设置',

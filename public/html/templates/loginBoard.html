@@ -1,25 +1,50 @@
+<style>
+    .displayRow{
+        margin-bottom:0.5rem;
+    }
+
+    .displayRow >div:first-child{
+        min-width:4rem;
+        text-align:right;
+    }
+
+    .displayRow input{
+        height:1.5rem;
+    }
+
+    .displayRow button{
+        padding:5px;
+        padding-top:3px;
+        padding-bottom:3px;
+    }
+
+     #loginWindow >div:nth-last-child(n+3){
+         padding-right:2rem;
+     }
+
+</style>
 <div id="loginWindow">
-    <div mytable-row>
+    <div class="displayRow">
         <div style="text-align:right;margin-right:10px;">用户名:</div>
         <input ng-model="data[0]" ng-blur="checkUser()">
         <div ng-show="userChecking" class="anim" style="height:1rem;width:28px;max-width:28px;margin-left:5px;"><img src="/img/loading.gif" style="width:22px;height:22px;"></div>
     </div>
     <div ng-show="userErr!=''" style="margin-right:auto;margin-left:5.5rem;font-size:0.8rem;color:gray;">{{userErr}}</div>
-    <div mytable-row ng-if="loginMode===1">
+    <div class="displayRow" ng-if="loginMode===1">
         <div style="text-align:right;margin-right:10px;">邮箱:</div>
         <div>{{mail}}</div>
     </div>
-    <div mytable-row>
+    <div class="displayRow">
         <div style="text-align:right;margin-right:10px;">密码:</div>
         <input type="password" ng-model="data[1]" maxlength="12">
     </div>
-    <div mytable-row ng-if="loginMode===1">
+    <div class="displayRow" ng-if="loginMode===1">
         <div style="text-align:right;margin-right:10px;">简介:</div>
         <div>{{intro}}</div>
     </div>
-    <div mytable-row >
-        <div style="width:100%;display:flex;flex-direction:row;margin-top:1rem;"><button style="margin-right:0px;margin-left:auto;" ng-click="sendLogin()" ng-disabled="requesting" id="submitButton">{{submitSign}}</button></div>
+    <div class="displayRow">
+        <button style="margin-right:0;margin-left:auto;margin-top:1rem;" class="grand-button" ng-click="sendLogin()" ng-disabled="requesting">{{submitSign}}</button>
     </div>
-    <div mytable-row></div>
+    <div class="displayRow"></div>
 </div>
-<div mytable-row style="padding-left:2rem;" ng-show="error"><div style="margin:auto;color:darkred;font-weight:bold;text-align:center;">{{error}}</div></div>
+<div  style="padding-left:2rem;display:flex;" ng-show="error"><div style="margin:auto;color:darkred;font-weight:bold;text-align:center;">{{error}}</div></div>

@@ -214,7 +214,7 @@
                 <div style="padding-left:2rem;position:relative;min-height:6rem;display:flex;padding-top:0.5rem;">
                     <textarea id="introBoard" ng-model="settings.intro" maxlength="100"></textarea>
                     <% if(user.intro && user.intro.length >0) { %>
-                    <span><%= user.intro %></span>
+                    <span><%= settings.intro %></span>
                     <% }else{ %>
                     <span>暂无简介</span>
                     <% } %>

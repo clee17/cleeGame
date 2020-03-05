@@ -233,7 +233,7 @@
             <button ng-click="logout()" ng-disabled="loggingOut" class="dashboard">登出</button>
         </div>
         <% }else{ %>
-        <div class="dashboard" ng-show="showLoginboard" style="position:absolute;right:0;top:0;width:480px;max-width:480px;">
+        <div ng-show="showLoginboard" id="loginParent">
             <div ng-include="'/templates/loginBoard.html'" ng-controller="loginCon"></div>
         </div>
         <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()">登录</a>

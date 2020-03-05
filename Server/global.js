@@ -44,15 +44,25 @@ global.__updateUserSetting = function(applicationId){
 
 };
 
-global.__sendMail = function(mailContents,userMail){
+global.__getDateInfo = function(date){
+    let timeStamp = date || Date.now();
+    let info = new Date(timeStamp);
+    return info.getFullYear()+'年'+(info.getMonth()+1) + '月'+ info.getDate()+'日'+info.getHours()+'时'+info.getMinutes()+'分';
+};
+
+global.__sendMail = function(mailContents,userMail,title){
     var options = {
         from        : '"cleegame admin" <cleegame@outlook.com>',
         to          : ' <'+userMail+'>',
-        subject        : '感谢申请注册cleeArchive',
+        subject        : title || '感谢使用cleeArchive',
         html           : mailContents,
     };
 
     mailTransport.sendMail(options,function(err,result){
+        if(err)
+           console.log(err);
+        else
+            console.log(result);
     });
 };
 

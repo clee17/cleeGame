@@ -187,28 +187,28 @@ input{
     width:100%;
 }
 
-.dashboard #loginWindow{
+#loginParent{
+    position:absolute;
+    right:0;
+    top:0;
+    width:auto;
     color:inherit;
-    border:none;
+}
+
+#loginParent #loginWindow{
+    color:inherit;
     box-shadow:none;
-    background:white;
+    background:rgba(223,216,214,1);
+    padding-top:3rem;
+    padding-right:4rem;
+    padding-left:4rem;
     font-size:14px;
-    background:rgba(215,215,215,230);
     z-index:0;
-    padding-top:2.5rem;
-    padding-left:0;
-    padding-right:30px;
+    border: solid 1px rgba(181,163,160,218);
 }
 
-.dashboard #loginWindow button{
-    background:white;
-    color:inherit;
-    border:solid 1px rgba(108,95,93,255);
-}
-
-.dashboard #loginWindow button:hover{
-    background: rgba(108,95,93,255);
-    color: rgba(181,163,160,255);
+.errorInfo{
+    color:darkred;
 }
 
 #main{

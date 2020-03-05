@@ -33,6 +33,8 @@
     #btnColumn{
         display:flex;
         flex-direction:column;
+        margin-left:auto;
+        margin-right:2rem;
     }
 
     #btnColumn >button{
@@ -46,7 +48,6 @@
 <div id="admin_board" controller="admin_con" style="flex:1;display:flex;flex-direction:column;min-width:35rem;" ng-controller="adminCon">
     <div style="margin-left:auto;margin-right:auto;margin-top:10px;">欢迎来到Clee_Archive管理界面，请选择您要管理的项目: </div>
     <div style="margin-left:auto;margin-right:auto;margin-top:20px;">表格：<select ng-model="tableId">
-        <option value="0">注册表</option>
         <option value="1">用户表</option>
         <option value="2">注册申请表</option>
     </select>
@@ -63,10 +64,11 @@
         <div ng-repeat="item in contents" style="display:flex;flex-direction:row;border-bottom:solid 1px rgba(218,218,218,218);width:95%;margin-left:auto;margin-right:auto;min-height:1.8rem;">
             <div table-content style="display:flex;flex-direction:row;"></div>
             <div id="btnColumn">
-                <button style="margin-left:auto;margin-right:10px;" ng-if="btn.editNeeded">编辑</button>
-                <button style="margin-right:10px;" ng-click="removeItem(item._id,$index)" ng-if="btn.deleteNeeded">删除</button>
-                <button style="margin-right:10px;" ng-click="answerRegister(true)" ng-if="btn.registerPermitNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
-                <button style="margin-right:10px;" ng-click="answerRegister(false)" ng-if="btn.registerDeclineNeeded" ng-disabled="item.status != 0 || requesting">拒绝</button>
+                <button ng-if="btn.editNeeded">编辑</button>
+                <button ng-click="removeItem(item._id,$index)" ng-if="btn.deleteNeeded">删除</button>
+                <button ng-click="answerRegister(true)" ng-if="btn.registerPermitNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
+                <button ng-click="answerRegister(false)" ng-if="btn.registerDeclineNeeded" ng-disabled="item.status != 0 || requesting">拒绝</button>
+                <button ng-click="resetPwd()" ng-if="btn.resetPwdNeeded" ng-disabled="requesting">重设密码</button>
             </div>
         </div>
     </div>

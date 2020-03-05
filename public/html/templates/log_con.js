@@ -13,7 +13,7 @@ app.controller('loginCon',function($scope,$window,loginManager){
     $scope.loginMode = 0;
 
     $scope.userResult = '';
-    $scope.submitSign = '提交';
+    $scope.submitSign = '登录';
     $scope.requesting = false;
 
     $scope.checkUser = function(){};
@@ -34,15 +34,13 @@ app.controller('loginCon',function($scope,$window,loginManager){
             loginManager.requestLogin(cryptoData);
         }
 
-
-        $scope.$on('loginFailed',function(event,data){
+        $scope.$on('loginFinished',function(event,data){
             $scope.requesting = true;
-            $scope.error=data.message;
-        });
-
-        $scope.$on('loginSuccess',function(event,data){
-            $scope.requesting = false;
-            $window.location.reload();
+            if(data.success){
+                $window.location.reload();
+            }
+            else
+                $scope.error = data.message;
         });
     }
 });
@@ -96,15 +94,14 @@ app.controller('registerCon',function($scope,$window,$location,$rootScope,loginM
         }
     };
 
-    $scope.$on('registerFailed',function(event,data){
+    $scope.$on('registerFinished',function(event,data){
         $scope.requesting = false;
-        $scope.error= data.message;
-    });
-
-    $scope.$on('registerSuccess',function(event,data){
-        $scope.requesting = false;
-        $scope.result = '注册成功';
-        $window.location.href = 'http://'+$location.host();
+        if(data.success){
+            $scope.result = '注册成功';
+            $window.location.href = 'http://'+$location.host();
+        }
+        else
+             $scope.error= data.message;
     });
 
     $scope.$on('nameCheckFinished',function(event,data){

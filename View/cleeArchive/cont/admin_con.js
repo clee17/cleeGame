@@ -1,7 +1,6 @@
 app.service('adminManager',function($http,$rootScope){
     let manager = this;
     this.request = function(site,info,data,ifInfoReceived){
-
         $http.post(site,{data:LZString.compressToBase64(JSON.stringify(data))})
             .then(function(response){
                     let receivedData = JSON.parse(LZString.decompressFromBase64(response.data));
@@ -90,7 +89,7 @@ app.directive('tableHeader',function($compile) {
     }
 });
 
-app.directive('tableContent',['adminManager',function(adminManager){
+app.directive('tableContent',['adminManager','loginManager',function(adminManager,loginManager){
     return {
         restrict: "A",
         link: function (scope, element, attr) {
@@ -106,6 +105,8 @@ app.directive('tableContent',['adminManager',function(adminManager){
                             let val = scope.val[j].value;
                             if(scope.$parent.tableId === '2' && scope.val[j].key === 'statements')
                                 scope.val[j].value = LZString.decompressFromBase64(scope.val[j].value);
+                            else if (scope.$parent.tableId === '1' && scope.val[j].key === 'intro')
+                                scope.val[j].value = LZString.decompressFromBase64(scope.val[j].value);
                             innerHTML += '<div style="padding-right:1rem;width:7rem;word-break:break-all;">' + scope.val[j].value + '</div>';
                         }
                     }
@@ -116,19 +117,20 @@ app.directive('tableContent',['adminManager',function(adminManager){
 
             scope.refreshHTML();
 
+            scope.answerRegister = function(agree){
+                let status = agree? 1 : 2;
+                adminManager.answerApplication({item:scope.item,status:status,mail:scope.item.mail,subType:9999});
+            };
+
+            scope.resetPwd = function(){
+                loginManager.resetPwd(scope.item);
+            };
+
             scope.$on('table content refreshed',function(event,data){
                 if(data._id == scope.item._id)
                     scope.refreshHTML();
             });
-
-            scope.answerRegister = function(agree){
-                let status = agree? 1 : 2;
-                adminManager.answerApplication({item:scope.item,status:status,mail:scope.item.mail,subType:9999});
-            }
-
-        }
-
-    }
+        }}
 }]);
 
 app.directive('addError',function($timeout){
@@ -159,7 +161,7 @@ app.directive('addError',function($timeout){
 });
 
 app.controller("adminCon",function($scope,adminManager){
-    $scope.tableId = '0';
+    $scope.tableId = '1';
     $scope.pageId = 0;
     $scope.perPage = 30;
     $scope.maxPage = 1;
@@ -167,14 +169,13 @@ app.controller("adminCon",function($scope,adminManager){
     $scope.requested = false;
     $scope.requesting = false;
     $scope.contents = [];
-
     $scope.btn  = {
         editNeeded:false,
         deleteNeeded:false,
         registerPermitNeeded: false,
         registerDeclineNeeded:false,
 
-    }
+    };
 
     $scope.request = function(){
         if($scope.requesting)
@@ -209,11 +210,14 @@ app.controller("adminCon",function($scope,adminManager){
         if($scope.tableId === '0'){
             $scope.btn.deleteNeeded = true;
         }
+        else if ($scope.tableId === '1'){
+            $scope.btn.resetPwdNeeded = true;
+        }
         else if($scope.tableId === '2'){
             $scope.btn.registerPermitNeeded = true;
             $scope.btn.registerDeclineNeeded = true;
         }
-    }
+    };
 
     $scope.$on('admin table received',function(event,data){
         $scope.requesting = false;
@@ -223,6 +227,8 @@ app.controller("adminCon",function($scope,adminManager){
             $scope.head = [];
             if($scope.tableId === '0')
                 $scope.head = ['_id','date'];
+            else if($scope.tableId === '1')
+                $scope.head = ['_id','user','userGroup','mail','intro'];
             else if($scope.tableId === '2')
                 $scope.head = ['_id','mail','count','date','statements','status','subType'];
             $scope.initializeBtn();
@@ -262,7 +268,6 @@ app.controller("adminCon",function($scope,adminManager){
         }
         $scope.requesting = false;
     });
-
 
     $scope.$on('record remove finished',function(event,data){
         $scope.requesting = false;

@@ -35,43 +35,43 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     });
 
 
-    $scope.$watch('preference',function(err,doc){
-        if(!$scope.initialized )
-            return;
-        if($scope.preferenceUploading)
-            return;
-        $scope.preferenceUploading = true;
-        let preference = parseInt($rootScope.preference.join(''),2);
-        userManager.savePreference({preference:preference});
-    },true);
+            $scope.$watch('preference',function(err,doc){
+                if(!$scope.initialized )
+                    return;
+                if($scope.preferenceUploading)
+                    return;
+                $scope.preferenceUploading = true;
+                let preference = parseInt($rootScope.preference.join(''),2);
+                userManager.savePreference({preference:preference});
+            },true);
 
-    $scope.$on('basicInfoSaveFinished',function(event,data){
-        if(data.type === 'intro')
-            $scope.introRequesting = false;
-        else if(data.type === 'mail')
-            $scope.mailRequesting = false;
-        if(data.success){
-            if(data.type === 'intro')
-                $rootScope.settings.intro = data.intro;
-            else if(data.type === 'mail')
-                $rootScope.settings.mail = data.mail;
-        }
-        else
-            $scope.$emit('showError',data.message);
-    });
+            $scope.$on('basicInfoSaveFinished',function(event,data){
+                if(data.type === 'intro')
+                    $scope.introRequesting = false;
+                else if(data.type === 'mail')
+                    $scope.mailRequesting = false;
+                if(data.success){
+                    if(data.type === 'intro')
+                        $rootScope.settings.intro = LZString.decompressFromBase64(data.intro);
+                    else if(data.type === 'mail')
+                        $rootScope.settings.mail = data.mail;
+                }
+                else
+                    $scope.$emit('showError',data.message);
+            });
 
-    $scope.$on('preferenceSaveFinished',function(event,data){
-        $scope.preferenceUploading = false;
-        if(data.success)
-        {
-            let preference = data.result.toString(2);
-            while(preference.length<5){
-                preference = '0'+preference;
-            }
-            $rootScope.preference = preference;
+            $scope.$on('preferenceSaveFinished',function(event,data){
+                $scope.preferenceUploading = false;
+                if(data.success)
+                {
+                    let preference = data.result.toString(2);
+                    while(preference.length<5){
+                        preference = '0'+preference;
+                    }
+                    $rootScope.preference = preference;
 
-        }
-        else{
+                }
+                else{
             $scope.$emit('showError',data.message);
         }
     });
@@ -253,7 +253,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
                     prev.innerHTML = '暂无简介';
             }
             $scope.introRequesting = true;
-            userManager.saveBasicInfo({intro:$rootScope.settings.intro,type:'intro'});
+            userManager.saveBasicInfo({intro:LZString.compressToBase64($rootScope.settings.intro),type:'intro'});
         }
         $scope.introEditing = !$scope.introEditing;
         element.nextElementSibling.style.opacity =  $scope.introEditing? '0':'1';

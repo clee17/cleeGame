@@ -73,8 +73,8 @@ let routeHandler = {
 
     register:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let sent = false;
         let response = {
+            sent:false,
             success:false,
             message: ''
         };
@@ -101,8 +101,67 @@ let routeHandler = {
             })
             .catch(function(err){
                 response.message = err.message || err;
+                response.success = false;
                 routeHandler.finalSend(res,response);
             });
+    },
+
+    resetPwd:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success:false,
+            message: '',
+            sent:false,
+        };
+
+        if(!receivedData._id)
+            response.message = '该用户信息不存在';
+        else if(!__validateId(receivedData._id))
+            response.message = '请提供有效的用户ID';
+        if(response.message !== ''){
+            routeHandler.finalSend(res,response);
+            return;
+        }
+
+        registerModel.deleteMany({user:receivedData._id,type:0},function(err,docs){
+            let newLink = new registerModel();
+            newLink.user = receivedData._id;
+            newLink.type = 0;
+            newLink.save(function(err){
+                if(err)
+                    response.message = err;
+                else{
+                    let resetLink = 'archive.cleegame.com/user/resetPwd/'+newLink._id;
+                    let mailContents = '<body><h1>您于'+__getDateInfo()+'申请了密码重置，如果这不是您本人的操作，请无视</h1>' +
+                        '<p>您可以通过本链接重置密码:<a href="'+resetLink+'">'+resetLink+'</a>,如果无法点击链接，请复制到浏览器中打开</p>' +
+                        '<p>该链接将为您保存24小时，请尽快操作</p>'+
+                        '<p>如果您没有申请过密码重新设定，请无视该邮件。</p>'+
+                        '</body>';
+                    response.success = true;
+                    __sendMail(mailContents,receivedData.mail,'cleeArchive用户密码重设');
+                }
+                routeHandler.finalSend(res,response);
+            })
+        });
+    },
+
+    resetPwdPage:function(req,res){
+        let resetId = req.params.resetId;
+        if(!__validateId(resetId)){
+            __renderError(req,res,'请输入有效的密码重设链接');
+        }
+        registerModel.findOne({_id:resetId},function(err,doc){
+            if(err)
+                __renderError(req,res,err);
+            else if(!doc)
+                __renderError(req,res,'您的注册链接已失效');
+            else if(doc)
+                __renderIndex(req,res,{
+                    viewport:'/view/resetPwd.html',
+                    controllers:['/view/cont/userEdit_con.js'],
+                    services:['/service/userService.js'],
+                    variables:{requestId:resetId,userId:doc.user}});
+        })
     },
 
     applicationProcess:function(doc, ifUpdate){
@@ -330,16 +389,60 @@ let routeHandler = {
             routeHandler.finalSend(res,response);
         })
     },
+
+    savePwd:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+        };
+
+        if(!receivedData._id)
+            response.message = '申请重设时没有提供用户信息，请联系管理员';
+        else if(!receivedData.requestId)
+            response.message = '修改链接信息丢失，请刷新页面';
+        else if(!receivedData.info || receivedData.info === '')
+            response.message = '新的密码不符合格式';
+
+        if(response.message !== '')
+            routeHandler.finalSend(res,response);
+
+        registerModel.findOneAndDelete({_id:receivedData.requestId},function(err,doc){
+            if(err)
+                response.message = err;
+            else if(!doc)
+                response.message = '您的用户链接已失效';
+            else{
+                userModel.findOneAndUpdate({_id:receivedData._id},{pwd:receivedData.info},{new:true},function(err,doc){
+                    if(err)
+                        response.message = err;
+                     if(!doc)
+                        response.message = '不存在该用户';
+                     if(response.message === '')
+                        response.success = true;
+                     routeHandler.finalSend(res,response);
+                });
+            }
+            if(response.message !== '')
+               routeHandler.finalSend(res,response);
+        });
+    }
 };
+
 
 router.post('/login',routeHandler.login);
 router.post('/logout',routeHandler.logout);
 router.post('/register',routeHandler.register);
 router.post('/registerRequest',routeHandler.requestRegister);
+router.post('/resetPwd',routeHandler.resetPwd);
+router.get('/resetPwd/:resetId',routeHandler.resetPwdPage);
 router.post('/checkUsername',routeHandler.checkUser);
 router.post('/apply',routeHandler.apply);
 router.post('/saveInfo',routeHandler.saveInfo);
 router.post('/requestBill',routeHandler.requestBill);
 router.post('/getStatus',routeHandler.getStatus);
+
+router.post('/save/pwd',routeHandler.savePwd);
 
 module.exports = router;

@@ -162,10 +162,13 @@ let handler = {
     userSetting:function(req,res){
         let userId = req.params.userId;
         let readerId = '';
-        if(!req.session.user)
+        if(!req.session.user){
             res.render('cleeArchive/errorB.html',{error:'您没有获取该页面的权限'});
-        else
-            res.render('cleeArchive/userSetting.html',{user:req.session.user});
+            return;
+        }
+        let settings=  {mail:req.session.user.mail || '',
+            intro:req.session.user.intro ? lzString.decompressFromBase64(req.session.user.intro) : null};
+        res.render('cleeArchive/userSetting.html',{user:req.session.user,settings:settings});
     },
 
     userPage:function(req,res,next){

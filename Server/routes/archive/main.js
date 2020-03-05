@@ -56,7 +56,7 @@ let handler = {
             variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
-        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js']});
+        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/view/donate.html',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js']});
         viewPortMap.set('/registerProcess',{viewport:'/view/registerProcess.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
