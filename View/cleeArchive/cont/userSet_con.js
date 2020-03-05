@@ -13,6 +13,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.preferenceUploading = false;
     $scope.mailEditing = false;
     $rootScope.settings.intro = LZString.decompressFromBase64($rootScope.settings.intro);
+    $rootScope.settings.intro = $rootScope.settings.intro.replace(/\n/gi,'<br>');
     $scope.splitStr = function(str){
         let list = [];
         for(let i=0;i<str.length;++i){
@@ -269,6 +270,15 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         $scope.requestFile();
         $scope.reloadAccess();
         $scope.initializePreference();
+        let element = document.getElementById('introBoard');
+        if(element){
+            let prev = element.nextElementSibling;
+            if(prev){
+                prev.innerHTML = $rootScope.settings.intro;
+                if($rootScope.settings.intro.length === 0)
+                    prev.innerHTML = '暂无简介';
+            }
+        }
         $scope.initialized = true;
     };
 
