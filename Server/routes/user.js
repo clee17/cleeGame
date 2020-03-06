@@ -157,7 +157,7 @@ let routeHandler = {
                 __renderError(req,res,_errAll[1]);
             else if(doc)
                 __renderIndex(req,res,{
-                    viewport:'/view/resetPwd.html',
+                    viewport:'/statement/resetPwd',
                     controllers:['/view/cont/userEdit_con.js'],
                     services:['/service/userService.js'],
                     variables:{requestId:resetId,userId:doc.user}});

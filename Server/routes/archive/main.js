@@ -48,19 +48,18 @@ let handler = {
     indexDetail:function(req,res,next,fanfic_grade){
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
-        viewPortMap.set('/fanfic',{viewport:'/view/fanficSearch.html',
+        viewPortMap.set('/fanfic',{viewport:'/statement/fanficSearch',
             modules:['/view/modules/workInfo.js','/view/modules/commentList.js','/view/modules/pageIndex.js'],
             styles:[],
             controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
             variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
-        viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
-        viewPortMap.set('/registerProcess',{viewport:'/view/registerProcess.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+        viewPortMap.set('/registerProcess',{viewport:'/statement/registerProcess',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
         let result = viewPortMap.get(req.url);
         if(!result)
             next();

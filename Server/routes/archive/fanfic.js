@@ -490,7 +490,7 @@ let handler = {
             }
             else if(doc)
             {
-                if(doc.targetUser != req.session.user._id)
+                if(!req.session.user || (doc.targetUser != req.session.user._id && req.session.user.userGroup < 999 && req.session.user.settings.access.indexOf(202)< 0))
                     result.message = '您没有删除该评论的权限';
                 else if(doc.work != postData.work || doc.chapter!= postData.chapter || doc.infoType != postData.infoType)
                     result.message = '数据有误，请重新尝试';

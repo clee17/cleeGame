@@ -11,6 +11,8 @@ var text = [
     "You cannot register for a new account as a logined user",
     "Sorry, we cannot find the page。<br>The developers may still be working on this.",
     "We're experiencing an internal Server Error <br>, you may report the issue you run into at the bottom of page",
+    "You are not authorized to make this change",
+    "Your login status has expired, please refresh and login again",
 ];
 
 module.exports = text;

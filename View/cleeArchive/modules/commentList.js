@@ -16,7 +16,7 @@ app.directive('commentWindow',function($rootScope) {
 app.directive('commentInfo',function($compile,$rootScope,feedbackManager) {
     return {
         restrict: "E",
-        templateUrl:'/view/modules/commentList.html',
+        templateUrl:'modules/commentList',
         link:function(scope,element,attr) {
             scope.comment = '';
             scope.parent = null;

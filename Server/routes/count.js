@@ -16,7 +16,7 @@ var handler = {
     },
 
     all:function(req,res){
-        let index = [0,5,101,102];
+        let index = [0,5,100,101,102];
         let data = {
             sent:false,
             success:false,

@@ -98,6 +98,12 @@
 
 #userFunction >div{
     margin-top:5px;
+
+}
+
+#userFunction button{
+    min-width:4.9rem;
+    text-align:left;
 }
 
 #userFunction >div:last-child{

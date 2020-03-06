@@ -7,6 +7,7 @@ global.__basedir = path.join(path.resolve(__dirname),'../');
 global.__view = path.join(path.join(__basedir,'/View/'));
 global.__routes = path.join(path.join(__basedir,'/Server/routes/'));
 global.__utils = path.join(path.join(__basedir,'/js/Utility/'));
+global.__templates = path.join(path.join(__basedir,'/public/html/templates'));
 
 global.__dataSchema = path.join(path.join(__basedir,'/data/schema/'));
 global.__dataModel = path.join(path.join(__basedir,'data/model/'));
@@ -33,7 +34,7 @@ let mailTransport = nodeMailer.createTransport({
 });
 
 
-global.__getCounryCode = function(ipData){
+global.__getCountryCode = function(ipData){
     if(ipData.country === '中国')
         return 'CN';
     else

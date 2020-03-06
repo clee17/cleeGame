@@ -66,6 +66,9 @@
         </div>
         <div class="comment-edit">
             <button class="editButton">回复</button>
+            <% if(user && user.userGroup>= 999){ %>
+                <button class="editButton" ng-click="deleteComment(comment)">管理员删除</button>
+            <% } %>
             <button ng-show="userId == readerId" class="editButton" ng-click="deleteComment(comment)">删除</button>
         </div>
     </div>

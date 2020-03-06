@@ -26,7 +26,7 @@
     <script src="/service/userService.js"></script>
     <script src="/templates/log_con.js"></script>
     <script>
-        app.controller('entryCon',function($scope,$rootScope,$window,$timeout,loginManager){
+        app.controller('entryCon',function($scope,$rootScope,$window,$timeout,$cookies,loginManager){
             window.addEventListener("click",function(event){
                 if($rootScope._buttonClicked)
                     $rootScope._buttonClicked = false;
@@ -37,9 +37,19 @@
             $rootScope.err = "<%- err %>";
             $rootScope.readerId = '<%- userId %>';
             $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
+            $rootScope.countryCode = "<%- countryCode %>";
+            if($cookies.getObject('readerLanguage')){
+                $rootScope.countryCode = $cookies.getObject('readerLanguage');
+            }
+            $rootScope.switchCountryCode = function(countryCode){
+                $cookies.putObject('readerLanguage',countryCode);
+                $window.location.reload();
+            };
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
+
+
 
             $scope.signal = '';
             $scope.alertInfo = '';
@@ -48,12 +58,10 @@
             $scope.showError = false;
 
             $scope.$on('showAlert',function(event,data){
-                let element = document.getElementById('alertWindow');
-                if(element)
-                    element.style.display = 'block';
-                let element2 = document.getElementById('alertWindow');
-                if(element2)
-                    element2.style.display = 'block';
+                let element = document.getElementById('alertContents');
+                if(element){
+                    element.style.height = '13rem';
+                }
                 $scope.showAlert = true;
                 $scope.alertInfo =  data.alertInfo || '';
                 $scope.signal = data.signal || '';
@@ -89,6 +97,10 @@
             $scope.tellYes = function(){
                 $scope.showAlert = false;
                 let response = {signal:$scope.signal};
+                let element = document.getElementById('alertContents');
+                if(element){
+                    element.style.height = '0';
+                }
                 if($scope.alertData)
                     response.variables = $scope.alertData;
                 $rootScope.$broadcast('tellYes',response);
@@ -97,6 +109,10 @@
             $scope.tellNo = function(){
                 $scope.showTop = false;
                 $scope.showAlert = false;
+                let element = document.getElementById('alertContents');
+                if(element){
+                    element.style.height = '0';
+                }
                 $rootScope.$broadcast('tellNo',{signal:$scope.signal});
             };
 
@@ -193,17 +209,21 @@
     </div>
     <div id="explainBoard">
         <div style="margin:2rem;flex:1;">
-
         </div>
         <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
     </div>
-    <div id="alertBox" ng-show="showAlert" style="display:none;"></div>
-    <div class="alert" ng-show="showAlert" style="display:none;">
+    <div id="alertBox" style="display:none;"></div>
+    <div id="alertContents" class="alert" style="height:0;">
         <div><div style="padding-top:3px;"><%- websiteInfo[2] %></div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
-        <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;"></div>
-        <div ng-repeat="info in alertInfo">{{info}}</div>
-        <div>
-            <button ng-click="tellYes()" class="grand-button"><%- websiteInfo[0] %></button>
+        <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;">
+
+        </div>
+        <div style="flex:1;">
+            <div ng-repeat="info in alertInfo">{{info}}</div>
+        </div>
+
+        <div style="margin-bottom:2rem;">
+            <button ng-click="tellYes()" class="grand-button" style="padding-top:5px;padding-bottom:10px;"><%- websiteInfo[0] %></button>
             <button ng-click="tellNo()" class="back-button"><%- websiteInfo[1] %></button>
         </div>
     </div>
@@ -215,6 +235,10 @@
                 <div>ARCHIVE</div>
                 <div>CLEE</div>
             </a>
+        </div>
+        <div id="languageSwitch">
+            <button id="BtnEn" ng-disabled="countryCode==='OTHER'" ng-click="switchCountryCode('OTHER')">EN</button>
+            <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')">CN</button>
         </div>
         <div id="headSign" style="margin-left:auto;margin-right:auto;color:dimgray;"></div>
         <% if(user) { %>
@@ -234,7 +258,7 @@
         </div>
         <% }else{ %>
         <div ng-show="showLoginboard" id="loginParent">
-            <div ng-include="'/templates/loginBoard.html'" ng-controller="loginCon"></div>
+            <div ng-include="'/templates/loginBoard'" ng-controller="loginCon"></div>
         </div>
         <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
         <% } %>
@@ -259,7 +283,7 @@
 
     <div id="contact" class="board" style="margin-right:auto;border:none;">
         <div class="headline"><%- websiteInfo[17] %></div>
-        <div><a href="/bugSubmit"><%- websiteInfo[18] %></a></div>
+        <div><a href="/develop?type=submitBug"><%- websiteInfo[18] %></a></div>
         <div><a href="mailto:cleegame@outlook.com"><%- websiteInfo[19] %></a></div>
     </div>
 </div>

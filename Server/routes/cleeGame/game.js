@@ -63,7 +63,7 @@ let handler = {
 
     getModules:function(req,res,data){
         let files = ['lzString','boot','JSZip'];
-        let countryCode = __getCounryCode(req.ipData);
+        let countryCode = __getCountryCode(req.ipData);
         gameModuleModel.aggregate([
                 {$match:{name:{$in:files}}},
                 {$facet:{

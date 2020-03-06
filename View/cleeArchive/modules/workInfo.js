@@ -100,9 +100,8 @@ app.directive('gradeShow',function(){
 app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackManager) {
     return {
         restrict: "E",
-        templateUrl:'/view/modules/workInfo.html',
+        templateUrl:'/modules/workInfo',
         link:function(scope,element,attr) {
-
             scope.status = 1;
             scope.showComment = false;
             scope.showFeedBack = false;
@@ -111,6 +110,7 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.type = Number(attr.type);
             scope.liked = false;
             scope.bookMarked = false;
+            scope.targetGrade = '0';
 
             if (scope.item.work.feedback) {
                 let feedback = scope.item.work.feedback;
@@ -248,6 +248,20 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
                 }
                 else
                     scope.$emit('showError',data.message);
+            });
+
+            scope.changeGrade = function(){
+                fanficManager.changeGrade({grade:scope.targetGrade,_id:scope.item.chapter._id,infoType:scope.item.infoType});
+            };
+
+            scope.$on('gradeChangeFinished',function(event,data){
+                if(scope.item.chapter._id !== data._id || scope.item.infoType !== data.infoType)
+                    return;
+                if(data.success){
+                    scope.item.chapter.grade = data.grade;
+                }else{
+                    scope.$emit('showError',data.message);
+                }
             });
 
             scope.$on('tellYes', function (event, data) {

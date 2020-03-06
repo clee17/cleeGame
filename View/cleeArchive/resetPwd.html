@@ -53,19 +53,19 @@
 </style>
 
 <div id="resetPw" ng-controller="userEditCon">
-    <div><h1>密码重新设定</h1></div>
+    <div><h1><%- infoAll[1] %></h1></div>
     <div class="displayRow">
-        <div>重设密码:</div>
+        <div><%- infoAll[2] %>:</div>
         <div> <input type="password" id="pwd" ng-blur="checkPwd()"></div>
     </div>
     <div class="displayRow">
-        <div>确认密码:</div>
+        <div><%- infoAll[3] %>:</div>
         <div> <input type="password" id="pwd2" ng-blur="checkRpPwd()"></div>
     </div>
     <div class="displayRow">
         <span id="resetPwError" class="errorInfo"></span>
     </div>
     <div class="displayRow">
-        <button id="resetPwBtn" class="grand-button" ng-click="submitResetPwd()">提交更改</button>
+        <button id="resetPwBtn" class="grand-button" ng-click="submitResetPwd()"><%- infoAll[4] %></button>
     </div>
 </div>
