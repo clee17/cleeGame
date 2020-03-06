@@ -28,9 +28,9 @@ let handler = {
     visitorDonate:function(req,res){
           let visitorId = req.query.id;
           if(!visitorId)
-              __renderError(req,res,'您必须输入申请码');
+              __renderError(req,res,_errInfo[13]);
           else if(!__validateId(visitorId))
-              __renderError(req,res,'请输入正确的申请码');
+              __renderError(req,res,_errInfo[14]);
           else {
 
               applicationModel.findOne({_id:visitorId},function(err,doc){
@@ -39,7 +39,7 @@ let handler = {
                       __renderIndex(req,res,data);
                   }
                   else
-                      __renderError(req,res,err || '数据库中不存在该申请码');
+                      __renderError(req,res,err || _errInfo[15]);
               })
           }
 
@@ -58,7 +58,7 @@ let handler = {
         viewPortMap.set('/design',{viewport:'/view/design.html',controllers:['/view/cont/index_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
-        viewPortMap.set('/donate',{viewport:'/view/donate.html',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
+        viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/view/registerProcess.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
         let result = viewPortMap.get(req.url);
@@ -76,14 +76,14 @@ let handler = {
             if(req.session.user && req.session.user.userGroup >= 999)
                 __renderIndex(req,res,result);
             else
-                __renderError(req,res,'您没有权限访问该界面，仅管理员可以登录。');
+                __renderError(req,res,_errAll[2]);
         }
         else if(req.url ==='/donate'){
             if(req.session.user){
                 result.variables.mail = {mail:req.session.user.mail || ''};
                 __renderIndex(req,res,result);
             } else
-                __renderError(req,res,'该页面仅对用户开放');
+                __renderError(req,res,_errAll[3]);
         }
         else if(req.url ==='/fanfic'){
             handler.fanficSearch(req,res,result);
@@ -106,7 +106,7 @@ let handler = {
 
         countMapModel.find({infoType:{$lt:10,$gte:0}},function(err,docs){
             if(err)
-                __renderError(req,res,err.errMsg || '无法获取文章总数');
+                __renderError(req,res,err);
             else
             {
                 result.variables.countList = JSON.parse(JSON.stringify(docs));
@@ -135,7 +135,7 @@ let handler = {
     work:function(req,res,next){
        let workName = req.params.workId;
        if(!__validateId(workName))
-           __renderError(req,res,'不是有效的作品ID');
+           __renderError(req,res,_errInfo[12]);
        else
        {
            worksModel.findOne({_id:workName}).exec()
@@ -155,7 +155,7 @@ let handler = {
                })
                .then(function(docs){
                    if(docs.length == 0)
-                       __renderError(req,res,'后端出错，请联系管理员');
+                       __renderError(req,res,_errAll[11]);
                    else
                        handler.fanficDetail(req,res,next,docs[0].chapter._id.toString());
                })
@@ -221,17 +221,17 @@ let handler = {
             if(noRes)
                 __renderError(req,res,noRes.message);
             else if(data.chapter && data.chapter.lockType === 1 && !req.session.user)
-                __renderError(req,res,'该作者为文章设置了站内可见，您必须成为注册用户才能阅览该文章');
+                __renderError(req,res,_errInfo[10]);
             else if(data.chapter && data.chapter.lockType === 2)
-                __renderError(req,res,'该作者设置该文章为仅自己可见，您无法阅读该文章。');
+                __renderError(req,res,_errInfo[11]);
             else if(!data.fanfic_grade)
-                __renderError(req,res,'后台网站设置出错，请联系管理员');
+                __renderError(req,res,_errAll[8]);
             else if(data.chapter && data.chapter.lockType <2)
                 res.render('cleeArchive/fanfic.html',data);
         };
 
         if(!fileName.match(/^[0-9a-fA-F]{24}$/)){
-            __renderError(req,res,'您输入的不是正确的文章目录网址，无法搜索');
+            __renderError(req,res,_errInfo[12]);
             data.sent = true;
             return;
         }

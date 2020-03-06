@@ -13,6 +13,8 @@ var bodyparser = require('body-parser'),
 
 const ipSearcher = new IP2Region();
 
+global.__errAll = require('./translation/err');
+
 module.exports=function(app){
     app.set('trust proxy',true);
     app.set('views',__view);
@@ -47,8 +49,21 @@ module.exports=function(app){
             req.ipData = ipSearcher.search(ip);
         else{
             req.ipData = {};
-            req.ipData.country_id = '中国';
+            req.ipData.country_id = '英国';
         }
+        if(req.ipData && req.ipData.country_id === '中国'){
+            global._websiteInfo = __websiteInfo.cn;
+            global._errInfo = __errInfo.cn;
+            global._errAll = __errAll.cn;
+            global._statements = global.__statements ? global.__statements.cn : null;
+        }
+        else{
+            global._websiteInfo =  __websiteInfo.en;
+            global._errInfo = __errInfo.en;
+            global._errAll = __errAll.en;
+            global._statements = global.__statements ? global.__statements.en : null;
+        }
+
         next();
     });
 

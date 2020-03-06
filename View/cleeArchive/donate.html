@@ -13,7 +13,7 @@
         padding-left:1rem;
         padding-right:1rem;
         height:1.5rem;
-        max-width:8rem;
+        max-width:10rem;
     }
 
     .info {
@@ -45,19 +45,11 @@
 </style>
 
 <div id="donateBoard" ng-controller="donateCon">
-    <div style="margin-left:auto;margin-right:auto;"><b>感谢您对本站的支持</b></div>
+    <div style="margin-left:auto;margin-right:auto;"><b><%- statements[0] %></b></div>
     <div id="mainContents">
-        <p>捐赠在于心意不在于数额，不管是5角、1元还是100元、500元本站都接受，<b>但同年度内本站不接受累积500元以上的捐赠</b>，如果有来自同一个人累积超过500元以上数额的，款项将原路退回。</p>
-        <div style="margin-top:2rem;" class="title"><div class="info">款项的去向</div></div>
-        <p>款项的主要费用去向罗列如下：</p>
-        <ul>
-            <li><b>空间的租赁费用：</b>本站使用的是AWS的ECS空间，它采用弹性计价的方式，根据使用空间的大小按月收取费用，目前网站的月空间费用约为$12(约人民币89元)</li>
-            <li><b>网络服务的租赁费用：</b>AWS的计价费用是按照小时计算，每个月有一定的免费额度，目前本站的流量使用尚未超出免费额度。</li>
-            <li><b>域名费用：</b>本站购买的是AWS的Route53域名服务，一年的费用约为$20 (约人民币140元)左右。</li>
-            <li><b>开发费用：</b>在本站的计划中有不同的创作形式，其中一些图片、游戏等开发形式需要额外的开发力度，有一部分资金将投入购买UI设计等专业服务中。</li>
-        </ul>
-        <p>任何捐赠人都有权利了解当前网站的资金储备情况与支出的明细，开发者正在开发自动分发账单的系统，如果有需要您可以在页面最下方点击申请账单链接，系统开发完成后您将按月自动收达支出与资金储备明细。</p>
-        <p>本系统暂时只对站内用户开放。</p>
+        <p><%- statements[1] %></p>
+        <div style="margin-top:2rem;" class="title"><div class="info"><%- statements[2] %></div></div>
+        <%- statements[3] %>
         <div style="margin-top:2rem;" class="title"><div class="info">捐赠方式</div></div>
         <p>本站承诺绝不透露您的真实个人信息，但希望您可以留下您在站内的用户名，或者可以对外公布的昵称，以便我们表示感谢。</p>
         <p>中国地区的用户，可以备注您的注册邮箱和指定的创作形式到支付宝或微信账户：</p>

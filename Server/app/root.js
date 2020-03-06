@@ -1,13 +1,15 @@
 global = require('../global');
 
 var express = require('express'),
-    config = require('../configure');
+    config = require('../configure'),
     route = require('../routes/cleeGame/index');
+
+global.__websiteInfo = require('../translation/cleegame.js');
+global.__errInfo = require('../translation/cleegame_err.js');
 
 var app = express();
 
 app = config(app);
-
 route(app);
 
 app.listen(3060);

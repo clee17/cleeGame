@@ -107,26 +107,26 @@ let handler = {
         }
 
         if(!req.session.user)
-            __renderError(req,res,'您尚未登录，请先登录以发表文章。');
+            __renderError(req,res,_errInfo[2]);
         else if(req.session.user && !authorize)
-            __renderError(req,res,'您的用户权限太低，无法发表文章，请联系站主确认您的权限。');
+            __renderError(req,res,_errInfo[3]);
         else if(req.session.user && authorize)
             __renderIndex(req,res,{viewport:'/dynamic/booknew',controllers:['/view/cont/edit_con.js'],services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],styles:['archive/edit']});
         else
-            __renderError(req,res,'因为不知名的原因导致您无法发表文章，请联系站主。');
+            __renderError(req,res,_errInfo[4]);
     },
 
     fanficEdit:function(req,res){
         let requestIndex = req.query.id;
         if(!__validateId(requestIndex))
-            __renderError(req,res,'没有收到任何可编辑的章节索引');
+            __renderError(req,res,_errInfo[5]);
         else {
             indexModel.findOne({_id: requestIndex}, function (err, doc) {
                 if (err || !doc)
-                    __renderError(req, res, '数据库中没有该章节');
+                    __renderError(req, res, _errInfo[6]);
                 else {
                     if (req.session.user._id != doc.chapter.user)
-                        __renderError(req, res, '您没有编辑该章节的权限');
+                        __renderError(req, res, _errInfo[7]);
                     else {
                         requestIndex = '?id=' + requestIndex;
                         __renderIndex(req, res, {

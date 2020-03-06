@@ -34,7 +34,7 @@
                     $rootScope.$broadcast('clicked',{event:event});
             });
 
-            $rootScope.err = '<%- err %>';
+            $rootScope.err = "<%- err %>";
             $rootScope.readerId = '<%- userId %>';
             $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
             for(let attr in $rootScope.variables){
@@ -195,16 +195,16 @@
         <div style="margin:2rem;flex:1;">
 
         </div>
-        <button ng-click="hideExplain()" class="grand-button">确定</button>
+        <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
     </div>
     <div id="alertBox" ng-show="showAlert" style="display:none;"></div>
     <div class="alert" ng-show="showAlert" style="display:none;">
-        <div><div style="padding-top:3px;">提示信息</div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
+        <div><div style="padding-top:3px;"><%- websiteInfo[2] %></div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
         <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;"></div>
         <div ng-repeat="info in alertInfo">{{info}}</div>
         <div>
-            <button ng-click="tellYes()" class="grand-button">确定</button>
-            <button ng-click="tellNo()" class="back-button">取消</button>
+            <button ng-click="tellYes()" class="grand-button"><%- websiteInfo[0] %></button>
+            <button ng-click="tellNo()" class="back-button"><%- websiteInfo[1] %></button>
         </div>
     </div>
 </div>
@@ -218,31 +218,31 @@
         </div>
         <div id="headSign" style="margin-left:auto;margin-right:auto;color:dimgray;"></div>
         <% if(user) { %>
-        <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div>个人主页</div></a>
-        <a href="/fanfic/post/new" target="_blank"><div>新的文章</div></a>
+        <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div><%- websiteInfo[3] %></div></a>
+        <a href="/fanfic/post/new" target="_blank"><div><%- websiteInfo[4] %></div></a>
         <a href="" style="display:flex;flex-direction:row;margin-right:2.5rem;" ng-click="switchDashboard($event)">
             <div style="margin-top:auto;margin-bottom:auto;text-align:right;"><%= user.user %></div>
             <div style="margin-left:8px;"><i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:-3px;"></i></div>
         </a>
         <div ng-show="showDashboard" id="dashboard" class="dashboard">
-            <% if(user.userGroup >= 999){ %>
-            <a class="dashboard" href="/admin">管理员</a>
+            <% if(user.userGroup >= 999 || (user.settings && user.settings.access.indexOf(202) >0 )){ %>
+            <a class="dashboard" href="/admin"><%- websiteInfo[5] %></a>
             <% } %>
-            <a class="dashboard" href="/donate">捐赠</a>
-            <a class="dashboard" href="/users/settings/<%- user._id %>">用户设置</a>
-            <button ng-click="logout()" ng-disabled="loggingOut" class="dashboard">登出</button>
+            <a class="dashboard" href="/donate"><%- websiteInfo[6] %></a>
+            <a class="dashboard" href="/users/settings/<%- user._id %>"><%- websiteInfo[7] %></a>
+            <button ng-click="logout()" ng-disabled="loggingOut" class="dashboard"><%- websiteInfo[8] %></button>
         </div>
         <% }else{ %>
         <div ng-show="showLoginboard" id="loginParent">
             <div ng-include="'/templates/loginBoard.html'" ng-controller="loginCon"></div>
         </div>
-        <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()">登录</a>
+        <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
         <% } %>
     </div>
     <div style="background:rgba(158,142,166,255);width:100%;height:2rem;display:flex;flex-direction:row;">
-        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:auto;"><a href="/fanfic">同 人 创 作</a></guide_button>
-        <guide_button color="rgba(119,111,144,255)" height="1.8rem"><a href="/tech">技 术 文 档</a></guide_button>
-        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-right:auto;"><a href="/develop">开 发 公 告</a></guide_button>
+        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-left:auto;"><a href="/fanfic"><%- websiteInfo[10] %></a></guide_button>
+        <guide_button color="rgba(119,111,144,255)" height="1.8rem"><a href="/tech"><%- websiteInfo[11] %></a></guide_button>
+        <guide_button color="rgba(119,111,144,255)" height="1.8rem" style="margin-right:auto;"><a href="/develop"><%- websiteInfo[12] %></a></guide_button>
     </div>
 </div>
 
@@ -251,17 +251,16 @@
 
 <div id="footer" style="margin-top:0">
     <div id="publication" class="board" style="margin-left:auto;">
-        <div class="headline">网站信息</div>
-        <div><a>网站地图</a></div>
-        <div><a>网站简介</a></div>
-        <div><a>版权声明</a></div>
+        <div class="headline"><%- websiteInfo[13] %></div>
+        <div><a href="/siteMap"><%- websiteInfo[14] %></a></div>
+        <div><a href="/siteIntro"><%- websiteInfo[15] %></a></div>
+        <div><a href="/declare"><%- websiteInfo[16] %></a></div>
     </div>
 
-
     <div id="contact" class="board" style="margin-right:auto;border:none;">
-        <div class="headline">联系我们</div>
-        <div><a href="/bugSubmit">提交故障</a></div>
-        <div><a href="mailto:cleegame@outlook.com">联系站主</a></div>
+        <div class="headline"><%- websiteInfo[17] %></div>
+        <div><a href="/bugSubmit"><%- websiteInfo[18] %></a></div>
+        <div><a href="mailto:cleegame@outlook.com"><%- websiteInfo[19] %></a></div>
     </div>
 </div>
 

@@ -148,13 +148,13 @@ let routeHandler = {
     resetPwdPage:function(req,res){
         let resetId = req.params.resetId;
         if(!__validateId(resetId)){
-            __renderError(req,res,'请输入有效的密码重设链接');
+            __renderError(req,res,_errAll[0]);
         }
         registerModel.findOne({_id:resetId},function(err,doc){
             if(err)
                 __renderError(req,res,err);
             else if(!doc)
-                __renderError(req,res,'您的注册链接已失效');
+                __renderError(req,res,_errAll[1]);
             else if(doc)
                 __renderIndex(req,res,{
                     viewport:'/view/resetPwd.html',

@@ -68,20 +68,20 @@ let handler = {
         let registerId = req.params.registerId;
 
         if (req.session.user) {
-             __renderError(req,res,'您已经登录，无法注册新账号');
+             __renderError(req,res,_errAll[9]);
             return;
         }
         applicationModel.findOne({_id:registerId},function(err,doc){
             if(err){
                 __renderError(req,res,err);
             }else if(!doc){
-                __renderError(req,res,'您的注册链接已失效');
+                __renderError(req,res,_errAll[4]);
             }else if (doc.status < 1){
-                __renderError(req,res,'您的审核尚未通过');
+                __renderError(req,res,_errAll[5]);
             }else if (doc.status === 2){
-                __renderError(req,res,'您的审核已被拒绝，我们已将您加入等待名单，下次开放时您将作为第一次批次考虑');
+                __renderError(req,res,_errAll[6]);
             }else if(doc.status === 3){
-                __renderError(req,res,'您已经完成注册，请勿重复注册');
+                __renderError(req,res,_errAll[7]);
             }else{
                 __renderIndex(req, res, {
                     viewport: '/view/register.html',
@@ -130,7 +130,7 @@ let handler = {
         };
 
         if (!req.session.user || req.session.user._id != userId)
-            __renderError(req, res, '您没有权限访问该页面');
+            __renderError(req, res, _errAll[3]);
         else {
             let settings=  {mail:req.session.user.mail || '',
             intro:req.session.user.intro ? req.session.user.intro : ''};

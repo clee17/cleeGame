@@ -129,6 +129,7 @@ input{
     color: rgba(108,95,93,255) ;
     background:white;
     font-size:14px;
+    font-family: inherit;
 }
 
 #dashboard a{

@@ -9,6 +9,8 @@ let userModel = require(path.join(__dataModel,'user'));
 let applicationModel = require(path.join(__dataModel,'application'));
 let tableIndex = [registerModel,userModel];
 
+let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+
 let handler = {
     finalSend:function(res,data){
         if(data.sent)
@@ -218,7 +220,38 @@ let handler = {
 
                 handler.finalSend(res,response);
             });
+    },
+
+    addApplication:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent:false,
+            message:'',
+            success:false
+        };
+
+        if(!req.session.user || req.session.user.userGroup < 999 || req.session.user.settings.access.indexOf(202) === -1)
+            response.message = '您没有相应的权限';
+
+        if(response.message !== '')
+            handler.finalSend(res,response);
+
+        userSettingModel.findOneAndUpdate({user:receivedData.item.user},
+            {$push:{access:receivedData.item.subType+100}},
+            {new:true},
+            function(err,doc){
+                if(err)
+                    response.message = err;
+                else if(doc)
+                    response.status  = 1;
+
+
+
+                handler.finalSend(res,response);
+            });
+
     }
+
 };
 
 module.exports = handler;

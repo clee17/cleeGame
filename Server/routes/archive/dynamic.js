@@ -92,7 +92,7 @@ let handler = {
                 return;
             data.user = req.session.user;
             if (data.err) {
-                __renderError(req,res,"后端出错，请报告该错误给网站管理员，管理员将及时修复。<br>"+data.err);
+                __renderError(req,res,_errAll[11]+data.err);
                 sent = true;
             } else if (!req.session.user) {
                 __renderError(req,res,data.err);

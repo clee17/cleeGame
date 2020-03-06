@@ -15,7 +15,7 @@ global.__chapterCount = function(index){
 };
 
 global.__renderIndex = function(req,res,renderInfo){
-    let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
+    let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{},websiteInfo:_websiteInfo};
     renderPage.lib = [
         'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
         'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
@@ -32,17 +32,35 @@ global.__renderIndex = function(req,res,renderInfo){
     res.render('cleeArchive/index.html',renderPage);
 };
 
+global.__renderSubPage = function(req,res,pageId,renderInfo){
+    let renderPage = {};
+    for(let attr in renderInfo){
+        renderPage[attr] = renderInfo[attr];
+    }
+    res.render('cleeArchive/'+pageId+'.html',renderPage);
+};
+
 global.__renderError = function(req,res,errMessage){
-      let userId = req.ip;
-      if(req.session.user)
-          userId = req.session.user._id;
-      let renderInfo = {viewport:'/view/error.html',controllers:['/view/cont/err_con.js'],modules:[],services:[],err:errMessage,user:req.session.user,userId:userId,title:null,styles:[],variables:{}};
+    let userId = req.ip;
+    if(req.session.user)
+        userId = req.session.user._id;
+    let renderInfo = {viewport:'/view/error.html',
+        controllers:['/view/cont/err_con.js'],
+        modules:[],
+        services:[],
+        err:errMessage,
+        user:req.session.user,
+        userId:userId,
+        title:null,
+        styles:[],
+        variables:{},
+        websiteInfo:_websiteInfo};
     renderInfo.lib = [
         'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
         'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
         'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
         'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
-      res.render('cleeArchive/index.html',renderInfo);
+    res.render('cleeArchive/index.html',renderInfo);
 };
 
 global.__readSettings = function (callBack,data) {
@@ -149,6 +167,7 @@ router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);
 router.post('/admin/getRegister',admin.getRegister);
 router.post('/admin/answerRegister',admin.answerRegister);
+router.post('/admin/addApplication',admin.addApplication);
 
 //user
 router.get('/register/:registerId',subUser.register);
@@ -197,7 +216,12 @@ router.get('/dynamic/entry',dynamic.entry);
 router.get('/dynamic/users/setting/:userId',dynamic.userSetting);
 router.get('/dynamic/users/:userId',dynamic.userPage);
 router.get('/dynamic/*',function(req,res){
-    res.render('cleeArchive/errorB.html',{error:'对不起，我们没有找到该网页。<br>该网页或许尚在施工中，敬请期待。'});
+    res.render('cleeArchive/errorB.html',{error:_errAll[10]});
+});
+
+router.get('/statement/:fileId',function(req,res){
+    let fileId = req.params.fileId;
+    __renderSubPage(req,res,fileId,{statements:_statements});
 });
 
 module.exports = function(app)
@@ -226,7 +250,7 @@ module.exports = function(app)
         __renderIndex(req,res,{
             viewport:'/view/error.html',
             controllers:['/view/cont/err_con.js'],
-            err:'对不起，我们没有找到该网页。<br>该网页或许尚在施工中，敬请期待。'});
+            err:_errAll[10]});
     });
 };
 

@@ -50,6 +50,7 @@
     <div style="margin-left:auto;margin-right:auto;margin-top:20px;">表格：<select ng-model="tableId">
         <option value="1">用户表</option>
         <option value="2">注册申请表</option>
+        <option value="3">权限申请表</option>
     </select>
         <button ng-click="request()">获取</button>
     </div>
@@ -69,6 +70,8 @@
                 <button ng-click="answerRegister(true)" ng-if="btn.registerPermitNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
                 <button ng-click="answerRegister(false)" ng-if="btn.registerDeclineNeeded" ng-disabled="item.status != 0 || requesting">拒绝</button>
                 <button ng-click="resetPwd()" ng-if="btn.resetPwdNeeded" ng-disabled="requesting">重设密码</button>
+                <button ng-click="allowAccess(true)" ng-if="btn.accessNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
+                <button ng-click="allowAccess(false)" ng-if="btn.accessDeclined" ng-disabled="item.status != 0 || requesting">拒绝</button>
             </div>
         </div>
     </div>

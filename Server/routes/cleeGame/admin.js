@@ -24,7 +24,7 @@ let handler = {
         if(req.session.user && req.session.user.settings.accessLevel >=10)
            __renderIndex(req,res,result);
         else
-            __renderError(req,res,'你没有权限获取该页面');
+            __renderError(req,res,_errAll[2]);
     },
 
     publish:function(req,res){
