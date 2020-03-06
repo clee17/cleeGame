@@ -1,7 +1,7 @@
 let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
     indexModel = require('./../model/cleeArchive_workIndex'),
-    likeModel = require(path.join(__dataModel,'cleeArchive_postLike')),
+    likeModel = require('./../model/cleeArchive_postLike'),
     tagModel = require('./../model/cleeArchive_tag'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     updatesModel = require('../model/cleeArchive_postUpdates'),
