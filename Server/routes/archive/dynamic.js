@@ -156,7 +156,7 @@ let handler = {
         let id = JSON.parse(JSON.stringify(req.session.user));
         delete id.password;
         if(req.session.user)
-            res.render('cleeArchive/entry.html',id);
+            __renderSubPage(req,res,'entry',{id:id});
     },
 
     userSetting:function(req,res){
@@ -188,9 +188,14 @@ let handler = {
             if(sent)
                 return;
             sent = true;
+            response.websiteInfo = _websiteInfo;
             if(response.user)
+                response.user.intro = lzString.decompressFromBase64(response.user.intro);
+            console.log(response.user.intro);
+
+            if(response.user){
                 res.render('cleeArchive/userPage.html',response);
-            else
+            } else
                 res.render('cleeArchive/errorB.html',{error:'该用户不存在'});
         };
         userModel.findOne({_id:userId}).exec()

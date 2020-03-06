@@ -14,6 +14,7 @@ var bodyparser = require('body-parser'),
 const ipSearcher = new IP2Region();
 
 global.__errAll = require('./translation/err');
+global.__infoAll = require('./translation/info');
 
 module.exports=function(app){
     app.set('trust proxy',true);
@@ -51,16 +52,19 @@ module.exports=function(app){
             req.ipData = {};
             req.ipData.country = '英国';
         }
-        if(req.ipData && req.ipData.country === '中国'){
+
+        if((req.ipData && req.ipData.country === '中国') || req.cookies['readerLanguage'] === '"CN"'){
             global._websiteInfo = __websiteInfo.cn;
             global._errInfo = __errInfo.cn;
             global._errAll = __errAll.cn;
+            global._infoAll = __infoAll.cn;
             global._statements = global.__statements ? global.__statements.cn : null;
         }
         else{
             global._websiteInfo =  __websiteInfo.en;
             global._errInfo = __errInfo.en;
             global._errAll = __errAll.en;
+            global._infoAll = __infoAll.en;
             global._statements = global.__statements ? global.__statements.en : null;
         }
 

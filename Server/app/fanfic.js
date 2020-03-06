@@ -7,6 +7,7 @@ var express= require('express'),
 global.__websiteInfo = require('../translation/archive.js');
 global.__errInfo = require('../translation/archive_err.js');
 global.__statements = require('../translation/archive_statements.js');
+global.__infoAll = require('../translation/info.js');
 
 var app = express();
 app = config(app);

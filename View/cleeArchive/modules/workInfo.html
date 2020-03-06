@@ -233,61 +233,76 @@
 <div style="display:flex;flex-direction:column;flex:1;" class="workInfo work-info-outer">
     <div class="titleRow">
         <div class="grade" grade-show grade="{{item.chapter.grade}}">{{item.chapter.grade | grade:gradeTemplate }} </div>
-        <div ng-if="item.infoType==1"><span class="markerColor">作品</span> <a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a> <span class="markerColor" ng-if="item.index.prev != null">更新了</span><span class="markerColor" ng-if="item.index.prev == null">发布了</span></div>
+        <div ng-if="item.infoType==1"><span class="markerColor"><%- websiteInfo[27] %></span>
+            <a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a>
+            <span class="markerColor" ng-if="item.index.prev != null"><%- websiteInfo[28] %></span><span class="markerColor" ng-if="item.index.prev == null"><%- websiteInfo[29] %></span></div>
         <div><a href="{{ item | workInfoLink:type }}">{{item | workInfoTitle:type}}</a></div>
-        <div ng-if="item.infoType==0" class="marker markerColor" >新的作品</div>
+        <div ng-if="item.infoType==0" class="marker markerColor" ><%- websiteInfo[30] %></div>
         <div style="margin-left:auto;">{{item | workInfoDate:type}}</div>
     </div>
     <div class="subInfoRow">
-        <div>作者:</div>
+        <div><%- websiteInfo[31] %>:</div>
         <a href="{{'/users/'+item.work.user}}">{{item.chapter.user.user}}</a>
-        <div>总字数:</div>
-        <div>{{item | workInfoWordCount:type}}字</div>
-        <div ng-show="item.infoType== 0">总章节数:</div>
+        <div><%- websiteInfo[32] %>:</div>
+        <div>{{item | workInfoWordCount:type}}<%- websiteInfo[33] %></div>
+        <div ng-show="item.infoType== 0"><%- websiteInfo[34] %>:</div>
         <div ng-show="item.infoType== 0">{{item.work.chapterCount}}</div>
-        <div>浏览量:</div>
+        <div><%- websiteInfo[35] %>:</div>
         <div>{{item | workInfoVisited:type}}</div>
-        <div>更新状态:</div>
+        <div><%- websiteInfo[36] %>:</div>
         <div>{{item.work.status | workInfoStatus}}</div>
     </div>
     <div class="tagRow">
-        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">基于作品:</div>
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[37]%>:</div>
         <a ng-repeat="fandom in item.chapter.fandom" href="{{'/search/tag?id='+ escape(fandom)}}" class="tag">{{fandom}}</a>
     </div>
     <div class="tagRow">
-        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">人物关系:</div>
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[38]%>:</div>
         <a ng-repeat="relation in item.chapter.relationships" href="{{'/search/tag?id='+ escape(relation)}}" class="tag">{{relation}}</a>
     </div>
     <div class="tagRow">
-        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">登场角色:</div>
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[39]%>:</div>
         <a ng-repeat="character in item.chapter.characters" href="{{'/search/tag?id='+ escape(character)}}" class="tag">{{character}}</a>
     </div>
     <div class="tagRow">
-        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;">其他标签:</div>
+        <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[40] %>:</div>
         <a ng-repeat="tag in item.chapter.tag" href="{{'/search/tag?id='+ escape(tag)}}" class="tag">{{tag}}</a>
     </div>
     <div>
-        <div><span ng-if="item.infoType===1">章节</span><span ng-show="item.infoType===0">作品</span>简介:</div>
+        <div><span ng-if="item.infoType===1"><%- websiteInfo[42] %></span><span ng-show="item.infoType===0"><%- websiteInfo[43] %></span><%- websiteInfo[41] %>:</div>
         <div style="margin-left:20px;">{{item.chapter.intro | introType}}</div>
     </div>
     <div class="editRow">
-        <button class="editButton" ng-click="showFeedbackList()" ng-if="(item.work.liked+ item.work.bookmarked )>0">热度({{item.work.liked+ item.work.bookmarked}})</button>
-        <button class="editButton" ng-click="deleteItem()" ng-if="item.work.user == readerId">删除</button>
-        <button class="editButton"><a href="{{'/fanfic/post/edit?id='+item.index._id}}" ng-if="item.work.user == readerId" target="_blank">编辑</a></button>
-        <button ng-class="{'editButton':!liked,'likedButton':liked}" ng-if="item.work.user != readerId" ng-click="likeIt()"><span ng-show="liked">已点赞</span><span ng-show="!liked">点赞</span>({{item.work.liked}})</button>
-        <button ng-class="{'editButton':!bookMarked,'likedButton':bookMarked}" ng-if="item.work.user != readerId" ng-click="bookMarkIt()"><span ng-show="bookMarked">已收藏</span><span ng-show="!bookMarked">收藏</span>({{item.work.bookmarked}})</button>
-        <button class="editButton" ng-click="showCommentList()">评论(<span ng-if="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
+        <button class="editButton" ng-click="showFeedbackList()" ng-if="(item.work.liked+ item.work.bookmarked )>0"><%- websiteInfo[44] %>({{item.work.liked+ item.work.bookmarked}})</button>
+        <button class="editButton" ng-click="deleteItem()" ng-if="item.work.user == readerId"><%- websiteInfo[45] %></button>
+        <button class="editButton"><a href="{{'/fanfic/post/edit?id='+item.index._id}}" ng-if="item.work.user == readerId" target="_blank"><%- websiteInfo[46] %></a></button>
+        <button ng-class="{'editButton':!liked,'likedButton':liked}" ng-if="item.work.user != readerId" ng-click="likeIt()"><span ng-show="liked"><%- websiteInfo[48] %></span><span ng-show="!liked"><%- websiteInfo[47] %></span>({{item.work.liked}})</button>
+        <button ng-class="{'editButton':!bookMarked,'likedButton':bookMarked}" ng-if="item.work.user != readerId" ng-click="bookMarkIt()"><span ng-show="bookMarked"><%- websiteInfo[50] %></span><span ng-show="!bookMarked"><%- websiteInfo[49] %></span>({{item.work.bookmarked}})</button>
+        <button class="editButton" ng-click="showCommentList()"><%- websiteInfo[51] %>(<span ng-if="item.infoType ===0">{{item.work.comments}}</span><span ng-show="item.infoType ===1">{{item.chapter.comments}}</span>)</button>
     </div>
+    <div>
+    </div>
+    <% if (user.settings && (user.settings.access.indexOf(202) > 0 || user.userGroup >= 999 )){ %>
+    <div style="margin:0;padding-left:2rem;min-height:2rem;border-top:solid 1px gray;display:flex;flex-direction:row;background:rgba(223,216,214,255);">
+        <div style="margin-top:auto;margin-bottom:auto;">调整分级:</div>
+        <select ng-model="targetGrade" style="height:1.5rem;margin-top:auto;margin-bottom:auto;">
+            <option value="0">全年龄向</option>
+            <option value="1">NC-17</option>
+            <option value="2">NC-21</option>
+        </select>
+        <button ng-click="changeGrade()" style="margin-top:auto;margin-bottom:auto;margin-left:1.2rem;">更改分级</button>
+    </div>
+    <% } %>
     <div ng-show="showFeedBack" class="feedbackInfo work-info-outer">
-        <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0">共有<b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b>名游客点赞了该作品</div></div>
+        <div style="border-bottom:none;"><div class="feedbackEntry" ng-show="item.work.visitorLiked >0"><%- websiteInfo[53] %><b style="margin-left:5px;margin-right:5px;">{{item.work.visitorLiked}}</b><%- websiteInfo[52] %></div></div>
         <div style="min-height:15px;" ng-show="feedback.length>0"></div>
         <div ng-repeat="feedback in feedback">
-           <div class="feedbackEntry"><a href="{{'/users/'+feedback.user}}" target="_blank">{{feedback.userName}}</a> <span ng-if="feedback.type==1">点赞了</span><span ng-if="feedback.type==2">收藏了</span>此作品</div>
+           <div class="feedbackEntry"><a href="{{'/users/'+feedback.user}}" target="_blank">{{feedback.userName}}</a> <span ng-if="feedback.type==1"><%- websiteInfo[54] %></span><span ng-if="feedback.type==2"><%- websiteInfo[55] %></span><%- websiteInfo[56] %></div>
         </div>
         <div style="min-height:3rem;" ng-show="requestingFeed">
         </div>
         <div style="min-height:3rem;" ng-show="feedback.length>15">
-            <div style="margin-top:auto;margin-bottom:15px;"><button class="editButton" style="margin-right:auto;margin-left:0" ng-click="showFeedbackList()">收起 <i class="fas fa-angle-up"></i></button></div>
+            <div style="margin-top:auto;margin-bottom:15px;"><button class="editButton" style="margin-right:auto;margin-left:0" ng-click="showFeedbackList()"><%- websiteInfo[57] %> <i class="fas fa-angle-up"></i></button></div>
         </div>
     </div>
     <div ng-show="showComment" class="feedbackInfo work-info-outer">

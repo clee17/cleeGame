@@ -102,8 +102,12 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
             tempArr[2].innerHTML = record['102'] ? record['102'] : '0' ;
             tempArr[3].innerHTML = record['103'] ? record['103'] : '0';
 
-            tempArr[4].innerHTML = record['99'] ? record['99'] :'??';
-            tempArr[5].innerHTML = record['0'] ? record['0'] : '??';
+            let works = record['0'] ? record['0'] : 0;
+            let paints = record['2'] ? record['1'] :0;
+            let games = record['3'] ? record['2'] : 0;
+            let all = works + paints + games;
+            tempArr[4].innerHTML = all.toString();
+            tempArr[5].innerHTML = works ? record['0'] : '??';
             tempArr[6].innerHTML = record['2'] ? record['2'] :'0';
             tempArr[7].innerHTML = record['3'] ? record['3'] :'0';
         }

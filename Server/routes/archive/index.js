@@ -15,7 +15,7 @@ global.__chapterCount = function(index){
 };
 
 global.__renderIndex = function(req,res,renderInfo){
-    let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{},websiteInfo:_websiteInfo};
+    let renderPage = {viewport:'',controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{},websiteInfo:_websiteInfo,countryCode:__getCountryCode(req.ipData)};
     renderPage.lib = [
         'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
         'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
@@ -37,7 +37,17 @@ global.__renderSubPage = function(req,res,pageId,renderInfo){
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
     }
+    renderPage.websiteInfo = _websiteInfo;
+    renderPage.infoAll = _infoAll;
     res.render('cleeArchive/'+pageId+'.html',renderPage);
+};
+
+global.__renderTemplates = function(req,res,pageId,renderInfo){
+    let renderPage = {};
+    for(let attr in renderInfo){
+        renderPage[attr] = renderInfo[attr];
+    }
+    res.render(path.join(__templates,pageId+'.html'),renderPage);
 };
 
 global.__renderError = function(req,res,errMessage){
@@ -54,6 +64,7 @@ global.__renderError = function(req,res,errMessage){
         title:null,
         styles:[],
         variables:{},
+        countryCode:__getCountryCode(req.ipData),
         websiteInfo:_websiteInfo};
     renderInfo.lib = [
         'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
@@ -147,9 +158,7 @@ global.__updateUserSetting = function(applicationId,data,req,callback){
 let router = express.Router();
 //entry pages
 router.get('/',main.index);
-router.get('/fanfic/',main.index);
-router.get('/tech/',main.index);
-router.get('/design/',main.index);
+router.get('/fanfic',main.index);
 router.get('/donate',main.index);
 router.get('/registerProcess',main.index);
 router.get('/visitorDonate',main.visitorDonate);
@@ -159,6 +168,7 @@ router.get('/tech/:techId',main.tech);
 router.get('/fanfic/:fanficId',main.fanfic);
 router.post('/fanfic/validate/:fanficId',main.validate);
 router.get('/fanfic/work/:workId',main.work);
+
 
 //admin pages
 router.get('/admin/',main.index);
@@ -185,6 +195,7 @@ router.get('/fanfic/post/preview',edit.previewPage);
 router.get('/fanfic/post/edit',edit.fanficEdit);
 router.post('/fanfic/post/previewRequest',edit.fanficPreview);
 router.post('/fanfic/post/publish',edit.publish);
+router.post('/fanfic/change',edit.changeInfo);
 
 router.post('/fanfic/chapter/save',edit.saveChapter);
 router.post('/fanfic/chapter/add',edit.addChapter);
@@ -220,9 +231,21 @@ router.get('/dynamic/*',function(req,res){
 });
 
 router.get('/statement/:fileId',function(req,res){
+    console.log('entered');
     let fileId = req.params.fileId;
-    __renderSubPage(req,res,fileId,{statements:_statements});
+    __renderSubPage(req,res,fileId,{statements:_statements,websiteInfo:_websiteInfo});
 });
+
+router.get('/templates/:fileId',function(req,res){
+    let fileId = req.params.fileId;
+    __renderTemplates(req,res,fileId,{statements:_statements,websiteInfo:_websiteInfo});
+});
+
+router.get('/modules/:filename',function(req,res){
+    let fileId = req.params.filename;
+    res.render('cleeArchive/modules/'+fileId+'.html',{statements:_statements,websiteInfo:_websiteInfo,user:req.session.user});
+});
+
 
 module.exports = function(app)
 {

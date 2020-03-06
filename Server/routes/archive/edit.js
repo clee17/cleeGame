@@ -11,7 +11,6 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works'));
 
 let handler = {
-
     finalSend:function(res,data){
         if(data.sent)
             return;
@@ -663,6 +662,45 @@ let handler = {
                     grade =  JSON.parse(doc);
                 finalSend();
             });
+    },
+
+    changeInfo:function(req,res){
+        try{
+            let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
+            let response = {
+                sent:false,
+                success:false,
+                message:'',
+                _id:data._id,
+                infoType:data.infoType
+            };
+            let newStatus = JSON.parse(JSON.stringify(data));
+            delete newStatus._id;
+            delete newStatus.infoType;
+            if(!req.session.user ) {
+                response.message = _errAll[13];
+                handler.finalSend(res,response);
+            }else if(req.session.user.userGroup <999 && req.session.user.settings.access.indexOf(202) <0){
+                response.message = _errAll[12];
+                handler.finalSend(res,response);
+            }else{
+                chapterModel.findOneAndUpdate({_id:data._id},newStatus,{new:true},function(err,doc){
+                    console.log(doc.grade);
+                    if(err)
+                        response.message = err;
+                    else if (!doc)
+                        response.message = _errInfo[6];
+                    else{
+                        response.grade = doc.grade;
+                        response.success = true;
+                    }
+                    handler.finalSend(res,response);
+                })
+            }
+        }catch(e){
+            console.log(e);
+        }
+
     },
 };
 

@@ -1,3 +1,6 @@
+let fs = require('fs'),
+    path = require('path');
+
 let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
     indexModel = require('./../model/cleeArchive_workIndex'),
@@ -6,10 +9,9 @@ let chapterModel = require('./../model/cleeArchive_fanfic'),
     tagMapModel = require('./../model/cleeArchive_tagMap'),
     updatesModel = require('../model/cleeArchive_postUpdates'),
     countMapModel = require('../model/cleeArchive_countMap'),
+    userModel = require('../model/user'),
     userSettingModel = require('./../model/cleeArchive_userSetting');
 
-let fs = require('fs'),
-    path = require('path');
 
 let redis = require('redis'),
     redisClient = redis.createClient();
@@ -466,6 +468,44 @@ let updateMessagePool = function(){
     calcAll();
 };
 
+let countAllUser = function(){
+       userModel.countDocuments({},function(err,result){
+            countMapModel.findOneAndUpdate({infoType:100},{number:result},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,docs){
+                if(err)
+                    console.log(err);
+                else
+                    console.log('共有全部创作者'+docs.number+'人');
+            });
+       });
+
+    userSettingModel.countDocuments({access:101},function(err,result){
+        countMapModel.findOneAndUpdate({infoType:101},{number:result},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,docs){
+            if(err)
+                console.log(err);
+            else
+                console.log('共有文章创作者'+docs.number+'人');
+        });
+    });
+
+    userSettingModel.countDocuments({access:102},function(err,result){
+        countMapModel.findOneAndUpdate({infoType:102},{number:result},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,docs){
+            if(err)
+                console.log(err);
+            else
+                console.log('共有绘图创作者'+docs.number+'人');
+        });
+    });
+
+    userSettingModel.countDocuments({access:103},function(err,result){
+        countMapModel.findOneAndUpdate({infoType:103},{number:result},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,docs){
+            if(err)
+                console.log(err);
+            else
+                console.log('共有同人游戏创作者'+docs.number+'人');
+        });
+    });
+};
+
 let countAll = function(){
     let countMap = [{infoType:0,number:0},{infoType:1,number:0},{infoType:5,number:0}];
     let startIndex = 0;
@@ -632,6 +672,9 @@ switch(argv[2])
     // case 'mergeWork':
         // mergeWork([argv[3],argv[4]]);
         // break;
+    case 'countUser':
+        countAllUser();
+        break;
     default:
         console.log('输入无效的指令');
         break;

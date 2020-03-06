@@ -58,7 +58,7 @@ let handler = {
             handler.finalSend(res, data);
         else if (req.session.user && req.session.user.userGroup >= 999)
             handler.finalSend(res, data);
-        else if (__getCounryCode(req.ipData) !== 'CN')
+        else if (__getCountryCode(req.ipData) !== 'CN')
             handler.finalSend(res, data);
         else
             handler.filterContents(req,res, data);
