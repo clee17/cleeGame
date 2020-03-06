@@ -49,9 +49,9 @@ module.exports=function(app){
             req.ipData = ipSearcher.search(ip);
         else{
             req.ipData = {};
-            req.ipData.country_id = '英国';
+            req.ipData.country = '英国';
         }
-        if(req.ipData && req.ipData.country_id === '中国'){
+        if(req.ipData && req.ipData.country === '中国'){
             global._websiteInfo = __websiteInfo.cn;
             global._errInfo = __errInfo.cn;
             global._errAll = __errAll.cn;
