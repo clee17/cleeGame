@@ -112,6 +112,8 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.bookMarked = false;
             scope.targetGrade = '0';
 
+            console.log(scope.item.blocked);
+
             if (scope.item.work.feedback) {
                 let feedback = scope.item.work.feedback;
                 feedback.forEach(function (item) {
