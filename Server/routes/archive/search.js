@@ -19,10 +19,18 @@ let handler = {
         let userId = req.session.user? req.session.user._id :null;
         for (let i = 0; i < data.result.length; ++i) {
             if (data.result[i].chapter.grade > 0 && data.result[i].work.user != userId){
-                data.result[i].blocked = true;
-                delete data.result[i].chapter.intro;
-                delete data.result[i].chapter.tag;
+                if(req.session.user && (req.session.user.settings.preference >> 5 & 1))
+                {
+                    data.result[i].blocked = true;
+                    delete data.result[i].chapter.intro;
+                    delete data.result[i].chapter.tag;
+                }
+                else
+                    data.result[i] = -1
             }
+        }
+        while(data.result.indexOf(-1) >=0){
+            data.result.splice(data.result.indexOf(-1),1);
         }
         handler.finalSend(res, data);
     },
