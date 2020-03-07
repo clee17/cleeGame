@@ -53,7 +53,7 @@ module.exports=function(app){
             req.ipData.country = '中国';
         }
 
-        if((req.ipData && req.ipData.country === '中国') || req.cookies['readerLanguage'] === '"CN"'){
+        if((req.ipData && req.ipData.country === '中国' && !req.cookies['readerLanguage']) || req.cookies['readerLanguage'] === '"CN"'){
             global._websiteInfo = __websiteInfo.cn;
             global._errInfo = __errInfo.cn;
             global._errAll = __errAll.cn;

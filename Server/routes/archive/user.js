@@ -10,6 +10,7 @@ let applicationModel = require(path.join(__dataModel,'application')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagModel =  require(path.join(__dataModel,'cleeArchive_tag')),
+    followModel = require(path.join(__dataModel,'cleeArchive_follow')),
     tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap'));
 
 let md5 = crypto.createHash('md5');
@@ -89,6 +90,41 @@ let handler = {
                     variables: {registerId: registerId, mail:doc.mail,intro:doc.statements, loginMode: 1}});
             }
         });
+    },
+
+    follow:function(req,res){
+        let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent: false,
+            success: false,
+            message: '',
+        };
+
+        if(!data.target)
+             response.message = _errInfo[18];
+        else if (!req.session.user)
+            response.message = _errInfo[0];
+        else if(data.userId !== req.session.user._id)
+            response.message = _errInfo[1];
+
+        if(response.message !== ''){
+            handler.finalSend(res,response);
+            return;
+        }
+
+
+        followModel.findOneAndUpdate({type:data.type,user:req.session.user._id,target:data.target},
+            {status:data.status},
+            {new:true,upsert:true,setDefaultsOnInsert: true},
+            function(err,doc){
+                  if(err)
+                      response.message = err;
+                  else if(doc){
+                      response.success = true;
+                      response.result = JSON.parse(JSON.stringify(doc));
+                  }
+                  handler.finalSend(res,response);
+            });
     },
 
     reloadSettings:function(req,res){

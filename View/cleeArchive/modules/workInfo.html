@@ -62,7 +62,6 @@
         margin-left:45px;
     }
 
-
     .titleRow >div{
         margin-right:10px;
         line-height:1.5rem;
@@ -265,19 +264,19 @@
     </div>
     <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[37]%>:</div>
-        <a ng-repeat="fandom in item.chapter.fandom" href="{{'/search/tag?id='+ escape(fandom)}}" class="tag">{{fandom}}</a>
+        <a ng-repeat="fandom in item.chapter.fandom" href="{{'/tag?id='+ getTag(fandom)}}" class="tag">{{fandom}}</a>
     </div>
     <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[38]%>:</div>
-        <a ng-repeat="relation in item.chapter.relationships" href="{{'/search/tag?id='+ escape(relation)}}" class="tag">{{relation}}</a>
+        <a ng-repeat="relation in item.chapter.relationships" href="{{'/tag?id='+ getTag(relation)}}" class="tag">{{relation}}</a>
     </div>
     <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[39]%>:</div>
-        <a ng-repeat="character in item.chapter.characters" href="{{'/search/tag?id='+ escape(character)}}" class="tag">{{character}}</a>
+        <a ng-repeat="character in item.chapter.characters" href="{{'/tag?id='+ getTag(character)}}" class="tag">{{character}}</a>
     </div>
     <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[40] %>:</div>
-        <a ng-repeat="tag in item.chapter.tag" href="{{'/search/tag?id='+ escape(tag)}}" class="tag">{{tag}}</a>
+        <a ng-repeat="tag in item.chapter.tag" href="{{'/tag?id='+ getTag(tag)}}" class="tag">{{tag}}</a>
     </div>
     <div ng-if="item.blocked">
         <span style="padding-left:2rem;"><b>该作品相关章节因为不符合您所在地区的法律法规，已经被屏蔽。</b></span>

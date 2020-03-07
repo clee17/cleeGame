@@ -111,8 +111,9 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.liked = false;
             scope.bookMarked = false;
             scope.targetGrade = '0';
-
-            console.log(scope.item.blocked);
+            scope.getTag = function(info){
+                return escape(info);
+            };
 
             if (scope.item.work.feedback) {
                 let feedback = scope.item.work.feedback;

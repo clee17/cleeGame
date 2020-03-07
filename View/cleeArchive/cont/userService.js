@@ -53,5 +53,9 @@ app.service('userManager',function($http,$rootScope){
 
     this.getStatus = function(data){
         manager.requestAll('/user/getStatus','requestStatusFinished',data);
+    };
+
+    this.follow = function(data){
+        manager.requestAll('/users/follow/','followFinished',data);
     }
 });

@@ -8,6 +8,7 @@ let registerModel = require(path.join(__dataModel,'register'));
 let userModel = require(path.join(__dataModel,'user'));
 let applicationModel = require(path.join(__dataModel,'application'));
 let tableIndex = [registerModel,userModel];
+let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
@@ -218,6 +219,17 @@ let handler = {
                     __sendMail(mailContents,doc.mail);
                 }
 
+                if(!err && doc){
+                    countMapModel.findOneAndUpdate({infoType:201},{$inc:{number:-1},function(err,data){
+                        if(err)
+                            console.log(err);
+                        }});
+
+                    applicationModel.updateMany({subType:{$gte:doc.subType,$lt:9999}},{$inc:{number:-1}},function(err,doc){
+                        if(err)
+                            console.log(err);
+                    });
+                }
                 handler.finalSend(res,response);
             });
     },
