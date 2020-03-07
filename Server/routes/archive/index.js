@@ -117,7 +117,8 @@ let  main = require(path.join(__routes,"/archive/main")),
      admin = require(path.join(__routes,"/archive/admin")),
      search = require(path.join(__routes,"/archive/search")),
      edit = require(path.join(__routes,"/archive/edit")),
-     fanfic = require(path.join(__routes,"/archive/fanfic"));
+     fanfic = require(path.join(__routes,"/archive/fanfic")),
+     tag = require(path.join(__routes,"/archive/tag")),
      feedback = require(path.join(__routes,"/archive/feedback"));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
@@ -164,6 +165,12 @@ router.get('/registerProcess',main.index);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 
+//tag pages
+
+router.get('/tag',tag.searchTag);
+router.get('/tag/tagPage',tag.tagPage);
+router.post('/tag/:tagId',tag.requestTag);
+
 //fanfic pages
 router.get('/fanfic/:fanficId',main.fanfic);
 router.post('/fanfic/validate/:fanficId',main.validate);
@@ -181,6 +188,7 @@ router.post('/admin/addApplication',admin.addApplication);
 
 //user
 router.get('/register/:registerId',subUser.register);
+router.post('/users/follow',subUser.follow);
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/settings/reload',subUser.reloadSettings);
 router.get('/users/settings/:userId',subUser.userSetting);
@@ -188,6 +196,8 @@ router.post('/users/request/dashboard',subUser.requestDashboard);
 router.post('/settings/save',subUser.saveSetting);
 router.post('/settings/savePreference',subUser.savePreference);
 router.post('/users/request/calculate',subUser.calculate);
+
+
 
 //edit routes;
 router.get('/fanfic/post/new',edit.newFanfic);
@@ -249,7 +259,6 @@ router.get('/modules/:filename',function(req,res){
 
 module.exports = function(app)
 {
-
 	 app.use('*',function(req,res,next){
         if(!req.session.user)
         {

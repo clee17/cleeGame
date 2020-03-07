@@ -1,6 +1,6 @@
 var text = [
-    "",
-    "",
+    "You have to login first before you proceed",
+    "There is something wrong with your account, please relogin",
     'You must login first before you can post new work',
     'Your authorization level is too low to post a new work, please apply for the permit your user setting page',
     "Your works has failed to be published due to unknown reason, please contact us at the bottom of the page",
@@ -15,6 +15,7 @@ var text = [
     'You have to provide your invitation code first',
     'Please provide correct invitation code',
     'Your invitation code is not found',
+    "The tag info sent is not correct",
 ];
 
 module.exports = text;

@@ -97,6 +97,10 @@ let routeHandler = {
                    applicationModel.findOneAndUpdate({mail:receivedData.mail},{status:3},function(err,doc){
                        routeHandler.finalSend(res,response);
                    });
+                    countMapModel.findOneAndUpdate({infoType:100},{$inc:{number:1}},function(err,doc){
+                       if(err)
+                           console.log(err);
+                   });
                });
             })
             .catch(function(err){

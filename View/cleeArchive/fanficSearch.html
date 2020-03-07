@@ -43,7 +43,7 @@
         <div style="margin:auto;font-weight:bold;"><%- websiteInfo[63] %>：{{err}}</div>
     </div>
     <div ng-show="!searching && !showErr" style="display:flex;flex-direction:column;padding-top:3rem;">
-        <work-info ng-repeat="item in receivedList" infoType="1" info="{{item}}"></work-info>
+        <work-info ng-repeat="item in receivedList"></work-info>
     </div>
     <page-index pid='pageId' tnm="listNumber" ppg="perPage"></page-index>
 </div>

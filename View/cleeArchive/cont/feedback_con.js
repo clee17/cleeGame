@@ -18,7 +18,7 @@ app.directive('infoReceiver',['$rootScope',function($rootScope){
             scope.chapterCount = Number(scope.chapterCount);
             scope.feedback = JSON.parse(scope.feedback);
 
-            $rootScope.userId = scope.authorId;
+            $rootScope.x = scope.authorId;
             $rootScope.visitorId=  scope.visitorId;
             $rootScope.readerId = scope.readerId;
 

@@ -81,7 +81,12 @@ var text = [
     "Works",
     "Recommendations",
     "Series",
-    "Data Analysis"
+    "Data Analysis",
+    "Follow", //83
+    "Followers",
+    "Works",
+    "Unfollow",
+    "only registered users could follow a tag"
 ];
 
 module.exports = text;

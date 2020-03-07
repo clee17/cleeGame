@@ -1,0 +1,101 @@
+<style>
+   #tagParent{
+      display:flex;
+      flex-direction:column;
+      flex:1;
+      color:rgba(108,95,93,255);
+   }
+
+   #btnFollow{
+      margin-top:auto;
+      margin-bottom:0;
+      margin-left:1.5rem;
+      padding-left:3px;
+      padding-right:3px;
+      padding-top:2px;
+      padding-bottom:2px;
+      color:rgba(108,95,93,255);
+      outline:solid 1px rgba(108,95,93,255);
+      outline-offset:-2px;
+      display:none;
+   }
+
+   .tagHeader{
+      height:auto;
+      width:80%;
+      max-width:60rem;
+      background:rgba(223,216,214,255);
+      color:rgba(108,95,93,255);
+      margin-left:auto;
+      margin-right:auto;
+      padding:0;
+   }
+
+   #detailInfo{
+      padding-left:2.5rem;
+      padding-top:1rem;
+      padding-bottom:1rem;
+      background:rgba(248,248,248,0.8);
+   }
+
+   #detailInfo span{
+      margin-right:2rem;
+   }
+
+   #waitingBoard{
+      font-size:30px;
+      font-weight:bold;
+      padding-bottom:5rem;
+      margin:auto;
+   }
+
+   #cannotFollow{
+      display:none;
+      margin-bottom:0;
+      margin-top:auto;
+      font-size:0.8rem;
+      margin-left:1.5rem;
+   }
+
+   .tagFollowed{
+      background:lightgray;
+      border:none;
+   }
+
+   .tagUnfollow{
+
+   }
+</style>
+
+<div id="tagParent" ng-controller="tagCon">
+   <info-receiver
+           ng-init="totalNum = <%- result.totalNum || 0 %>;
+                    tagId = '<%- result._id || '' %>';
+                    gradeTemplate = '<%= JSON.stringify(fanfic_grade) %>';
+                    userExisted = <%- userExisted %>;
+                    followed = <%- followed %>;
+                    followInfo = '<%- websiteInfo[83] %>';
+                    followedInfo = '<%- websiteInfo[86] %>';
+                    noUserInfo = '<%- websiteInfo[87] %>';">
+   </info-receiver>
+   <div class="tagHeader title">
+      <div id="headerInfo" class="info displayRow" style="margin-top:1rem;margin-left:2rem;" >
+         <div style="font-size:1.5rem;margin-left:0.5rem;font-weight:bold;"><%- tagName %></div>
+        <button id="btnFollow" ng-click="follow()"><i class="fa fa-plus" style="margin-right:0.5rem;"></i><%- websiteInfo[83] %></button>
+         <span id="cannotFollow"></span>
+      </div>
+      <div style="width:100%;border-bottom:solid 1px rgba(181,163,160,218);min-height:1rem;"></div>
+      <div id="detailInfo">
+         <span><%- websiteInfo[35] %>: <%- result.visited || 0 %></span>
+         <span><%- websiteInfo[84] %>: <%- result.follower || 0 %></span>
+         <span><%- websiteInfo[85] %>: <%- result.totalNum || 0 %></span>
+      </div>
+   </div>
+   <div id="waitingBoard"  ng-show="requesting">
+      <%- websiteInfo[62] %><i class="fa fa-spinner fa-spin" style="margin-left:1rem;"></i>
+   </div>
+   <div ng-show="ready" style="display:flex;flex-direction:column;padding-top:3rem;">
+      <work-info ng-repeat="item in data"></work-info>
+   </div>
+   <page-index pid='pageIndex' tnm="totalNum" ppg="perPage"></page-index>
+</div>

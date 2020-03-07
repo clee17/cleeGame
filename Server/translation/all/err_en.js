@@ -13,6 +13,7 @@ var text = [
     "We're experiencing an internal Server Error <br>, you may report the issue you run into at the bottom of page",
     "You are not authorized to make this change",
     "Your login status has expired, please refresh and login again",
+    "You need to provide a tag so you can browse that",
 ];
 
 module.exports = text;

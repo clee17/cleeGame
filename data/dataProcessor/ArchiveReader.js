@@ -165,7 +165,7 @@ let updateTagMap = function(){
             let total = {'totalNum':rec.totalCount,'workNum':rec.workCount};
             if(processData.currentIndex != 0)
                 total = { '$inc': {'totalNum':rec.totalCount,'workNum':rec.workCount}};
-            tagModel.findOneAndUpdate({'name':rec._id},total,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+            tagModel.findOneAndUpdate({'name':rec._id.toLowerCase()},total,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                 .then(function(doc){
                     if(!doc)
                         throw '没有找到该记录';
