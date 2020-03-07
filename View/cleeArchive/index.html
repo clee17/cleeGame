@@ -49,8 +49,6 @@
                 $rootScope[attr] = $rootScope.variables[attr];
             };
 
-
-
             $scope.signal = '';
             $scope.alertInfo = '';
             $scope.alertData = null;
@@ -237,10 +235,9 @@
             </a>
         </div>
         <div id="languageSwitch">
-            <button id="BtnEn" ng-disabled="countryCode==='OTHER'" ng-click="switchCountryCode('OTHER')">EN</button>
-            <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')">CN</button>
+            <button id="BtnEn" ng-disabled="countryCode==='OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
+            <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')" style="font-weight:bold;">CN</button>
         </div>
-        <div id="headSign" style="margin-left:auto;margin-right:auto;color:dimgray;"></div>
         <% if(user) { %>
         <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div><%- websiteInfo[3] %></div></a>
         <a href="/fanfic/post/new" target="_blank"><div><%- websiteInfo[4] %></div></a>

@@ -31,21 +31,12 @@ let handler = {
     },
 
     filterContents: function (req,res, data) {
-        let pushData = [];
         let userId = req.session.user? req.session.user._id :null;
         for (let i = 0; i < data.result.length; ++i) {
-            if (data.result[i].chapter.grade > 0 && data.result[i].work.user != userId)
-                pushData.push(data.result[i]._id);
-        }
-        if (pushData.length > 0)
-            data.blocked = true;
-        while (pushData.length > 0) {
-            let tmp = pushData.shift();
-            for (let i = 0; i < data.result.length; ++i) {
-                if (data.result[i]._id === tmp) {
-                    data.result.splice(i, 1);
-                    break;
-                }
+            if (data.result[i].chapter.grade > 0 && data.result[i].work.user != userId){
+               data.result[i].blocked = true;
+               delete data.result[i].chapter.intro;
+               delete data.result[i].chapter.tag;
             }
         }
         handler.finalSend(res, data);
@@ -401,11 +392,17 @@ let handler = {
                                 {$project: {work: 0, chapter: 0, infoType: 0}}]
                         }
                     },
+                    {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
+                                {$match:{$expr:{$eq:["$_id","$$userId"]}}},
+                                {$project:{user:1,_id:1}}]}},
+                    {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
+                    {$unwind:'$user_setting'}
                 ]).exec();
             })
             .then(function (docs) {
                 response.success = true;
                 response.maxLimit = docs.length;
+                console.log(docs[0]);
                 response.result = docs.slice(startPage * perPage, startPage * perPage + perPage);
                 handler.filter(req, res, response);
             })
@@ -532,6 +529,8 @@ let handler = {
                         {$project: {work: 0, chapter: 0, infoType: 0}}]
                 }
             },
+            {$lookup:{from:"user_setting",localField:"chapter.user",foreignField:"user",as:"user_setting"}},
+            {$unwind:'$user_setting'}
         ])
             .then(function (docs) {
                 response.success = true;
@@ -699,6 +698,8 @@ let handler = {
                         {$project: {work: 0, chapter: 0, infoType: 0}}]
                 }
             },
+            {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
+            {$unwind:'$user_setting'}
         ]).exec()
             .then(function (docs) {
                 response.success = true;

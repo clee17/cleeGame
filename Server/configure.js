@@ -50,7 +50,7 @@ module.exports=function(app){
             req.ipData = ipSearcher.search(ip);
         else{
             req.ipData = {};
-            req.ipData.country = '英国';
+            req.ipData.country = '中国';
         }
 
         if((req.ipData && req.ipData.country === '中国') || req.cookies['readerLanguage'] === '"CN"'){

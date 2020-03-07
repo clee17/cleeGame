@@ -16,29 +16,15 @@ let handler = {
     },
 
     filterContents:function(req,res,data){
-        try{
-            let pushData = [];
-            let userId = req.session.user? req.session.user._id :null;
-            for(let i=0; i<data.result.length;++i){
-                if(data.result[i].chapter.grade>0 && data.result[i].work.user != userId)
-                    pushData.push(data.result[i]._id);
+        let userId = req.session.user? req.session.user._id :null;
+        for (let i = 0; i < data.result.length; ++i) {
+            if (data.result[i].chapter.grade > 0 && data.result[i].work.user != userId){
+                data.result[i].blocked = true;
+                delete data.result[i].chapter.intro;
+                delete data.result[i].chapter.tag;
             }
-            if(pushData.length>0)
-                data.blocked = true;
-            while(pushData.length>0){
-                let tmp = pushData.shift();
-                for(let i=0; i< data.result.length;++i){
-                    if(data.result[i]._id === tmp){
-                        data.result.splice(i,1);
-                        break;
-                    }
-                }
-            }
-            handler.finalSend(res,data);
-        }catch(e){
-            console.log(e);
         }
-
+        handler.finalSend(res, data);
     },
 
     filter:function(req,res,data){
@@ -194,6 +180,8 @@ let handler = {
                         {$sort:{date:-1}},
                         {$limit:15},
                         {$project:{work:0,chapter:0,infoType:0}}]}},
+            {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
+            {$unwind:'$user_setting'}
         ]).allowDiskUse(true).exec()
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));
@@ -201,7 +189,7 @@ let handler = {
                 if(req.session.user && (req.session.user.userGroup >= 999 || req.session.user.settings.access.indexOf(202) !== -1))
                     handler.finalSend(res,response);
                 else
-                     handler.filter(req,res,response);
+                    handler.filter(req,res,response);
             })
             .catch(function(err){
                 if(typeof err !== 'string')

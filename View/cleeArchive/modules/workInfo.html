@@ -231,12 +231,23 @@
 </style>
 
 <div style="display:flex;flex-direction:column;flex:1;" class="workInfo work-info-outer">
-    <div class="titleRow">
+    <div class="titleRow" ng-if="!item.blocked">
         <div class="grade" grade-show grade="{{item.chapter.grade}}">{{item.chapter.grade | grade:gradeTemplate }} </div>
         <div ng-if="item.infoType==1"><span class="markerColor"><%- websiteInfo[27] %></span>
             <a href="{{'/fanfic/work/'+item.work._id}}">{{item.work.title}}</a>
             <span class="markerColor" ng-if="item.index.prev != null"><%- websiteInfo[28] %></span><span class="markerColor" ng-if="item.index.prev == null"><%- websiteInfo[29] %></span></div>
         <div><a href="{{ item | workInfoLink:type }}">{{item | workInfoTitle:type}}</a></div>
+        <div ng-if="item.infoType==0" class="marker markerColor" ><%- websiteInfo[30] %></div>
+        <div style="margin-left:auto;">{{item | workInfoDate:type}}</div>
+    </div>
+    <div class="titleRow" ng-if="item.blocked">
+        <div ng-if="item.infoType==1" style="text-decoration:line-through;">
+            <span class="markerColor"><%- websiteInfo[27] %></span>
+            <span style="font-weight:bold;font-size:1.2rem;">{{item.work.title}}</span>
+            <span class="markerColor" ng-if="item.index.prev != null"><%- websiteInfo[28] %></span>
+            <span class="markerColor" ng-if="item.index.prev == null"><%- websiteInfo[29] %></span>
+        </div>
+        <div><span style="font-weight:bold;font-size:1.2rem;text-decoration:line-through;">{{item | workInfoTitle:type}}</span></div>
         <div ng-if="item.infoType==0" class="marker markerColor" ><%- websiteInfo[30] %></div>
         <div style="margin-left:auto;">{{item | workInfoDate:type}}</div>
     </div>
@@ -252,27 +263,30 @@
         <div><%- websiteInfo[36] %>:</div>
         <div>{{item.work.status | workInfoStatus}}</div>
     </div>
-    <div class="tagRow">
+    <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[37]%>:</div>
         <a ng-repeat="fandom in item.chapter.fandom" href="{{'/search/tag?id='+ escape(fandom)}}" class="tag">{{fandom}}</a>
     </div>
-    <div class="tagRow">
+    <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[38]%>:</div>
         <a ng-repeat="relation in item.chapter.relationships" href="{{'/search/tag?id='+ escape(relation)}}" class="tag">{{relation}}</a>
     </div>
-    <div class="tagRow">
+    <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[39]%>:</div>
         <a ng-repeat="character in item.chapter.characters" href="{{'/search/tag?id='+ escape(character)}}" class="tag">{{character}}</a>
     </div>
-    <div class="tagRow">
+    <div class="tagRow" ng-if="!item.blocked">
         <div style="margin-right:10px;margin-top:auto;margin-bottom:auto;height:1rem;line-height:1rem;"><%- websiteInfo[40] %>:</div>
         <a ng-repeat="tag in item.chapter.tag" href="{{'/search/tag?id='+ escape(tag)}}" class="tag">{{tag}}</a>
     </div>
-    <div>
+    <div ng-if="item.blocked">
+        <span style="padding-left:2rem;"><b>该作品相关章节因为不符合您所在地区的法律法规，已经被屏蔽。</b></span>
+    </div>
+    <div ng-if="!item.blocked">
         <div><span ng-if="item.infoType===1"><%- websiteInfo[42] %></span><span ng-show="item.infoType===0"><%- websiteInfo[43] %></span><%- websiteInfo[41] %>:</div>
         <div style="margin-left:20px;">{{item.chapter.intro | introType}}</div>
     </div>
-    <div class="editRow">
+    <div class="editRow" ng-if="!item.blocked">
         <button class="editButton" ng-click="showFeedbackList()" ng-if="(item.work.liked+ item.work.bookmarked )>0"><%- websiteInfo[44] %>({{item.work.liked+ item.work.bookmarked}})</button>
         <button class="editButton" ng-click="deleteItem()" ng-if="item.work.user == readerId"><%- websiteInfo[45] %></button>
         <button class="editButton"><a href="{{'/fanfic/post/edit?id='+item.index._id}}" ng-if="item.work.user == readerId" target="_blank"><%- websiteInfo[46] %></a></button>
