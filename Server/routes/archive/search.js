@@ -189,7 +189,6 @@ let handler = {
                         {$limit:15},
                         {$project:{work:0,chapter:0,infoType:0}}]}},
             {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
-            {$unwind:'$user_setting'}
         ]).allowDiskUse(true).exec()
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));

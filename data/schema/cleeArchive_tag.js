@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 module.exports = new mongoose.Schema({
     name:{type:String,default:'',index:true},
+    searchName:{type:String,default:'',index:true},
     type:{type:Number,default:0},
     visited:{type:Number,default:0},
     totalNum:{type:Number,default:0},

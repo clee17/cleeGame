@@ -439,8 +439,7 @@ let handler = {
                     {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
                                 {$match:{$expr:{$eq:["$_id","$$userId"]}}},
                                 {$project:{user:1,_id:1}}]}},
-                    {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
-                    {$unwind:'$user_setting'}
+                    {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}}
                 ]).exec();
             })
             .then(function (docs) {
@@ -573,8 +572,7 @@ let handler = {
                         {$project: {work: 0, chapter: 0, infoType: 0}}]
                 }
             },
-            {$lookup:{from:"user_setting",localField:"chapter.user",foreignField:"user",as:"user_setting"}},
-            {$unwind:'$user_setting'}
+            {$lookup:{from:"user_setting",localField:"chapter.user",foreignField:"user",as:"user_setting"}}
         ])
             .then(function (docs) {
                 response.success = true;
@@ -743,7 +741,6 @@ let handler = {
                 }
             },
             {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
-            {$unwind:'$user_setting'}
         ]).exec()
             .then(function (docs) {
                 response.success = true;

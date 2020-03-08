@@ -148,7 +148,7 @@ let handler = {
                         {$project: {contents: 0}}
                     ]}},
             {$unwind: "$chapter"},
-            {$lookup: {from: 'works', localField: "chapter.book", foreignField: "_id", as: "work"}},
+            {$lookup: {from: 'works', localField: "work", foreignField: "_id", as: "work"}},
             {$unwind: "$work"},
             {
                 $lookup: {
@@ -173,12 +173,10 @@ let handler = {
             },
             {$lookup: {from: 'work_index', localField: "chapter._id", foreignField: "chapter", as: "index"}},
             {$unwind: "$index"},
-            {
-                $facet: {
+            {$facet: {
                     "fanfic_chapter": [
                         {
                             $match: {
-                                "work.type": {$lt: 100},
                                 $or: [{"work.status": 1}, {"work.chapterCount": {$gt: 1}}],
                                 "chapter.published": true,
                                 infoType: 1
@@ -187,17 +185,12 @@ let handler = {
                         {$set: {updated: "$chapter.date"}},
                     ],
                     "fanfic_works": [
-                        {
-                            $match: {
-                                "work.type": {$lt: 100},
+                        {$match: {
                                 "index.order": 0,
                                 "work.published": true,
                                 infoType: 0
-                            }
-                        },
-                        {
-                            $lookup: {
-                                from: "work_chapters",
+                            }},
+                        {$lookup: {from: "work_chapters",
                                 let: {bookId: "$work._id"},
                                 as: "countChapter",
                                 pipeline: [{
@@ -205,28 +198,19 @@ let handler = {
                                         $expr: {$eq: ["$book", "$$bookId"]},
                                         published: true
                                     }
-                                }, {$project: {contents: 0}}]
-                            }
-                        },
-                        {
-                            $set: {
-                                updated: "$work.date",
-                                infoType: 0,
+                                }, {$project: {contents: 0}}]}},
+                        {$set: {updated: "$work.date",
                                 "work.visited": {$sum: "$countChapter.visited"},
-                                "work.wordCount": {$sum: "$countChapter.wordCount"}
-                            }
-                        },
-                    ]
-                }
-            },
+                                "work.wordCount": {$sum: "$countChapter.wordCount"}}},
+                        {$project:{countChapter:0}},
+                    ]}},
             {$project: {all: {$setUnion: ["$fanfic_chapter", "$fanfic_works"]}}},
             {$unwind: "$all"},
             {$replaceRoot: {newRoot: "$all"}},
             {$sort: {updated: -1}},
             {$skip:perPage*pageId},
             {$limit:perPage},
-            {
-                $lookup: {
+            {$lookup: {
                     from: "post_comment",
                     let: {work_id: "$work._id", chapter_id: "$chapter._id", post_type: "$infoType"},
                     as: "commentList",
@@ -235,19 +219,18 @@ let handler = {
                         {$sort: {date: -1}},
                         {$limit: 15},
                         {$project: {work: 0, chapter: 0, infoType: 0}}]
-                }
-            },
+                }},
             {$lookup:{from:"user", let:{userId:"$chapter.user"},as:"chapter.user",pipeline:[
                         {$match:{$expr:{$eq:["$_id","$$userId"]}}},
                         {$project:{user:1,_id:1}}]}},
-            {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}},
-            {$unwind:'$user_setting'}
+            {$lookup:{from:"user_setting",localField:"chapter.user._id",foreignField:"user",as:"user_setting"}}
         ],function(err,docs){
             if(err){
                 response.message = err;
                 response.errCode = 404;
             }else{
                 response.success = true;
+                console.log(docs.length);
                 response.result = JSON.parse(JSON.stringify(docs));
                 handler.finalSend(res,response);
             }
