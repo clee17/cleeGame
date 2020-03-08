@@ -41,7 +41,7 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
             return;
         $scope.intialized = true;
         $scope.requesting = true;
-        tagManager.requestTagFeed({pid:$scope.pageIndex,perPage:$scope.perPage,tagId:$scope.tagId});
+        tagManager.requestTagFeed({pageId:$scope.pageIndex,perPage:$scope.perPage,tagId:$scope.tagId});
     };
 
     $scope.follow = function(){
@@ -78,6 +78,6 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
 
     $scope.$on('pageChange',function(event,data){
         $scope.pageIndex = data.pid;
-        tagManager.requestTagFeed({pid:data.pid,perPage:$scope.perPage,tagId:$scope.tagId});
+        tagManager.requestTagFeed({pageId:data.pid,perPage:$scope.perPage,tagId:$scope.tagId});
     });
 }]);
