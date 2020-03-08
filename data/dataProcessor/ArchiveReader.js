@@ -158,7 +158,7 @@ let updateTagMap = function(){
             let searchName = processData.currentRecords[i].searchName = escape(name);
             for (let j=0;j<processData.currentRecords.length;++j){
                 let item = processData.currentRecords[j];
-                if(escape(item.name.toLowerCase()) === searchName && j!== i){
+                if(escape(item._id.toLowerCase()) === searchName && j!== i){
                     processData.currentRecords[i].workNum += item.workNum;
                     processData.currentRecords[i].totalNum += item.totalNum;
                     processData.currentRecords[i].list = processData.currentRecords[i].list.concat(processData.currentRecords[j].list);
