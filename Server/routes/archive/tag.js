@@ -112,6 +112,9 @@ let handler = {
     requestTag:function(req,res){
         let tagId  = req.params.tagId;
         let data  = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let pageId = data.pageId;
+        pageId--;
+        let perPage = data.perPage;
         let response = {
             sent:false,
             message:'',
@@ -220,6 +223,8 @@ let handler = {
             {$unwind: "$all"},
             {$replaceRoot: {newRoot: "$all"}},
             {$sort: {updated: -1}},
+            {$skip:perPage*pageId},
+            {$limit:perPage},
             {
                 $lookup: {
                     from: "post_comment",
