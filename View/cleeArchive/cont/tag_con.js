@@ -70,10 +70,14 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
         if(data.success){
             $scope.followed = data.result.status;
         }else{
-            console.log(data);
             $scope.followed = !$scope.followed;
             $scope.refreshBtn();
             $scope.$emit('showError',data.message);
         }
-    })
+    });
+
+    $scope.$on('pageChange',function(event,data){
+        $scope.pageIndex = data.pid;
+        tagManager.requestTagFeed({pid:data.pid,perPage:$scope.perPage,tagId:$scope.tagId});
+    });
 }]);
