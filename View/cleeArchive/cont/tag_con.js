@@ -54,6 +54,7 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
     };
 
     $scope.$on('tagDataReceived',function(event,data){
+        $scope.$broadcast('pageChangeFinished',null);
         $scope.requesting = false;
         if(data.success){
             $scope.ready = true;
