@@ -28,19 +28,19 @@ let handler = {
         if(data.infoType === 0)
             searchQuery = {work:data.workId,aid:data.chapterId};
         if(data.infoType === 1)
-            searchQuery = {aid:data.chapterId,infoType:1};
+            searchQuery = {aid:data.chapterId,infoType:1,work:data.workId};
 
         let startIndex = 0;
         let updateTagListIndex = [];
 
         for(let i=0;i<data.tagList.length;++i)
         {
-            let name = data.tagList[i].name;
+            let name = escape(data.tagList[i].name.toLowerCase());
             let type = data.tagList[i].type;
             let update = {$inc:{totalNum:1}};
             if(data.infoType === 0 )
                 update = {$inc:{workNum:1,totalNum:1}};
-            tagModel.findOneAndUpdate({'name':name.toLowerCase()},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+            tagModel.findOneAndUpdate({'searchName':name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
                 startIndex++;
                 let updateDoc = null;
                 if(doc)

@@ -346,7 +346,6 @@ let handler = {
                         {$limit:50},
                         {$project:{status:1,type:1,userName:1,user:1}}]}},
             {$lookup:{from:"user_setting",localField:"chapter.user",foreignField:"user",as:"user_setting"}},
-            {$unwind:'$user_setting'}
         ],function(err,doc){
             if(err)
             {

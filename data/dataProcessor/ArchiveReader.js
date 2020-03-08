@@ -152,6 +152,29 @@ let updateTagMap = function(){
             console.log('写入Tag表完成');
     };
 
+    let processDuplicate = function(){
+        for (let i = 0; i< processData.currentRecords.length;++i){
+            let name = processData.currentRecords[i].name = processData.currentRecords[i]._id.toLowerCase();
+
+            processData.currentRecords[i].searchName = escape(name);
+            for (let j=0;j<processData.currentRecords.length;++j){
+                let item = processData.currentRecords[j];
+                if(item.name === name && j!== i){
+                    processData.currentRecords[i].workNum += item.workNum;
+                    processData.currentRecords[i].totalNum += item.totalNum;
+                    processData.currentRecords[i].list = processData.currentRecords[i].list.concat(processData.currentRecords[j].list);
+                    processData.currentRecords[j] =-1;
+                }
+            }
+        }
+
+        while (processData.currentRecords.indexOf(-1) >=0){
+            let index = processData.currentRecords.indexOf(-1);
+            processData.currentRecords.splice(index,1);
+        }
+
+    };
+
     let write = function(){
         let startIndex = 0;
         let writeOne = function(){
@@ -162,10 +185,8 @@ let updateTagMap = function(){
             }
             let rec = processData.currentRecords[startIndex];
             startIndex++;
-            let total = {'totalNum':rec.totalCount,'workNum':rec.workCount};
-            if(processData.currentIndex != 0)
-                total = { '$inc': {'totalNum':rec.totalCount,'workNum':rec.workCount}};
-            tagModel.findOneAndUpdate({'name':rec._id.toLowerCase()},total,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
+            let update = { '$inc': {'totalNum':rec.totalCount,'workNum':rec.workCount},name:rec.name};
+            tagModel.findOneAndUpdate({'searchName':rec.searchName},update,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                 .then(function(doc){
                     if(!doc)
                         throw '没有找到该记录';
@@ -183,11 +204,9 @@ let updateTagMap = function(){
                             delete item._id;
                         tagMapModel.findOneAndUpdate({tag:doc._id,infoType:item.infoType,aid:item.aid},item,{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
                             .then(function(result){
-                                console.log(result);
                                 writeTagMap();
                             })
                             .catch(function(err){
-                                console.log(err);
                                 writeTagMap();
                             });
                     };
@@ -325,6 +344,7 @@ let updateTagMap = function(){
         ]).allowDiskUse(true).exec()
             .then(function(docs){
                 processData.currentRecords = docs;
+                processDuplicate();
                 write();
             })
             .catch(function(err){
