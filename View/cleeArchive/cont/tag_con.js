@@ -79,6 +79,7 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
 
     $scope.$on('pageChange',function(event,data){
         $scope.pageIndex = data.pid;
+        $scope.requesting = true;
         tagManager.requestTagFeed({pageId:data.pid,perPage:$scope.perPage,tagId:$scope.tagId});
     });
 }]);
