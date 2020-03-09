@@ -40,7 +40,9 @@ let handler = {
             let update = {$inc:{totalNum:1}};
             if(data.infoType === 0 )
                 update = {$inc:{workNum:1,totalNum:1}};
-            tagModel.findOneAndUpdate({'searchName':name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+            tagModel.findOneAndUpdate({'searchName':name,name:data.tagList[i].name.toLowerCase()},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+				if(err)
+					console.log(err);
                 startIndex++;
                 let updateDoc = null;
                 if(doc)
@@ -56,6 +58,8 @@ let handler = {
             if(mapEntered)
                 return;
             mapEntered = true;
+			
+
 
             let updateList = [];
             if(!searchQuery)
@@ -72,9 +76,15 @@ let handler = {
                 })
                 .then(function(docs){
                     if(updateList.length>0)
-                        tagModel.bulkWrite(updateList).exec();
+                        tagModel.bulkWrite(updateList,function(err,result){
+							if(err)
+								console.log(err);
+						});
                     if(updateTagListIndex.length>0)
                         tagMapModel.bulkWrite(updateTagListIndex,function(err,doc){
+							if(err)
+								console.log(err);
+							
                         });
                 })
                 .catch(function(err){
@@ -685,7 +695,6 @@ let handler = {
                 handler.finalSend(res,response);
             }else{
                 chapterModel.findOneAndUpdate({_id:data._id},newStatus,{new:true},function(err,doc){
-                    console.log(doc.grade);
                     if(err)
                         response.message = err;
                     else if (!doc)
