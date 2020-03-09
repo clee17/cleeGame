@@ -40,7 +40,10 @@ let handler = {
             let update = {$inc:{totalNum:1}};
             if(data.infoType === 0 )
                 update = {$inc:{workNum:1,totalNum:1}};
-            tagModel.findOneAndUpdate({'searchName':name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+            update.updated = Date.now();
+            tagModel.findOneAndUpdate({searchName:name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+                if(err)
+                    console.log(err);
                 startIndex++;
                 let updateDoc = null;
                 if(doc)
