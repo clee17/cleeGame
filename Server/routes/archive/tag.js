@@ -84,14 +84,9 @@ let handler = {
             tagName: tagName,
         };
 
-        let final = function(){
-            redisClient.get('fanfic_grade',function(err,grades) {
-                render.fanfic_grade = {};
-                if (!err && grades)
-                    render.fanfic_grade = JSON.parse(grades);
-                __renderSubPage(req, res, 'tagPage', render);
-            });
-        };
+        let finalRender = function(){
+			__renderSubPage(req, res, 'tagPage', render);
+		}
 
         tagModel.findOneAndUpdate({name: searchTagName},{$inc:{visited:1}},{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
             .then(function(doc){
@@ -102,7 +97,13 @@ let handler = {
             .then(function(followed){
                 render.followed=  followed? followed.status : false;
                 render.userExisted = !!req.session.user;
-                final();
+               redisClient.get('fanfic_grade',function(err,grades) {
+                render.fanfic_grade = {};
+                if (!err && grades)
+                    render.fanfic_grade = JSON.parse(grades);
+				else
+                    __readSettings(finalRender, render);
+			   });
             })
             .catch(function(err){
                     res.render('cleeArchive/errorB.html',{error:JSON.stringify(err)});
@@ -230,7 +231,6 @@ let handler = {
                 response.errCode = 404;
             }else{
                 response.success = true;
-                console.log(docs.length);
                 response.result = JSON.parse(JSON.stringify(docs));
                 handler.finalSend(res,response);
             }

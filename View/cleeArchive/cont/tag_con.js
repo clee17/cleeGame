@@ -19,6 +19,7 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
     $scope.perPage = 15;
     $scope.following = false;
 
+
     $scope.refreshBtn = function(){
         let followBtn = document.getElementById('btnFollow');
         let noUserSign = document.getElementById('cannotFollow');

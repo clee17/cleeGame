@@ -154,24 +154,28 @@ let updateTagMap = function(){
 
     let processDuplicate = function(){
         for (let i = 0; i< processData.currentRecords.length;++i){
+			if(!processData.currentRecords[i])
+				continue;
             let name = processData.currentRecords[i].name = processData.currentRecords[i]._id.toLowerCase();
             let searchName = processData.currentRecords[i].searchName = escape(name);
             for (let j=0;j<processData.currentRecords.length;++j){
                 let item = processData.currentRecords[j];
-                if(escape(item._id.toLowerCase()) === searchName && j!== i){
-                    processData.currentRecords[i].workNum += item.workNum;
-                    processData.currentRecords[i].totalNum += item.totalNum;
+                if(item && escape(item._id.toLowerCase()) === searchName && j!= i){
+                    processData.currentRecords[i].workCount += item.workCount;
+                    processData.currentRecords[i].totalCount += item.totalCount;
+					console.log(processData.currentRecords[i].searchName);
+					console.log(processData.currentRecords[i].workCount);
+					console.log(processData.currentRecords[i].totalCount);
                     processData.currentRecords[i].list = processData.currentRecords[i].list.concat(processData.currentRecords[j].list);
-                    processData.currentRecords[j] =-1;
+                    processData.currentRecords[j] =null;
                 }
             }
         }
 
-        while (processData.currentRecords.indexOf(-1) >=0){
-            let index = processData.currentRecords.indexOf(-1);
+        while (processData.currentRecords.indexOf(null) >=0){
+            let index = processData.currentRecords.indexOf(null);
             processData.currentRecords.splice(index,1);
         }
-
     };
 
     let write = function(){
