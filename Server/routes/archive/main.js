@@ -47,7 +47,9 @@ let handler = {
 
     indexDetail:function(req,res,next,fanfic_grade){
         let viewPortMap = new Map();
-        viewPortMap.set('/',{viewport:'/dynamic/entry',controllers:['/view/cont/index_con.js'],services:['/view/cont/feedService.js']});
+        viewPortMap.set('/',{viewport:'/dynamic/entry',
+            controllers:['/view/cont/index_con.js'],
+            services:['/view/cont/userService.js','/view/cont/tagService.js']});
         viewPortMap.set('/fanfic',{viewport:'/statement/fanficSearch',
             modules:['/view/modules/workInfo.js','/view/modules/commentList.js','/view/modules/pageIndex.js'],
             styles:[],

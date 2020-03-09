@@ -57,5 +57,13 @@ app.service('userManager',function($http,$rootScope){
 
     this.follow = function(data){
         manager.requestAll('/users/follow/','followFinished',data);
+    };
+
+    this.requestTagFollowed = function(){
+        manager.requestAll('/users/followedTag/','followedTagFinished',{});
+    };
+
+    this.updateFollow = function(data){
+        manager.requestAll('/users/updateFollow/','updateFollowFinished',data);
     }
 });

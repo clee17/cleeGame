@@ -8,7 +8,7 @@ var text = [
     'We found no such chapter in the database',
     "You are not allowed to edit the chapter",
     '',
-    '',//9
+    "You haven't followed any Tag",//9
     'This work has been restricted to registered users, you must login first before you can read it',
     'This work is only accessable by the writer。',
     'This is not a valid work Id',

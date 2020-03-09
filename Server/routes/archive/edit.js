@@ -523,7 +523,7 @@ let handler = {
         if(typeof saveData.book.status != 'number')
             saveData.book.status = Number(saveData.book.status);
 
-        if(!req.session.user || (req.session.user._id != saveData.chapter.user)){
+        if(!req.session.user || req.session.user._id != saveData.book.user){
             data.message = '您的登录状态出现错误，请重新登录';
             handler.finalSend(res,data);
             return;

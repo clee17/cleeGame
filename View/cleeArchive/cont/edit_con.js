@@ -744,7 +744,6 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         $scope.contentsLoaded = true;
         if(data.success)
         {
-
             for(let i =0; i< data.deleted.length;++i)
                 $scope.removeIndex(data.deleted[i]);
             for(let i =0; i<data.updated.length;++i)

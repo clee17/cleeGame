@@ -112,9 +112,8 @@ let handler = {
             return;
         }
 
-
         followModel.findOneAndUpdate({type:data.type,user:req.session.user._id,target:data.target},
-            {status:data.status},
+            {status:data.status,saved:data.saved},
             {new:true,upsert:true,setDefaultsOnInsert: true},
             function(err,doc){
                   if(err)
@@ -125,6 +124,68 @@ let handler = {
                   }
                   handler.finalSend(res,response);
             });
+    },
+
+    getTagFollowed:function(req,res){
+        let response = {
+            sent: false,
+            success: false,
+            message: '',
+        };
+
+        if(!req.session.user)
+            response.message = _errAll[13];
+
+        if(response.message !== ''){
+            handler.finalSend(res,response);
+            return;
+        }
+
+        followModel.aggregate([
+            {$match:{type:0,user:mongoose.Types.ObjectId(req.session.user._id),status:true}},
+            {$lookup:{from: 'tag', localField: "target", foreignField: "_id",as:"target"}},
+            {$unwind:'$target'},
+            ],function(err,result){
+            if(err)
+                response.message = err;
+            else{
+                response.success = true;
+                response.result = JSON.parse(JSON.stringify(result));
+                if(response.result.length === 0)
+                    response.message = _errInfo[9];
+            }
+            handler.finalSend(res,response);
+        });
+    },
+
+    updateFollowed:function(req,res){
+        let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent: false,
+            success: false,
+            message: '',
+        };
+
+        if(!req.session.user)
+            response.message = _errAll[13];
+
+        if(response.message !== ''){
+            handler.finalSend(res,response);
+            return;
+        }
+
+        followModel.findOneAndUpdate(
+            {type:data.type,user:req.session.user._id,target:data.target},
+            {saved:data.saved},
+            {new:true},
+        function(err,doc){
+            if(err)
+                response.message = err;
+            else{
+                response.success = true;
+            }
+            handler.finalSend(res,response);
+        });
     },
 
     reloadSettings:function(req,res){
@@ -445,7 +506,6 @@ let handler = {
             .then(function (docs) {
                 response.success = true;
                 response.maxLimit = docs.length;
-                console.log(docs[0]);
                 response.result = docs.slice(startPage * perPage, startPage * perPage + perPage);
                 handler.filter(req, res, response);
             })
