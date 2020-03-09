@@ -5,6 +5,8 @@ app.directive('infoReceiver',function(){
             scope.gradeTemplate = JSON.parse(scope.gradeTemplate);
             scope.followInfo = '<i class="fa fa-plus" style="margin-right:0.5rem;"></i>' + scope.followInfo;
             scope.followedInfo = '<i class="fa fa-minus" style="margin-right:0.5rem;"></i>' + scope.followedInfo;
+            if(scope.followed)
+                scope.updateFollowNum();
             scope.refreshBtn();
             scope.initialize();
          }
@@ -51,7 +53,11 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
         $scope.following = true;
         $scope.followed = !$scope.followed;
         $scope.refreshBtn();
-        userManager.follow({type:0,target:$scope.tagId,userId:$rootScope.readerId,status:$scope.followed});
+        userManager.follow({type:0,target:$scope.tagId,userId:$rootScope.readerId,status:$scope.followed,saved:{total:$scope.totalNum,work:$scope.workNum}});
+    };
+
+    $scope.updateFollowNum = function(){
+        userManager.updateFollow({type:0,target:$scope.tagId,userId:$rootScope.readerId,saved:{total:$scope.totalNum,work:$scope.workNum}});
     };
 
     $scope.$on('tagDataReceived',function(event,data){

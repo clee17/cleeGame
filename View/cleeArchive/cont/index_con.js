@@ -1,13 +1,10 @@
-app.controller("welcomeCon",function($scope,$http,$rootScope,$window,$location){
-    $scope.isLogged = false;
-    $scope.initialized = false;
-
+app.controller("welcomeCon",['$scope','$rootScope','$window','$location','tagManager','userManager',function($scope,$rootScope,$window,$location,tagManager,userManager){
     $scope.channel = 0;
-
-    $scope.error = '';
-
-    $scope.news = [];
-    $scope.newsReceived = false;
+    $scope.followError = '';
+    $scope.data = [];
+    $scope.tags = [];
+    $scope.tagRequesting = true;
+    $scope.requesting = true;
 
     $scope.changeChannel = function(newChannel){
         $scope.channel = newChannel;
@@ -15,22 +12,22 @@ app.controller("welcomeCon",function($scope,$http,$rootScope,$window,$location){
         {
             case 0:
             {
-                $scope.$broadcast("updateChannel");
+                $scope.goUpdatePage();
                 break;
             }
             case 1:
             {
-                $scope.$broadcast("updateMessage");
+                $scope.goUpdateMail();
                 break;
             }
             case 2:
             {
-                $scope.$broadcast("updateComments");
+                $scope.goUpdateNotification();
                 break;
             }
             case 3:
             {
-                $scope.$broadcast("updateBookmark");
+                $scope.goUpdateBookmark();
                 break;
             }
             default:
@@ -38,76 +35,61 @@ app.controller("welcomeCon",function($scope,$http,$rootScope,$window,$location){
         }
     };
 
-    let cookieList = document.cookie.split(';');
-    for(var i=0;i<cookieList.length;++i)
-    {
-        let attr = cookieList[i].substring(0,cookieList[i].indexOf('='));
-        let value = cookieList[i].substring(cookieList[i].indexOf('='));
-        if(attr == 'userId')
-        {
-            $scope.isLogged = true;
-        }
-    }
+    $scope.calcChange = function(item){
+        let ifUpdates = !!($rootScope.preference >>0 &1);
+        let  result = '';
+        if(ifUpdates)
+            result =  item.target.totalNum - item.saved.total;
+        else
+            result = item.target.workNum - item.saved.work;
 
-    if(!$scope.initialized)
-        $scope.initialized = true;
-});
+        if(result > 0 )
+            result = result.toString();
+        else
+            result = '';
 
-app.controller("tagUpdateCon",function($scope,$http,$rootScope,$window,$location,feedManager){
-    $scope.requesting = false;
-    $scope.updated = false;
-    $scope.initialized = false;
-    $scope.currentTag = '';
-    $scope.err = null;
-
-    $scope.list = [];
-    $scope.posts = [];
-
-    let updateFeed = function() {
-        $scope.err = null;
-        $scope.updated = false;
-
-        let data = $scope.currentTag;
-        if ($scope.currentTag == '')
-            data = $scope.list.join(',');
-        if (data == '')
-        {
-            $scope.updated = true;
-            $scope.err = '暂无订阅,请先去订阅相关频道以获取最新文章';
-            return;
-        }
-        feedManager.getPosts(data);
+        return  result;
     };
 
-    let getList = function(){
-        if($scope.requesting)
-            return;
-        $scope.requesting = true;
-        feedManager.getFeeds('channel');
+    $scope.goUpdatePage=  function(){
     };
 
-    $scope.$on("updateChannel",function(event,data){
-         getList();
-    });
+    $scope.goUpdateMail = function(){
 
-    $scope.$on('feedsReceived',function(event,response){
-        $scope.initialized = true;
-        if(response.type=='channel')
-        {
-            $scope.list = JSON.parse(JSON.stringify(response.data));
-            $scope.requesting = false;
-            updateFeed();
+    };
+
+    $scope.goUpdateNotification = function(){
+
+    };
+
+    $scope.goUpdateBookmark = function(){
+
+    };
+
+    $scope.showTagError = function(err){
+        let element = document.getElementById('tagFollowedErr');
+        if(element)
+            element.innerHTML = err;
+    };
+
+    $scope.$on('followedTagFinished',function(event,data){
+        $scope.tagRequesting = false;
+        if(data.success){
+            $scope.tags = JSON.parse(JSON.stringify(data.result));
+            if($scope.tags.length == 0)
+                $scope.showTagError(data.message);
         }
         else
-            $scope.posts = JSON.parse(JSON.stringify(response.data));
-
+            $scope.showTagError(data.message);
     });
 
-    $scope.$on('feedsLost',function(event,err){
-        $scope.initialized = true;
-        $scope.requesting = false;
-        $scope.err=err.message;
-    });
+    $scope.initialize = function(){
+        if($scope.initialized)
+            return;
+        $scope.initialize = true;
+        tagManager.requestTagPersonalFeed();
+        userManager.requestTagFollowed();
+    };
 
-    getList();
-});
+    $scope.initialize();
+}]);

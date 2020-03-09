@@ -39,7 +39,19 @@ input{
     flex-direction:column;
 }
 
-#header a{
+#logo >a{
+    text-decoration:none;
+}
+
+#headerGuideBar{
+    background:rgba(158,142,166,255);
+    width:100%;
+    height:2rem;
+    display:flex;
+    flex-direction:row;
+}
+
+#headerGuideBar a{
     text-decoration:none;
     color:white;
     flex:1;
@@ -47,12 +59,12 @@ input{
     text-align:center;
 }
 
-#header a:visited{
+#headerGuideBar a:visited{
     color:white;
     text-decoration:none;
 }
 
-#header a:hover{
+#headerGuideBar a:hover{
     color:white;
     text-decoration:none;
 }
@@ -147,41 +159,46 @@ input{
     font-family: inherit;
 }
 
-#dashboard a{
-    color: inherit;
-    height:1.5rem;
-    padding-bottom:4px;
-    padding-top:4px;
-}
-
-#dashboard a:hover{
-    background:rgba(235,235,235,200);
-    color:inherit;
-}
-
-#dashboard a:visited{
+.dashboardSelect{
     color: rgba(108,95,93,255);
+    background:white;
+    width:100%;
     height:1.5rem;
     padding-bottom:4px;
     padding-top:4px;
+    text-align:center;
+    text-decoration:none;
 }
 
+.dashboardSelect:hover{
+    background:rgba(235,235,235,200);
+    cursor:pointer;
+}
 
-#dashboard button{
+.dashboardSelect:visited{
+    height:1.5rem;
+    padding-bottom:4px;
+    padding-top:4px;
+    color: rgba(108,95,93,255);
+}
+
+.dashboardBtn{
     border:none;
     background:rgba(0,0,0,0);
     margin:0;
     padding-bottom:4px;
     padding-top:4px;
+    color: rgba(108,95,93,255);
 }
 
-#dashboard button:hover{
+.dashboardBtn:hover{
     background:rgba(235,235,235,200);
-    color:inherit;
+    color: rgba(108,95,93,255);
     border:none;
+
 }
 
-#dashboard button:disabled{
+.dashboardBtn:disabled{
     background:rgba(235,235,235,200);
     color:dimgray;
 }
@@ -196,11 +213,6 @@ input{
 
 #userBoard>a:last-child{
     margin-right:10px;
-}
-
-.dashboard{
-    color:rgba(108,95,93,255);
-    width:100%;
 }
 
 #loginParent{
@@ -384,6 +396,14 @@ input{
 
 .alert  >div:last-child button:first-child{
     margin-left:auto;
+}
+
+.numChange{
+    border-radius:0.5rem;
+    background:rgba(158,142,166,255);
+    padding-left:0.5rem;
+    padding-right:0.5rem;
+    color:white;
 }
 
 #headSign{

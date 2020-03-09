@@ -20,4 +20,8 @@ app.service('tagManager',['$http','$rootScope',function($http,$rootScope){
         manager.request('/tag/'+data.tagId,'tagDataReceived',data);
     };
 
+    this.requestTagPersonalFeed = function(data){
+        // manager.request('/tag/personal','tagDataReceived',data);
+    };
+
 }]);

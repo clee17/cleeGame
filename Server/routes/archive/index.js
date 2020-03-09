@@ -29,6 +29,7 @@ global.__renderIndex = function(req,res,renderInfo){
         renderPage.userId = req.session.user._id;
     else
         renderPage.userId = req.ip;
+    renderPage.variables.preference = req.session.user? req.session.user.settings.preference : 29;
     res.render('cleeArchive/index.html',renderPage);
 };
 
@@ -189,6 +190,8 @@ router.post('/admin/addApplication',admin.addApplication);
 //user
 router.get('/register/:registerId',subUser.register);
 router.post('/users/follow',subUser.follow);
+router.post('/users/followedTag',subUser.getTagFollowed);
+router.post('/users/updateFollow',subUser.updateFollowed)
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/settings/reload',subUser.reloadSettings);
 router.get('/users/settings/:userId',subUser.userSetting);

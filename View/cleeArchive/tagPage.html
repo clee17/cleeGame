@@ -69,6 +69,7 @@
 <div id="tagParent" ng-controller="tagCon">
    <info-receiver
            ng-init="totalNum = <%- result.totalNum || 0 %>;
+                    workNum = <%- result.workNum || 0 %>;
                     tagId = '<%- result._id || '' %>';
                     gradeTemplate = '<%= JSON.stringify(fanfic_grade) %>';
                     userExisted = <%- userExisted %>;

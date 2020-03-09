@@ -4,19 +4,20 @@
         margin-left:auto;
         margin-right:auto;
         display:flex;
-        flex-direction:column;
+        flex-direction:row;
         flex-wrap:wrap;
-        width:60%;
-        min-width:100px;
-        max-width:750px;
-        height:100%;
+        flex:1;
+        width:100%;
+        min-width:200px;
     }
 
     #loginInfo{
         display:flex;
         flex-direction:column;
-        flex:1;
+        margin-left:2rem;
+        margin-right:auto;
         padding-bottom:120px;
+        min-width:40rem;
     }
 
    #entryBoard .headline{
@@ -29,7 +30,7 @@
         text-align: left;
         min-width:8rem;
         letter-spacing:2px;
-       font-size:20px;
+        font-size:20px;
     }
 
     #feedHeader{
@@ -37,8 +38,11 @@
         flex-direction:row;
         color:rgba(181,163,160,255);
         font-weight:bold;
-        font-family: "Microsoft YaHei UI";
+        font-family: "Microsoft YaHei UI",serif,Arial;
+        margin-left:3rem;
+        margin-right:auto;
         padding-top:10px;
+        font-size:14px;
     }
 
     .feedGuide{
@@ -85,59 +89,135 @@
         margin-right:auto;
     }
 
-    #entryBoard .floatBoard{
+    .floatBoard{
         border:solid 1px rgba(215,215,215,188);
         box-shadow:0px 0px 8px rgba(215,215,215,188);
-        width:12rem;
+        width:14rem;
+    }
+
+    #followBoard{
+        margin-left:auto;
+        margin-top:1rem;
+        margin-right:1rem;
+        z-index:99;
+        height:auto;
+        margin-bottom:auto;
+        display:flex;
+        flex-direction:column;
+        padding-bottom:2rem;
+    }
+
+    #followBoard >div:nth-child(1){
+        display:flex;
+        flex-direction:row;
+        margin:10px;
+        height:2rem;
+        padding-bottom:10px;
+        padding-left:10px;
+        border-bottom:solid 1px rgba(218,218,218,255);
+    }
+
+    #followBoard >div:nth-child(2){
+        min-height:3rem;
+        display:flex;
+        flex-direction:column;
+        padding-bottom:10px;
+    }
+
+    #tagFollowedErr {
+        margin:auto;
+        word-break:break-all;
+        max-width:78%;
     }
 
     #entryBoard .feedBoard{
         flex:1;
     }
+
+    #loading{
+        margin-left:8rem;
+        font-weight:bold;
+        margin-top:2rem;
+    }
+
+    .btnIcon{
+        width:40px;
+        margin-bottom:0.5rem;
+        transform:scale(1.2);
+        margin-left:auto;
+        margin-right:auto;
+        text-align:center;
+    }
+
+    .dashboardSelectSub{
+        text-align:left;
+        flex:1;
+        width:auto;
+        display:flex;
+        flex-direction:row;
+    }
+
+    .dashboardSelectSub >span:nth-child(1){
+        flex:1;
+        margin-left:1rem;
+        text-overflow: ellipsis;
+        word-break:break-all;
+    }
+
+    .dashboardSelectSub >span:nth-child(2){
+        margin-right:1rem;
+        width:auto;
+    }
+
+    .dashboardSelectSub >span:nth-child(1):before{
+        content:'#';
+    }
+
 </style>
 
 <div id="entryBoard" ng-controller="welcomeCon">
-    <div id="searchBar"></div>
-
+    <div id="followBoard" class="floatBoard">
+        <div>
+            <div style="margin-left:0;margin-top:auto;margin-bottom:auto;width:40px;"><i class="fa fa-plus"></i></div>
+            <div style="margin-top:auto;margin-bottom:auto;margin-right:auto;"><%- websiteInfo[69] %></div>
+        </div>
+        <div id="followLoading" ng-show="tagRequesting">
+            <img src="/img/loading.gif" style="width:22px;height:22px;margin:auto;">
+        </div>
+        <a class="dashboardSelect dashboardSelectSub" ng-repeat="item in tags" href="{{'/tag?id='+item.target.searchName}}">
+            <span>{{item.target.name}}</span>
+            <span ng-show="calcChange(item) !== ''" class="numChange">{{calcChange(item)}}</span>
+        </a>
+        <div id="tagFollowedErr"></div>
+    </div>
     <div id="loginInfo">
             <div id="feedHeader">
                 <div class="feedGuide" ng-click="changeChannel(0)">
-                    <div style="width:40px;height:40px;"><svg class="icon" style="width:40px;height:40px;"><use xlink:href="/svg/symbols2.svg#icon-archive"></use></svg></div>
-                    <div style="font-size:14px;"><%- websiteInfo[65] %></div>
+                    <div class="btnIcon"><i class="fas fa-book-reader fa-2x"></i></div>
+                    <div><%- websiteInfo[65] %></div>
                 </div>
                 <div class="feedGuide" ng-click="changeChannel(1)">
-                    <div style="width:40px;height:40px;"><svg class="icon" style="width:40px;height:40px;"><use xlink:href="/svg/symbols2.svg#icon-envelope"></use></svg></div>
-                    <div style="font-size:14px;"><%- websiteInfo[66] %></div>
+                    <div class="btnIcon"><i class="fas fa-envelope-open fa-2x"></i></div>
+                    <div ><%- websiteInfo[66] %></div>
                 </div>
 
                 <div class="feedGuide" ng-click="changeChannel(2)">
-                    <div style="width:40px;height:40px;"><svg class="icon" style="width:45px;height:45px;margin-top:-3px;"><use xlink:href="/svg/symbols2.svg#icon-chat1"></use></svg></div>
-                    <div style="font-size:14px;"><%- websiteInfo[67] %></div>
+                    <div class="btnIcon"><i class="fas fa-heart fa-2x"></i></div>
+                    <div><%- websiteInfo[67] %></div>
                 </div>
 
                 <div class="feedGuide" ng-click="changeChannel(3)">
-                    <div style="width:40px;height:40px;"><svg class="icon" style="width:35px;height:35px;margin-top:2px;"><use xlink:href="/svg/symbols2.svg#icon-book-reference"></use></svg></div>
-                    <div style="font-size:14px;"><%- websiteInfo[68] %></div>
+                    <div class="btnIcon"><i class="fas fa-bookmark fa-2x"></i></div>
+                    <div ><%- websiteInfo[68] %></div>
                 </div>
             </div>
-            <div ng-show="channel==0" style="width:100%;position:relative;">
-                <div style="display:flex;flex-direction:row;flex-wrap:wrap;" ng-controller="tagUpdateCon">
-                    <div class="floatBoard" style="position:absolute;left:-6rem;z-index:99;">
-                        <div style="display:flex;flex-direction:row;margin:10px;height:2rem;padding-bottom:10px;padding-left:10px;border-bottom:solid 1px rgba(218,218,218,255);">
-                            <div style="margin-left:0;margin-top:auto;margin-bottom:auto;width:40px;"><i class="fa fa-plus"></i></div>
-                            <div style="margin-top:auto;margin-bottom:auto;margin-right:auto;"><%- websiteInfo[69] %></div>
-                        </div>
-                        <div style="min-height:3rem;display:flex;flex-direction:column;padding-bottom:10px;">
-                            <img src="/img/loading.gif" style="width:22px;height:22px;margin:auto;">
-                            <div ng-show="initialized && list.length==0 && !requesting" style="margin-top:auto;margin-bottom:auto;margin-left:auto;margin-right:auto;font-weight:bold;">
-                                <%- websiteInfo[70] %>
-                            </div>
-                        </div>
-                    </div>
+            <div id="loading"><img src="/img/loading.gif" style="width:22px;height:22px;margin-right:1.5rem;"><%- websiteInfo[62] %></div>
+            <div ng-show="channel==0">
+                <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
                     <div class="feedBoard" style="margin-left:10px;margin-top:20px;">
                         <div ng-show="!updated" style="display:flex;flex-direction:row;">
-                            <div style="margin-left:auto;"><img src="/img/loading.gif" style="width:22px;height:22px;"></div>
-                            <div style="margin-left:1rem;width:6rem;margin-right:auto;font-weight:bold;margin-top:auto;margin-bottom:auto;"><%- websiteInfo[62] %></div>
+
+                            <div style="margin-left:1rem;width:6rem;margin-right:auto;margin-top:auto;margin-bottom:auto;"></div>
                         </div>
                     </div>
                 </div>
