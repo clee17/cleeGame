@@ -80,9 +80,9 @@ let handler = {
                 __renderError(req,res,_errAll[2]);
         }
         else if(req.url ==='/donate'){
-            __renderError(req,res,'因创站者对相关法律条款有所疑虑，因此本页咱不可访问');
-            return;
-            if(req.session.user){
+            if(!req.ipData || req.ipData.country === '中国')
+                __renderError(req,res,'因创站者对相关法律条款有所疑虑，因此本页暂不可访问');
+           else if(req.session.user){
                 result.variables.mail = {mail:req.session.user.mail || ''};
                 __renderIndex(req,res,result);
             } else
