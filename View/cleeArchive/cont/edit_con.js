@@ -629,6 +629,7 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
         if(data.success)
         {
             $scope.chapter = JSON.parse(JSON.stringify(data.chapter.chapter));
+            $scope.chapter.contents = LZString.decompressFromBase64($scope.chapter.contents);
             if($scope.currentIndex.chapter == null)
                 $scope.currentIndex.chapter = $scope.chapter._id;
             $scope.workIndex.map(function(item,i){

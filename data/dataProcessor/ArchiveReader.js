@@ -1,5 +1,6 @@
 let fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    LZString = require('../../js/lib/lz-string1.4.4');
 
 let chapterModel = require('./../model/cleeArchive_fanfic'),
     worksModel = require('./../model/cleeArchive_works'),
@@ -659,6 +660,23 @@ let changeChapterId = function(prevId, nextId){
     });
 };
 
+let compressAllNovel = function(){
+    chapterModel.find({},{contents:1,_id:1},function(err,docs){
+        let maxLength = docs.length;
+        let startIndex = 0;
+        for(let i =0; i<docs.length;++i){
+            docs[i].contents = LZString.compressToBase64(docs[i].contents);
+            chapterModel.findOneAndUpdate({_id:docs[i]._id},{contents:docs[i].contents},function(err,doc){
+                if(err)
+                    console.log(err);
+                startIndex++;
+                if(startIndex >= maxLength)
+                    console.log('打包完成');
+            });
+        }
+    });
+};
+
 
 switch(argv[2])
 {
@@ -697,6 +715,9 @@ switch(argv[2])
         // break;
     case 'countUser':
         countAllUser();
+        break;
+    case 'compressContents':
+        compressAllNovel();
         break;
     default:
         console.log('输入无效的指令');

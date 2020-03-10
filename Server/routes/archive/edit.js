@@ -41,9 +41,9 @@ let handler = {
             if(data.infoType === 0 )
                 update = {$inc:{workNum:1,totalNum:1}};
             update.updated = Date.now();
-            tagModel.findOneAndUpdate({searchName:name},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
-                if(err)
-                    console.log(err);
+            tagModel.findOneAndUpdate({'searchName':name,name:data.tagList[i].name.toLowerCase()},update,{new:true,upsert:true,setDefaultsOnInsert: true},function(err,doc){
+				if(err)
+					console.log(err);
                 startIndex++;
                 let updateDoc = null;
                 if(doc)
@@ -59,6 +59,8 @@ let handler = {
             if(mapEntered)
                 return;
             mapEntered = true;
+			
+
 
             let updateList = [];
             if(!searchQuery)
@@ -75,9 +77,15 @@ let handler = {
                 })
                 .then(function(docs){
                     if(updateList.length>0)
-                        tagModel.bulkWrite(updateList).exec();
+                        tagModel.bulkWrite(updateList,function(err,result){
+							if(err)
+								console.log(err);
+						});
                     if(updateTagListIndex.length>0)
                         tagMapModel.bulkWrite(updateTagListIndex,function(err,doc){
+							if(err)
+								console.log(err);
+							
                         });
                 })
                 .catch(function(err){
@@ -236,6 +244,7 @@ let handler = {
         };
         let id = chapterData._id || null;
         delete chapterData._id;
+        chapterData.contents = lzString.compressToBase64(chapterData.contents);
         chapterModel.findOneAndUpdate({_id:id},chapterData,{new:true}).exec()
             .then(function(doc){
                 if(!doc)
@@ -532,6 +541,7 @@ let handler = {
             return;
         }
 
+        saveData.chapter.contents = lzString.compressToBase64(saveData.chapter.contents);
         let countMap = [{infoType:0,increment:0},{infoType:1,increment:0},{infoType:5,increment:0}];
 
         let updateModelUpdateList = [];
@@ -593,7 +603,8 @@ let handler = {
             let name = saveData.chapter.tag[i];
             updateTagData.tagList.push({name:name,type:4});
         }
-		
+
+        saveData.contents = lzString.compressToBase64(saveData.contents);
         chapterModel.findOneAndUpdate({_id:saveData.chapter._id},saveData.chapter,{new:true}).exec()
             .then(function(doc){
                 if(!doc)
@@ -688,7 +699,6 @@ let handler = {
                 handler.finalSend(res,response);
             }else{
                 chapterModel.findOneAndUpdate({_id:data._id},newStatus,{new:true},function(err,doc){
-                    console.log(doc.grade);
                     if(err)
                         response.message = err;
                     else if (!doc)
