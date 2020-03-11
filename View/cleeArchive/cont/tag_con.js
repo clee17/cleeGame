@@ -40,9 +40,9 @@ app.controller("tagCon",['$scope','$rootScope','$location','tagManager','userMan
 
 
     $scope.initialize = function(){
-        if($scope._initialized)
+        if($scope._initalized)
             return;
-        $scope.intialized = true;
+        $scope._initalized = true;
         $scope.requesting = true;
         tagManager.requestTagFeed({pageId:$scope.pageIndex,perPage:$scope.perPage,tagId:$scope.tagId});
     };
