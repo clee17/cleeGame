@@ -106,7 +106,24 @@ let handler = {
         });
     },
 
-    newFanfic:function(req,res,next){
+    newTech:function(req,res){
+        let authorize = false;
+
+        if(!req.session.user)
+            __renderError(req,res,_errInfo[2]);
+        else if(req.session.user.userGroup <999 && req.session.user.settings.access.indexOf(104) < 0)
+            __renderError(req,res,_errInfo[18]);
+        else if(req.session.user.userGroup >=999 && req.session.user.settings.access.indexOf(104) >= 0)
+            __renderIndex(req,res,{viewport:'/dynamic/techNew',
+                controllers:['/view/cont/edit_tech_con.js'],
+                services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
+                styles:['archive/edit'],
+                variables:{type:1}});
+        else
+            __renderError(req,res,_errInfo[2]);
+    },
+
+    newFanfic:function(req,res){
         let authorize = false;
         if(req.session.user)
         {
@@ -121,7 +138,11 @@ let handler = {
         else if(req.session.user && !authorize)
             __renderError(req,res,_errInfo[3]);
         else if(req.session.user && authorize)
-            __renderIndex(req,res,{viewport:'/dynamic/booknew',controllers:['/view/cont/edit_con.js'],services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],styles:['archive/edit']});
+            __renderIndex(req,res,{viewport:'/dynamic/booknew',
+                controllers:['/view/cont/edit_con.js'],
+                services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
+                variables:{type:0},
+                styles:['archive/edit']});
         else
             __renderError(req,res,_errInfo[4]);
     },

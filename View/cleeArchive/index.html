@@ -38,6 +38,10 @@
             $rootScope.readerId = '<%- userId %>';
             $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
             $rootScope.countryCode = "<%- countryCode %>";
+            $rootScope.countryState = "<%- websiteInfo[88] %>";
+            $rootScope.countryList = "<%- infoAll[5] %>";
+            $rootScope.countryList = $rootScope.countryList.split(',');
+            $rootScope.statementTitle = '<%- infoAll[6] %>';
             if($cookies.getObject('readerLanguage')){
                 $rootScope.countryCode = $cookies.getObject('readerLanguage');
             }
@@ -161,6 +165,33 @@
                     $scope.$apply();
                 }
             });
+
+            $scope.countryStatement = function(){
+                let element = document.getElementById("countryStatement");
+                let statement = $rootScope.countryState;
+                let s = statement.indexOf('%s');
+                let l = statement.indexOf('%l');
+                if($rootScope.countryCode === 'CN'){
+                    statement = statement.substring(0,s)+$rootScope.countryList[1]+statement.substring(s+2);
+                    statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
+                }
+                else{
+                    statement = statement.substring(0,s)+$rootScope.countryList[1]+statement.substring(s+2);
+                    statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
+                }
+
+                if(element)
+                    element.innerHTML =  statement;
+            };
+
+            $scope.initialize = function(){
+                if($scope._initialized)
+                   return;
+                $scope._initialized = true;
+                $scope.countryStatement();
+            };
+
+            $scope.initialize();
         });
 
 
@@ -238,6 +269,7 @@
             <button id="BtnEn" ng-disabled="countryCode==='OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
             <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')" style="font-weight:bold;">CN</button>
         </div>
+        <span id="countryStatement"></span>
         <% if(user) { %>
         <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div><%- websiteInfo[3] %></div></a>
         <a href="/fanfic/post/new" target="_blank"><div><%- websiteInfo[4] %></div></a>

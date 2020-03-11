@@ -25,6 +25,12 @@ let handler = {
         });
     },
 
+    statement:function(req,res){
+        let countryID = req.params.countryId;
+        let data = {viewport:"/view/countryStatement_"+countryID+'.html'};
+        __renderIndex(req,res,data);
+    },
+
     visitorDonate:function(req,res){
           let visitorId = req.query.id;
           if(!visitorId)
@@ -80,9 +86,7 @@ let handler = {
                 __renderError(req,res,_errAll[2]);
         }
         else if(req.url ==='/donate'){
-            if(!req.ipData || req.ipData.country === '中国')
-                __renderError(req,res,'因创站者对相关法律条款有所疑虑，因此本页暂不可访问');
-           else if(req.session.user){
+            if(req.session.user){
                 result.variables.mail = {mail:req.session.user.mail || ''};
                 __renderIndex(req,res,result);
             } else
@@ -204,7 +208,7 @@ let handler = {
                 }
             }
 
-            if(data.chapter && (data.codeMatch  || !data.chapter.passcode))
+            if(data.chapter && (data.codeMatch  || !data.chapter.passcode.use))
                 chapterModel.findOneAndUpdate({_id:data.chapter._id},{$inc:{visited:1}},function(err,doc){
                 });
 

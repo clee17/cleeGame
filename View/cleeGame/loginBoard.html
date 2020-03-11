@@ -75,10 +75,7 @@
         let contents = '';
         let id = document.getElementById('lgName');
         let pwd = document.getElementById('lgPwd');
-        if(pwd)
-            contents +='pwd='+ md5(pwd.value);
-        if(id)
-            contents += '&user='+id.value;
+        contents += 'data='+LZString.compressToBase64(JSON.stringify({user:id.value,pwd:md5(pwd.value)}));
         xhr.send(contents);
         xhr.onload = function(){
             if(this._statusChange)

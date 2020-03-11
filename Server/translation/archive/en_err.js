@@ -16,6 +16,8 @@ var text = [
     'Please provide correct invitation code',
     'Your invitation code is not found',
     "The tag info sent is not correct",
+    "This work can only be published by technical writers, you may get the identity from your user setting page",
+    "publishing"
 ];
 
 module.exports = text;

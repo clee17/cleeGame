@@ -45,6 +45,12 @@ let handler = {
         }
     },
 
+    techNew:function(req,res){
+        let data = {};
+
+        res.render('cleeArchive/bookTechNew.html',data);
+    },
+
     bookNew:function(req,res) {
         let data = {ready:false,currentIndex:null,bookDetail:null};
         handler.getBookPage(req,res,data,false);
@@ -167,11 +173,11 @@ let handler = {
             return;
         }
         let settings=  {mail:req.session.user.mail || '',
-            intro:req.session.user.intro ? lzString.decompressFromBase64(req.session.user.intro) : null};
+            intro:req.session.user.intro&&req.session.user.intro !== '' ? lzString.decompressFromBase64(req.session.user.intro) : null};
         res.render('cleeArchive/userSetting.html',{user:req.session.user,settings:settings});
     },
 
-    userPage:function(req,res,next){
+    userPage:function(req,res){
         let userId = req.params.userId;
         let readerId = '';
         if(req.session.user)

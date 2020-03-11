@@ -4,6 +4,8 @@ var text = [
     "New Password",
     "Confirm Password",
     "SUBMIT",
+    "China,Chinese,'',''",
+    "Service Statement"
 
 ];
 

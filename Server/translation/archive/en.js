@@ -86,7 +86,8 @@ var text = [
     "Followers",
     "Works",
     "Unfollow",
-    "only registered users could follow a tag"
+    "only registered users could follow a tag",
+    "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district"
 ];
 
 module.exports = text;
