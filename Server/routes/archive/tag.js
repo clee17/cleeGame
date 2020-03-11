@@ -86,7 +86,7 @@ let handler = {
 
         let finalRender = function(){
 			__renderSubPage(req, res, 'tagPage', render);
-		}
+		};
 
         tagModel.findOneAndUpdate({name: searchTagName},{$inc:{visited:1}},{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
             .then(function(doc){
@@ -99,8 +99,11 @@ let handler = {
                 render.userExisted = !!req.session.user;
                redisClient.get('fanfic_grade',function(err,grades) {
                 render.fanfic_grade = {};
-                if (!err && grades)
+                console.log('entered fanfic grade');
+                if (!err && grades){
                     render.fanfic_grade = JSON.parse(grades);
+                    finalRender();
+                }
 				else
                     __readSettings(finalRender, render);
 			   });
@@ -111,6 +114,7 @@ let handler = {
     },
 
     requestTag:function(req,res){
+        console.log('entered');
         let tagId  = req.params.tagId;
         let data  = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let pageId = data.pageId;
@@ -123,6 +127,7 @@ let handler = {
         };
         if(data.tagId !== tagId)
             response.message = _errInfo[16];
+
 
         if(response.message !== ''){
             handler.finalSend(res,response);

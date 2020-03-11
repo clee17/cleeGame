@@ -64,6 +64,7 @@ router.get('/info/:infoId',info.getInfo);
 
 //游戏界面
 router.get('/games/admin',admin.index);
+router.get('/games/edit/:gameId',admin.edit);
 router.post('/games/admin/addGame',admin.add);
 router.post('/games/admin/gameList',admin.fullList);
 

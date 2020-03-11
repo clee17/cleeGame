@@ -88,9 +88,7 @@ global.__readSettings = function (callBack,data) {
             data.err = err;
             if(callBack)
                 callBack();
-            return;
-        }
-        else{
+        } else{
             let settings = JSON.parse(File);
             let multiRedisCommands = [];
             while(redisList.length>0)
@@ -99,9 +97,9 @@ global.__readSettings = function (callBack,data) {
                 data['fanfic_'+keyString] = settings[keyString];
                 multiRedisCommands.push(["set",keyString,JSON.stringify(settings[keyString])]);
             }
+            if(callBack)
+                callBack();
             redisClient.multi(multiRedisCommands).exec(function(err,docs){
-                if(callBack)
-                    callBack();
             });
         }
     });

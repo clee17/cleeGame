@@ -21,10 +21,15 @@ let handler = {
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
-        if(req.session.user && req.session.user.settings.accessLevel >=10)
+        if(req.session.user && req.session.user.userGroup >=999)
            __renderIndex(req,res,result);
         else
             __renderError(req,res,_errAll[2]);
+    },
+
+
+    edit:function(req,res){
+
     },
 
     publish:function(req,res){
@@ -214,6 +219,7 @@ let handler = {
             handler.finalSend(res,result);
         });
     },
+
 };
 
 module.exports = handler;
