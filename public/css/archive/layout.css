@@ -498,6 +498,9 @@ input{
     margin-bottom:auto;
     font-size:0.9rem;
     color:gray;
+    margin-left:0;
+    margin-right:auto;
+    padding-left:0;
 }
 
 #languageSwitch button{
