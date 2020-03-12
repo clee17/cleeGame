@@ -176,7 +176,7 @@
                     statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
                 }
                 else{
-                    statement = statement.substring(0,s)+$rootScope.countryList[2]+statement.substring(s+2);
+                    statement = statement.substring(0,s)+statement.substring(s+2);
                     statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
                 }
 

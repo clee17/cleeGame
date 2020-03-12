@@ -1,10 +1,16 @@
 app.controller("welcomeCon",['$scope','$rootScope','$window','$location','tagManager','userManager',function($scope,$rootScope,$window,$location,tagManager,userManager){
     $scope.channel = 0;
     $scope.followError = '';
-    $scope.data = [];
+    $scope.updateList = [];
     $scope.tags = [];
+    $scope.loadSign = '1111';
     $scope.tagRequesting = true;
     $scope.requesting = true;
+
+    $scope.updateLoadSign = function(index,condition){
+        let info = condition? '1' :'0';
+        $scope.loadSign[index] = info;
+    };
 
     $scope.changeChannel = function(newChannel){
         $scope.channel = newChannel;
@@ -12,21 +18,25 @@ app.controller("welcomeCon",['$scope','$rootScope','$window','$location','tagMan
         {
             case 0:
             {
+                $scope.updateLoadSign(3,true);
                 $scope.goUpdatePage();
                 break;
             }
             case 1:
             {
+                $scope.updateLoadSign(2,true);
                 $scope.goUpdateMail();
                 break;
             }
             case 2:
             {
+                $scope.updateLoadSign(1,true);
                 $scope.goUpdateNotification();
                 break;
             }
             case 3:
             {
+                $scope.updateLoadSign(0,true);
                 $scope.goUpdateBookmark();
                 break;
             }

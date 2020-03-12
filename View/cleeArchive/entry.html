@@ -211,16 +211,9 @@
                     <div ><%- websiteInfo[68] %></div>
                 </div>
             </div>
-            <div id="loading"><img src="/img/loading.gif" style="width:22px;height:22px;margin-right:1.5rem;"><%- websiteInfo[62] %></div>
+            <div id="loading" ng-show="loadSign[channel]"><img src="/img/loading.gif" style="width:22px;height:22px;margin-right:1.5rem;"><%- websiteInfo[62] %></div>
             <div ng-show="channel==0">
-                <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
-                    <div class="feedBoard" style="margin-left:10px;margin-top:20px;">
-                        <div ng-show="!updated" style="display:flex;flex-direction:row;">
-
-                            <div style="margin-left:1rem;width:6rem;margin-right:auto;margin-top:auto;margin-bottom:auto;"></div>
-                        </div>
-                    </div>
-                </div>
+                <work-info ng-repeat="item in updateList"></work-info>
             </div>
             <div ng-show="channel==1"></div>
             <div ng-show="channel==2"></div>
