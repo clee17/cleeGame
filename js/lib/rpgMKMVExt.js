@@ -38,6 +38,10 @@ $system.isChinese = function(){
 
 };
 
+$system.isKorean = function(){
+    return false;
+};
+
 viewport.pageToCanvasY = function(y) {
     if (this._canvas) {
         var top = this._canvas.offsetTop;
@@ -417,7 +421,7 @@ Bitmap.prototype._renewCanvas = function(){
     }
 };
 
-Bitmap.prototype.initialize = function(width, height) {
+Bitmap.prototype.initialize = function(width, height,status) {
     if(!this._defer){
         this._createCanvas(width, height);
     }
@@ -427,11 +431,13 @@ Bitmap.prototype.initialize = function(width, height) {
     this._paintOpacity = 255;
     this._smooth = false;
     this._loadListeners = [];
-    this._loadingState = 'none';
+    this._loadingState = status || 'pending';
     this._decodeAfterRequest = false;
     this.cacheEntry = null;
-    this.fontFace = 'GameFont';
+    this.fontFace = 'Arial';
     this.fontSize = 28;
+    this.fontWidth = this.fontSize;
+    this.letterSpacing = 4;
     this.fontItalic = false;
     this.textColor = '#ffffff';
     this.outlineColor = 'rgba(0, 0, 0, 0.5)';
@@ -475,7 +481,7 @@ Bitmap.snap = function(stage) {
 };
 
 Bitmap.prototype.isReady = function() {
-    return this._loadingState === 'loaded';
+    return this._loadingState === 'loaded' || this._loadingState ==='none';
 };
 
 Bitmap.prototype.isError = function() {
@@ -1019,30 +1025,36 @@ Bitmap.prototype.drawCircle = function(x, y, radius, color) {
 };
 
 Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
-
-    if (text !== undefined) {
-        var tx = x;
-        var ty = y + lineHeight - (lineHeight - this.fontSize * 0.7) / 2;
-        var context = this._context;
-        var alpha = context.globalAlpha;
-        maxWidth = maxWidth || 0xffffffff;
-        if (align === 'center') {
-            tx += maxWidth / 2;
+        if (text !== undefined) {
+            var tx = x;
+            var ty = y + lineHeight - (lineHeight - this.fontSize * 0.7) / 2;
+            var context = this._context;
+            var alpha = context.globalAlpha;
+            maxWidth = maxWidth || 0xffffffff;
+            if (align === 'center') {
+                tx += maxWidth / 2;
+            }
+            if (align === 'right') {
+                tx += maxWidth;
+            }
+            context.save();
+            context.font = this._makeFontNameText();
+            context.textAlign = align;
+            context.textBaseline = 'alphabetic';
+            if(this._showShadow){
+                context.shadowColor = this.shadowColor;
+                context.shadowBlur = this.shadowBlur;
+                context.globalAlpha = 0.9;
+            }else{
+                context.globalAlpha = 0.6;
+                context.shadowBlur = 0;
+            }
+            this._drawTextOutline(text, tx, ty, maxWidth);
+            context.globalAlpha = alpha;
+            this._drawTextBody(text, tx, ty, maxWidth);
+            context.restore();
+            this._setDirty();
         }
-        if (align === 'right') {
-            tx += maxWidth;
-        }
-        context.save();
-        context.font = this._makeFontNameText();
-        context.textAlign = align;
-        context.textBaseline = 'alphabetic';
-        context.globalAlpha = 1;
-        this._drawTextOutline(text, tx, ty, maxWidth);
-        context.globalAlpha = alpha;
-        this._drawTextBody(text, tx, ty, maxWidth);
-        context.restore();
-        this._setDirty();
-    }
 };
 
 Bitmap.prototype.measureTextWidth = function(text) {
@@ -1177,10 +1189,16 @@ Bitmap.prototype._makeFontNameText = function() {
 };
 
 Bitmap.prototype._drawTextOutline = function(text, tx, ty, maxWidth) {
+    if(!this.outlineWidth)
+        return;
     var context = this._context;
+    context.globalAlpha =  0.5;
     context.strokeStyle = this.outlineColor;
     context.lineWidth = this.outlineWidth;
     context.lineJoin = 'round';
+    context.strokeText(text, tx, ty, maxWidth);
+    context.globalAlpha = 1;
+    context.lineWidth = this.outlineWidth -2.5;
     context.strokeText(text, tx, ty, maxWidth);
 };
 
@@ -1265,6 +1283,18 @@ Bitmap.prototype.startRequest = function(){
     }
 };
 
+function Text(){
+    this.initialize.apply(this, arguments);
+}
+
+Text.prototype = Object.create(PIXI.Text.prototype);
+Text.prototype.constructor = Text;
+
+Text.prototype.initialize = function(text,style) {
+    PIXI.Text.call(this, arguments);
+    this._text = text;
+};
+
 
 function Sprite() {
     this.initialize.apply(this, arguments);
@@ -1296,10 +1326,20 @@ Sprite.prototype.initialize = function(filename) {
 
     this._isPicture = false;
     this.opaque = false;
-    this._filename = this.generateKey(filename);
 
-    loader.getBitmapInfo(filename,this.initializeBitmap.bind(this));
-    ImageManager.reserveAlias(this._filename);
+    if(filename && typeof filename == 'string')
+    {
+        this._filename = this.generateKey(filename);
+        ImageManager.reserveAlias(this._filename);
+        loader.getBitmapInfo(filename,this.initializeBitmap.bind(this));
+    }else if(filename && typeof filename === 'object'){
+        this.bitmap = filename;
+        this.bitmap.fillAll('rgba(255,255,255,1)');
+    }else{
+        this.bitmap = null;
+    }
+
+
 };
 
 Sprite._counter = 0;
@@ -1314,7 +1354,6 @@ Sprite.prototype.initializeBitmap = function(info){
         this.setFrame(x,y,width,height);
         this._rotated = info.rotated;
     }
-
     ImageManager.removeAlias(this._filename);
 };
 
@@ -1325,7 +1364,6 @@ Object.defineProperty(Sprite.prototype, 'bitmap', {
     set: function(value) {
         if (this._bitmap !== value) {
             this._bitmap = value;
-
             if(value){
                 this._refreshFrame = true;
                 value.addLoadListener(this._onBitmapLoad.bind(this));
@@ -1356,6 +1394,24 @@ Sprite.prototype.update = function() {
     });
 };
 
+Sprite.prototype.canvasToLocalX = function(x) {
+    var node = this;
+    while (node) {
+        x -= node.x;
+        node = node.parent;
+    }
+    return x;
+};
+
+Sprite.prototype.canvasToLocalY = function(y) {
+    var node = this;
+    while (node) {
+        y -= node.y;
+        node = node.parent;
+    }
+    return y;
+};
+
 Sprite.prototype.move = function(x, y) {
     this.x = x;
     this.y = y;
@@ -1370,6 +1426,7 @@ Sprite.prototype.setFrame = function(x, y, width, height) {
         frame.y = y;
         frame.width = width;
         frame.height = height;
+
         this._refresh();
     }
 };
@@ -1408,6 +1465,7 @@ Sprite.prototype._onBitmapLoad = function(bitmapLoaded) {
             this._refreshFrame = false;
             this._frame.width = this._bitmap.width;
             this._frame.height = this._bitmap.height;
+
         }
     }
     this._refresh();
@@ -1425,6 +1483,7 @@ Sprite.prototype._refresh = function() {
     var realY = frameY.clamp(0, bitmapH);
     var realW = (frameW - realX + frameX).clamp(0, bitmapW - realX);
     var realH = (frameH - realY + frameY).clamp(0, bitmapH - realY);
+
 
     this._realFrame.x = realX;
     this._realFrame.y = realY;
@@ -1632,7 +1691,32 @@ Sprite.prototype._executeTint = function(x, y, w, h) {
     context.drawImage(this._bitmap.canvas, x, y, w, h, 0, 0, w, h);
 };
 
-Sprite.prototype._renderWebGL_PIXI = PIXI.Sprite.prototype._renderWebGL;
+Sprite.prototype._render_PIXI = PIXI.Sprite.prototype._render;
+
+Sprite.prototype._render = function(renderer){
+    if (this.bitmap) {
+        this.bitmap.touch();
+    }
+    if(this.bitmap && !this.bitmap.isReady()){
+        return;
+    }
+
+    if (this.texture.frame.width > 0 && this.texture.frame.height > 0) {
+        if (this._bitmap) {
+            this._bitmap.checkDirty();
+        }
+        this._render_PIXI(renderer);
+        this.calculateVertices();
+        // if (this.pluginName === 'sprite' && this._isPicture) {
+        //     this._speedUpCustomBlendModes(renderer);
+        //     renderer.setObjectRenderer(renderer.plugins.picture);
+        //     renderer.plugins.picture.render(this);
+        // } else {
+        //     renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
+        //     renderer.plugins[this.pluginName].render(this);
+        // }
+    }
+};
 
 Sprite.prototype._speedUpCustomBlendModes = function(renderer) {
     var picture = renderer.plugins.picture;
@@ -1654,29 +1738,177 @@ Sprite.prototype._speedUpCustomBlendModes = function(renderer) {
     }
 };
 
-Sprite.prototype._renderWebGL = function(renderer) {
-    if (this.bitmap) {
-        this.bitmap.touch();
-    }
-    if(this.bitmap && !this.bitmap.isReady()){
-        return;
-    }
-    if (this.texture.frame.width > 0 && this.texture.frame.height > 0) {
-        if (this._bitmap) {
-            this._bitmap.checkDirty();
+function Sprite_Sign() {
+    this.initialize.apply(this, arguments);
+}
+
+Sprite_Sign.prototype = Object.create(Sprite.prototype);
+Sprite_Sign.prototype.constructor = Sprite_Sign;
+
+Sprite_Sign.prototype.initialize = function(filename) {
+    Sprite.prototype.initialize.call(this,filename);
+    this._openness = 0;
+    this._openStep = 12;
+    this.alpha = 0;
+    this._active = false;
+    this._opening = false;
+};
+
+Object.defineProperty(Sprite_Sign.prototype, 'openness', {
+    get: function() {
+        return this._openness;
+    },
+    set: function(value) {
+        if (this._openness !== value) {
+            this._openness = value.clamp(0, 255);
+            this.updateOpenness();
         }
-        this.calculateVertices();
-        if (this.pluginName === 'sprite' && this._isPicture) {
-            this._speedUpCustomBlendModes(renderer);
-            renderer.setObjectRenderer(renderer.plugins.picture);
-            renderer.plugins.picture.render(this);
-        } else {
-            renderer.setObjectRenderer(renderer.plugins[this.pluginName]);
-            renderer.plugins[this.pluginName].render(this);
+    },
+    configurable: true
+});
+
+Sprite_Sign.prototype.open = function(){
+    if (!this.isOpen()) {
+        this._opening = true;
+    }
+    this._closing = false;
+};
+
+Sprite_Sign.prototype.close = function(){
+    if (!this.isClosed()) {
+        this._closing = true;
+    }
+    this._opening = false;
+};
+
+Sprite_Sign.prototype.updateOpenness = function(){
+    this.opacity = this._openness/255*255;
+};
+
+Sprite_Sign.prototype.update = function() {
+    Sprite.prototype.update.call(this);
+    this.updateOpen();
+    this.updateClose();
+};
+
+Sprite_Sign.prototype.setOpenSpeed = function(time){
+    this._openStep = 255/time;
+    this._openStep = this._openStep.clamp(0.1,255);
+};
+
+Sprite_Sign.prototype.isOpen = function(){
+    return this._openness >= 255;
+};
+
+Sprite_Sign.prototype.isClosed = function(){
+    return this._openness <= 0;
+};
+
+Sprite_Sign.prototype.updateOpen = function() {
+    if (this._opening) {
+        this.openness += this._openStep;
+        if (this.isOpen()) {
+            this._opening = false;
         }
     }
 };
 
+Sprite_Sign.prototype.updateClose = function(){
+    if (this._closing) {
+        this.openness -= this._openStep;
+        if (this.isClosed()) {
+            this._closing = false;
+        }
+    }
+};
+
+function ScreenSprite() {
+    this.initialize.apply(this, arguments);
+}
+
+ScreenSprite.prototype = Object.create(PIXI.Container.prototype);
+ScreenSprite.prototype.constructor = ScreenSprite;
+
+ScreenSprite.prototype.initialize = function () {
+    PIXI.Container.call(this);
+
+    this._graphics = new PIXI.Graphics();
+    this.addChild(this._graphics);
+    this.opacity = 255;
+
+    this._red = -1;
+    this._green = -1;
+    this._blue = -1;
+    this._colorText = '';
+    this.setBlack();
+};
+
+Object.defineProperty(ScreenSprite.prototype, 'opacity', {
+    get: function () {
+        return this.alpha * 255;
+    },
+    set: function (value) {
+        this.alpha = value.clamp(0, 255) / 255;
+    },
+    configurable: true
+});
+
+ScreenSprite.YEPWarned = false;
+ScreenSprite.warnYep = function () {
+    if (!ScreenSprite.YEPWarned) {
+        console.log("Deprecation warning. Please update YEP_CoreEngine. ScreenSprite is not a sprite, it has graphics inside.");
+        ScreenSprite.YEPWarned = true;
+    }
+};
+
+Object.defineProperty(ScreenSprite.prototype, 'anchor', {
+    get: function () {
+        ScreenSprite.warnYep();
+        this.scale.x = 1;
+        this.scale.y = 1;
+        return {x: 0, y: 0};
+    },
+    set: function (value) {
+        this.alpha = value.clamp(0, 255) / 255;
+    },
+    configurable: true
+});
+
+Object.defineProperty(ScreenSprite.prototype, 'blendMode', {
+    get: function () {
+        return this._graphics.blendMode;
+    },
+    set: function (value) {
+        this._graphics.blendMode = value;
+    },
+    configurable: true
+});
+
+ScreenSprite.prototype.setBlack = function () {
+    this.setColor(0, 0, 0);
+};
+
+ScreenSprite.prototype.setWhite = function () {
+    this.setColor(255, 255, 255);
+};
+
+ScreenSprite.prototype.setColor = function (r, g, b) {
+    if (this._red !== r || this._green !== g || this._blue !== b) {
+        r = Math.round(r || 0).clamp(0, 255);
+        g = Math.round(g || 0).clamp(0, 255);
+        b = Math.round(b || 0).clamp(0, 255);
+        this._red = r;
+        this._green = g;
+        this._blue = b;
+        this._colorText = Utils.rgbToCssColor(r, g, b);
+
+        var graphics = this._graphics;
+        graphics.clear();
+        var intColor = (r << 16) | (g << 8) | b;
+        graphics.beginFill(intColor, 1);
+        graphics.drawRect(-viewport.width * 5, -viewport.height * 5, viewport.width * 10, viewport.height * 10);
+    }
+};
 
 function TilingSprite() {
     this.initialize.apply(this, arguments);
@@ -1704,13 +1936,18 @@ TilingSprite.prototype.initialize = function(filename,width,height) {
 
     this._filename = this.generateKey(filename);
 
+    if(filename)
+    {
+        ImageManager.reserveAlias(this._filename);
+        loader.getBitmapInfo(filename,this.initializeBitmap.bind(this));
+    }else{
+        this.bitmap = null;
+    }
 
-    loader.getBitmapInfo(filename,this.initializeBitmap.bind(this));
-    ImageManager.reserveAlias(this._filename);
 };
 
 TilingSprite.prototype.initializeBitmap = function(info){
-    this.bitmap  = ImageManager.loadBitmap(info.alias|| info.name);
+    this.bitmap  = ImageManager.loadBitmap(info.alias || info.name);
     if(info.frame) {
         this.setFrame(info.frame.x,info.frame.y,info.frame.w,info.frame.h);
         this._rotated = info.rotated;
@@ -1738,7 +1975,6 @@ Object.defineProperty(TilingSprite.prototype, 'bitmap', {
     },
     set: function(value) {
         if (this._bitmap !== value) {
-
             this._bitmap = value;
             if (this._bitmap) {
                 this._bitmap.addLoadListener(this._onBitmapLoad.bind(this));
@@ -1804,6 +2040,7 @@ TilingSprite.prototype._refresh = function() {
 };
 
 TilingSprite.prototype._speedUpCustomBlendModes = Sprite.prototype._speedUpCustomBlendModes;
+
 
 function Stage() {
     this.initialize.apply(this, arguments);
@@ -2146,9 +2383,9 @@ TouchInput.clear = function() {
     this._screenPressed = false;
     this._pressedTime = 0;
     this._events = {};
-    this._triggerEvent = [];
-    this._moveEvent = [];
-    this._releaseEvent = [];
+    this._triggerEvent = {};
+    this._moveEvent = {};
+    this._releaseEvent = {};
     this._events.triggered = false;
     this._events.cancelled = false;
     this._events.moved = false;
@@ -2297,11 +2534,11 @@ TouchInput._onRightButtonDown = function(event) {
 };
 
 TouchInput._onMouseMove = function(event) {
-    if (this._mousePressed) {
-        var x = viewport.pageToCanvasX(event.pageX);
-        var y = viewport.pageToCanvasY(event.pageY);
+    var x = viewport.pageToCanvasX(event.pageX);
+    var y = viewport.pageToCanvasY(event.pageY);
+    if (this._mousePressed)
         this._onMove(x, y);
-    }
+    this._onHover(x,y);
 };
 
 TouchInput._onMouseUp = function(event) {
@@ -2379,10 +2616,11 @@ TouchInput._onTrigger = function(x, y) {
     this._events.triggered = true;
     this._x = x;
     this._y = y;
-    this._triggerEvent.forEach(function(event){
-        if(event)
-            event(x,y);
-    });
+    let event = this._triggerEvent;
+    for(let attr in event){
+        if(event[attr])
+            event[attr](x,y);
+    }
     this._date = Date.now();
 };
 
@@ -2396,36 +2634,59 @@ TouchInput._onMove = function(x, y) {
     this._events.moved = true;
     this._x = x;
     this._y = y;
-    this._moveEvent.forEach(function(event){
-        if(event)
-            event(x,y);
-    });
+    let event = this._moveEvent;
+    for(let attr in event){
+        if(event[attr])
+            event[attr](x,y);
+    };
+};
+
+TouchInput._onHover = function(x,y){
+    this._hovered = true;
+    this._hoverX = x;
+    this._hoverY = y;
 };
 
 TouchInput._onRelease = function(x, y) {
     this._events.released = true;
     this._x = x;
     this._y = y;
-    this._releaseEvent.forEach(function(event){
-        if(event)
-            event(x,y);
-    });
+    let event = this._releaseEvent;
+    for(let attr in event){
+        if(event[attr])
+            event[attr](x,y);
+    };
 };
 
-TouchInput.registerTriggerEvent = function(callback){
-    if(callback && this._triggerEvent.indexOf(callback) === -1)
-        this._triggerEvent.push(callback);
+TouchInput.registerTriggerEvent = function(symbol,callback){
+    if(symbol && callback)
+        this._triggerEvent[symbol] = callback;
 };
 
-TouchInput.registerMoveEvent = function(callback){
-    if(callback && this._moveEvent.indexOf(callback) === -1)
-        this._moveEvent.push(callback);
+TouchInput.removeTriggerEvent = function(symbol){
+    if(this._triggerEvent[symbol])
+        delete this._triggerEvent[symbol];
 };
 
-TouchInput.registerReleaseEvent = function(callback){
-    if(callback && this._releaseEvent.indexOf(callback) === -1)
-        this._releaseEvent.push(callback);
-}
+TouchInput.registerMoveEvent = function(symbol, callback){
+    if(symbol && callback)
+        this._moveEvent[symbol] = callback;
+};
+
+TouchInput.removeMoveEvent = function(symbol){
+    if(this._moveEvent[symbol])
+        delete this._moveEvent[symbol];
+};
+
+TouchInput.registerReleaseEvent = function(symbol,callback){
+    if(symbol && callback)
+        this._releaseEvent[symbol] = callback;
+};
+
+TouchInput.removeReleaseEvent = function(symbol){
+    if(this._releaseEvent[symbol])
+        delete this._releaseEvent[symbol];
+};
 
 function WebAudio() {
     this.initialize.apply(this, arguments);
@@ -3729,7 +3990,15 @@ StorageManager.fileExists = function(savefileId) {
 
 StorageManager.removeFile = function(savefileId) {
     let key = this.webStorageKey(savefileId);
-   localStorage.removeItem(key);
+    localStorage.removeItem(key);
+};
+
+StorageManager.localSaveExisted = function(){
+    for(let i=1;i<7;++i){
+        if(this.exists(i))
+            return true;
+    }
+    return false;
 };
 
 StorageManager.webStorageKey = function(savefileId) {
@@ -3737,8 +4006,10 @@ StorageManager.webStorageKey = function(savefileId) {
         return id+'Config';
     } else if (savefileId === 0) {
         return id +'Global';
-    } else {
+    } else if(savefileId<4) {
         return  id+'_File%02d'.format(savefileId);
+    }else if(savefileId < 7){
+        return  'cloud_'+id+'_File%02d'.format(savefileId);
     }
 };
 
@@ -3876,6 +4147,7 @@ Game_Database.initialize = function(){
         return;
     this._initialized = true;
     this._databaseFiles = [];
+    this._index = {};
     this._state = 'start';
 
     this.initializeDatabase();
@@ -3892,9 +4164,18 @@ Game_Database.loadDatabases  = function(records){
     this._databaseFiles = records;
     for(let i =0; i< this._databaseFiles.length;++i){
         let data = this._databaseFiles[i];
-        loader.readBinaryString(data.content,function(result){
+        loader.readText(data.content,function(result){
             Game_Database._databaseFiles[i].loaded = true;
-            Game_Database._databaseFiles[i].content = JSON.parse(result);
+            try{
+                Game_Database._databaseFiles[i].content = JSON.parse(result);
+            }catch(e){
+                console.log(Game_Database._databaseFiles[i].name);
+            }
+
+            let indexName = Game_Database._databaseFiles[i].name;
+            indexName = indexName.substring(0,indexName.indexOf('.json'));
+            indexName = indexName.toLowerCase();
+            Game_Database._index[indexName] = JSON.parse(JSON.stringify(Game_Database._databaseFiles[i].content));
         });
     }
     loader.clearCache('data');
@@ -3911,9 +4192,65 @@ Game_Database.isLoaded = function(){
     return true;
 };
 
-Game_Database.initGame = function(){
-
+Game_Database.getDefaultPlayer = function(){
+    if(this._index['default'])
+        return JSON.parse(JSON.stringify(this._index['default']));
+    else
+        return {};
 };
+
+
+Game_Database.getData = function(data,n){
+    if(this._index[data])
+        return this._index[data][n] || null;
+    else
+        return null;
+};
+
+Game_Database.getList = function(name){
+    if(this._index[name])
+        return this._index[name];
+    else return [];
+};
+
+Game_Database.getRole = function(n){
+    if(this._index['role'])
+        return this._index['role'][n];
+    else
+        return {};
+};
+
+Game_Database.getMap = function(n){
+    if(this._index['map']){
+        return this._index['map'][n];
+    }else {
+        return {};
+    }
+};
+
+Game_Database.compareValue = function(value,condition){
+    let result = true;
+    if(condition === undefined || condition === null)
+        return false;
+    if(typeof condition !== 'object')
+        return value === condition;
+    for(let attr in condition){
+        if(attr === '$gte' && value < condition[attr]){
+            result = false;
+        }
+        if(attr === '$gt' && value <= condition[attr])
+            result = false;
+        if(attr === '$lt' && value >= condition[attr])
+            result = false;
+        if(attr === '$lte' && value > condition[attr])
+            result = false;
+        else if(value !== condition[attr]){
+            result = false;
+        }
+    }
+    return result;
+};
+
 
 function DataManager() {
     throw new Error('This is a static class');
@@ -3929,30 +4266,6 @@ DataManager.isDatabaseLoaded = function() {
     return Game_Database.isLoaded();
 };
 
-DataManager.loadMapData = function(mapId) {
-    if (mapId > 0) {
-        var filename = 'Map%1.json'.format(mapId.padZero(3));
-        this._mapLoader = ResourceHandler.createLoader(path+'/data/' + filename, this.loadDataFile.bind(this, '$dataMap', filename));
-        this.loadDataFile('$dataMap', filename);
-    } else {
-        this.makeEmptyMap();
-    }
-};
-
-DataManager.makeEmptyMap = function() {
-    $dataMap = {};
-    $dataMap.data = [];
-    $dataMap.events = [];
-    $dataMap.width = 100;
-    $dataMap.height = 100;
-    $dataMap.scrollType = 3;
-};
-
-DataManager.isMapLoaded = function() {
-    this.checkError();
-    return !!$dataMap;
-};
-
 DataManager.checkError = function() {
     if (DataManager._errorUrl) {
         throw new Error('加载失败: ' + DataManager._errorUrl);
@@ -3960,10 +4273,7 @@ DataManager.checkError = function() {
 };
 
 DataManager.setupNewGame = function() {
-    if(Game_Database)
-    {
-        Game_Database.initGame();
-    }
+    GameManager.startGame(Game_Database.getDefaultPlayer());
 };
 
 DataManager.loadGlobalInfo = function() {
@@ -4136,21 +4446,82 @@ DataManager.extractSaveContents = function(contents) {
        Game_database.loadSaveContents(contents);
 };
 
+
+function GameManager() {
+    throw new Error('This is a static class');
+}
+
+GameManager._game = {};
+GameManager._gameStarted = false;
+
+GameManager.startGame = function(saveFile){
+    this._game = saveFile;
+    GameManager.initialize();
+    this._gameStarted = true;
+};
+
+GameManager.initialize = function(){
+
+};
+
+GameManager.getValue = function(attr){
+    if(this._game && this._game[attr] !== undefined)
+        return this._game[attr];
+    else
+        return null;
+};
+
+GameManager.update = function(){
+
+};
+
 function TextManager(){
     throw new Error('This is a static class');
 }
 
+TextManager._text = [];
+
+TextManager._tempTextInfo = {
+    'hp':"体力",
+    "step":"步数"
+};
+
 TextManager.currencyUnit = '$';
+
+TextManager.newGame = function(){
+    return this._text[0] || '新的游戏';
+};
+
+TextManager.continue = function(){
+    return this._text[1] || '继续游戏';
+};
+
+TextManager.rewards = function(){
+    return this._text[2] || '成就一览';
+};
+
+TextManager.options = function(){
+    return this._text[3] || '选项设置';
+};
+
+TextManager.getNameForValue = function(value){
+    return this._tempTextInfo[value] || '';
+};
+
 
 function ConfigManager() {
     throw new Error('This is a static class');
 };
+
+ConfigManager._config = {};
 
 ConfigManager.load = function() {
     let json = {};
     try {
         json = StorageManager.load(-1) || config;
         json = JSON.parse(json);
+        if(json.textSpeed)
+            json.textSpeed=  8;
     } catch (e) {
         console.error(e);
     }
@@ -4176,6 +4547,10 @@ ConfigManager.readVolume = function(config, name) {
 
 ConfigManager.makeData = function(){
     StorageManager.save(-1,JSON.stringify(this._config));
+};
+
+ConfigManager.textSpeed = function(){
+    return this._config.textSpeed;
 };
 
 
@@ -4457,12 +4832,6 @@ Scene_Base.prototype.popScene = function() {
     SceneManager.pop();
 };
 
-Scene_Base.prototype.checkGameover = function() {
-    if ($gameParty.isAllDead()) {
-        SceneManager.goto(Scene_Gameover);
-    }
-};
-
 Scene_Base.prototype.fadeOutAll = function() {
     var time = this.slowFadeSpeed() / 60;
     AudioManager.fadeOutBgm(time);
@@ -4501,6 +4870,7 @@ Scene_Boot.prototype.initialize = function() {
 
 Scene_Boot.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
+
     Game_Boot.updateBootProgress(20);
 };
 
@@ -4512,6 +4882,7 @@ Scene_Boot.prototype.attachReservation = function() {
 
 Scene_Boot.prototype.isReady = function() {
     if (Scene_Base.prototype.isReady.call(this) && window['loader'] && loader._isLoaded) {
+
         return DataManager.isDatabaseLoaded();
     } else {
         return false;
@@ -4522,9 +4893,7 @@ Scene_Boot.prototype.start = function() {
     Scene_Base.prototype.start.call(this);
     Game_Boot.updateBootProgress(30);
     SoundManager.preloadImportantSounds();
-    DataManager.setupNewGame();
     SceneManager.goto(Scene_Title);
-    Window_TitleCommand.initCommandPosition();
 };
 
 
@@ -4544,6 +4913,7 @@ SceneManager._sceneStarted      = false;
 SceneManager._exiting           = false;
 SceneManager._previousClass     = null;
 SceneManager._backgroundBitmap  = null;
+SceneManager._allowTouch        = true;
 SceneManager._loadedList = ['load.js'];
 if (!Utils.isMobileSafari()) SceneManager._currentTime = SceneManager._getTimeInMsWithoutMobileSafari();
 SceneManager._accumulator = 0.0;
@@ -4598,8 +4968,11 @@ SceneManager.tickEnd = function() {
 };
 
 SceneManager.updateInputData = function() {
-    Input.update();
-    TouchInput.update();
+    if(this._allowTouch)
+    {
+        Input.update();
+        TouchInput.update();
+    }
 };
 
 SceneManager.updateMain = function() {
@@ -4655,6 +5028,7 @@ SceneManager.updateScene = function() {
             this.onSceneStart();
         }
         if (this.isCurrentSceneStarted()) {
+            GameManager.update();
             this._scene.update();
         }
     }
@@ -4669,6 +5043,7 @@ SceneManager.renderScene = function() {
 };
 
 SceneManager.onSceneCreate = function() {
+
 };
 
 SceneManager.onSceneStart = function() {
@@ -4759,6 +5134,14 @@ SceneManager.resume = function() {
     }
 };
 
+SceneManager.blockTouch = function(){
+    this._allowTouch = false;
+};
+
+SceneManager.resumeTouch = function(){
+    this._allowTouch = true;
+};
+
 function Game_Boot(){
     throw new Error('This is a static class');
 };
@@ -4827,6 +5210,10 @@ Game_Boot.initializeEnvironment = function(){
     this.initInput();
     this.initAudio();
     SceneManager.setupErrorHandlers();
+};
+
+Game_Boot.startNewGame = function(){
+
 };
 
 Game_Boot.run = function(){

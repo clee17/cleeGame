@@ -127,9 +127,9 @@ loader.getDataFiles = function(callback){
     else if(this._db) {
         let transaction = this._db.transaction('data','readonly').objectStore('data').getAll();
         transaction.onsuccess = function(){
-                loader.loadDatabaseFiles(transaction.result);
-                if(callback)
-                    callback(loader._dataPack.data);
+            loader.loadDatabaseFiles(transaction.result);
+            if(callback)
+                callback(loader._dataPack.data);
         };
         transaction.onerror = function(){
                  if(callback)
@@ -195,7 +195,6 @@ loader.request = function(){
         if(requestFile.response && requestFile.status <= 400)
         {
             loader._requested = true;
-            this._request = null;
             loader.receiveData(requestFile.response);
         }
     };
@@ -211,7 +210,9 @@ loader._encryption = [];
 loader._encrptylength = 32;
 
 loader.loadEncrypt = function(){
-    this._encryption = this._encryptionKey.split().filter(Boolean);
+    for(let i=0; i< this._encryptionKey.length;++i){
+        this._encryption.push(this._encryptionKey[i]);
+    }
 };
 
 loader.receiveData = function(data){
@@ -278,6 +279,7 @@ loader.checkFullyCached = function(){
      {
          for(let key in this._files)
          {
+
              if(this._files[key].failed > 0)
                  return;
          }
@@ -309,7 +311,6 @@ loader._onRecordUpdated = function(list,event) {
         loader._dataPack[key][list.name] = list;
         list.referred = null;
     }
-    console.log(loader._files[key]);
     if(loader._files[key].saved + loader._files[key].failed >= loader._files[key].idx.list.length)
     {
         loader._localSaved++;
@@ -330,7 +331,7 @@ loader.updateRecords = function(key){
         list[i].content = content;
         list[i].sub  = key;
 
-        if(list[i].type === '.json')
+        if(list[i].type === '.json' && key === 'img')
         {
             this.readBinaryString(list[i].content,function(result){
                 let meta = JSON.parse(result);

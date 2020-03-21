@@ -1,16 +1,36 @@
+var gameText = null;
+
 var scriptManager = function(){
     throw new Error('This is a static class');
 };
 
 scriptManager.initialize = function(){
     this._fullList = window['libs'] || [];
+    this._moduleList = window['modules'] || [];
+    this._gameTextLoading = false;
     this._reloadList = [];
     this._loadedList = [];
     this._retryList = [];
     this._errorList = [];
     this._initialized = true;
-
     this.requestLoad();
+};
+
+scriptManager.loadGameText = function(){
+    this._gameTextLoading = true;
+    let newUrl = '/game/text/'+id;
+    let request = new XMLHttpRequest();
+    request.open("GET", newUrl);
+    request.responseType = "text/plain";
+    request.send();
+    request.onload = function () {
+        scriptManager._gameTextLoading = false;
+        if(request.response && request.status <= 400){
+            gameText = JSON.parse(LZString.decompressFromBase64(request.response));
+        }else
+            gameText = [];
+        scriptManager.autoStart();
+    };
 };
 
 scriptManager.checkDependency = function(link){
@@ -71,6 +91,18 @@ scriptManager.checkRetry =function(dl){
     })
 };
 
+scriptManager.checkModules = function(dl){
+    this._moduleList.forEach(function(link,i,arr){
+        if(scriptManager.checkDependency(link))
+            dl.push(link);
+    });
+
+    dl.forEach(function(link){
+        if(scriptManager._moduleList.indexOf(link)!== -1)
+            scriptManager._moduleList.splice(scriptManager._moduleList.indexOf(link),1);
+    });
+};
+
 scriptManager.updateRetry = function(link){
     let insert = true;
     for(let i=0;i<this._retryList.length;++i)
@@ -107,11 +139,19 @@ scriptManager.append=function(link){
         this.updateRetry(link);
 };
 
+scriptManager.checkTextLoad = function(){
+    if(this._loadedList.indexOf('lzString') >=0 && !this._gameTextLoading && !gameText){
+        this.loadGameText();
+    }
+};
+
 scriptManager.requestLoad = function(){
     let downloadList = [];
     scriptManager.checkReload(downloadList);
     scriptManager.checkLibrary(downloadList);
+    scriptManager.checkModules(downloadList);
     scriptManager.checkRetry(downloadList);
+    scriptManager.checkTextLoad()
     downloadList.forEach(function(list){
         scriptManager.append(list);
     })
@@ -147,14 +187,25 @@ scriptManager.finishRetry = function(filename){
     }
 };
 
+scriptManager.modulesLoaded = function(){
+  for(let i=0; i<this._moduleList.length;++i){
+      if(this._loadedList.indexOf(this._moduleList[i])<0)
+          return false;
+  }
+  return !!gameText;
+};
+
+scriptManager.autoStart = function(){
+    if(this._loadedList.indexOf('boot') >0 && this.modulesLoaded())
+        Game_Boot.boot();
+};
 
 scriptManager.finishLoad = function(filename){
     this._loadedList.push(filename);
     this.finishReload(filename);
     this.finishLibrary(filename);
     this.finishRetry(filename);
-    if(filename == 'boot')
-        Game_Boot.boot();
+    this.autoStart()
     scriptManager.requestLoad();
 };
 

@@ -13,7 +13,9 @@ Sprite_Button.prototype.initialize = function(filename,symbol) {
     this._handler = null;
     this._active = true;
     this._contentsSprite = new Sprite();
+    this.addChild(this._contentsSprite);
     this._nameArea = new Rectangle(0,0,this._width,this._height);
+    this._blockTouch = true;
     this._symbol = symbol || filename;
     this._name = '';
     this._fontSize = 14;
@@ -31,7 +33,6 @@ Sprite_Button.prototype.callClickHandler = function(){
     if(this._handler)
     {
         this._handler(this._symbol);
-        this._active = false;
     }
 
 };
@@ -56,7 +57,6 @@ Sprite_Button.prototype._btnBitmapLoaded = function(){
     this._height = this._fullTexture.height/3;
     this.bitmap = this._fullTexture;
     this._contentsSprite.bitmap =  new Bitmap(this._width,this._height,'none');
-    this.addChild(this._contentsSprite);
     this._nameArea.width = this._width;
     this._nameArea.height = this._height;
     this._refreshStatus();
@@ -71,6 +71,7 @@ Sprite_Button.prototype.updateHover = function(){
     let y = this.canvasToLocalY(TouchInput._hoverY);
     if(this._active && this._enabled)
     {
+
         if(this.isInsideFrame(x,y) && !this._selected){
             this._selected = true;
             this._refreshStatus();
@@ -103,9 +104,9 @@ Sprite_Button.prototype.updateTouch = function(){
                     this._selected = false;
                     this._refreshStatus();
                 }
-                if (TouchInput.isReleased()) {
-                    this.callClickHandler();
-                }
+                this.callClickHandler();
+                if(this._blockTouch)
+                    TouchInput._released = false;
             }
         }
     } else {
@@ -158,7 +159,6 @@ Sprite_Button.prototype.refreshName = function(){
             this._contentsSprite.bitmap.drawText(text,tx,rect.y,maxWidth,rect.height,'center');
             tx+= maxWidth+spacing*2;
         }
-
     }
 };
 
@@ -182,4 +182,8 @@ Sprite_Button.prototype.setComment =function(comment){
 
 Sprite_Button.prototype.setFontSize = function(fontSize){
     this._fontSize = fontSize;
+};
+
+Sprite_Button.prototype.setEvent = function(callback){
+    this._handler = callback || null;
 };

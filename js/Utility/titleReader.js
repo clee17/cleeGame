@@ -12,7 +12,6 @@ let gameDir = path.join(rootDir,args[0],'/img/titles');
 let testDir = path.join(rootDir,args[0],'/img/clgTitles');
 
 let reference = JSON.parse(fs.readFileSync(path.join(testDir,'index.json')));
-console.log(reference.index);
 
 let countFileNum = function(refer){
    let left = 100000-refer.startIndex;
@@ -62,7 +61,6 @@ let readFile = function(fileName){
         }
     }
     let finalBuffer = Buffer.concat(bufferList,finalLength);
-    console.log(finalBuffer);
     try{
         fs.writeFileSync(path.join(testDir,fileName),finalBuffer);
     }

@@ -59,17 +59,17 @@ let bytesTest = function(){
     view[0] = parseInt('0x52',16);
     view[1] = parseInt(num.toString(16),16);
     view[2] = parseInt(num1.toString(16),16);
-    console.log(new Buffer.from(arrayBuffer));
+
     for(let i=0;i<arrayBuffer.byteLength;++i)
     {
         view[i] = view[i]^parseInt(num3.toString(16),16);
     }
-    console.log(new Buffer.from(arrayBuffer));
+
     for(let i=0;i<arrayBuffer.byteLength;++i)
     {
         view[i] = view[i]^parseInt(num3.toString(16),16);
     }
-    console.log(new Buffer.from(arrayBuffer));
+
 };
 
 let reWrite = function(){

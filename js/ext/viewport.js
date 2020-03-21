@@ -498,6 +498,7 @@ viewport.printLoadingError = function(filename){
         viewport.stop();
     this._errorShowed = true;
     if(this._errorPrinter){
+        console.log('error printer');
         this._errorPrinter.innerHTML = this._makeErrorHtml('加载失败','资源加载失败'+filename+',请重新下载');
     }
 };
@@ -709,6 +710,20 @@ viewport.stop = function(){
        this._cover.pause();
     this._applyCanvasFilter();
     this._clearUpperCanvas();
+};
+
+viewport.startNewGame = function(){
+    let gameBoard = document.getElementById('gameBoard');
+    if(gameBoard)
+        gameBoard.style.height = '26rem';
+};
+
+viewport.closeBoard = function(){
+    let gameBoard = document.getElementById('gameBoard');
+    if(gameBoard)
+        gameBoard.style.height = '0';
+    if(SceneManager)
+        SceneManager.resumeTouch();
 };
 
 viewport.update = function(){

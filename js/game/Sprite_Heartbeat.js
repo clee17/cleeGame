@@ -1,4 +1,3 @@
-
 function Sprite_Heartbeat() {
     this.initialize.apply(this, arguments);
 }
@@ -13,44 +12,44 @@ Sprite_Heartbeat.prototype.initialize = function(filename) {
     this._scaleStep = 0.15;
     this._minScale = 0.5;
     this._maxScale = 1.2;
-    this._scalSign = -1;
+    this._scaleSign = -1;
 };
 
 
-Sprite_Sign.prototype.updateOpenness = function(){
+Sprite_Heartbeat.prototype.updateOpenness = function(){
     this.scale = this._openness/255;
 };
 
-Sprite_Blink.prototype.updateBlinkStatus = function(){
+Sprite_Heartbeat.prototype.updateScaleStatus = function(){
     if(!this.isOpen())
         return;
-    if(this.opacity >= this._maxFade && this._fadeSign !== -1){
-        this._fadeSign = 0;
+    if(this.scale >= this._maxScale && this._scaleSign !== -1){
+        this._scaleSign = 0;
         this._stayCount++;
-    }else if(this.opacity <= this._minFade && this._fadeSign !==1){
-        this._fadeSign = 0;
+    }else if(this.scale <= this._minScale && this._scaleSign !==1){
+        this._scaleSign = 0;
         this._stayCount++;
     }
-    if(this.opacity >= this._maxFade && this._stayCount >= this._blinkStop*1.2){
+    if(this.scale >= this._minScale && this._stayCount >= this._beatStop*1.2){
         this._stayCount = 0;
-        this._fadeSign = -1;
-    }else if(this.opacity <= this._minFade && this._stayCount >= this._blinkStop*0.85){
+        this._scaleSign = -1;
+    }else if(this.scale <= this._minScale && this._stayCount >= this._beatStop*0.85){
         this._stayCount = 0;
-        this._fadeSign = 1;
+        this._scaleSign = 1;
     }
 };
 
-Sprite_Blink.prototype.updateBlink = function(){
+Sprite_Heartbeat.prototype.updateScale = function(){
     if(!this.isOpen())
         return;
-    if(this._fadeSign <0 ){
-        this.opacity -= this._opacityStep;
+    if(this._scaleSign <0 ){
+        this.scale -= this._scaleStep;
     }
-    else if (this._fadeSign >0)
-        this.opacity += this._opacityStep;
+    else if (this._scaleSign >0)
+        this.scale += this._scaleStep;
 };
 
-Sprite_Blink.prototype.update = function() {
+Sprite_Heartbeat.prototype.update = function() {
     Sprite_Sign.prototype.update.call(this);
     this.updateScaleStatus();
     this.updateScale();
