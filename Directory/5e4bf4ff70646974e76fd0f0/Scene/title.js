@@ -142,6 +142,8 @@ Scene_Title.prototype.isStarted = function(){
 };
 
 Scene_Title.prototype.commandNewGame = function() {
+    viewport.startNewGame();
+    return;
     DataManager.setupNewGame();
     this._titleCommand.close();
     this.fadeOutAll();

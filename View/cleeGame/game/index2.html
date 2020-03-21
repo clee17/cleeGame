@@ -114,7 +114,7 @@
         overflow:hidden;
         background-image:url('/img/pattern_001.png');
         background-repeat:no-repeat;
-        background-size:100% 45%;
+        background-size:80% 45%;
         background-position-x: 100%;
         background-position-y:-30px;
         transition:height 0.4s;
@@ -146,6 +146,18 @@
 
     #gameStatement{
         min-height:20rem;
+        color:rgba(190,150,124,1);
+    }
+
+    #gameStatement >div{
+        margin:2rem;
+        margin-top:3rem;
+    }
+
+    #gameStatement p{
+        margin-bottom:1rem;
+        text-indent:2rem;
+        font-family:SimSun, serif, Arial, "Microsoft YaHei UI";
     }
 
     #gameOptions button {
@@ -190,11 +202,13 @@
         <button id="closeButton" onclick="viewport.closeBoard()">×</button>
     </div>
     <div id="gameStatement">
-
+        <div>
+            <p>本游戏尚在开发进程中，因此暂不开放公众玩家的注册游玩。</p>
+            <p>请关注本游戏的lofter发布号以获取准确发布日期。</p>
+        </div>
     </div>
     <div id="gameOptions">
-        <button>登录</button>
-        <button>取消</button>
+        <button onclick="viewport.closeBoard()">确定</button>
     </div>
 </div>
 </body>
