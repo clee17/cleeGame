@@ -18,7 +18,6 @@ let redis = require('redis'),
     redisClient = redis.createClient();
 
 var argv = process.argv;
-console.log(argv);
 
 function dataEditor(){
     throw new Error(' this is a static class');

@@ -2,8 +2,6 @@ app.directive('renderFinish',function($timeout){
     return {
         restrict: 'A',
         link:function(scope,element,attr){
-            console.log('entered render finish');
-            console.log(scope);
             if(scope.$last ===true)
             {
                 scope.$emit('renderFinish');

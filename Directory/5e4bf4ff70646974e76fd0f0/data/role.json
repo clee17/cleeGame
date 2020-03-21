@@ -1,0 +1,136 @@
+[
+  {
+    "index": 0
+  },
+  {
+    "index": 1,
+    "name": "Dick Grayson",
+    "gender": 1,
+    "head": "head001.png"
+  },
+  {
+    "index": 2,
+    "name": "Jason Todd",
+    "gender": 1,
+    "head": "head002.png"
+  },
+  {
+    "index": 3,
+    "name": "Batman",
+    "gender": 1
+  },
+  {
+    "index": 4,
+    "name": "Bruce Wayne",
+    "gender": 1
+  },
+  {
+    "index": 5,
+    "name": "Alfred Pennyworth",
+    "gender": 1
+  },
+  {
+    "index": 6,
+    "name": "Babara Gordon",
+    "nickname": "Bab",
+    "gender": 1
+  },
+  {
+    "index": 7,
+    "name": "Tim Drake",
+    "gender": 1
+  },
+  {
+    "index": 8,
+    "name": "Selena Kyle",
+    "gender": 1
+  },
+  {
+    "index": 9
+  },
+  {
+    "index": 10
+  },
+  {
+    "index": 11
+  },
+  {
+    "index": 12
+  },
+  {
+    "index": 13
+  },
+  {
+    "index": 14
+  },
+  {
+    "index": 15
+  },
+  {
+    "index": 16,
+    "name": "conrad Lindsey",
+    "gender": 1
+  },
+  {
+    "index": 17,
+    "name": "Rickey Cruz",
+    "gender": 1
+  },
+  {
+    "index": 18,
+    "name": "Edwin Sherman",
+    "gender": 1
+  },
+  {
+    "index": 19,
+    "name": "Jorge Hines",
+    "gender": 1
+  },
+  {
+    "index": 20,
+    "name": "Franklin Lopez",
+    "gender": 1
+  },
+  {
+    "index": 21,
+    "name": "Freddie Allison",
+    "gender": 1
+  },
+  {
+    "index": 22,
+    "name": "Nora Berry",
+    "gender": 0
+  },
+  {
+    "index": 23,
+    "name": "Kristina Byrd",
+    "gender": 0
+  },
+  {
+    "index": 24,
+    "name": "Rachel Tapia",
+    "gender": 0
+  },
+  {
+    "index": 25,
+    "name": "April Barnett",
+    "gender": 0
+  },
+  {
+    "index": 26,
+    "name": "Esther Carr",
+    "gender": 0
+  },
+  {
+    "index": 27,
+    "name": "Nelson Santiago",
+    "gender": 1,
+    "age": 20
+  },
+  {
+    "index": 28,
+    "name": "Ashley Barnes",
+    "gender": 0,
+    "age": 26
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {"index":0, "name":"地下监控室", "level":0, "description":"位于哥谭市地下的监控室，在逃避哥谭义警监测的同时可以方便地获取哥谭警局的信息。"},
+  {"index":1, "name":"地下浴室","level":0, "description":"干净的热水，足以满足基本生活所需。"},
+  {"index":2, "name": "客厅","level":1, "description": "这里的阳光不错"},
+  {"index":3, "name": "卧室","level": 1,"description": "嗨，床"},
+  {"index": 4,"name": "餐厅","level": 2,"description": "看看今天早晨吃什么，华夫饼？"},
+  {"index": 5,"name": "书房","level": 2,"description": "钢铁丛林中的精神绿洲"},
+  {"index": 5,"name": "楼顶泳池","level": 3,"description": "在没人看到的地方裸泳真是个好主意"},
+  {"index": 6,"name": "空中花园","level": 3,"description": "我打赌毒藤女一定会嫉妒这个地方的"}
+]

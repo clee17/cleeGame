@@ -61,5 +61,15 @@
     "hp": 0,
     "name": "返回瓷砖",
     "events": []
+  },
+  {
+    "index": 5,
+    "textureIndex": 6,
+    "type": "danger",
+    "map": -1,
+    "step": 0,
+    "hp": 0,
+    "name": "危险瓷砖",
+    "events": []
   }
 ]

@@ -6,8 +6,6 @@ app.controller("userEditCon",['$scope','$rootScope','loginManager',function($sco
 
     $scope.checkError = function(){
         $scope.error = '';
-        console.log($scope.rpPwd);
-        console.log($scope.pwd);
         if($scope.pwd !== '' && $scope.rpPwd !== '' && $scope.pwd !== $scope.rpPwd)
             $scope.error = '您两次输入的密码不一致,请重新输入';
         let element = document.getElementById('resetPwError');

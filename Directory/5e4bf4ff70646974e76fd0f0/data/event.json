@@ -1,0 +1,30 @@
+[
+  {
+    "index": 0,
+    "type": "text",
+    "condition": {
+      "map": 0,
+      "level": -1
+    },
+    "contents": [1,2,3,4],
+    "result": {
+      "level": {"$inc": 1}
+    },
+    "task": {"add": [0]}
+  },
+  {
+    "index": 1,
+    "type": "challenge",
+    "condition":{
+      "map": 1
+    },
+    "exit": 11,
+    "fail": 12,
+    "events": [0],
+    "hidden": [1],
+    "task": {
+      "add": [1],
+      "complete": [0]
+    }
+  }
+]

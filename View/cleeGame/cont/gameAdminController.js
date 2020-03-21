@@ -7,7 +7,6 @@ app.service('gameManager',function($http,$rootScope){
                 let data = JSON.parse(LZString.decompressFromBase64(response.data));
                  $rootScope.$broadcast('newGameAddFinished',data);
             },function(err){
-                console.log(err);
                 $rootScope.$broadcast('newGameAddFinished',{success:false,message:'网络通信错误'});
             });
     };
@@ -147,7 +146,6 @@ app.controller("gameAdminCon",['$location','$scope','$rootScope','$timeout','$in
     $scope.validateGameSub=  function(){
         let errorMessage = null;
         $scope.gameSubmit.finalVersion = $scope.gameSubmit.version.root+'.'+$scope.gameSubmit.version.sub+'.'+$scope.gameSubmit.version.branch;
-        console.log($scope.gameSubmit.finalVersion);
         if($scope.gameSubmit.title.length === 0)
             errorMessage = '游戏名称不能为空';
         else if($scope.gameSubmit.path.length ===0)
@@ -207,7 +205,6 @@ app.controller("gameAdminCon",['$location','$scope','$rootScope','$timeout','$in
         $scope.requesting = false;
         if(data.success)
         {
-            console.log(data.docs);
             $scope.receivedList = JSON.parse(JSON.stringify(data.docs));
             if($scope.receivedList === 0)
                 $rootScope.$broadcast('showError','数据库中没有记录');

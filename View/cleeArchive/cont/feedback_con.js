@@ -39,7 +39,6 @@ app.directive('feedbackContent',function(){
         restrict: 'E',
         link:function(scope,element,attr){
             scope.$watch(element[0].offsetHeight,function(){
-                console.log('triggered');
             });
         }
     }
@@ -353,13 +352,11 @@ app.controller("feedbackCon",['$scope','$rootScope','$cookies','$http','$timeout
             return;
         $scope.validateError = '';
         let request = {code:$scope.codeVal,type:0};
-        console.log(request);
         $scope.validating = true;
         $http.post('/fanfic/validate/'+$scope.chapterId,{data:JSON.stringify(request)})
             .then(function(response){
                 $scope.validating = false;
                 let data = response.data;
-                console.log(data);
                 if(data.success)
                 {
                     let expireDate = new Date();

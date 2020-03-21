@@ -25,7 +25,6 @@ app.directive('infoReceiver',function($rootScope){
                 scope.count['5'] = 0;
             if(!scope.count['10'])
                 scope.count['10'] = 0;
-            console.log(scope.count);
             scope.gradeTemplate = JSON.parse(scope.gradeTemplate);
             scope.tagList = JSON.parse(scope.tagList);
             scope.initialize();

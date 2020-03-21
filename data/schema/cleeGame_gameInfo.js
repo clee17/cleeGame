@@ -20,7 +20,7 @@ module.exports = new mongoose.Schema({
 
     exchangeRate:{type:Number,default:100},
 
-    modules:[{type:Number,default:0}],
+    modules:[{type:String,default:""}],
 
     date: { type: Date, default: Date.now },
 

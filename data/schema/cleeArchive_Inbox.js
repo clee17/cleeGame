@@ -5,6 +5,6 @@ module.exports = new mongoose.Schema({
     from:{type:mongoose.Schema.ObjectId,default:null},
     recipient:[{type:mongoose.Schema.ObjectId,default:null}],
     groups:[{type:Number,default:0}],
-    contents:{type:String,default:''},
+    contents:{type:mongoose.Schema.ObjectId,refer:'message_contents',default:''},
     sent:{type:Date,default:Date.now()},
 });

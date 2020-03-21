@@ -11,7 +11,7 @@ module.exports = new mongoose.Schema({
 
     ipa:{type:String,default:null},
 
-    targetUser:{type:mongoose.Schema.ObjectId,default:null},
+    targetUser:{type:mongoose.Schema.ObjectId,default:null,index:true},
 
     date: {type: Date, default: Date.now},
 

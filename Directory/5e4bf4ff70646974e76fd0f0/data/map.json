@@ -1,0 +1,151 @@
+[
+  {
+    "index": 0,
+    "name": "哥谭市",
+    "condition": [],
+    "buttons": [
+      {
+        "refer": "MapBtn001",
+        "type": "map",
+        "name": "哥谭警局",
+        "symbol": "1",
+        "pos": {
+          "x": 645,
+          "y": 40
+        }
+      },
+      {
+        "refer": "MapBtn002",
+        "type": "map",
+        "name": "林荫坊",
+        "symbol": "2",
+        "pos": {
+          "x": 372,
+          "y": 150
+        }
+      },
+      {
+        "refer": "MapBtn003",
+        "type": "map",
+        "name": "奈何酒吧",
+        "symbol": "3",
+        "pos": {
+          "x": 60,
+          "y": 192.5
+        }
+      },
+      {
+        "refer": "MapBtn004",
+        "type": "map",
+        "name": "中城区",
+        "symbol": "4",
+        "pos": {
+          "x": 372,
+          "y": 305
+        }
+      },
+      {
+        "refer": "MapBtn005",
+        "type": "map",
+        "name": "Wayne大宅",
+        "symbol": "5",
+        "pos": {
+          "x": 60,
+          "y": 40
+        }
+      },
+      {
+        "refer": "MapBtn006",
+        "type": "map",
+        "name": "墓园",
+        "symbol": "6",
+        "pos": {
+          "x": 645,
+          "y": 192.5
+        }
+      },
+      {
+        "refer": "MapBtn007",
+        "type": "map",
+        "name": "哥谭港",
+        "symbol": "7",
+        "pos": {
+          "x": 645,
+          "y": 345
+        }
+      },
+      {
+        "refer": "MapBtn008",
+        "type": "map",
+        "name": "地下赌场",
+        "symbol": "8",
+        "pos":{
+          "x": 60,
+          "y": 345
+        }
+      }]
+  },
+  {
+    "index": 1,
+    "name": "哥谭警局",
+    "info": 0,
+    "condition": {
+      "level": {"$gte": 0}
+    }
+  },
+  {
+    "index": 2,
+    "name": "林荫坊",
+    "info": 1,
+    "condition": {
+      "level": {"$gte": 2}
+    }
+  },
+  {
+    "index": 3,
+    "name": "奈何酒吧",
+    "condition": {
+      "level": {"$gte": 1}
+    }
+  },
+  {
+    "index": 4,
+    "name": "中城区",
+    "condition": {
+      "level": {"$gte": 10}
+    }
+  },
+  {
+  "index": 5,
+    "name": "Wayne大宅",
+  "condition": {
+    "level": {
+      "$gte": 4
+    }
+  }},
+  {
+    "index": 6,
+    "name": "墓园",
+    "condition": {
+      "level": {
+        "$gte": 1
+      }
+    }
+  },
+  {
+    "index": 7,
+    "name": "哥谭港",
+    "condition": {
+      "level": {"$gte": 10}
+    }
+  },
+  {
+    "index": 8,
+    "name": "地下赌场",
+    "condition": {
+      "level": {
+        "$gte": 10
+      }
+    }
+  }
+]

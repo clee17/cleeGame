@@ -1,10 +1,10 @@
 [
   {
     "type":"Sprite",
-    "name": "Blink"
+    "name": "Button"
   },
   {
-    "type":"Sprite",
-    "name": "Heartbeat"
+    "type": "Progress",
+    "name": "Pie"
   }
 ]

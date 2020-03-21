@@ -56,7 +56,6 @@ app.service('worksManager',function($http,$rootScope){
                 $rootScope.$broadcast('worksManagerRequest',response.data);
             })
             .catch(function(err){
-                console.log(err);
                 manager.requesting = false;
                 $rootScope.$broadcast('worksManagerRequest',{error:err,status:503});
             });
@@ -249,7 +248,6 @@ app.controller("manualCon",function($scope,$http,$routeParams,$location){
     };
 
     $scope.$on('$viewContentLoaded',function(){
-        console.log('view reloaded');
         if($scope.error == firstError)
             $scope.error = "没有找到该页面，请点击左侧按钮前往相应说明。"
     });
@@ -311,7 +309,6 @@ app.controller('guideBarCon',function($scope,newsManager,$timeout){
                 $scope.$apply();
             })
             .catch(function(err){
-                console.log(err);
                 $scope.requesting =false;
                 $scope.error = '没有获取到新闻，后端出错';
             })

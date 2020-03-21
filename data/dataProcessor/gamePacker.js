@@ -102,7 +102,9 @@ resourcePacker.pack = function(){
 };
 
 resourcePacker.loadEncrypt = function(){
-    this._encryption = this._encryptionKey.split().filter(Boolean);
+    for(let i=0; i< this._encryptionKey.length;++i){
+        this._encryption.push(this._encryptionKey[i]);
+    }
 };
 
 resourcePacker.requestEncrypt = function(buffer){

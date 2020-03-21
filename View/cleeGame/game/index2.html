@@ -11,6 +11,7 @@
         var version =' <%- version %>';
         var path = '/games/'+'<%- path %>';
         var libs  = JSON.parse('<%- JSON.stringify(lib) %>');
+        var modules = JSON.parse('<%- JSON.stringify(modules) %>');
         var id = '<%- _id %>';
         var config = '<%- JSON.stringify(config) %>';
         var Md5Info = '<%- md5 %>';
@@ -25,11 +26,13 @@
             this._updateCall = [];
             this._stashedQueue = [];
         };
+
         updateManager.getQueue = function(){
             if(!this._initialized)
                 this.initialize();
             return this._updateQueue;
         };
+
         updateManager.isRegistered = function(obj){
             for(let i =0; i<this._updateQueue.length;++i)
             {
@@ -38,12 +41,15 @@
             }
             return false;
         };
+
         updateManager.stashUpdate = function(obj){
             this.removeUpdate(obj);
         };
+
         updateManager.restoreUpdate = function(obj){
             this._updateQueue.push(obj);
         };
+
         updateManager.registerUpdate = function(obj){
             if(!this._initialized)
                 this.initialize();
@@ -56,6 +62,7 @@
             }
             this._updateQueue.push(obj);
         };
+
         updateManager.removeUpdate = function(obj){
             if(!this._initialized)
                 this.initialize();
@@ -66,6 +73,7 @@
                     updateManager._updateQueue.splice(i,1);
             })
         };
+
     </script>
     <script src="/js/scriptManager.js" defer="defer"></script>
     <script src="/js/loader.js" defer="defer"></script>
@@ -79,11 +87,115 @@
         min-width:100vw;
         min-height:100vh;
     }
+
+    #closeButton{
+        position:absolute;
+        right:1rem;
+        top:-0.3rem;
+        padding:0;
+        font-weight:bold;
+        font-size:2rem;
+        border:none;
+        color:rgba(155,60,84,1);
+        background:rgba(0,0,0,0);
+    }
+
+    #closeButton:hover{
+        color:white;
+    }
+
+    #gameBoard{
+        background:rgba(236,225,219,1);
+        pointer-events:auto;
+        min-width:22rem;
+        position:fixed;
+        top:calc(50% - 14rem);
+        left:calc(50% - 12rem);
+        overflow:hidden;
+        background-image:url('/img/pattern_001.png');
+        background-repeat:no-repeat;
+        background-size:100% 45%;
+        background-position-x: 100%;
+        background-position-y:-30px;
+        transition:height 0.4s;
+        display:flex;
+        flex-direction:column;
+        border-radius:0.4rem;
+        z-index:99;
+        height:0;
+    }
+
+    #gameBoard >div:nth-child(1){
+        width:100%;
+        min-height:2rem;
+        font-weight:bold;
+        background:rgba(236,199,184,1);
+        letter-spacing:1rem;
+        display:flex;
+        text-align:center;
+        color:rgba(155,60,84,1);
+        font-size:1.2rem;
+    }
+
+    #gameBoard >div:last-child{
+        width:100%;
+        display:flex;
+        height:3.5rem;
+        margin-bottom:2rem;
+    }
+
+    #gameStatement{
+        min-height:20rem;
+    }
+
+    #gameOptions button {
+
+        font-size:1rem;
+        letter-spacing:0.5rem;
+        margin-top:auto;
+        margin-bottom:auto;
+        margin-right:2rem;
+        background:rgba(155,60,84,1);
+        color:white;
+        font-weight:bold;
+        border-radius:5rem;
+        min-height:1.5rem;
+        padding:0.3rem;
+        padding-left:0.8rem;
+        border:none;
+    }
+
+    #gameOptions button:hover{
+        background:rgba(252,162,177,1);
+    }
+
+    #gameOptions button:first-child{
+        margin-left:auto;
+    }
+
+    #gameOptions button:last-child{
+        margin-right:auto;
+    }
+
 </style>
 <%- style_root %>
 <body>
+
 <script src="/js/JsExt.js"></script>
 <script src="/js/viewport.js"></script>
 <%- scene_load %>
+<div id="gameBoard">
+    <div>
+        <div style="margin:auto;">公告</div>
+        <button id="closeButton" onclick="viewport.closeBoard()">×</button>
+    </div>
+    <div id="gameStatement">
+
+    </div>
+    <div id="gameOptions">
+        <button>登录</button>
+        <button>取消</button>
+    </div>
+</div>
 </body>
 </html>

@@ -1,0 +1,41 @@
+[
+  {
+    "index": 0,
+    "name": "探照灯",
+    "imgId": 1,
+    "description": "可以照出目标方向的警用装备",
+    "effect": {
+      "map_status":1
+    }
+  },
+  {
+    "index": 1,
+    "name": "防弹背心",
+    "imgId": 2,
+    "description": "可以降低恶性事件对体力和步数的伤害"
+  },
+  {
+    "index": 2,
+    "name": "能量棒",
+    "imgId": 0,
+    "description": "可以少量补充体力"
+  },
+  {
+    "index": 3,
+    "name": "单车硬币",
+    "imgId": 3,
+    "description": "可以使用街道上的公众单车，增加当前持有的步数"
+  },
+  {
+    "index": 4,
+    "imgId": 4,
+    "name": "毒藤的馈赠",
+    "description": "据说是来自毒藤女培育植物的神奇提取物，有起死回生的效果"
+  },
+  {
+    "index": 5,
+    "imgId": 5,
+    "name": "奇怪的手表",
+    "description": "来自外星的神奇手表，似乎能够逆转时间和空间。"
+  }
+]
