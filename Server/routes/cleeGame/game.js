@@ -63,6 +63,7 @@ let handler = {
 
     getModules:function(req,res,data){
         let files = ['lzString','boot','JSZip'];
+        files = files.concat(data.modules);
         let countryCode = __getCountryCode(req.ipData);
         gameModuleModel.aggregate([
                 {$match:{name:{$in:files}}},
@@ -88,10 +89,15 @@ let handler = {
                 return;
             }
             data.lib = [];
+            let tmpModules = JSON.parse(JSON.stringify(data.modules));
+            data.modules = [];
             docs.forEach(function(item){
                 let tmp = JSON.parse(JSON.stringify(item));
                 tmp.path = tmp.path[countryCode];
-                data.lib.push(tmp);
+                if(tmpModules.indexOf(tmp.name)>0)
+                    data.modules.push(tmp);
+                else
+                    data.lib.push(tmp);
             });
             handler.newGame(req,res,data);
         })
@@ -146,12 +152,22 @@ let handler = {
 
                 }
             }
+            console.log(data.loadList);
             if(data.loadList.length === 0)
             {
                 data.status = 200;
                 handler.finalStr(res,data);
             }
         })
+    },
+
+    loadText:function(req,res){
+        let id = req.params.gameId;
+        let result = fs.readFileSync(path.join(__game,id+'/','text.json'),{encoding:'utf-8'});
+        if(!result)
+           res.status(404).send({message:'There is no text under the game file'});
+        else
+            res.status(200).send(lzString.compressToBase64(result));
     },
 
     loadScripts:function(req,res){
@@ -163,17 +179,22 @@ let handler = {
             res.status(404).send({message:'请输入正确的游戏路径名'});
         let finalSend = {
             contents: '',
-            loadList:['Scene','Display'],
+            loadList:['Scene','Display','Manager'],
             id:id,
             loadedScene:list,
             subPath:path.join(__game,id+'/'),
             sent:false,
             status:404,
         };
-        finalSend.contents = fs.readFileSync(path.join(__game,'Sprite_Base.js'),{encoding:'utf-8'});
-        finalSend.contents += fs.readFileSync(path.join(__game,'Window_Base.js'),{encoding:'utf-8'});
+        let widget = fs.readFileSync(path.join(__game,id+'/','widget.json'),{encoding:'utf-8'});
+        widget = JSON.parse(widget);
+        for(let i=0;i <widget.length;++i){
+            let filename = widget[i].type+'_'+widget[i].name+'.js';
+            finalSend.contents+= fs.readFileSync(path.join(__basedir,'/js/game/',filename),{encoding:'utf-8'});
+        }
         handler.loadDir(finalSend,'Scene',res);
         handler.loadDir(finalSend,'Display',res);
+        handler.loadDir(finalSend,'Manager',res);
     },
 
     getPreview: function(req,res){
@@ -186,7 +207,6 @@ let handler = {
             res.status(404).send({status:503,message:'the game pathname is not correct'});
         }
     },
-
 };
 
 module.exports = handler;

@@ -16,4 +16,5 @@ module.exports=function(app)
     app.use('/controller',express.static(path.join(__basedir,'/View/controller')));
     app.use('/modules',express.static(path.join(__basedir,'/View/modules')));
     app.use('/js',express.static(path.join(__basedir,'/js/ext/')));
+    app.use('/gameLib',express.static(path.join(__basedir,'/js/game/')));
 };

@@ -197,7 +197,6 @@ let handler = {
             response.websiteInfo = _websiteInfo;
             if(response.user)
                 response.user.intro = lzString.decompressFromBase64(response.user.intro);
-            console.log(response.user.intro);
 
             if(response.user){
                 res.render('cleeArchive/userPage.html',response);

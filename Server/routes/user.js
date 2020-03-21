@@ -13,7 +13,6 @@ let routeHandler = {
     finalSend:function(res,data){
         if(data.sent)
             return;
-        console.log(data);
         data.sent = true;
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },

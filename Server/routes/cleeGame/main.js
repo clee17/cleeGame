@@ -9,18 +9,11 @@ let handler = {
         let contents = fs.readFileSync(path.join(__view,'cleeGame/loginBoard.html'),{encoding:'utf-8'});
         let data = {loginBoard:contents};
         data.user = req.session.user || null;
-        if(req.ipData && req.ipData.country === '中国')
-            data.lib = [
-                'https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js',
-                'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
-                'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
-                'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
-        else
-            data.lib = [
-                'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
-                'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
-                'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
-                'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+        data.lib = [
+            'https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js',
+            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
         res.render(path.join(__view,'cleeGame/index.html'),data);
     },
 

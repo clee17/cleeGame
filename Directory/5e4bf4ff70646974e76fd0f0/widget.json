@@ -1,0 +1,10 @@
+[
+  {
+    "type":"Sprite",
+    "name": "Blink"
+  },
+  {
+    "type":"Sprite",
+    "name": "Heartbeat"
+  }
+]

@@ -249,7 +249,6 @@ router.get('/dynamic/*',function(req,res){
 });
 
 router.get('/statement/:fileId',function(req,res){
-    console.log('entered');
     let fileId = req.params.fileId;
     __renderSubPage(req,res,fileId,{statements:_statements,websiteInfo:_websiteInfo});
 });

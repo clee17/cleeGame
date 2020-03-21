@@ -13,16 +13,10 @@ let router = express.Router();
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {controllers:[],modules:[],services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{}};
-    if(req.ipData && req.ipData.country === '中国')
-        renderPage.lib = [
-            'https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js',
-            'https://cdn.bootcss.com/angular.js/1.7.8/angular.min.js',
-            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
-    else
-        renderPage.lib = [
-            'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
-            'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
-            'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
+    renderPage.lib = [
+        'https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js',
+        'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
+        'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
     for(let attr in renderInfo){
         renderPage[attr] = renderInfo[attr];
     }
@@ -63,6 +57,8 @@ router.post('/getManual',main.getManual);
 router.get('/info/:infoId',info.getInfo);
 
 //游戏界面
+router.get('/game/text/:gameId',game.loadText);
+
 router.get('/games/admin',admin.index);
 router.get('/games/edit/:gameId',admin.edit);
 router.post('/games/admin/addGame',admin.add);
@@ -70,7 +66,6 @@ router.post('/games/admin/gameList',admin.fullList);
 
 router.get('/games/request',game.getResource);
 router.get('/games/load',game.loadScripts);
-router.get('/games/:gameId/',game.getGame);
 router.get('/games/:gameId/',game.getGame);
 router.post('/games/:gameId/requestPreview',game.getPreview);
 

@@ -99,7 +99,6 @@ let handler = {
                 render.userExisted = !!req.session.user;
                redisClient.get('fanfic_grade',function(err,grades) {
                 render.fanfic_grade = {};
-                console.log('entered fanfic grade');
                 if (!err && grades){
                     render.fanfic_grade = JSON.parse(grades);
                     finalRender();
@@ -114,7 +113,6 @@ let handler = {
     },
 
     requestTag:function(req,res){
-        console.log('entered');
         let tagId  = req.params.tagId;
         let data  = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let pageId = data.pageId;

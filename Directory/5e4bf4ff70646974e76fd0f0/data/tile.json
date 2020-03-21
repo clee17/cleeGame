@@ -1,0 +1,65 @@
+[
+  {
+    "index": 0,
+    "textureIndex": 0,
+    "type": "treasure",
+    "map": 1,
+    "name": "警局装备",
+    "step": -8,
+    "hp": 0,
+    "description": "去这里碰碰运气，总有些老朋友愿意帮忙",
+    "role": [17,18,19,20,21,23,24,25,26],
+    "events":[1,2,3,4,5]
+  },
+  {
+    "index": 1,
+    "textureIndex": 1,
+    "type": "events",
+    "map": 1,
+    "name": "警局偶遇",
+    "description": "故地重游，总会发生意想不到的事情",
+    "step": -5,
+    "hp": 0,
+    "role": [17,18,19,20,21,23,24,25,26],
+    "events":[],
+    "special": [{
+      "index": 0,
+      "rate": 10
+    }]
+  },
+  {
+    "index": 2,
+    "textureIndex": 2,
+    "type": "normal",
+    "map": 1,
+    "step": -1,
+    "hp": 0,
+    "name": "平安无事的警局",
+    "description": "今天的哥谭警局也像一如既往那么平静",
+    "role": [],
+    "events":[]
+  },
+  {
+    "index": 3,
+    "textureIndex": 3,
+    "type": "special",
+    "map": 1,
+    "step": -1,
+    "hp": 0,
+    "name": "神奇的探照灯",
+    "description": "在警局发现了罚没的神奇微型探照灯",
+    "role": [],
+    "events":[]
+  },
+  {
+    "index": 4,
+    "textureIndex": 4,
+    "type": "animate",
+    "animate": [4,5],
+    "map": -1,
+    "step": 0,
+    "hp": 0,
+    "name": "返回瓷砖",
+    "events": []
+  }
+]

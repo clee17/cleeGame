@@ -379,7 +379,6 @@ let handler = {
            if(postData[validateList[i]] === undefined)
            {
                result.message = 'not valid visitor';
-               console.log(validateList[i]);
                handler.finalSend(res,result);
                return;
            }
