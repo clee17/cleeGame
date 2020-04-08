@@ -70,6 +70,7 @@ global.__renderError = function(req,res,errMessage){
         title:null,
         styles:[],
         variables:{},
+        infoAll:_infoAll,
         countryCode:__getCountryCode(req.ipData),
         websiteInfo:_websiteInfo};
     renderInfo.lib = [
@@ -195,7 +196,7 @@ router.post('/admin/addApplication',admin.addApplication);
 router.get('/register/:registerId',subUser.register);
 router.post('/users/follow',subUser.follow);
 router.post('/users/followedTag',subUser.getTagFollowed);
-router.post('/users/updateFollow',subUser.updateFollowed)
+router.post('/users/updateFollow',subUser.updateFollowed);
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/settings/reload',subUser.reloadSettings);
 router.get('/users/settings/:userId',subUser.userSetting);
