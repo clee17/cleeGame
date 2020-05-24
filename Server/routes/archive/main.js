@@ -218,7 +218,8 @@ let handler = {
                 'https://cdn.jsdelivr.net/npm/angular@1.7.9/angular.min.js',
                 'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
 
-            data.chapter.contents = lzString.decompressFromBase64(data.chapter.contents);
+            if(data.chapter)
+                 data.chapter.contents = lzString.decompressFromBase64(data.chapter.contents);
 
             if(noRes)
                 __renderError(req,res,noRes.message);
@@ -353,7 +354,6 @@ let handler = {
             if(err)
             {
                 noRes = {message:err};
-                console.log(err);
                 finalSend();
             }
             else{
