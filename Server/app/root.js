@@ -12,5 +12,6 @@ var app = express();
 app = config(app);
 route(app);
 
-app.listen(3060);
+var server = app.listen(3060);
 
+global.__viewFolder ='cleeGame/';
