@@ -58,7 +58,7 @@ var text = [
     "this work",
     "Collapse",
     "Application Status",
-    "Please fill your mailbox here",
+    "Please fill the registration code you received here",
     "Submit",//60
     "You may find your application status after you clicked the submit button ",
     "Loading",

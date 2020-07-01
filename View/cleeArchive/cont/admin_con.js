@@ -15,19 +15,6 @@ app.service('adminManager',function($http,$rootScope){
                 });
     };
 
-    this.requestContents = function(index,pageId,perPage){
-        $http.post('/admin/getTable',{data:LZString.compressToBase64(JSON.stringify({name:index,pageId:pageId,perPage:perPage}))})
-            .then(function(response){
-                let data = JSON.parse(LZString.decompressFromBase64(response.data));
-                if(data.success)
-                    $rootScope.$broadcast('admin table received',data);
-                else
-                    $rootScope.$broadcast('admin table received',{success:false,message:data.message});
-            },function(err){
-                $rootScope.$broadcast('admin table received',{success:false,message:'网络通信错误'});
-            });
-    };
-
     this.requestAdd = function(index){
         $http.post('/admin/addRecord',{data:LZString.compressToBase64(JSON.stringify({name:index}))})
             .then(function(response){
@@ -71,235 +58,233 @@ app.service('adminManager',function($http,$rootScope){
     this.addApplication = function(data){
         manager.request('/admin/addApplication','application added',data);
     }
-
 });
 
-app.directive('tableHeader',function($compile) {
-    return {
-        restrict: "A",
-        scope:{
-        },
-        link: function (scope, element, attr) {
-            element.css('background','rgba(223,216,214,255)');
-            element.css('border-bottom','solid 1px rgba(181,163,160,218)');
-            element.css('border-top','solid 1px rgba(181,163,160,218)');
-            scope.$on('table refreshed',function(event,data){
-                let header = data.head;
-                if(!header)
-                    return;
-                let message = '';
-                for(let i =0;i <header.length;++i){
-                      message += '<div style="width:8rem;min-width:8rem;line-height:2rem;font-weight:bold;">'+header[i]+'</div>';
-                }
-                element.empty();
-                element.html(message);
-            });
-        }
+
+app.filter('date',function(){
+    return function(date){
+        if(!date)
+            return 'UNKNOWN';
+        let finalDate = new Date(date);
+        let year = finalDate.getFullYear();
+        let month = finalDate.getMonth()+1;
+        let day = finalDate.getDate();
+        return year+'-'+month+'-'+day;
     }
 });
 
-app.directive('tableContent',['adminManager','loginManager',function(adminManager,loginManager){
-    return {
-        restrict: "A",
-        link: function (scope, element, attr) {
-            scope.refreshHTML = function(){
-                scope.val = [];
-                for(let attr in scope.item){
-                    scope.val.push({key:attr,value:scope.item[attr]});
-                }
-                let innerHTML = '<div style="display:flex;flex-direction:row;">';
-                for(let i=0; i<scope.$parent.head.length;++i){
-                    for(let j=0;j<scope.val.length;++j){
-                        if(scope.val[j].key === scope.$parent.head[i]) {
-                            let val = scope.val[j].value;
-                            if((scope.$parent.tableId === '2' || scope.$parent.tableId === '3' )&& scope.val[j].key === 'statements')
-                                scope.val[j].value = LZString.decompressFromBase64(scope.val[j].value);
-                            else if (scope.$parent.tableId === '1' && scope.val[j].key === 'intro')
-                                scope.val[j].value = LZString.decompressFromBase64(scope.val[j].value);
-                            innerHTML += '<div style="padding-right:1rem;width:7rem;word-break:break-all;">' + scope.val[j].value + '</div>';
-                        }
-                    }
-                }
-                innerHTML += '</div>';
-                element.html(innerHTML);
-            };
-
-            scope.refreshHTML();
-
-            scope.answerRegister = function(agree){
-                let status = agree? 1 : 2;
-                adminManager.answerApplication({item:scope.item,status:status,mail:scope.item.mail,subType:9999});
-            };
-
-            scope.resetPwd = function(){
-                loginManager.resetPwd(scope.item);
-            };
-
-            scope.allowAccess = function(agree){
-                let status = agree? 1 : 2;
-                 adminManager.addApplication({item:scope.item,subType:9999});
-            };
-
-            scope.$on('table content refreshed',function(event,data){
-                if(data._id == scope.item._id)
-                    scope.refreshHTML();
-            });
-        }}
-}]);
-
-app.directive('addError',function($timeout){
-    return {
-        restrict: "E",
-        replace:true,
-        template:'<div style="margin-left:auto;margin-right:auto;">{{addErr}}</div>',
-        scope:{
-        },
-        link: function (scope, element, attr) {
-            scope.addErr = '';
-            scope.timeout = null;
-            element.css('transition','opacity 0.1s');
-            element.css('opacity','0');
-            scope.$on('action finished',function(event,data){
-                scope.addErr = data.message;
-                element.css('opacity','100%');
-                element.css('transition','opacity 1s');
-                if(scope.timeout)
-                    $timeout.cancel(scope.timeout);
-                scope.timeout = $timeout(function(){
-                    element.css('opacity','100%');
-                    element.css('transition','opacity 0.1s');
-                },3*1000);
-            });
-        }
+app.filter('time',function(){
+    return function(date,format){
+        if(!date)
+            return '';
+        let finalDate = new Date(date);
+        let hour = finalDate.getHours();
+        let min = finalDate.getMinutes();
+        let sec = finalDate.getSeconds();
+        return hour+':'+min+':'+sec;
     }
 });
 
-app.controller("adminCon",function($scope,adminManager){
-    $scope.tableId = '1';
-    $scope.pageId = 0;
-    $scope.perPage = 30;
-    $scope.maxPage = 1;
-    $scope.err = null;
-    $scope.requested = false;
-    $scope.requesting = false;
-    $scope.contents = [];
-    $scope.btn  = {
-        editNeeded:false,
-        deleteNeeded:false,
-        registerPermitNeeded: false,
-        registerDeclineNeeded:false,
+app.filter('userGroup',function(){
+    return function(group){
+       if(group === 0)
+           return 'general user';
+       else if(group >= 99)
+           return 'administrator';
+    }
+});
 
-    };
-
-    $scope.request = function(){
-        if($scope.requesting)
-            return;
-        $scope.err = null;
-        $scope.requesting = true;
-        $scope.requested = false;
-        if($scope.tableId ===  '2')
-             adminManager.requestRegister($scope.pageId,$scope.perPage);
-        else if($scope.tableId === '3')
-              adminManager.requestApplication($scope.pageId,$scope.perPage);
-        else
-            adminManager.requestContents($scope.tableId,$scope.pageId,$scope.perPage);
-    };
-
-    $scope.requestAdd = function(){
-        if($scope.requesting)
-            return;
-        $scope.requesting = true;
-        adminManager.requestAdd($scope.tableId);
-    };
-
-
-
-    $scope.removeItem = function(_id,index){
-         if($scope.requesting)
-             return;
-         $scope.requesting = true;
-         adminManager.requestRemove({name:$scope.tableId,_id:_id,index:index});
-    };
-
-    $scope.initializeBtn = function(){
-        for(let attr in $scope.btn){
-            $scope.btn[attr] = false;
-        }
-        if($scope.tableId === '0'){
-            $scope.btn.deleteNeeded = true;
-        }
-        else if ($scope.tableId === '1'){
-            $scope.btn.resetPwdNeeded = true;
-        }
-        else if($scope.tableId === '2'){
-            $scope.btn.registerPermitNeeded = true;
-            $scope.btn.registerDeclineNeeded = true;
-        }else if($scope.tableId === '3'){
-            $scope.btn.accessNeeded = true;
-            $scope.btn.accessDeclined = true;
-        }
-    };
-
-    $scope.$on('admin table received',function(event,data){
-        $scope.requesting = false;
-        if(data.success)
-        {
-            $scope.requested = true;
-            $scope.head = [];
-            if($scope.tableId === '0')
-                $scope.head = ['_id','date'];
-            else if($scope.tableId === '1')
-                $scope.head = ['_id','user','userGroup','mail','intro'];
-            else if($scope.tableId === '2' || $scope.tableId === '3')
-                $scope.head = ['_id','mail','count','date','statements','status','subType'];
-            $scope.initializeBtn();
-            $scope.$broadcast('table refreshed',{head:$scope.head});
-            $scope.contents = JSON.parse(JSON.stringify(data.contents));
-        }
-        else{
-            $scope.$emit('showError',data.message);
-        }
-    });
-
-    $scope.$on('table add finished',function(event,data){
-        $scope.requesting = false;
-        $scope.addErr = '';
-        if(data.success)
-        {
-            if($scope.pageId <= $scope.maxPage)
-                $scope.contents.push(JSON.parse(JSON.stringify(data.contents)));
-        }
-        else{
-            $scope.addErr = data.message;
-        }
-        $scope.$broadcast('action finished',{message:data.message});
-    });
-
-    $scope.$on('request replied',function(event,data){
-        if(data.success){
-            for(let i=0; i<$scope.contents.length;++i){
-                if(data.contents._id == $scope.contents[i]._id){
-                    $scope.contents[i].status = data.contents.status;
-                    $scope.contents[i].subType = data.contents.subType;
-                    $scope.$broadcast('table content refreshed',data.contents);
-                }
+app.directive('statements',function(){
+    return {
+        restrict: 'A',
+        scope:{
+            info: '=',
+        },
+        link:function(scope,element,attr){
+            if(scope.info === '')
+                element.html('NO DATA');
+            else{
+                let statements = LZString.decompressFromBase64(scope.info);
+                if(statements)
+                    statements = statements.replace(/\n/gi,'<br>');
+                element.html(statements);
             }
-        }else{
-            $scope.$emit('showError',data.message);
         }
-        $scope.requesting = false;
-    });
+    }
+});
 
-    $scope.$on('record remove finished',function(event,data){
+
+let HTMLTemplate = {
+    'noInfo':'<p style="margin:auto;min-width:10rem;font-size:1rem;"><b>There is no Records found under this section</b></p>',
+    'registrationInfo':'<table class="admin_table">' +
+        '<tr><td></td><td style="text-align:center;">ORDER</td><td style="text-align:center;">TIME</td><td>MAIL</td><td>STATEMENTS</td><td>ANSWER</td><td style="width:4rem;"></td></tr>' +
+        '<tr ng-repeat="entry in entries track by $index"><td></td>' +
+        '<td style="text-align:center;">{{(pageInfo.pageId-1)*pageInfo.perPage + $index+1}}</td>' +
+        '<td style="text-align:center;">{{entry.application.date | date}} <br> {{entry.application.date | time}}</td>' +
+        '<td style="max-width:9rem;padding-right:4px;">{{entry.application.register.mail}}</td>' +
+        '<td statements info="entry.application.statements" valign="top"></td>' +
+        '<td style="display:flex;flex-flow:column wrap;max-height:4rem;" class="btnArea"><button>APPROVE</button><button>DENY</button><button>ENQUIRE</button></td>'+
+        '<td></td></tr>' +
+        '</table>',
+    'userInfo':'<table class="admin_table">' +
+        '<tr><td></td><td>USER</td><td>REGISTERED</td><td>GROUP</td><td>MAIL</td><td>POINTS</td><td>IDENTITY</td><td></td><td style="width:4rem;"></td></tr>' +
+        '<tr ng-repeat="entry in entries track by $index"><td></td>' +
+        '<td>{{entry.user}}</td>'+
+        '<td>{{entry.registered | date}} <br> {{entry.registered | time}}</td>'+
+        '<td>{{entry.userGroup | userGroup}}</td>'+
+        '<td>{{entry.mail}}</td>'+
+        '<td>{{entry.points}}</td>'+
+        '<td>TBD(权限图片)</td>'+
+        '<td class="btnArea"><button>PASSWORD RESET</button></td>'+
+        '<td></td></tr>'+
+        '</table>'
+}
+
+app.controller("adminCon",function($scope,$location,$compile,adminManager){
+    let search = $location.search();
+    if(search.sid && Number(search.sid) >=0 && Number(search.sid) <=2)
+        $scope.selection = Number(search.sid);
+    else if(!search.sid){
+        $location.search('sid','0');
+        $scope.selection = 0;
+    }
+
+    $scope.initializePage = function(){
         $scope.requesting = false;
-        $scope.addErr = '';
-        if(data.success)
+        $scope.pageRequesting = false;
+        $scope.err = null;
+        $scope.entries = [];
+        $scope.pageInfo = {
+            pageId:1,
+            perPage:30,
+            maxPage:1,
+            maxCount:1
+        }
+        switch($scope.selection){
+            case 0:
+                $scope.pageInfo.maxPage = 15;
+        }
+    }
+
+    $scope.selectTab = function(index){
+        $scope.selection = index;
+        $location.search('sid',index.toString());
+        $scope.requesting = false;
+        $scope.refreshPage();
+    }
+
+    $scope.requestContents = function(){
+        if($scope.requesting)
+            return;
+        if(typeof $scope.selection === 'number' && $scope.selection >= 0 && $scope.selection <3){
+            let siteInfo = ['user','registration','authorization'];
+            let condition = [{name:'user'},{name:'queue',type:0,populate:{
+                    path:     'application',
+                    populate: { path:  'register',
+                        model: 'user_register' }
+                }},{name:'queue',type:{$gte:1,$lte:5},populate:{
+                    path:     'application',
+                    populate: { path:  'register',
+                        model: 'user_register' }
+                }}];
+            $scope.requesting = true;
+            let requestData = condition[$scope.selection];
+            requestData.pageId=  $scope.pageInfo.pageId;
+            requestData.perPage = $scope.pageInfo.perPage;
+            $scope.requestId = siteInfo[$scope.selection]+Date.now()+':'+$scope.selection;
+            requestData.requestId = $scope.requestId;
+            adminManager.request('/admin/getTable/','administrator data received',requestData);
+        }else{
+
+        }
+    }
+
+    $scope.countPage = function(){
+        $scope.pageRequesting = true;
+        let siteInfo = ['user','registration','authorization'];
+        let condition = [{name:'user'},{name:'queue',type:0},{name:'queue',type:{$gte:1,$lte:5}}];
+        let requestData = condition[$scope.selection];
+        adminManager.request('/admin/countRec/','page count received',requestData);
+    }
+
+    $scope.refreshPage = function(){
+        let dashboard = document.getElementById('admin_dashboard');
+        if(dashboard){
+            dashboard.style.opacity = '0';
+            dashboard.innerHTML = '';
+        }
+        $scope.initializePage();
+        $scope.requestContents();
+        $scope.countPage();
+    };
+
+    $scope.refreshPage();
+
+    $scope.applyContents = function(html){
+        let ele = null;
+        if(html && html !== '')
+           ele = $compile(html)($scope);
+        let dashboard = document.getElementById('admin_dashboard');
+        if(dashboard)
         {
-            $scope.contents.splice(data.index,1);
+            if(ele){
+                let board  = angular.element(dashboard);
+                board.append(ele);
+            }
+            dashboard.style.opacity = '1';
         }
-        else{
-            $scope.addErr = data.message;
+    }
+
+    $scope.getTemplate = function(){
+        let template = '';
+        if($scope.selection === 0){
+            template = HTMLTemplate['userInfo'];
+        }else if($scope.selection === 1){
+            template = HTMLTemplate['registrationInfo'];
+        }else if($scope.selection === 2){
+            template = HTMLTemplate['Authorization'];
         }
-        $scope.$broadcast('action finished',{message:data.message});
-    });
+        if(template && template !== '')
+           $scope.applyContents(template);
+    }
+
+    $scope.$on('administrator data received',function(event,data){
+        $scope.requesting = false;
+        $scope.$broadcast('pageChangeFinished',{});
+        if(!data.success){
+            $scope.$emit('showError',data.message);
+        }else {
+            if($scope.requestId  !== data.requestId)
+                return;
+            $scope.entries = data.contents || [];
+            if($scope.entries.length === 0){
+                $scope.applyContents(HTMLTemplate['noInfo']);
+            }else{
+                $scope.getTemplate();
+            }
+        }
+    })
+
+    $scope.$on('pageChange',function(event,data){
+        $scope.pageInfo.pageId = data.pid;
+        $scope.requesting = false;
+        let dashboard = document.getElementById('admin_dashboard');
+        if(dashboard){
+            dashboard.style.opacity = '0';
+            dashboard.innerHTML = '';
+        }
+        $scope.requestContents();
+    })
+
+    $scope.$on('page count received',function(event,data){
+        $scope.pageRequesting = false;
+        if(data.success){
+            $scope.pageInfo.maxCount = data.count;
+            $scope.pageInfo.maxPage = Math.ceil(data.count / $scope.pageInfo.perPage);
+            if($scope.pageInfo.maxCount ===0)
+                $scope.pageInfo.maxCount++;
+            $scope.$broadcast('updatePageIndex',{pageId:$scope.pageInfo.pageId, totalNum:$scope.pageInfo.maxCount});
+        }
+    })
+
 });

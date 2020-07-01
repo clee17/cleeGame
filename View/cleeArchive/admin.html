@@ -1,33 +1,100 @@
 <style>
-    #admin_board select{
-        font-size:14px;
-        height:1.4rem;
+    #main{
+        display:flex;
+        flex:1;
     }
 
-    #admin_board button{
+    #admin_board{
+        background:rgba(223,216,214,255);
+        flex:1;
+        display:flex;
+        flex-direction:row;
+    }
+
+    #admin_left_guide{
+        background:rgba(248,248,248,1);
+        border-right:1px solid rgba(195,195,195,0.8);
+        width:8rem;
+        display:flex;
+        flex-direction:column;
+    }
+
+    #admin_left_guide button{
+        border:none;
+        letter-spacing:2px;
+        background:rgba(0,0,0,0);
         font-size:1rem;
-        padding-left:10px;
-        padding-right:10px;
+        padding:8px;
         color:rgba(108,95,93,255);
+
+        font-family:"Microsoft YaHei UI",Arial,serif;
+        transition:background 0.14s ease-out;
     }
 
-    #funcBoard{
-        margin-bottom:3rem;
+    #admin_left_guide button:hover{
+        background:rgba(223,216,214,255);
     }
 
-    #funcBoard button{
-        margin-right:10px;
-        padding-left:10px;
-        padding-right:10px;
-        padding-top:0;
-        padding-bottom:3px;
-    }
-    #funcBoard button:nth-child(1){
-        margin-left:auto;
+    #admin_left_guide button:disabled{
+        background:rgba(223,216,214,255);
+        color:rgba(158,142,166,1);
+        font-weight:bold;
+        border-left:solid 6px rgba(158,142,166,1);
     }
 
-    #funcBoard button:last-child{
-        margin-right:20px;
+    .admin_table{
+        border-collapse:collapse;
+    }
+
+    .admin_table tr{
+        font-family: "Microsoft YaHei UI",arial,serif;
+    }
+
+    .admin_table tr>td:first-child{
+        width:3rem;
+    }
+
+    .admin_table tr{
+       border-bottom:1px solid rgba(223,216,214,0.8);
+    }
+
+    .admin_table td{
+        padding-bottom:8px;
+        padding-top:8px;
+    }
+    .admin_table tr:first-child{
+        height:2.5rem;
+        font-weight:bold;
+        font-size:1rem;
+        background:rgba(223,216,214,0.4);
+
+    }
+
+    .btnArea button{
+        margin:3px;
+        padding:2px;
+        padding-left:5px;
+        padding-right:5px;
+        border-radius:5px;
+        border:solid 1px rgba(181,163,160,218);
+        background:none;
+        color:rgba(181,163,160,218);
+        font-weight:bold;
+    }
+
+    .btnArea button:hover{
+        background:rgba(181,163,160,218);
+        color:white;
+    }
+
+    .btnArea button:first-child{
+        border:solid 2px rgba(119,111,144,255);
+        color:rgba(119,111,144,255);
+    }
+
+    .btnArea button:first-child:hover{
+        background:rgba(119,111,144,255);
+        color:white;
     }
 
     #btnColumn{
@@ -45,39 +112,24 @@
     }
 </style>
 
-<div id="admin_board" controller="admin_con" style="flex:1;display:flex;flex-direction:column;min-width:35rem;" ng-controller="adminCon">
-    <div style="margin-left:auto;margin-right:auto;margin-top:10px;">欢迎来到Clee_Archive管理界面，请选择您要管理的项目: </div>
-    <div style="margin-left:auto;margin-right:auto;margin-top:20px;">表格：<select ng-model="tableId">
-        <option value="1">用户表</option>
-        <option value="2">注册申请表</option>
-        <option value="3">权限申请表</option>
-    </select>
-        <button ng-click="request()">获取</button>
+<div id="admin_board" controller="admin_con" ng-controller="adminCon">
+    <div id="admin_left_guide">
+        <button style="margin-top:6rem;" ng-disabled="selection === 0" ng-click="selectTab(0)">用户管理</button>
+        <button ng-disabled="selection === 1" ng-click="selectTab(1)">注册审核</button>
+        <button ng-disabled="selection === 2" ng-click="selectTab(2)">权限审核</button>
+        <button style="margin-bottom:auto;" ng-disabled="selection === 3" ng-click="selectTab(3)">申请记录</button>
     </div>
-    <div ng-show="!requested && !requesting" style="display:flex;flex:1;">
-        <div style="margin:auto;text-align:center;font-weight:bold;">请先获取列表</div>
-    </div>
-    <img src="/img/loading.gif" style="width:22px;height:22px;" ng-show="requesting">
-    <div ng-show="err && err!= ''">{{err}}</div>
-
-    <div ng-show="requested" style="flex:1;display:flex;flex-direction:column;margin-left:auto;margin-right:auto;margin-top:1rem;min-width:80%;">
-        <div table-header style="min-height:2rem;display:flex;flex-direction:row;padding-left:25px;"></div>
-        <div ng-repeat="item in contents" style="display:flex;flex-direction:row;border-bottom:solid 1px rgba(218,218,218,218);width:95%;margin-left:auto;margin-right:auto;min-height:1.8rem;">
-            <div table-content style="display:flex;flex-direction:row;"></div>
-            <div id="btnColumn">
-                <button ng-if="btn.editNeeded">编辑</button>
-                <button ng-click="removeItem(item._id,$index)" ng-if="btn.deleteNeeded">删除</button>
-                <button ng-click="answerRegister(true)" ng-if="btn.registerPermitNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
-                <button ng-click="answerRegister(false)" ng-if="btn.registerDeclineNeeded" ng-disabled="item.status != 0 || requesting">拒绝</button>
-                <button ng-click="resetPwd()" ng-if="btn.resetPwdNeeded" ng-disabled="requesting">重设密码</button>
-                <button ng-click="allowAccess(true)" ng-if="btn.accessNeeded" ng-disabled="item.status >= 1 || requesting">通过</button>
-                <button ng-click="allowAccess(false)" ng-if="btn.accessDeclined" ng-disabled="item.status != 0 || requesting">拒绝</button>
+    <div style="padding-left:2.5rem;display:flex;flex-direction:column;flex:1;">
+        <div style="margin-left:auto;margin-right:auto;margin-top:10px;font-size:1.5rem;text-align:center;font-weight:bold;">欢迎来到Clee_Archive管理界面 </div>
+        <div style="display:flex;flex:1;flex-direction:column;margin:1rem;background:white;border-radius:0.5rem;position:relative;">
+            <div style="width:100%;height:100%;position:absolute;left:0;top:0;display:flex;background:rgba(185,185,185,0.4);" ng-show="requesting">
+                <img src="/img/loading.gif" style="width:4rem;height:4rem;margin:auto;" >
             </div>
+            <div id="admin_dashboard" style="transition:opacity 0.14s ease-out;flex:1;opacity:0;display:flex;flex-direction:column;margin-bottom:2rem;">
+            </div>
+            <page-index pid='pageInfo.pageId' tnm="pageInfo.maxCount" ppg="pageInfo.perPage" style="margin-top:auto;margin-bottom:-1.5rem;"></page-index>
         </div>
+
     </div>
 
-    <div id="funcBoard" style="display:flex;flex-direction:row;width:90%;">
-        <add-error></add-error>
-        <button ng-disabled="!requested" ng-click="requestAdd()">添加</button>
-    </div>
 </div>

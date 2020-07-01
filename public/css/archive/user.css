@@ -130,6 +130,7 @@
 
 #classification >a{
     text-decoration:none;
+    transition: background 0.15s ease-out, color 0.2s ease-out;
 }
 
 #classification >a{

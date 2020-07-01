@@ -7,4 +7,6 @@ module.exports = new mongoose.Schema({
     mail:{type:String,default:''},
     intro:{type:String,default:''},
     points:{type:Number,default:0},
+    registered:{type:Date,default:Date.now()},
+    register:{type:mongoose.Schema.ObjectId,default:null,ref:'user_register'}
 });

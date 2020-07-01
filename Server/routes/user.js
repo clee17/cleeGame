@@ -12,6 +12,19 @@ let userModel = require(path.join(__dataModel, 'user')),
 let router = express.Router();
 
 let routeHandler = {
+    addQueue:function(application){
+        let queue = new queueModel();
+        queue.application = application._id;
+        queue.date = Date.now();
+        queue.save(function(err,doc){
+            if(err){
+                //CLEE TO BE ADDED;
+            }else if(!doc){
+                //CLEE TO BE ADDED;
+            }
+        });
+    },
+
     finalSend:function(res,data){
         if(data.sent)
             return;
@@ -72,6 +85,56 @@ let routeHandler = {
         res.send(lzString.compressToBase64(JSON.stringify(response)));
     },
 
+
+    requestRegister:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success:false,
+            sent:false,
+            message: ''
+        };
+
+        receivedData.mail = receivedData.mail.toLowerCase();
+        receivedData.statements = lzString.compressToBase64(receivedData.statements);
+        registerModel.findOne({mail:receivedData.mail}).exec()
+            .then(function(doc){
+                if(doc){
+                    response.message = '该邮箱已被注册';
+                    routeHandler.finalSend(res,response);
+                }else{
+                    let newRecord= new registerModel();
+                    newRecord.mail = receivedData.mail;
+                    newRecord.intro = receivedData.statements;
+                    return newRecord.save();
+                }
+            })
+            .then(function(register){
+                if(register){
+                    let application = new applicationModel();
+                    application.type = 0;
+                    application.register = register._id;
+                    application.statements = register.intro;
+                    return application.save();
+                }else
+                    throw 'something went wrong and the register info cannot be saved. Please contact the administrator';
+            })
+            .then(function(application){
+                response.success = true;
+                response.result = application._id;
+                res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
+                let mailNotification = '<h1>您好，感谢注册CleeArchive！</h1>' +
+                    '<p><b>您的注册申请码是：'+application._id+'</b>，请使用该申请码查询您的申请进度以及当前所处的位置。</p>'+
+                    '<p>您的申请将在48小时内得到回应，如无进展，请联系管理员。</p>';
+                __sendMail(mailNotification,receivedData.mail,'感谢注册CleeArchive');
+                routeHandler.finalSend(res,response);
+                routeHandler.addQueue(application);
+            })
+            .catch(function(err){
+                response.message = 'err';
+                routeHandler.finalSend(res,response);
+            });
+    },
+
     register:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
@@ -79,7 +142,7 @@ let routeHandler = {
             success:false,
             message: ''
         };
-            userModel.findOne({user:receivedData.user}).exec()
+        userModel.findOne({user:receivedData.user}).exec()
             .then(function(reply){
                 if(reply)
                     throw '该用户名已经被注册';
@@ -89,20 +152,20 @@ let routeHandler = {
                 newModel.mail = receivedData.mail;
                 newModel.intro = receivedData.intro;
                 newModel.save(function(err,savedObj){
-                   if(err)
-                       throw '注册失败'+err;
-                   response.message = '注册成功';
-                   response.success = true;
-                   req.session.user = newModel;
-                   res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
-                   applicationModel.findOneAndUpdate({mail:receivedData.mail},{status:3},function(err,doc){
-                       routeHandler.finalSend(res,response);
-                   });
+                    if(err)
+                        throw '注册失败'+err;
+                    response.message = '注册成功';
+                    response.success = true;
+                    req.session.user = newModel;
+                    res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
+                    applicationModel.findOneAndUpdate({mail:receivedData.mail},{status:3},function(err,doc){
+                        routeHandler.finalSend(res,response);
+                    });
                     countMapModel.findOneAndUpdate({infoType:100},{$inc:{number:1}},function(err,doc){
-                       if(err)
-                           console.log(err);
-                   });
-               });
+                        if(err)
+                            console.log(err);
+                    });
+                });
             })
             .catch(function(err){
                 response.message = err.message || err;
@@ -167,57 +230,6 @@ let routeHandler = {
                     services:['/service/userService.js'],
                     variables:{requestId:resetId,userId:doc.user}});
         })
-    },
-
-    requestRegister:function(req,res){
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let response = {
-            success:false,
-            sent:false,
-            message: ''
-        };
-        receivedData.mail = receivedData.mail.toLowerCase();
-
-        receivedData.statements = lzString.compressToBase64(receivedData.statements);
-        registerModel.findOne({mail:receivedData.mail}).exec
-            .then(function(doc){
-                if(doc){
-                    response.message = '该邮箱已被注册';
-                    routeHandler.finalSend(res,response);
-                }else{
-                    let newRecord= new registerModel({
-                        mail:receivedData.mail,
-                        intro:receivedData.statements
-                    });
-                    return newRecord.save();
-                }
-            })
-            .then(function(register){
-                if(register){
-                    let application = new applicationModel();
-                    application.type = 0;
-                    application.user = register._id;
-                    application.statements = register.intro;
-                    return application.save();
-                }else
-                    throw 'something went wrong and the register info cannot be saved. Please contact the administrator';
-            })
-            .then(function(application){
-                let queue = new queueModel();
-                queue.application = application._id;
-                queue.date = Date.now();
-                return queue.save().then();
-            })
-            .then(function(queue){
-                response.success = true;
-                response.result = application._id;
-                res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
-                let mailNotification = 
-            })
-            .catch(function(err){
-                response.message = 'err';
-                routeHandler.finalSend(res,response);
-            });
     },
 
     checkUser:function(req,res){
@@ -354,11 +366,13 @@ let routeHandler = {
     getStatus:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
+            registered:false,
+            position:1,
             success: false,
             message: '',
             sent: false,
         };
-        if(!receivedData.mail){
+        if(!receivedData.id){
             response.message = '没有收到邮箱地址';
         }
 
@@ -366,18 +380,42 @@ let routeHandler = {
             routeHandler.finalSend(res,response);
             return;
         }
-        applicationModel.findOne({mail:receivedData.mail},function(err,doc){
-            if(err)
+        applicationModel.findOne({_id:receivedData.id})
+            .then(function(application){
+                if(!application){
+                    throw 'There is no record for your application, please contact the administrator.';
+                }else{
+                    response.result = application.result;
+                    response.requestId = application._id;
+                    response.time = application.date;
+                    routeHandler.success = true;
+                    if(application.result === 1){
+                        userModel.findOne({register:application.register},function(err,user){
+                            if(user)
+                                response.registered = true;
+                            routeHandler.finalSend(res,response);
+                        });
+                    }else{
+                        return queueModel.findOne({application:application._id}).exec();
+                    }
+                }
+            })
+            .then(function(queue){
+                if(!queue)
+                    throw 'Your application has been lost in the system, please kindly contact administrator for assistance.'
+                else{
+                    queueModel.countDocuments({date:{$lt:queue.date},type:0},function(err,count){
+                        response.position += count;
+                        response.success = true;
+                        routeHandler.finalSend(res,response);
+                    });
+                }
+            })
+            .catch(function(err){
                 response.message = err;
-            else if(doc){
-                response.result = doc.status;
-                response.subType = doc.subType;
-                response._id = doc._id;
-            }
-            if(response.message === '')
-                response.success = true;
-            routeHandler.finalSend(res,response);
-        })
+                response.success = false;
+                routeHandler.finalSend(res,response);
+            })
     },
 
     savePwd:function(req,res){

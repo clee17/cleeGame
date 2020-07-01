@@ -6,11 +6,17 @@ let express = require('express'),
 
 let validModel = require(path.join(__dataModel,'valid'));
 let userModel = require(path.join(__dataModel,'user'));
+let queueModel = require(path.join(__dataModel,'application_queue'));
 let applicationModel = require(path.join(__dataModel,'application'));
-let tableIndex = [validModel,userModel];
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+
+let tableIndex ={
+    'valid':validModel,
+    'queue':queueModel,
+    'user':userModel
+};
 
 let handler = {
     finalSend:function(res,data){
@@ -22,44 +28,100 @@ let handler = {
 
     getTable:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let pageId = receivedData.pageId || 0;
+        let populate = receivedData.populate || '';
+        let name = receivedData.name;
+        let condition = JSON.parse(JSON.stringify(receivedData));
+        delete condition.name;
+        if(condition.populate)
+            delete condition.populate;
+        if(condition.requestId)
+            delete condition.requestId;
+        let pageId = receivedData.pageId || 1;
+        pageId--;
         let perPage = receivedData.perPage || 30;
-        let sent = false;
+        if(condition.pageId)
+            delete condition.pageId;
+        if(condition.perPage)
+            delete condition.perPage;
         let data = {
+            message:'',
+            requestId:receivedData.requestId,
+            success:false,
+            sent:false
+        };
+
+        if(!receivedData.name || !tableIndex[receivedData.name]){
+            data.message='The table is currently not available for management.';
+            handler.finalSend(res,data);
+            return;
+        }
+
+        if(!req.session.user || req.session.user < 99){
+            data.message='This page is only limited to Administrators.';
+            handler.finalSend(res,data);
+            return;
+        }
+        
+        tableIndex[receivedData.name].find(condition,null,{skip:pageId*perPage,limit:perPage,sort:{_id: -1}}).populate(populate).exec()
+            .then(function(docs){
+                data.contents = JSON.parse(JSON.stringify(docs));
+                data.success = true;
+                handler.finalSend(res,data);
+            })
+            .catch(function(err){
+                if(typeof err === 'object')
+                   data.message = err.message || JSON.stringify(err);
+                else
+                    data.message = err;
+                handler.finalSend(res,data);
+            })
+    },
+
+    countRec:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let data = {
+            sent:false,
             message:'',
             success:false
         };
-        let finalSend = function(){
-            if(sent)
-                return;
-            sent = true;
-            res.send(lzString.compressToBase64(JSON.stringify(data)));
-        };
+        let condition = JSON.parse(JSON.stringify(receivedData));
+        if(condition.name)
+            delete condition.name;
 
-        if(req.session.user && req.session.user.userGroup >= 99)
-        {
-            let index = Number(receivedData.name);
-            if(index >= tableIndex.length || index <0)
-            {
-                data.message='暂不提供该表的管理功能';
-                finalSend();
-            }
-
-            tableIndex[index].find({},null,{skip:pageId*perPage,limit:perPage,sort:{_id: -1}}).exec()
-                .then(function(docs){
-                    data.contents = JSON.parse(JSON.stringify(docs));
-                    data.success = true;
-                    finalSend();
-                })
-                .catch(function(err){
-                    data.message = err;
-                    finalSend();
-                })
+        if(!receivedData.name || !tableIndex[receivedData.name]){
+            data.message='The table is currently not available for management.';
+            handler.finalSend(res,data);
+            return;
         }
-        else
-        {
-            data.message='你没有查看该页面的权限';
-            finalSend();
+
+        if(!req.session.user || req.session.user < 99){
+            data.message='This page is only limited to Administrators.';
+            handler.finalSend(res,data);
+            return;
+        }
+
+        if(receivedData.estimation){
+            tableIndex[receivedData.name].estimatedDocumentCount(function(err,count){
+                if(!err){
+                    data.success = true;
+                    data.count = count;
+                    handler.finalSend(res,data);
+                }else{
+                    data.message = err;
+                    handler.finalSend(res,data);
+                }
+            });
+        }else{
+            tableIndex[receivedData.name].countDocuments(condition,function(err,count){
+                if(!err){
+                    data.success = true;
+                    data.count = count;
+                    handler.finalSend(res,data);
+                }else{
+                    data.message = err;
+                    handler.finalSend(res,data);
+                }
+            });
         }
     },
 

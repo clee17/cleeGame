@@ -26,8 +26,8 @@ body{
 #header{
     order:1;
     display:flex;
-    padding:0px;
-    margin-bottom:0px;
+    padding:0;
+    margin-bottom:0;
     min-width:30rem;
 }
 
