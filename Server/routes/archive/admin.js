@@ -4,10 +4,10 @@ let express = require('express'),
         tagModel = require(path.join(__dataModel,'cleeArchive_tag'))),
     updatesModel = require(path.join(__dataModel,'cleeArchive_postUpdates'));
 
-let registerModel = require(path.join(__dataModel,'register'));
+let validModel = require(path.join(__dataModel,'valid'));
 let userModel = require(path.join(__dataModel,'user'));
 let applicationModel = require(path.join(__dataModel,'application'));
-let tableIndex = [registerModel,userModel];
+let tableIndex = [validModel,userModel];
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));

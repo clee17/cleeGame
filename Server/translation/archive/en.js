@@ -9,7 +9,7 @@ var text = [
     'User Settings',
     'Logout',
     'Login',
-    'FAN WORKS',
+    'FAN WORKS', // 10
     'TUTORIALS',
     'DEVELOPMENT',
     'About Site',
@@ -87,7 +87,8 @@ var text = [
     "Works",
     "Unfollow",
     "only registered users could follow a tag",
-    "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district"
+    "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district",
+    "HOME"
 ];
 
 module.exports = text;

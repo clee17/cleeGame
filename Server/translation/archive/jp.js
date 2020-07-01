@@ -18,7 +18,7 @@ var text = [
     'Declare',
     'Contact Us',
     'Submit a ticket',
-    'contact me'
+    'contact me',
 ];
 
 module.exports = text;

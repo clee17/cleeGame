@@ -3,7 +3,9 @@ var express = require('express'),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let userModel = require(path.join(__dataModel, 'user')),
-    registerModel = require(path.join(__dataModel,'register')),
+    registerModel = require(path.join(__dataModel,'user_register')),
+    validModel = require(path.join(__dataModel,'valid')),
+    queueModel = require(path.join(__dataModel,'application_queue')),
     applicationModel = require(path.join(__dataModel,'application')),
     countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
@@ -126,8 +128,8 @@ let routeHandler = {
             return;
         }
 
-        registerModel.deleteMany({user:receivedData._id,type:0},function(err,docs){
-            let newLink = new registerModel();
+        validModel.deleteMany({user:receivedData._id,type:0},function(err,docs){
+            let newLink = new validModel();
             newLink.user = receivedData._id;
             newLink.type = 0;
             newLink.save(function(err){
@@ -153,7 +155,7 @@ let routeHandler = {
         if(!__validateId(resetId)){
             __renderError(req,res,_errAll[0]);
         }
-        registerModel.findOne({_id:resetId},function(err,doc){
+        validModel.findOne({_id:resetId},function(err,doc){
             if(err)
                 __renderError(req,res,err);
             else if(!doc)
@@ -167,28 +169,6 @@ let routeHandler = {
         })
     },
 
-    applicationProcess:function(doc, ifUpdate){
-        let step = ifUpdate? 1 :0;
-
-        let processMail = function(){
-            let mailContents =  '<h1>您好，感谢注册CleeArchive！</h1>' +
-                '<p><b>您的注册邀请码是：'+doc._id+'</b>，请妥善保管。</p>'+
-                '<p>您当前的申请处在第'+doc.subType+'位，管理员每天都会处理一次申请，请耐心等待。</p>';
-            __sendMail(mailContents,doc.mail);
-        };
-
-        countMapModel.findOneAndUpdate({infoType:201},{$inc:{number:step}},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,result){
-            let requestCode = doc._id.toString();
-            if(ifUpdate)
-                applicationModel.findOneAndUpdate({_id:doc._id},{subType:result.number},{new:true,upsert:true,setDefaultsOnInsert: true},function(err,count){
-                    doc.subType = count.subType;
-                    processMail();
-                });
-            else
-                processMail();
-        });
-    },
-
     requestRegister:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
@@ -199,36 +179,45 @@ let routeHandler = {
         receivedData.mail = receivedData.mail.toLowerCase();
 
         receivedData.statements = lzString.compressToBase64(receivedData.statements);
-
-        let addApplication = function(){
-            applicationModel.findOneAndUpdate({mail:receivedData.mail,type:0},
-                {statements:receivedData.statements,$inc:{count:1}},
-                {upsert:true,setDefaultsOnInsert: true,new:true},
-                function(err,doc){
-                    if(err)
-                        response.message = err;
-                    else if(!doc)
-                        response.message = '没有创建文件';
-                    else{
-                        response.success = true;
-                        response.result = doc._id;
-                        res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
-                        let ifUpdate = doc.count<=1;
-                        routeHandler.applicationProcess(doc,ifUpdate);
-
-                    }
+        registerModel.findOne({mail:receivedData.mail}).exec
+            .then(function(doc){
+                if(doc){
+                    response.message = '该邮箱已被注册';
                     routeHandler.finalSend(res,response);
-                });
-        };
-
-        userModel.findOne({mail:receivedData.mail},function(err,doc){
-             if(doc) {
-                 response.message = '该邮箱已被注册';
-                 routeHandler.finalSend(res,response);
-             }else{
-                 addApplication();
-             }
-        });
+                }else{
+                    let newRecord= new registerModel({
+                        mail:receivedData.mail,
+                        intro:receivedData.statements
+                    });
+                    return newRecord.save();
+                }
+            })
+            .then(function(register){
+                if(register){
+                    let application = new applicationModel();
+                    application.type = 0;
+                    application.user = register._id;
+                    application.statements = register.intro;
+                    return application.save();
+                }else
+                    throw 'something went wrong and the register info cannot be saved. Please contact the administrator';
+            })
+            .then(function(application){
+                let queue = new queueModel();
+                queue.application = application._id;
+                queue.date = Date.now();
+                return queue.save().then();
+            })
+            .then(function(queue){
+                response.success = true;
+                response.result = application._id;
+                res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
+                let mailNotification = 
+            })
+            .catch(function(err){
+                response.message = 'err';
+                routeHandler.finalSend(res,response);
+            });
     },
 
     checkUser:function(req,res){
@@ -409,7 +398,7 @@ let routeHandler = {
         if(response.message !== '')
             routeHandler.finalSend(res,response);
 
-        registerModel.findOneAndDelete({_id:receivedData.requestId},function(err,doc){
+        validModel.findOneAndDelete({_id:receivedData.requestId},function(err,doc){
             if(err)
                 response.message = err;
             else if(!doc)
