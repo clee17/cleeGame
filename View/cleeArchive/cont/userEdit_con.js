@@ -47,7 +47,7 @@ app.controller("userEditCon",['$scope','$rootScope','loginManager',function($sco
     $scope.$on('pwdSaved',function(event,data){
         $scope.requesting = false;
         if(data.success){
-            $scope.$emit('showExplain','<p>密码重设完成，请使用右上角登录按钮进行登录</p>');
+            $scope.$emit('showExplain',{info:'<p>密码重设完成，请使用右上角登录按钮进行登录</p>'});
             let btn = document.getElementById('resetPwBtn');
             if(btn)
                 btn.disabled = true;

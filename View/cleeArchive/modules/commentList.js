@@ -130,7 +130,7 @@ app.directive('commentInfo',function($compile,$rootScope,feedbackManager) {
                 if (scope.status === 8 && data.signal !== 'deleteComment' + scope.chapterId + scope.infoType)
                     return;
                if(scope.status === 8)
-                    scope.deleteCommentById(data.variables.id);
+                    scope.deleteCommentById(data.variables.id);``
                 scope.status = 1;
             });
         }

@@ -20,11 +20,11 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
     $scope.requesting = false;
 
     $scope.donate = function(){
-        $scope.$emit('showExplain',$scope.message[0]);
+        $scope.$emit('showExplain',{info:$scope.message[0]});
     };
 
     $scope.showExplain = function(index){
-        $scope.$emit('showExplain',$scope.message[index]);
+        $scope.$emit('showExplain',{info:$scope.message[index]});
     }
 
     $scope.checkExisted = function(){
@@ -52,11 +52,11 @@ app.controller("introCon",['$scope','$rootScope','$cookies','userManager','count
     $scope.$on('requestRegisterFinished',function(err,data){
         $scope.requesting = false;
         if(data.success){
-            $scope.$emit('showExplain','<h1>注册成功！</h1>'+
+            $scope.$emit('showExplain',{info:'<h1>注册成功！</h1>'+
                 '<p>您的邮箱与陈述已经成功被递交到审核队列中，审理通过后您将收到一封包含有注册链接邮件，可以通过链接完成注册。</p>'+
             '<p>您也可以通过网站的审核查询界面使用邮箱查询审核进度<a href="/registerProcess">前往</a></p>'+
             '<p>管理员每天晚上检查一次申请队列，因此您可以第二天早上确认您的申请状态</p>'+
-            '<p>祝创作愉快</p>');
+            '<p>祝创作愉快</p>'});
             $scope.mail = '';
             $scope.statements = '';
         }else{

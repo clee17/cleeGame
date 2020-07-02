@@ -15,7 +15,8 @@ let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'))
 let tableIndex ={
     'valid':validModel,
     'queue':queueModel,
-    'user':userModel
+    'user':userModel,
+    'application':applicationModel
 };
 
 let handler = {
@@ -26,23 +27,23 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    getTable:function(req,res){
+    validation:function(data,response,req){
+        if(!data.name || !tableIndex[data.name]){
+            response.message='The table is currently not available for management.';
+            return false;
+        }
+
+        if(!req.session.user || req.session.user < 99){
+            response.message='This page is only limited to Administrators.';
+            return false;
+        }
+
+        return true;
+    },
+
+    aggregate:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let populate = receivedData.populate || '';
-        let name = receivedData.name;
-        let condition = JSON.parse(JSON.stringify(receivedData));
-        delete condition.name;
-        if(condition.populate)
-            delete condition.populate;
-        if(condition.requestId)
-            delete condition.requestId;
-        let pageId = receivedData.pageId || 1;
-        pageId--;
-        let perPage = receivedData.perPage || 30;
-        if(condition.pageId)
-            delete condition.pageId;
-        if(condition.perPage)
-            delete condition.perPage;
+        let condition = receivedData.condition || null;
         let data = {
             message:'',
             requestId:receivedData.requestId,
@@ -50,17 +51,50 @@ let handler = {
             sent:false
         };
 
-        if(!receivedData.name || !tableIndex[receivedData.name]){
-            data.message='The table is currently not available for management.';
+        if(!handler.validation(receivedData,data,req)){
             handler.finalSend(res,data);
             return;
         }
 
-        if(!req.session.user || req.session.user < 99){
-            data.message='This page is only limited to Administrators.';
+        if(!condition){
+            data.message = 'cannot aggregate without condition';
             handler.finalSend(res,data);
             return;
         }
+
+        tableIndex[receivedData.name].aggregate(condition)
+            .then(function(docs){
+                data.contents = docs;
+                data.success = true;
+                handler.finalSend(res,data);
+            })
+            .catch(function(err){
+                if(typeof err != 'string')
+                    err = JSON.stringify(err);
+                data.message = err;
+                handler.finalSend(res,data);
+            });
+    },
+
+    getTable:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let populate = receivedData.populate || '';
+        let condition = receivedData.condition || {};
+        let pageId = receivedData.pageId || 1;
+        pageId--;
+        let perPage = receivedData.perPage || 30;
+        let data = {
+            message:'',
+            requestId:receivedData.requestId,
+            success:false,
+            sent:false
+        };
+
+        if(!handler.validation(receivedData,data,req)){
+            handler.finalSend(res,data);
+            return;
+        }
+
         
         tableIndex[receivedData.name].find(condition,null,{skip:pageId*perPage,limit:perPage,sort:{_id: -1}}).populate(populate).exec()
             .then(function(docs){

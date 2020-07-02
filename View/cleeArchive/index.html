@@ -65,6 +65,7 @@
                     element.style.height = '13rem';
                 }
                 $scope.showAlert = true;
+                $scope.alertWindow = 3;
                 $scope.alertInfo =  data.alertInfo || '';
                 $scope.signal = data.signal || '';
                 $scope.alertData = data.variables;
@@ -75,8 +76,9 @@
                 if(!explain)
                     return;
                 let children = explain.children;
-                children[0].innerHTML = '<div style="margin:2rem">'+data+'</div>';
-                explain.style.height = '30rem';
+                children[0].innerHTML = '<div style="margin:2rem">'+data.info+'</div>';
+                $scope.alertWindow = 1;
+                explain.style.height = data.height ? data.height+'rem': '30rem';
             });
 
             $scope.$on('showError',function(event,data){
@@ -92,8 +94,9 @@
 
             $scope.hideExplain = function(){
                 let explain = document.getElementById('explainBoard');
-                if(explain)
+                if(explain){
                     explain.style.height = '0';
+                }
             };
 
             $scope.tellYes = function(){
@@ -234,15 +237,16 @@
 </style>
 <body ng-app="cleeArchive" ng-controller="entryCon" style="display:flex;flex-direction:column;">
 <div id="alertWindow" class="topBoard">
+    <div style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(125,125,125,0.6);z-index:0;" ng-show="showAlert"></div>
     <div class="error-box" ng-show="showError">
     </div>
-    <div id="explainBoard">
+    <div id="explainBoard" ng-show="alertWindow === 1">
         <div style="margin:2rem;flex:1;">
         </div>
         <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
     </div>
-    <div id="alertBox" style="display:none;"></div>
-    <div id="alertContents" class="alert" style="height:0;">
+    <div id="alertBox" ng-show="alertWindow === 2"></div>
+    <div id="alertContents" class="alert" ng-show="alertWindow === 3" style="height:0;">
         <div><div style="padding-top:3px;"><%- websiteInfo[2] %></div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
         <div style="background:rgba(200,200,200,255);height:1px;width:68%;margin-left:auto;margin-right:auto;">
 

@@ -186,6 +186,7 @@ router.get('/fanfic/work/:workId',main.work);
 //admin pages
 router.get('/admin/',main.index);
 router.post('/admin/getTable',admin.getTable);
+router.post('/admin/aggregate',admin.aggregate);
 router.post('/admin/countRec',admin.countRec);
 router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);

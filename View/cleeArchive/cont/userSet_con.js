@@ -7,13 +7,16 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         {name:'技术工作者',order:4,description:'拥有该权限的你可以在社区中发表技术文章，并以技术支持者的身份参与到游戏的开发中去'},
         {name:'音乐创作者',order:5,description:'拥有该权限的你可以在社区中发表您所创作的同人或原创音乐'}];
     $scope.application = $scope.badges[0];
-    $scope.enabled = [1];
+    $scope.enabled = [1,2];
     $scope.enabledSubmit = false;
     $scope.badgeImage = null;
     $scope.preferenceUploading = false;
     $scope.mailEditing = false;
     $rootScope.settings.intro = LZString.decompressFromBase64($rootScope.settings.intro);
+    if(!$rootScope.settings.intro)
+        $rootScope.settings.intro = "";
     $rootScope.settings.intro = $rootScope.settings.intro.replace(/\n/gi,'<br>');
+
     $scope.splitStr = function(str){
         let list = [];
         for(let i=0;i<str.length;++i){
@@ -36,44 +39,44 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         $scope.refreshApplicationBtn()
     });
 
+    $scope.$watch('preference',function(err,doc){
+        if(!$scope.initialized )
+            return;
+        if($scope.preferenceUploading)
+            return;
+        $scope.preferenceUploading = true;
+        let preference = parseInt($rootScope.preference.join(''),2);
+        userManager.savePreference({preference:preference});
+    },true);
 
-            $scope.$watch('preference',function(err,doc){
-                if(!$scope.initialized )
-                    return;
-                if($scope.preferenceUploading)
-                    return;
-                $scope.preferenceUploading = true;
-                let preference = parseInt($rootScope.preference.join(''),2);
-                userManager.savePreference({preference:preference});
-            },true);
 
-            $scope.$on('basicInfoSaveFinished',function(event,data){
-                if(data.type === 'intro')
-                    $scope.introRequesting = false;
-                else if(data.type === 'mail')
-                    $scope.mailRequesting = false;
-                if(data.success){
-                    if(data.type === 'intro')
-                        $rootScope.settings.intro = LZString.decompressFromBase64(data.intro);
-                    else if(data.type === 'mail')
-                        $rootScope.settings.mail = data.mail;
-                }
-                else
-                    $scope.$emit('showError',data.message);
-            });
+    $scope.$on('basicInfoSaveFinished',function(event,data){
+        if(data.type === 'intro')
+            $scope.introRequesting = false;
+        else if(data.type === 'mail')
+            $scope.mailRequesting = false;
+        if(data.success){
+            if(data.type === 'intro')
+                $rootScope.settings.intro = LZString.decompressFromBase64(data.intro);
+            else if(data.type === 'mail')
+                $rootScope.settings.mail = data.mail;
+        }
+        else
+            $scope.$emit('showError',data.message);
+    });
 
-            $scope.$on('preferenceSaveFinished',function(event,data){
-                $scope.preferenceUploading = false;
-                if(data.success)
-                {
-                    let preference = data.result.toString(2);
-                    while(preference.length<5){
-                        preference = '0'+preference;
-                    }
-                    $rootScope.preference = preference;
+    $scope.$on('preferenceSaveFinished',function(event,data){
+        $scope.preferenceUploading = false;
+        if(data.success)
+        {
+            let preference = data.result.toString(2);
+            while(preference.length<5){
+                preference = '0'+preference;
+            }
+            $rootScope.preference = preference;
 
-                }
-                else{
+        }
+        else{
             $scope.$emit('showError',data.message);
         }
     });
@@ -116,7 +119,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     ];
 
     $scope.showExplain = function(index){
-          $scope.$emit('showExplain',$scope.message[index]);
+          $scope.$emit('showExplain',{info:$scope.message[index]});
     };
 
     $scope.getBadgeUrl = function(){
@@ -130,14 +133,18 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         if($rootScope.userAccess.length === 0)
             element.innerHTML = '您暂无任何创作者权限，欢迎提交申请';
         else{
+            console.log('badge initialization repeat');
             let innerHTML = '';
-            for(let i=0;i <$rootScope.userAccess.length;++i){
-                let index = $rootScope.userAccess[i];
-                if(index >100)
-                     innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
-                else
-                    innerHTML +=  '<div style="position:relative" ><div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-1)+'px;"></div>'+
+            let badges = [101,102];
+            for(let i=0;i< badges.length;++i){
+                let index = badges[i];
+                if($rootScope.userAccess.indexOf(index) >=0)
+                    innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
+                else if($rootScope.userAccess.indexOf(index-100)>=0)
+                    innerHTML +=  '<div style="position:relative" ><div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>'+
                         '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;">申请中</span></div></div>';
+                else
+                    innerHTML +=  '<div style="filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
             }
             element.innerHTML = innerHTML;
         }
