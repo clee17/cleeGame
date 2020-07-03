@@ -59,26 +59,36 @@
             $scope.showAlert = false;
             $scope.showError = false;
 
+            $scope.hideAlert = function(scope){
+                scope.showAlert = false;
+            }
+
             $scope.$on('showAlert',function(event,data){
-                let element = document.getElementById('alertContents');
-                if(element){
-                    element.style.height = '13rem';
-                }
-                $scope.showAlert = true;
                 $scope.alertWindow = 3;
+                $scope.showAlert = true;
                 $scope.alertInfo =  data.alertInfo || '';
                 $scope.signal = data.signal || '';
                 $scope.alertData = data.variables;
+                $timeout(function(){
+                    let element = document.getElementById('alertContents');
+                    if(element){
+                        element.style.height = '13rem';
+                    }
+                },10)
             });
 
             $scope.$on('showExplain',function(event,data){
-                let explain = document.getElementById('explainBoard');
-                if(!explain)
-                    return;
-                let children = explain.children;
-                children[0].innerHTML = '<div style="margin:2rem">'+data.info+'</div>';
                 $scope.alertWindow = 1;
-                explain.style.height = data.height ? data.height+'rem': '30rem';
+                $scope.showAlert = true;
+                let showExplain = function(data){
+                    let explain = document.getElementById('explainBoard');
+                    if(explain){
+                        let children = explain.children;
+                        children[0].innerHTML = '<div style="margin:2rem">'+data.info+'</div>';
+                        explain.style.height = data.height ? data.height+'rem': '30rem';
+                    }
+                };
+                $timeout(showExplain(data),10)
             });
 
             $scope.$on('showError',function(event,data){
@@ -97,28 +107,34 @@
                 if(explain){
                     explain.style.height = '0';
                 }
+                $timeout($scope.hideAlert($scope),140);
             };
 
             $scope.tellYes = function(){
-                $scope.showAlert = false;
-                let response = {signal:$scope.signal};
+                let finishTellYes = function(scope,rootScope){
+                    let response = {signal:scope.signal};
+                    if(scope.alertData)
+                        response.variables = scope.alertData;
+                    rootScope.$broadcast('tellYes',response);
+                    scope.hideAlert(scope);
+                }
                 let element = document.getElementById('alertContents');
                 if(element){
                     element.style.height = '0';
                 }
-                if($scope.alertData)
-                    response.variables = $scope.alertData;
-                $rootScope.$broadcast('tellYes',response);
+                $timeout(finishTellYes($scope,$rootScope),140);
             };
 
             $scope.tellNo = function(){
-                $scope.showTop = false;
-                $scope.showAlert = false;
+                let finishTellNo = function(scope,rootScope){
+                    rootScope.$broadcast('tellNo',{signal:scope.signal});
+                    scope.hideAlert(scope);
+                }
                 let element = document.getElementById('alertContents');
                 if(element){
                     element.style.height = '0';
                 }
-                $rootScope.$broadcast('tellNo',{signal:$scope.signal});
+                $timeout(finishTellNo($scope,$rootScope),140);
             };
 
             $scope.loggingOut = false;
@@ -197,7 +213,6 @@
             $scope.initialize();
         });
 
-
         app.directive('initialisation',['$rootScope',function() {
             return {
                 restrict: 'AC',
@@ -230,17 +245,17 @@
 
     <% modules.forEach(function(item){ %>
     <script src='<%= item %>'></script>
-    <% }) %>
+    <% }) %>`
 
 </head>
 <style>
 </style>
-<body ng-app="cleeArchive" ng-controller="entryCon" style="display:flex;flex-direction:column;">
+<body ng-app="cleeArchive" ng-controller="entryCon" style="padding:0;margin:0;">
 <div id="alertWindow" class="topBoard">
-    <div style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(125,125,125,0.6);z-index:0;" ng-show="showAlert"></div>
-    <div class="error-box" ng-show="showError">
+    <div style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(125,125,125,0.6);z-index:0;pointer-events:auto;" ng-show="showAlert"></div>
+    <div class="error-box" ng-show="showError" style="z-index:10;">
     </div>
-    <div id="explainBoard" ng-show="alertWindow === 1">
+    <div id="explainBoard" ng-show="alertWindow === 1" style="z-index:20;">
         <div style="margin:2rem;flex:1;">
         </div>
         <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
@@ -261,7 +276,7 @@
         </div>
     </div>
 </div>
-<div id="header" >
+<div id="header">
     <div id="userBoard">
         <div id="logo">
             <a href="/">
@@ -282,7 +297,7 @@
             <div style="margin-left:8px;"><i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:-3px;"></i></div>
         </a>
         <div ng-show="showDashboard" id="dashboard">
-            <% if(user.userGroup >= 999 || (user.settings && user.settings.access.indexOf(202) >0 )){ %>
+            <% if(user.userGroup >= 999){ %>
             <a class="dashboardSelect" href="/admin"><%- websiteInfo[5] %></a>
             <% } %>
             <a class="dashboardSelect" href="/donate"><%- websiteInfo[6] %></a>
@@ -303,11 +318,8 @@
         <guide_button color="rgba(119,111,144,1)" height="1.8rem" style="margin-right:auto;"><a href="/develop"><%- websiteInfo[12] %></a></guide_button>
     </div>
 </div>
-
 <div id="main" ng-include="'<%= viewport %>'">
-
 </div>
-
 <div id="footer" style="margin-top:0">
     <div id="publication" class="board" style="margin-left:auto;">
         <div class="headline"><%- websiteInfo[13] %></div>

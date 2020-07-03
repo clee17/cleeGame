@@ -9,7 +9,6 @@ let userModel = require(path.join(__dataModel,'user'));
 let queueModel = require(path.join(__dataModel,'application_queue'));
 let applicationModel = require(path.join(__dataModel,'application'));
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
-
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
 let tableIndex ={
@@ -95,7 +94,6 @@ let handler = {
             return;
         }
 
-        
         tableIndex[receivedData.name].find(condition,null,{skip:pageId*perPage,limit:perPage,sort:{_id: -1}}).populate(populate).exec()
             .then(function(docs){
                 data.contents = JSON.parse(JSON.stringify(docs));
@@ -118,9 +116,7 @@ let handler = {
             message:'',
             success:false
         };
-        let condition = JSON.parse(JSON.stringify(receivedData));
-        if(condition.name)
-            delete condition.name;
+        let condition = receivedData.condition || {};
 
         if(!receivedData.name || !tableIndex[receivedData.name]){
             data.message='The table is currently not available for management.';
@@ -338,7 +334,7 @@ let handler = {
             success:false
         };
 
-        if(!req.session.user || req.session.user.userGroup < 999 || req.session.user.settings.access.indexOf(202) === -1)
+        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.setting.access))
             response.message = '您没有相应的权限';
 
         if(response.message !== '')
@@ -357,7 +353,50 @@ let handler = {
 
                 handler.finalSend(res,response);
             });
+    },
 
+    authorize:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+        };
+
+        if(!receivedData.user || !__validateId(receivedData.user)){
+            response.message=  'No valid user info received';
+            handler.finalSend(res,response);
+            return;
+        }
+
+        if(!receivedData.index || receivedData.index <= 100 || receivedData.index >105 ){
+            response.message=  'No valid authorization code  received';
+            handler.finalSend(res,response);
+            return;
+        }
+
+        response.index = receivedData.index;
+        response.user = receivedData.user;
+
+        userSettingModel.findOneAndUpdate({user:receivedData.user,"access.index":(receivedData.index-100)},{$inc:{"access.$.index":100}},{new:true}).exec()
+            .then(function(doc){
+                if(!doc){
+                    throw 'Please request the authorization first.'
+                }
+                doc = JSON.parse(JSON.stringify(doc));
+                response.success = true;
+                response.access =  doc.access;
+                handler.finalSend(res,response);
+            })
+            .catch(function(err){
+                console.log(err);
+                if(typeof err == 'string')
+                    response.message = err
+                else
+                    response.messaege = JSON.stringify(err);
+                response.success = false;
+                handler.finalSend(res,response);
+            })
     }
 
 };

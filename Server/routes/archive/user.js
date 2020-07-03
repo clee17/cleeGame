@@ -5,9 +5,9 @@ let express = require('express'),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let applicationModel = require(path.join(__dataModel,'application')),
+    userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
-    userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
     tagModel =  require(path.join(__dataModel,'cleeArchive_tag')),
     followModel = require(path.join(__dataModel,'cleeArchive_follow')),
@@ -52,7 +52,7 @@ let handler = {
     },
 
     filter: function (req, res, data) {
-        if (req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
+        if (req.session.user && __isIdentity(202,req.session.user.settings.access))
             handler.finalSend(res, data);
         else if (req.session.user && req.session.user._id == data.userId)
             handler.finalSend(res, data);

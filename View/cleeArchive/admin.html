@@ -122,6 +122,15 @@
         background:rgba(158,142,166,0.8);
     }
 
+    .btnArea button:first-child:disabled{
+        filter:grayscale(1);
+    }
+
+    .btnArea button:first-child:disabled:hover{
+        background:rgba(158,142,166,1);
+        color:white;
+    }
+
     #btnColumn{
         display:flex;
         flex-direction:column;
@@ -148,14 +157,40 @@
 
     .badgesR:hover{
         border-bottom:solid 4px rgba(158,142,166,255);
-
-
+        cursor:pointer;
     }
 
     .badgesR >div{
         transform:scale(1);
         margin:auto;
     }
+
+    .info_header{
+        border-bottom:1px solid rgba(223,216,214,0.8);
+        display:flex;
+        flex-direction:row;
+        height:3rem;
+        box-shadow:0 0 6px rgba(185,185,185,0.6);
+    }
+
+    .info_header >div{
+        border:none;
+        background:rgba(0,0,0,0);
+        color:rgba(108,95,93,255);
+        height:calc(100% - 4px);
+        font-weight:bold;
+        min-width:8rem;
+        text-align:center;
+        line-height:3rem;
+        border-bottom:solid 4px white;
+        transition:border-bottom 0.14s ease-out, color 0.14s ease-out;
+    }
+
+    .info_header>div:hover{
+        cursor:pointer;
+        color:rgba(181,163,160,255);
+    }
+
 </style>
 
 <div id="admin_board" controller="admin_con" ng-controller="adminCon">

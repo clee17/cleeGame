@@ -36,7 +36,7 @@ let handler = {
     },
 
     filter:function(req,res,data){
-        if(req.session.user && req.session.user.settings.access.indexOf(202) !== -1)
+        if(req.session.user && __isIdentity(202,req.session.user.settings.access))
             handler.finalSend(res,data);
         else if(req.session.user && req.session.user.userGroup >= 999)
             handler.finalSend(res,data);
@@ -193,7 +193,7 @@ let handler = {
             .then(function(docs){
                 response.result = JSON.parse(JSON.stringify(docs));
                 response.success = true;
-                if(req.session.user && (req.session.user.userGroup >= 999 || req.session.user.settings.access.indexOf(202) !== -1))
+                if(req.session.user && (req.session.user.userGroup >= 999 || __isIdentity(202,req.session.user.settings.access)))
                     handler.finalSend(res,response);
                 else
                     handler.filter(req,res,response);

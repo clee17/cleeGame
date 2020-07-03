@@ -8,7 +8,6 @@ let express = require('express'),
     chapterModel =require(path.join(__dataModel,'cleeArchive_fanfic')),
     tagMapModel = require(path.join(__dataModel,'cleeArchive_tagMap')),
     indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
-
     userModel = require(path.join(__dataModel,'user')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 

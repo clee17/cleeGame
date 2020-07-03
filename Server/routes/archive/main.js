@@ -63,7 +63,7 @@ let handler = {
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
             variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
-        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js'],modules:['/view/modules/pageIndex.js']});
+        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js','/service/copyService.js'],modules:['/view/modules/pageIndex.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});

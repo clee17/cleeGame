@@ -14,6 +14,14 @@ global.__chapterCount = function(index){
         return '无法转义';
 };
 
+global.__isIdentity = function(index,access){
+    for(let i =0;i<access.length;++i){
+        if(access[i].index === index)
+            return true;
+    }
+    return false;
+}
+
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],
         services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{},
@@ -152,13 +160,13 @@ global.__updateUserSetting = function(applicationId,data,req,callback){
         return;
     let userId = req.session.user._id;
 
-    if(data.type == 1){
-        req.session.user.settings.access.push(data.subType);
-    }
-
-    userSettingModel.findOneAndUpdate({user:userId},{$push:{access:data.subType}},function(err,doc){});
-    if(callback)
-        callback();
+    userSettingModel.findOneAndUpdate({user:userId},{$push:{"access.index":data.subType}},function(err,doc){
+        if(data.type == 1){
+            req.session.user.settings.access  = doc.access;
+        }
+        if(callback)
+            callback();
+    });
 };
 
 let router = express.Router();
@@ -193,6 +201,7 @@ router.post('/admin/removeRec',admin.removeRec);
 router.post('/admin/getRegister',admin.getRegister);
 router.post('/admin/answerRegister',admin.answerRegister);
 router.post('/admin/addApplication',admin.addApplication);
+router.post('/admin/authorize',admin.authorize);
 
 //user
 router.get('/register/:registerId',subUser.register);

@@ -4,6 +4,7 @@ var express = require('express'),
 
 let userModel = require(path.join(__dataModel, 'user')),
     registerModel = require(path.join(__dataModel,'user_register')),
+    settingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     validModel = require(path.join(__dataModel,'valid')),
     queueModel = require(path.join(__dataModel,'application_queue')),
     applicationModel = require(path.join(__dataModel,'application')),

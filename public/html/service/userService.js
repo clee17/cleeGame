@@ -39,3 +39,21 @@ app.service('loginManager',function($http,$rootScope){
     }
 
 });
+
+
+var __isIdentity = function(id,group){
+    for(let i=0; i<group.length;++i){
+        if(group[i].index === id)
+            return true;
+    }
+    return false;
+}
+
+var __isAccessReq = function(id, group){
+    let index=  id- 100;
+    for(let i=0; i<group.length;++i){
+        if(group[i].index === index)
+            return true;
+    }
+    return false;
+}

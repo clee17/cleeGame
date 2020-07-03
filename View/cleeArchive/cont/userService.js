@@ -65,5 +65,5 @@ app.service('userManager',function($http,$rootScope){
 
     this.updateFollow = function(data){
         manager.requestAll('/users/updateFollow/','updateFollowFinished',data);
-    }
+    };
 });

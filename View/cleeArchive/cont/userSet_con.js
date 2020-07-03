@@ -98,9 +98,9 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.refreshApplicationBtn = function(){
         if($scope.enabled.indexOf($scope.application.order) < 0)
             $scope.application.error = '该功能尚未开发完成，敬请期待';
-        else if($rootScope.userAccess.indexOf(100+$scope.application.order) >=0)
+        else if(__isIdentity(100+$scope.application.order,$rootScope.userAccess))
             $scope.application.error = '您已经拥有该项权限，无法继续申请';
-        else if($rootScope.userAccess.indexOf($scope.application.order)>=0)
+        else if(__isIdentity($scope.application.order,$rootScope.userAccess))
             $scope.application.error = '您已经提交了该权限的申请，请勿重复提交';
         else
             $scope.application.error = '';
@@ -138,9 +138,9 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
             let badges = [101,102];
             for(let i=0;i< badges.length;++i){
                 let index = badges[i];
-                if($rootScope.userAccess.indexOf(index) >=0)
+                if(__isIdentity(index,$rootScope.userAccess))
                     innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
-                else if($rootScope.userAccess.indexOf(index-100)>=0)
+                else if(__isAccessReq(index,$rootScope.userAccess))
                     innerHTML +=  '<div style="position:relative" ><div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>'+
                         '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;">申请中</span></div></div>';
                 else
@@ -200,7 +200,9 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
                  $scope.$emit('showError',error);
                  return;
              }
-             $rootScope.userAccess.push($scope.application.order);
+             $rootScope.userAccess.push({
+                 index:$scope.application.order
+             });
              let data = {
                  type:1,
                  statements:children[1].value,
