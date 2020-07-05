@@ -1,0 +1,36 @@
+{"frames": {
+
+"building.png":
+{
+	"frame": {"x":1,"y":251,"w":707,"h":251},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":707,"h":251},
+	"sourceSize": {"w":794,"h":251}
+},
+"frontBoard.png":
+{
+	"frame": {"x":730,"y":1,"w":705,"h":283},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":705,"h":283},
+	"sourceSize": {"w":705,"h":283}
+},
+"title.png":
+{
+	"frame": {"x":1,"y":1,"w":727,"h":248},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":727,"h":248},
+	"sourceSize": {"w":727,"h":248}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "decoration.png",
+	"format": "RGBA8888",
+	"size": {"w":1014,"h":707},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:10bd01d32abb3c7666630b563e031ea8:0eaa25efe4ce771a7b85a6a82a91b386:71a88a4e163a50e8a1058bb24f5ae753$"
+}
+}

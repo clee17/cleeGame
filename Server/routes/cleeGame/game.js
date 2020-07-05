@@ -152,7 +152,6 @@ let handler = {
 
                 }
             }
-            console.log(data.loadList);
             if(data.loadList.length === 0)
             {
                 data.status = 200;

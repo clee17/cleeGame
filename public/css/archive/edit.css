@@ -244,7 +244,7 @@
     background:rgba(223,216,214,255);
     border:solid 1px rgba(223,216,214,128);
     border-top:none;
-    height:2rem;
+    height:35px;
     width:100%;
     display:flex;
     flex-direction:row;
@@ -275,6 +275,13 @@
     flex-direction:row;
 }
 
+.icon-background{
+    text-align:center;
+    min-width:35px;
+    min-height:35px;
+    display:flex;
+}
+
 .tool-section{
     display:flex;
     flex-direction:row;
@@ -282,12 +289,8 @@
     padding-right:4px;
 }
 
-#tool-bar svg{
-    width:18px;
-    height:18px;
-    margin-top:0;
-    margin-left:-10px;
-    fill: rgba(138,138,138,211);
+#tool-bar i{
+    color: rgba(138,138,138,211);
 }
 
 .tool-section>div{

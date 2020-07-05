@@ -36,13 +36,25 @@ Text_Cache.prototype.processName = function(s){
         name = name[nameType];
     else if (nameType ===2)
         name = nameInfo.name;
-    else if (nameType >=3)
-    {
+    else if (nameType >=3) {
         let index = nameType -3;
         name = nickName[index] || name[index];
     }
 
     return name;
+};
+
+Text_Cache.prototype.processTarget = function(s){
+    let target = GameManager.getMapTarget();
+
+
+    return targetMessage;
+};
+
+Text_Cache.prototype.processLocation = function(s){
+    let location = GameManager.getMapTargetLocation();
+
+    return locationMessage;
 };
 
 Text_Cache.prototype.processText = function(index){
@@ -52,8 +64,19 @@ Text_Cache.prototype.processText = function(index){
         let result = '';
         if(s[1] === 'n' || s[1] === 'N')
             result = tx.processName(s);
+        else if(s[1] === 't' || s[1] === 'T')
+            result = tx.processTarget(s);
+        else if(s[1] === 'l' || s[1] === 'L')
+            result = tx.processLocation(s);
         return result;
     });
+};
+
+Text_Cache.prototype.randomRole = function(){
+    let randomInt = Math.randomInt(this._text.role.length);
+    if(randomInt === this._text.role.length)
+        randomInt--;
+    return this._text.role[randomInt];
 };
 
 Text_Cache.prototype.loadText = function(){
@@ -61,9 +84,15 @@ Text_Cache.prototype.loadText = function(){
     for(let i=0; i<this._text.length;++i){
         if(typeof this._text[i].role === 'number'){
             this._text[i].role = Game_Database.getData('role',this._text[i].role);
-            if(this._text[i].role.head)
-                ImageManager.reserveBitmap(this._text[i].role.head);
+        }else if(Array.isArray(this._text[i].role)){
+            let role = this.randomRole();
+            while(role === GameManager.getMapTarget()){
+                role = this.randomRole();
+            }
+            this._text[i].role = Game_Database.getData('role',this._text[i].role[role]);
         }
+        if(this._text[i].role && this._text[i].role.head)
+            ImageManager.reserveBitmap(this._text[i].role.head);
         this.processText(i);
     }
     this._target = this._text.length;
@@ -116,7 +145,16 @@ TalkManager.loadText = function(){
 };
 
 TalkManager.clearCache = function(){
+    this._typing = false;
+    this._messageCompleted = false;
     this._textCache = new Text_Cache();
+};
+
+TalkManager.terminate = function(){
+    this._typing = false;
+    this._messageCompleted = false;
+    if(this._textCache.loaded())
+        this._textCache._current--;
 };
 
 TalkManager.notEnd = function(){
@@ -198,20 +236,30 @@ Window_Talk.prototype = Object.create(Window_Base.prototype);
 Window_Talk.prototype.constructor = Window_Talk;
 
 Window_Talk.prototype.initialize = function(filename) {
+    this._position = new Point(0,0);
     Window_Base.prototype.initialize.call(this,0,0,1,1,true);
-    this._align = 'left';
-    this._message = null;
     this._showing = false;
-    this.loadBackground(filename);
-    this._letterSpacing = 2;
-    this._fontSize = 24;
-    this.openness = 0;
     this._paused = false;
-    this.position = new Point(this.x,this.y);
+    this._active = true;
+
+    this._message = null;
+    this._align = 'left';
+    this._letterSpacing = 2;
+    this._nameOutline = {color:'rgba(0,0,0,0)',width:4};
+    this._fontSize = 24;
+
     this._headArea = new Rectangle(35,30,this._width,this._height);
     this._contentsArea = new Rectangle(200,30,100,200);
+
+    this.openness = 0;
     this._stayCount = 0;
-    this._nameOutline = {color:'rgba(0,0,0,0)',width:4};
+
+    this.loadBackground(filename);
+    this.resetTextSpeed();
+};
+
+Window_Talk.prototype._createAllParts = function(){
+    Window_Base.prototype._createAllParts.call(this);
     this._nameSprite = new Sprite();
     this._headSprite = new Sprite();
     this._headMask = new Sprite('headMask.png');
@@ -220,9 +268,6 @@ Window_Talk.prototype.initialize = function(filename) {
     this._headSprite.addChild(this._headMask);
     this.addChild(this._headSprite);
     this.addChild(this._nameSprite);
-
-    this.resetTextSpeed();
-    this._refresh();
 };
 
 Object.defineProperty(Window.prototype, 'nameContents', {
@@ -254,40 +299,30 @@ Window_Talk.prototype.createContents = function() {
 
 };
 
-Window_Talk.prototype._refreshContents = function() {
-    this._windowContentsSprite.move(0, 0);
-};
-
 Window_Talk.prototype.resetTextSpeed = function(){
     this._textSpeed = ConfigManager.textSpeed();
 };
 
 Window_Talk.prototype.loadBackground = function(filename){
-    this._loadingBackBitmap = ImageManager.loadBitmap(filename+'.png');
-    this._loadingBackBitmap.addLoadListener(this._onBackSpriteLoaded.bind(this));
+    this._windowBackSprite.bitmap  = ImageManager.loadBitmap(filename);
+    this._windowBackSprite.bitmap.addLoadListener(this._onBackSpriteLoaded.bind(this));
 };
 
 Window_Talk.prototype._onBackSpriteLoaded = function(){
-     if(this._loadingBackBitmap){
-         this._windowBackSprite.bitmap = this._loadingBackBitmap;
-         this._width = this._windowBackSprite.width;
-         this._height = this._windowBackSprite.height;
-         this._contentsArea.width = this._width - this.standardPadding()*2 - this._fontSize;
-         this._contentsArea.height = this._height - this.standardPadding()*2;
-         this._nameSprite.bitmap = new Bitmap(this._width,this._fontSize,'none');
-         this.contents = new Bitmap(this._width, this._height,'none');
-
-         this.contents.x = this.standardPadding();
-         this.contents.y = this.standardPadding();
-         this._refresh();
-     }
+    this._width = this._windowBackSprite.width;
+    this._height = this._windowBackSprite.height;
+    this._refreshAllParts();
 };
 
 Window_Talk.prototype.setPosition = function(x,y){
     x = x || 0;
     y = y || 0;
-    this.position.x = x;
-    this.position.y = y;
+    if(!this._position){
+        this._position = new Point(this.x,this.y);
+    }
+    this._position.x = x;
+    this._position.y = y;
+    this._refreshAllParts();
 };
 
 Window_Talk.prototype.setNameArea = function(x,y,width,height){
@@ -298,9 +333,33 @@ Window_Talk.prototype.setNameArea = function(x,y,width,height){
 
 
 Window_Talk.prototype._refresh = function(){
-    this.x = this.position.x - this._width/2;
-    this.y = this.position.y - this._height;
+    this.x = this._position.x - this._width/2;
+    this.y = this._position.y - this._height;
     this._reposPauseSign();
+};
+
+Window_Talk.prototype._refreshContents = function(){
+    Window_Base.prototype._refreshContents.call(this);
+    if(!this._contentsArea)
+        this._contentsArea = new Rectangle(200,30,this._width,this.height);
+    this._windowContentsSprite.move(0, 0);
+    this._contentsArea.width = this._width - this.standardPadding()*2 - this._fontSize;
+    this._contentsArea.height = this._height - this.standardPadding()*2;
+    this.contents = new Bitmap(this._width, this._height,'none');
+    this.contents._thickText = true;
+    this.contents.x = this.standardPadding();
+    this.contents.y = this.standardPadding();
+    this._refresh();
+};
+
+Window_Talk.prototype._refreshNameBitmap = function(){
+    this._nameSprite.bitmap = new Bitmap(this._width,this._fontSize,'none');
+};
+
+Window_Talk.prototype._refreshAllParts = function(){
+  Window_Base.prototype._refreshAllParts.call(this);
+  this._refreshNameBitmap();
+  this._refresh();
 };
 
 Window_Talk.prototype.textOnDisplay = function(){
@@ -316,6 +375,7 @@ Window_Talk.prototype.drawName = function(){
         this.nameContents.textColor = this.nameColor();
         this.nameContents.clear();
         let name = this._message.role.name;
+        this.nameContents._thickText = true;
         this.nameContents.drawText(name,0,0,this._width,fontSize,'left');
         this._nameDirty = false;
     }
@@ -334,7 +394,6 @@ Window_Talk.prototype.drawHead = function(){
 };
 
 Window_Talk.prototype.close = function(){
-
     Window_Base.prototype.close.call(this);
 };
 
@@ -358,18 +417,33 @@ Window_Talk.prototype.addContentsLine = function(n){
     this._message.ty = this._message.ty.clamp(0,this.contents.height);
 };
 
-
 Window_Talk.prototype.updateMessage = function(){
     if(TalkManager._messageCompleted)
         return;
     this.resetFontSettings();
     let index = this._message.index;
     let text = this._message.text[index];
+    if(!this._message.role.head)
+        this._contentsArea.x = 100;
+    else
+        this._contentsArea.x = 200;
     let tx = this._contentsArea.x +this._message.tx;
     let ty = this._contentsArea.y + this._message.ty;
-    this.contents.drawText(text,tx,ty,this._fontSize,this.lineHeight(),'left');
+    let maxWidth = this._fontSize;
+    if(text.match(/[a-zA-Z]/)){
+        if(text.match(/[a-z]/))
+            maxWidth*=0.68;
+        else if(text.match(/[A-Z]/))
+            maxWidth *= 1.2;
+    }
+    let spacing = this._letterSpacing;
+    if(index+1 < this._message.text.length && this._message.text[index+1].match(/[a-zA-Z]/)){
+        spacing = 0;
+    }
+    this.contents._thickText = true;
+    this.contents.drawText(text,tx,ty,maxWidth,this.lineHeight(),'left');
     this._message.index++;
-    this._message.tx += this._fontSize+this._letterSpacing*2;
+    this._message.tx += maxWidth+spacing*2;
     if(this._message.tx +this._contentsArea.x >= this._contentsArea.width){
         this._message.tx = 0;
         this._message.ty += this.lineHeight();
@@ -398,6 +472,8 @@ Window_Talk.prototype.speedUpText = function(){
 };
 
 Window_Talk.prototype.updateText = function(){
+    if(!this._active)
+        return;
     if(TalkManager.textLoaded() && this.isClosed() && !TalkManager.typing() &&  TalkManager.isText()){
         this.open();
     }else if(!this.textOnDisplay() && this.isOpen() && TalkManager.notEnd()){
@@ -437,7 +513,6 @@ Window_Talk.prototype.updateContentsVisible = function(){
 
 Window_Talk.prototype.update = function(){
     Window_Base.prototype.update.call(this);
-    this._active = this.isOpen();
     this.updateContentsVisible();
     this.updateText();
     this.updateInput();
@@ -476,12 +551,18 @@ Object.defineProperty(Window.prototype, 'posY', {
 Window_Infoboard.prototype.initialize = function(width,height,filename,margin) {
     let m = margin || 55;
     Window_Base.prototype.initialize.call(this,0,0,width+m*2,height+m*2,true);
+    this._active = true;
     this._windowMargin = m;
     this._align = 'center';
+
     this._openStep = this._closeStep = 35;
     this._reserveBackBitmap = ImageManager.loadBitmap(filename);
     this._reserveBackBitmap.addLoadListener(this._refreshAllParts.bind(this));
     this._reserveCoverTexture = null;
+
+    this._type = 0;
+
+    this._itemInfo = [];
     this._refreshAllParts();
     this.openness = 0;
 };
@@ -519,7 +600,7 @@ Window_Infoboard.prototype._refreshBack = function() {
     tbit.blt(bitmap,0,sh-m,m,m,0,h-m,m,m);
     tbit.blt(bitmap,sw-m,sh-m,m,m,w-m,h-m,m,m);
     tbit.blt(bitmap,m,m,sw-m*2,sh-m*2,m,m,w-m*2,h - m*2);
-    tbit.blt(bitmap,m,0,sw-m*2,60,60,0,w-m*2,m);
+    tbit.blt(bitmap,m,0,sw-m*2,m,m,0,w-m*2,m);
     tbit.blt(bitmap,m,sh-m,sw-m*2,m,m,h-m,w-m*2,m);
     tbit.blt(bitmap,0,m,m,sh-m*2,0,m,m,h-m*2);
     tbit.blt(bitmap,sw-m,m,m,sh-m*2,w-m,m,m,h-m*2);
@@ -586,35 +667,96 @@ Window_Infoboard.prototype.loadInfo = function(){
         this.close();
     }else{
         let text = this._info.text;
+        this.contents._thickText = true;
         this.drawAllText(text);
         this._paused = true;
     }
 };
 
 Window_Infoboard.prototype.resizeInfoBoard = function(text){
+    if(typeof this._stashedWidth === 'number'){
+        this.width = this._stashedWidth;
+        this._stashedWidth = null;
+    }
     let textHeight  = this.calcTextHeight(text);
-
     this.height = textHeight+this._windowMargin*2;
+    this._itemSprite.visible = false;
+
+};
+
+Window_Infoboard.prototype.resizeItemInfoBoard = function(){
+    if(!this._stashedWidth)
+       this._stashedWidth = this.width;
+    this.width = this._stashedWidth*0.5;
+    this.height = 150+this._windowMargin*2;
+};
+
+Window_Infoboard.prototype.makeItemText = function(info){
+    let itemInfo = Game_Database.getData('item',info.index);
+    return '获得了'+itemInfo.name+'X'+info.num;
+};
+
+Window_Infoboard.prototype.refreshItemInfo = function(){
+    if(this._itemInfo.length >0){
+        let info = this._itemInfo.shift();
+        let itemInfo = Game_Database.getData('item',info.index);
+        let imgId = itemInfo.imgId;
+        this.contents._thickText = true;
+        let text = this.makeItemText(info);
+        this._itemSprite.setFrame(145*(imgId%5),142.5*Math.floor(imgId/5),145,142.5);
+        this._itemSprite.anchor.x = 0.5;
+        this._itemSprite.x = this.width/2;
+        this._itemSprite.y = this._windowMargin /2;
+        this._itemSprite.visible = true;
+        this.drawText(text,0,this._windowMargin/2+120,this.width-36-this.standardPadding()*2,'center');
+        this._paused = true;
+
+    }else{
+        this._itemSprite.visible = true;
+        this.close();
+    }
+
 };
 
 Window_Infoboard.prototype.updateText = function(){
+    if(!this._active)
+        return;
+    if(GameManager._backpackUpdated && GameManager._backpackUpdated.length >0){
+        this._itemInfo =  this._itemInfo.concat(GameManager._backpackUpdated);
+    }
+    if(this._itemInfo.length >0 && this.isClosed()){
+        this._type = 1;
+        this.resizeItemInfoBoard();
+        this.open();
+    }
     if(TalkManager.textLoaded() && this.isClosed() && !TalkManager.typing() && TalkManager.isInfo()){
+        this._type = 0;
         this.resizeInfoBoard(TalkManager.getInfoText());
         this.open();
-    }else if(!this._paused && this.isOpen()){
-        this.loadInfo();
+    }
+    if(!this._paused && this.isOpen()){
+        if(this._type === 0)
+            this.loadInfo();
+        else if (this._type === 1)
+            this.refreshItemInfo();
     }
 };
 
 Window_Infoboard.prototype.updateInput = function(){
-    if (this.isOpen()) {
+    if (this.isOpen() && this._active) {
         if (TouchInput.isTriggered())
             this._touching = true;
         if (this._touching && TouchInput.isReleased() && this._paused){
-            TalkManager.completeMessage();
-            TalkManager.resetMessage();
+            if(GameManager.isTalkEvent()){
+                TalkManager.completeMessage();
+                TalkManager.resetMessage();
+            }
             this._paused = false;
-            this.loadInfo();
+            if(this._type === 0)
+                this.loadInfo();
+            else if (this._type === 1)
+                this.refreshItemInfo();
+            TouchInput._released = false;
         }
     }
 };
@@ -627,9 +769,15 @@ Window_Infoboard.resize = function(width,height){
 
 Window_Infoboard.prototype.update = function(){
     Window_Base.prototype.update.call(this);
-    this._active = this.isOpen();
     this.updateText();
     this.updateInput();
+};
+
+Window_Infoboard.prototype._createAllParts = function(){
+   Window_Base.prototype._createAllParts.call(this);
+    this._itemSprite = new Sprite('item_large.png');
+    this.addChild(this._itemSprite);
+    this._itemSprite.visible=  false;
 };
 
 Window_Infoboard.prototype.contentsWidth = function() {
@@ -642,6 +790,7 @@ Window_Infoboard.prototype._refreshContents = function() {
     var h = this._height - m * 2;
     var bitmap = new Bitmap(w, h,'none');
     bitmap.clear();
+    bitmap._thickText = true;
     this._windowContentsSprite.bitmap = bitmap;
     this.contentsOpacity = 255;
 };

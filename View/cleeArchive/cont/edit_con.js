@@ -20,9 +20,6 @@ app.directive('iconBackground',function(){
           pointer: '@'
       },
       link:function(scope,element){
-         let children = element.children();
-         let svg = children[0];
-
          let getCurrentSelected = function(){
              let index = Number(scope.pointer);
              let str = scope.selected.toString(2);
@@ -50,13 +47,15 @@ app.directive('iconBackground',function(){
          };
 
          let updateIcon = function(){
+             let children = element.children();
+             let icon = children[0];
              if(getCurrentSelected())
              {
-                 svg.style.setProperty('fill','white');
+                 icon.style.setProperty('color','white');
                  element.css('background','rgba(181,163,160,218)');
              }
              else{
-                 svg.style.setProperty('fill','rgba(108,95,93,255)');
+                 icon.style.setProperty('color','rgba(108,95,93,255)');
                  element.css('background', 'rgba(108,95,93,0)');
              }
          };
@@ -65,13 +64,17 @@ app.directive('iconBackground',function(){
 
          element
              .on('mouseenter',function(){
-                svg.style.setProperty('fill','white');
+                 let children = element.children();
+                 let icon = children[0];
+                icon.style.color = 'white';
                 element.css('background','rgba(181,163,160,218)');
              })
              .on('mouseleave',function(){
                 if(getCurrentSelected())
                    return;
-                svg.style.setProperty('fill','rgba(108,95,93,255)');
+                 let children = element.children();
+                 let icon = children[0];
+                icon.style.setProperty('color','rgba(108,95,93,255)');
                 element.css('background', 'rgba(108,95,93,0)');
              })
              .on('click',function(){
@@ -87,6 +90,13 @@ app.directive('infoReceiver',function(){
     return {
         restrict: 'E',
         link:function(scope){
+            scope.warningTemplate = JSON.parse(decodeURIComponent(scope.warningTemplate));
+            scope.gradeTemplate = JSON.parse(decodeURIComponent(scope.gradeTemplate));
+            scope.workIndex = JSON.parse(decodeURIComponent(scope.workIndex));
+            scope.bookInfo = JSON.parse(decodeURIComponent(scope.bookInfo));
+            scope.bookInfoDetail = JSON.parse(decodeURIComponent(scope.bookInfoDetail));
+            scope.currentIndex = JSON.parse(decodeURIComponent(scope.currentIndex));
+            scope.userSettings = JSON.parse(decodeURIComponent(scope.userSettings));
             scope.ifSingle = (scope.bookInfo.status === 0 && scope.bookInfo.chapterCount <= 1);
             scope.bookInfo.status = scope.bookInfo.status.toString();
             if(!scope.bookInfoDetail)
@@ -238,9 +248,9 @@ app.directive('tagCollector',function(){
        },
        template:'<div class="myInput displayRow" style="position:relative;flex-wrap:wrap;padding:0;margin-bottom:0;font-family:SimSun-ExtB,Arial,serif;">\n' +
            '<div class="inputHint" ng-show="showHint" style="margin-left:40px;">{{hint}}</div>\n' +
-           '<div><svg class="icon icon-users" style="width:22px;height:30px;" ><use xlink:href="#icon-price-tags"></use></svg></div>\n' +
+           '<div style="display:flex;color:rgba(181,163,160,128);width:40px;height:30px;"><i class="fas fa-tags" style="width:22px;margin:auto;margin-right:2px;display:block;"></i></div>\n' +
            '<div class="remove-line no-select" ng-repeat="item in list" ng-click="removeTag($index)" style="font-size:14px;height:1.9rem;margin-left:10px;line-height:1.9rem;color:rgba(133,109,105,255);">#{{item}}</div>\n' +
-           '<div style="height:1.9rem;flex:1;margin-left:5px;padding:0;min-width:2rem;"><input maxlength="30" style="color:rgba(70,59,57,255);"></div>\n' +
+           '<div style="height:1.9rem;flex:1;padding:0;min-width:2rem;"><input maxlength="30" style="color:rgba(70,59,57,255);"></div>\n' +
            '</div>',
         link:function(scope,element){
            let root = element.find('input');
@@ -322,6 +332,44 @@ app.directive('contenteditable', function () {
                         return;
                     }
                 }
+                let insertImg = function(data){
+                    if(!data.link){
+                        scope.$emit('showError','you have to insert a link for your image');
+                        return false;
+                    }
+                    if(data.link){
+                        recoverRange();
+                        document.execCommand('insertHTML',false,'<img style="width:100%;height:100%;" src="'+data.link+'">');
+                        recordRange();
+                        let html = element.html();
+                        html = trimHTML(html);
+                        element.html(html);
+                        recoverRange();
+                        recordFullRange();
+                        return true;
+                    }
+
+                };
+
+                let insertLink = function(data){
+                    if(!data.link){
+                        scope.$emit('showError','you have to insert a link');
+                        return false;
+                    }
+                    if(data.link){
+                        recoverRange();
+                        document.execCommand('createLink',false,data.link);
+                        recordRange();
+                        let html = element.html();
+                        html = trimHTML(html);
+                        element.html(html);
+                        recoverRange();
+                        recordFullRange();
+                        return true;
+                    }
+                    return false;
+                };
+
                 switch(sign)
                 {
                     case 'b':
@@ -336,12 +384,16 @@ app.directive('contenteditable', function () {
                     case 'u':
                         document.execCommand('underline',false,null);
                         break;
-                    // case 'img':
-                    //     document.execCommand('insertImage',false,null);
-                    //     break;
-                    // case 'link':
-                    //     document.execCommand('createLink',false,null);
-                    //     break;
+                    case 'img':
+                        scope.$emit('callInsertPanel',{HTML:'<div style="display:flex;flex-direction:row;margin:auto;margin-bottom:0;min-width:22rem;">' +
+                                '<span style="font-family:Arial;font-size:1rem;width:4rem;">LINK:</span><input class="link" style="min-height:1.2rem;flex:1;padding-left:0.2rem;"></div>' +
+                                '<div style="margin-left:auto;margin-right:auto;margin-top:5px;font-weight:normal;margin-bottom:auto;font-size:0.8rem;">Please fill the image link above.</div>',okHandler:insertImg,height:10});
+                        break;
+                    case 'link':
+                        scope.$emit('callInsertPanel',{HTML:'<div style="display:flex;flex-direction:row;margin:auto;margin-bottom:0;min-width:22rem;">' +
+                                '<span style="font-family:Arial;font-size:1rem;width:4rem;">LINK:</span><input class="link" style="min-height:1.2rem;flex:1;padding-left:0.2rem;"></div>' +
+                                '<div style="margin-left:auto;margin-right:auto;margin-top:5px;font-weight:normal;margin-bottom:auto;font-size:0.8rem;">Please fill the image link above.</div>',okHandler:insertLink,height:10});
+                        break;
                     case 'ol':
                         document.execCommand('insertOrderedList',false,null);
                         break;
@@ -352,11 +404,13 @@ app.directive('contenteditable', function () {
                         break;
                 }
                 recordRange();
-                let html = element.html();
-                html = trimHTML(html);
-                element.html(html);
-                recoverRange();
-                recordFullRange();
+                if(sign.length < 3){
+                    let html = element.html();
+                    html = trimHTML(html);
+                    element.html(html);
+                    recoverRange();
+                    recordFullRange();
+                }
             };
 
             let loadSelection = function(){

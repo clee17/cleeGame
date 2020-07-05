@@ -54,6 +54,7 @@ DisplayPort.prototype._createAllParts = function() {
     this._frameTexture = ImageManager.loadBitmap('frame.png');
     this._frameTexture.addLoadListener(this._onFrameLoaded.bind(this));
     this._fadeSprite = new Sprite(new Bitmap(947,471,'none'));
+    this._fadeSprite.bitmap.fillAll('rgba(255,255,255,1)');
     this._map = new Map_Display(GameManager.getCurrentMap().index);
     this._alertSign = new Sprite(new Bitmap(947,28,'none'));
     this._alertSign.anchor.y = 1;
@@ -131,4 +132,12 @@ DisplayPort.prototype.update = function() {
     });
     this.updateMap();
     this.updateFade();
+};
+
+DisplayPort.prototype.updateInputEvent = function(){
+    this._map.updateInputEvent();
+}
+
+DisplayPort.prototype.isBusy = function(){
+    return this._fading;
 };
