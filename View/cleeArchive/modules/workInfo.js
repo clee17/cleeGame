@@ -139,18 +139,16 @@ app.directive('workInfo',function($compile,$rootScope,fanficManager,feedbackMana
             scope.commentList = scope.item.commentList;
 
             scope.deleteItem = function () {
-                let alertInfo = [];
-                let primaryInfo = '您是否确定要删除本';
+                let primaryInfo = '<div>您是否确定要删除本';
                 primaryInfo += scope.item.infoType ? '章节' : '作品';
-                primaryInfo += '?';
-                alertInfo.push(primaryInfo);
+                primaryInfo += '?</div>';
                 if (scope.item.infoType === 0)
-                    alertInfo.push('删除本作品将同时删除该作品下的所有章节，是否确定删除？');
+                    primaryInfo+= '<div>删除本作品将同时删除该作品下的所有章节，是否确定删除？</div>';
                 else if (scope.item.infoType === 1 && scope.item.work.chapterCount <= 1) {
-                    alertInfo.push('该章节为本作品仅有的章节，删除该章节将同时删除该作品，您是否了解这一点?');
-                    alertInfo.push('如您仅需要修改本章节内容，建议选择编辑选项。');
+                    primaryInfo += '该章节为本作品仅有的章节，删除该章节将同时删除该作品，您是否了解这一点?';
+                    primaryInfo += '如您仅需要修改本章节内容，建议选择编辑选项。';
                 }
-                let data = {alertInfo: alertInfo};
+                let data = {alertInfo: primaryInfo};
                 data.signal = 'deleteChapter' + scope.item.chapter._id + scope.item.infoType;
                 scope.$emit('showAlert', data);
                 scope.status = 5;

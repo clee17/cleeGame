@@ -35,8 +35,6 @@ app.directive('infoReceiver',function($rootScope){
 
 app.controller("dashboard_con",['$scope','$rootScope','$location','userManager','fanficManager',function($scope,$rootScope,$location,userManager,fanficManager){
     $scope.contentsLoaded = false;
-
-    $scope.alertInfo = '';
     $scope.showAlert = false;
 
     $scope.error = '';

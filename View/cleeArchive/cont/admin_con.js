@@ -28,19 +28,6 @@ app.service('adminManager',function($http,$rootScope){
             });
     };
 
-    this.requestRemove = function(data){
-        $http.post('/admin/removeRec',{data:LZString.compressToBase64(JSON.stringify(data))})
-            .then(function(response){
-                let data = JSON.parse(LZString.decompressFromBase64(response.data));
-                if(data.success)
-                    $rootScope.$broadcast('record remove finished',data);
-                else
-                    $rootScope.$broadcast('record remove finished',{success:false,message:data.message});
-            },function(err){
-                $rootScope.$broadcast('record remove finished',{success:false,message:'网络通信错误'});
-            });
-    };
-
     this.requestRegister =function(pageId,perPage){
           let data = {type:0,pageId:pageId,perPage:perPage};
           manager.request('/admin/getRegister','admin table received',data);
@@ -51,12 +38,12 @@ app.service('adminManager',function($http,$rootScope){
         manager.request('/admin/getRegister','admin table received', data);
     };
 
-    this.answerApplication = function(data){
-        manager.request('/admin/answerRegister','request replied',data);
-    };
-
     this.addApplication = function(data){
         manager.request('/admin/addApplication','application added',data);
+    };
+
+    this.answerApplication = function(data){
+        manager.request('/admin/answerApplication','application answered',data);
     };
 
     this.grantAuthorize = function(data){
@@ -98,10 +85,21 @@ app.filter('userGroup',function(){
     }
 });
 
-app.filter('applicationType',function(){
-    return function(type){
-          let typeList = ['REGISTER','WRITER','PAINTER','AUTHOR','AUTHOR','AUTHOR'];
-          return typeList[type] || 'UNKNOWN';
+app.directive('applicationType',function(){
+    return {
+        restrict: 'A',
+        scope:{
+            type:'='
+        },
+        link:function(scope,element,attr){
+            let typeList = ['REGISTER','WRITER','PAINTER','AUTHOR','AUTHOR','AUTHOR'];
+            element.css('text-align','center');
+            if(scope.type === 0){
+                element.html('<span style="font-weight:bold;">REGISTER</span>')
+            }else if(scope.type >=1 && scope.type <= 5){
+                element.html('<div class="badges" style="background-position-x:'+70*(scope.type-1)+'px;margin-left:auto;margin-right:auto;transform:scale(0.7);"></div>');
+            }
+        }
     }
 });
 
@@ -199,10 +197,11 @@ app.directive('filterType',function(){
 
 let HTMLTemplate = {
     'noInfo':'<p style="margin:auto;min-width:10rem;font-size:1rem;"><b>There is no Records found under this section</b></p>',
-    'registrationInfo':'<table class="admin_table">' +
-        '<tr><td></td><td style="text-align:center;">ORDER</td><td style="text-align:center;">TIME</td><td>MAIL</td><td>STATEMENTS</td><td>ANSWER</td><td style="width:4rem;"></td></tr>' +
+    'queueInfo':'<table class="admin_table">' +
+        '<tr><td></td><td style="text-align:center;">ORDER</td><td style="text-align:center;">TYPE</td><td style="text-align:center;">TIME</td><td>MAIL</td><td>STATEMENTS</td><td>ANSWER</td><td style="width:4rem;"></td></tr>' +
         '<tr ng-repeat="entry in entries track by $index"><td></td>' +
         '<td style="text-align:center;">{{(pageInfo.pageId-1)*pageInfo.perPage + $index+1}}</td>' +
+        '<td application-type type="entry.application.type" align="center"></td>'+
         '<td style="text-align:center;">{{entry.application.date | date}} <br> {{entry.application.date | time}}</td>' +
         '<td style="max-width:9rem;padding-right:4px;">{{entry.application.register.mail}}</td>' +
         '<td statements info="entry.application.statements" valign="top"></td>' +
@@ -237,7 +236,7 @@ let HTMLTemplate = {
         '<td style="display:flex;flex-direction:row;width:14rem;padding-right:1rem;">' +
         '<div style="width:12rem;margin-top:auto;margin-bottom:auto;text-overflow:ellipsis;overflow:hidden;">{{entry._id}}</div>' +
         '<div><button style="padding:3px;border:none;" class="copyBtn" onclick="copyPrev(this)"><i class="fa fa-copy"></i></button></div></td>'+
-        '<td style="max-width:6rem;text-align:center;font-weight:bold;">{{entry.type | applicationType}}</td>'+
+        '<td style="max-width:6rem;text-align:center;font-weight:bold;" application-type type="entry.type"></td>'+
         '<td style="word-break:break-all;padding-left:5px;padding-right:5px;" >{{entry.register.mail}}</td>'+
         '<td style="text-align:center;padding-left:0.4rem;padding-right:0.4rem;">{{entry.date | date}} <br> {{entry.date | time}}</td>'+
         '<td statements info="entry.statements" valign="top" style="max-width:15rem;padding-right:2rem;"></td>' +
@@ -256,6 +255,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         $scope.selection = 0;
     }
     $scope.newPage =true;
+    $scope.admin_showTop =false;
 
     $scope.initializePage = function(initial){
         $scope.requesting = false;
@@ -398,9 +398,9 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         if($scope.selection === 0){
             template = HTMLTemplate['userInfo'];
         }else if($scope.selection === 1){
-            template = HTMLTemplate['registrationInfo'];
+            template = HTMLTemplate['queueInfo'];
         }else if($scope.selection === 2){
-            template = HTMLTemplate['Authorization'];
+            template = HTMLTemplate['queueInfo'];
         }else if($scope.selection === 3){
             if(!$scope.newPage)
                 template = HTMLTemplate['applicationTable'];
@@ -413,7 +413,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 
     // functions of user management
     $scope.pwdReset= function(data){
-        let alertInfo = {alertInfo:["您是否要重设"+data.user+"的密码？"]};
+        let alertInfo = {alertInfo:"<div>您是否要重设"+data.user+"的密码？</div>"};
         alertInfo.variables = {_id:data._id,mail:data.mail};
         $scope.pwdSignal = alertInfo.signal =  'pwdReset' +Date.now() + data._id;
         $scope.$emit('showAlert', alertInfo);
@@ -427,25 +427,38 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             '104':'游戏开发者',
             '105':'音乐制作者'
         }
-        let alertInfo = {alertInfo:["您是否要给予"+name+author[index.toString()]+"权限？"]};
+        let alertInfo = {alertInfo:'<div>您是否要给予'+name+author[index.toString()]+'权限？</div>'};
         alertInfo.variables = {user:user,index:index,name:name};
         $scope.authorizeSignal = alertInfo.signal =  'authorGrant' +Date.now() + user;
         $scope.$emit('showAlert', alertInfo);
     }
 
     $scope.approve = function(entry){
-        let alertInfo = {alertInfo:["您是否要通过"+entry.application.register.mail+"的注册申请？"]};
-        alertInfo.variables = {_id:entry._id,mail:entry.mail};
-        alertInfo.applicationSignal =  'application' +Date.now() + entry._id;
+        let alertInfo = {alertInfo:"<div>您是否要通过"+entry.application.register.mail+"的注册申请？</div>"};
+        alertInfo.variables = {_id:entry._id,mail:entry.application.register.mail,type:entry.application.type,result:true};
+        $scope.applicationSignal = alertInfo.signal =  'application' +Date.now() + entry._id;
         $scope.$emit('showAlert',alertInfo);
     }
 
     $scope.deny = function(entry){
-
+        let alertInfo = {alertInfo:"<div>您是否要拒绝"+entry.application.register.mail+"的注册申请？</div>"};
+        alertInfo.alertInfo += '<div>请阐述原因:</div>';
+        alertInfo.alertInfo += '<div><textarea style="width:100%;height:5rem;resize:none;" id="admin_application_reason"></textarea></div>'
+        alertInfo.height = 19;
+        alertInfo.variables = {_id:entry._id,mail:entry.application.register.mail,type:entry.application.type,result:false};
+        let validate =  function(scope){
+            let element = document.getElementById('admin_application_reason');
+            if(element && element.value.length <= 10)
+                scope.$emit('showError','The reason of rejection cannot be empty');
+                return false;
+        };
+        alertInfo.validate = validate.bind(this,$scope);
+        $scope.applicationSignal = alertInfo.signal =  'application' +Date.now() + entry._id;
+        $scope.$emit('showAlert',alertInfo);
     }
 
     $scope.enquire = function(entry){
-
+        $scope.admin_showTop = true;
     }
 
 
@@ -467,6 +480,12 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         }else if(data.signal === $scope.authorizeSignal){
             $scope.requesting = true;
             adminManager.grantAuthorize({index:data.variables.index,user:data.variables.user});
+        }else if(data.signal === $scope.applicationSignal){
+            $scope.requesting = true;
+            let request = data.variables || {};
+            request.statement = data.formData.admin_application_reason || "";
+            console.log(request);
+            adminManager.answerApplication(request);
         }
     });
 

@@ -111,8 +111,7 @@ app.directive('commentInfo',function($compile,$rootScope,feedbackManager) {
             });
 
             scope.deleteComment = function(comment){
-                let alertInfo = ["您是否确定要删除本条来自"+comment.userName+"的评论？"];
-                let data = {alertInfo: alertInfo};
+                let data = {alertInfo: "<div>您是否确定要删除本条来自"+comment.userName+"的评论？</div>"};
                 data.signal = 'deleteComment' + scope.chapterId + scope.infoType;
                 data.variables = {id:comment._id};
                 scope.$emit('showAlert', data);
