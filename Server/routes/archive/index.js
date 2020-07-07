@@ -198,10 +198,11 @@ router.post('/admin/aggregate',admin.aggregate);
 router.post('/admin/countRec',admin.countRec);
 router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);
-router.post('/admin/getRegister',admin.getRegister);
-router.post('/admin/answerRegister',admin.answerRegister);
-router.post('/admin/addApplication',admin.addApplication);
-router.post('/admin/authorize',admin.authorize);
+router.post('/admin/approveAccess',admin.approveAccess);
+router.post('/admin/addAccess',admin.addAccess);
+router.post('/admin/answerApplicationQueue',admin.answerApplicationQueue);
+router.post('/admin/resendApplication',admin.resendApplication);
+
 
 //user
 router.get('/register/:registerId',subUser.register);

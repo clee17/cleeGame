@@ -1,4 +1,5 @@
-var path = require('path');
+let path = require('path'),
+    fs  = require('fs');
 let aRedis = require("async-redis"),
     nodeMailer=require('nodemailer');
 
@@ -45,12 +46,6 @@ global.__updateUserSetting = function(applicationId){
 
 };
 
-global.__getDateInfo = function(date){
-    let timeStamp = date || Date.now();
-    let info = new Date(timeStamp);
-    return info.getFullYear()+'年'+(info.getMonth()+1) + '月'+ info.getDate()+'日'+info.getHours()+'时'+info.getMinutes()+'分';
-};
-
 global.__sendMail = function(mailContents,userMail,title){
     var options = {
         from        : '"cleegame admin" <cleegame@outlook.com>',
@@ -66,6 +61,32 @@ global.__sendMail = function(mailContents,userMail,title){
             console.log(result);
     });
 };
+
+
+global.__getDateInfo = function(date){
+    let timeStamp = date || Date.now();
+    let info = new Date(timeStamp);
+    return info.getFullYear()+'年'+(info.getMonth()+1) + '月'+ info.getDate()+'日'+info.getHours()+'时'+info.getMinutes()+'分';
+};
+
+global.__processMail = function(mailId,mail,data,countryCode){
+    let mailName = mailId.toString();
+    while(mailName.length <3)
+        mailName = '0'+mailName;
+    let cc = countryCode || 'cn';
+    mailName += '_'+cc.toLowerCase();
+    let mailContents = fs.readFileSync(path.join(__routes,'archive/mail/'+mailName+'.html'),{encoding:'utf-8'});
+    if(!mailContents)
+        return;
+    mailContents = ejs.render(mailContents, data);
+    let mailTitle = null;
+    let titleIndex = mailContents.indexOf('<title>');
+    if(titleIndex >=0){
+        mailTitle = mailContents.substring(titleIndex,mailContents.indexOf('</title>'));
+        mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
+    }
+    __sendMail(mailContents,mail,mailTitle);
+}
 
 module.exports = global;
 

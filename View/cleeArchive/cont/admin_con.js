@@ -15,39 +15,20 @@ app.service('adminManager',function($http,$rootScope){
                 });
     };
 
-    this.requestAdd = function(index){
-        $http.post('/admin/addRecord',{data:LZString.compressToBase64(JSON.stringify({name:index}))})
-            .then(function(response){
-                let data = JSON.parse(LZString.decompressFromBase64(response.data));
-                if(data.success)
-                    $rootScope.$broadcast('table add finished',data);
-                else
-                    $rootScope.$broadcast('table add finished',{success:false,message:data.message});
-            },function(err){
-                $rootScope.$broadcast('table add finished',{success:false,message:'网络通信错误'});
-            });
+    this.addAccess = function(data){
+        manager.request('/admin/addAccess','access added',data);
     };
 
-    this.requestRegister =function(pageId,perPage){
-          let data = {type:0,pageId:pageId,perPage:perPage};
-          manager.request('/admin/getRegister','admin table received',data);
+    this.approveAccess = function(data){
+        manager.request('/admin/approveAccess','access approved',data);
     };
 
-    this.requestApplication = function(pageId,perPage){
-        let data = {type:1,pageId:pageId,perPage:perPage};
-        manager.request('/admin/getRegister','admin table received', data);
+    this.resendApplication = function(data){
+        manager.request('/admin/resendApplication','application added',data);
     };
 
-    this.addApplication = function(data){
-        manager.request('/admin/addApplication','application added',data);
-    };
-
-    this.answerApplication = function(data){
-        manager.request('/admin/answerApplication','application answered',data);
-    };
-
-    this.grantAuthorize = function(data){
-        manager.request('/admin/authorize','authorizeAdminFinished',data);
+    this.answerApplicationQueue = function(data){
+        manager.request('/admin/answerApplicationQueue','application answered',data);
     };
 });
 
@@ -93,9 +74,9 @@ app.directive('applicationType',function(){
         },
         link:function(scope,element,attr){
             let typeList = ['REGISTER','WRITER','PAINTER','AUTHOR','AUTHOR','AUTHOR'];
-            element.css('text-align','center');
+            element.css('textAlign','center');
             if(scope.type === 0){
-                element.html('<span style="font-weight:bold;">REGISTER</span>')
+                element.html('<span class="signBtn" style="border:solid 2px rgba(158,142,166,1);color:rgba(158,142,166,1);font-weight:bold;font-size:0.85rem;transform:scale(0.85);">REGISTER</span>')
             }else if(scope.type >=1 && scope.type <= 5){
                 element.html('<div class="badges" style="background-position-x:'+70*(scope.type-1)+'px;margin-left:auto;margin-right:auto;transform:scale(0.7);"></div>');
             }
@@ -103,10 +84,40 @@ app.directive('applicationType',function(){
     }
 });
 
-app.filter('applicationResult',function(){
-    return function(type){
-        let typeList = ['REVIEW','APPROVED','WAITED','DENIED'];
-        return typeList[type] || 'UNKNOWN';
+app.directive('applicationResult',function(){
+    return {
+        restrict: 'A',
+        scope:{
+            id:'=',
+            result: '=',
+        },
+        link:function(scope,element,attr){
+            element.css('textAlign','center');
+            let setResult = function(){
+                if(typeof scope.result !== 'number'){
+                    element.html('<div><i class="fas fa-info-circle"></i>No result found</div>');
+                    return;
+                }
+                let resultList = [
+                    '<span class="signBtn" style="border:solid 2px rgba(181,163,160,218);color:rgba(181,163,160,218);font-size:0.85rem;">REVIEW</span>',
+                    '<span class="signBtn" style="border:solid 2px rgba(107,187,167,218);color:rgba(107,187,167,218);font-size:0.85rem;">APPROVED</span>',
+                    '<span class="signBtn" style="border:solid 2px lightgray;background:lightgray;color:dimgray;transform:scale(0.85);font-size:0.85rem;">DENIED</span>',
+                    '<span class="signBtn" style="border:solid 2px lightgray;color:lightgray;transform:scale(0.85);font-size:0.85rem;">WAITED</span>'];
+                let result = scope.result;
+                let innerHTML =  resultList[result];
+                element.html(innerHTML);
+            }
+
+
+            scope.$on('application result changed',function(event,data){
+                if(data.id === scope.id){
+                    scope.result = data.result;
+                    setResult();
+                }
+            })
+
+            setResult();
+        }
     }
 });
 
@@ -151,7 +162,7 @@ app.directive('authorAccess',function($compile){
                         if(__isIdentity(index,access))
                             innerHTML += '<div class="badges" style="background-position-x:'+70*(index-101)+'px;"></div>';
                         else if(__isAccessReq(index,access))
-                            innerHTML +=  '<div style="position:relative;width:70px;height:70px;transform:scale(0.75);" class="badgesR" ng-click="grantAuthor('+index+",'"+scope.user+"','"+scope.name+"'"+')"><div class="badges"  style="min-width:100%;min-height:100%;filter:grayscale(1);background-position-x:'+70*(index-101)+'px;"></div>'+
+                            innerHTML +=  '<div style="position:relative;width:70px;height:70px;transform:scale(0.75);" class="badgesR" ng-click="approveAccess('+index+",'"+scope.user+"','"+scope.name+"'"+')"><div class="badges"  style="min-width:100%;min-height:100%;filter:grayscale(1);background-position-x:'+70*(index-101)+'px;"></div>'+
                                 '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;transform:scale(1.5);" class="badgeFont">申请中</span></div></div>';
                     }
                     element.html('');
@@ -198,13 +209,12 @@ app.directive('filterType',function(){
 let HTMLTemplate = {
     'noInfo':'<p style="margin:auto;min-width:10rem;font-size:1rem;"><b>There is no Records found under this section</b></p>',
     'queueInfo':'<table class="admin_table">' +
-        '<tr><td></td><td style="text-align:center;">ORDER</td><td style="text-align:center;">TYPE</td><td style="text-align:center;">TIME</td><td>MAIL</td><td>STATEMENTS</td><td>ANSWER</td><td style="width:4rem;"></td></tr>' +
+        '<tr><td></td><td style="text-align:center;">ORDER</td><td style="text-align:center;">TIME</td><td>MAIL</td><td>STATEMENTS</td><td>ANSWER</td><td style="width:4rem;"></td></tr>' +
         '<tr ng-repeat="entry in entries track by $index"><td></td>' +
         '<td style="text-align:center;">{{(pageInfo.pageId-1)*pageInfo.perPage + $index+1}}</td>' +
-        '<td application-type type="entry.application.type" align="center"></td>'+
         '<td style="text-align:center;">{{entry.application.date | date}} <br> {{entry.application.date | time}}</td>' +
         '<td style="max-width:9rem;padding-right:4px;">{{entry.application.register.mail}}</td>' +
-        '<td statements info="entry.application.statements" valign="top"></td>' +
+        '<td statements info="entry.application.statements" valign="top" style="max-width:12rem;padding-right:0.5rem;"></td>' +
         '<td style="display:flex;flex-flow:column wrap;max-height:4rem;" class="btnArea"><button ng-click="approve(entry)">APPROVE</button><button ng-click="deny(entry)">DENY</button><button ng-click="enquire(entry)">ENQUIRE</button></td>'+
         '<td></td></tr>' +
         '</table>',
@@ -230,7 +240,7 @@ let HTMLTemplate = {
         '<div style="font-weight:bold;margin-left:4rem;margin-top:auto;margin-bottom:auto;" ng-show="counted">Total<span style="margin-left:0.5rem;margin-right:0.5rem;">{{pageInfo.maxCount}}</span>application(s)</div>'+
         '</div>',
     'applicationTable':    '<table class="admin_table" style="font-size:0.9rem;">' +
-        '<tr><td style="font-size:2rem;"></td><td style="text-align:center;padding-right:0.4rem;">ORDER</td><td style="width:14rem;">APPLICATION ID</td><td style="text-align:center;">TYPE</td><td>MAIL</td><td style="text-align:center;padding-left:0.4rem;padding-right:0.4rem;">REQUESTED</td><td>STATEMENTS</td><td>RESULT</td><td></td><td style="width:2rem;"></td></tr>' +
+        '<tr><td style="font-size:2rem;"></td><td style="text-align:center;padding-right:0.4rem;">ORDER</td><td style="width:14rem;">APPLICATION ID</td><td style="text-align:center;">TYPE</td><td>MAIL</td><td style="text-align:center;padding-left:0.4rem;padding-right:0.4rem;">REQUESTED</td><td>STATEMENTS</td><td style="text-align:center;">RESULT</td><td></td><td style="width:2rem;"></td></tr>' +
         '<tr ng-repeat="entry in entries track by $index"><td></td>' +
         '<td style="text-align:center;padding-right:0.4rem;">{{(pageInfo.pageId-1)*pageInfo.perPage + $index+1}}</td>'+
         '<td style="display:flex;flex-direction:row;width:14rem;padding-right:1rem;">' +
@@ -240,8 +250,8 @@ let HTMLTemplate = {
         '<td style="word-break:break-all;padding-left:5px;padding-right:5px;" >{{entry.register.mail}}</td>'+
         '<td style="text-align:center;padding-left:0.4rem;padding-right:0.4rem;">{{entry.date | date}} <br> {{entry.date | time}}</td>'+
         '<td statements info="entry.statements" valign="top" style="max-width:15rem;padding-right:2rem;"></td>' +
-        '<td style="font-weight:bold;">{{entry.result | applicationResult}}</td>' +
-        '<td class="btnArea"><button ng-disabled="entry.result <2">REVOKE</button></td>'+
+        '<td style="font-weight:bold;text-align:center;padding:5px;" application-result result="entry.result" id="entry._id"></td>' +
+        '<td class="btnArea"><button ng-disabled="entry.result <2" ng-click="resend(entry)">RESEND</button></td>'+
         '<td></td></tr>'+
         '</table>'
 }
@@ -255,7 +265,6 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         $scope.selection = 0;
     }
     $scope.newPage =true;
-    $scope.admin_showTop =false;
 
     $scope.initializePage = function(initial){
         $scope.requesting = false;
@@ -263,6 +272,10 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         $scope.counted = false;
         $scope.err = null;
         $scope.entries = [];
+        $scope.applicationAdminSignal = '';
+        $scope.applicationSignal = '';
+        $scope.authorizeSignal = '';
+        $scope.pwdSignal = '';
         $scope.pageInfo = {
             pageId:1,
             perPage:30,
@@ -407,7 +420,6 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             else
                 template = HTMLTemplate['applicationHeader']+HTMLTemplate['applicationTable'];
         }
-
         return template;
     }
 
@@ -419,7 +431,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         $scope.$emit('showAlert', alertInfo);
     }
 
-    $scope.grantAuthor = function(index,user,name){
+    $scope.addAccess = function(index,user,name){
         let author = {
             '101':'文章创作者',
             '102':'绘图创作者',
@@ -435,7 +447,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 
     $scope.approve = function(entry){
         let alertInfo = {alertInfo:"<div>您是否要通过"+entry.application.register.mail+"的注册申请？</div>"};
-        alertInfo.variables = {_id:entry._id,mail:entry.application.register.mail,type:entry.application.type,result:true};
+        alertInfo.variables = {_id:entry._id,application:entry.application,result:1};
         $scope.applicationSignal = alertInfo.signal =  'application' +Date.now() + entry._id;
         $scope.$emit('showAlert',alertInfo);
     }
@@ -445,12 +457,14 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
         alertInfo.alertInfo += '<div>请阐述原因:</div>';
         alertInfo.alertInfo += '<div><textarea style="width:100%;height:5rem;resize:none;" id="admin_application_reason"></textarea></div>'
         alertInfo.height = 19;
-        alertInfo.variables = {_id:entry._id,mail:entry.application.register.mail,type:entry.application.type,result:false};
+        alertInfo.variables = {_id:entry._id,application:entry.application,result:2};
         let validate =  function(scope){
             let element = document.getElementById('admin_application_reason');
-            if(element && element.value.length <= 10)
+            if(element && element.value.length <= 10){
                 scope.$emit('showError','The reason of rejection cannot be empty');
                 return false;
+            }
+            return true;
         };
         alertInfo.validate = validate.bind(this,$scope);
         $scope.applicationSignal = alertInfo.signal =  'application' +Date.now() + entry._id;
@@ -458,8 +472,16 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
     }
 
     $scope.enquire = function(entry){
-        $scope.admin_showTop = true;
+        $scope.$broadcast('showEnquire',entry);
     }
+
+    $scope.resend = function(entry){
+        let requestType = ['registration','writer','painter'];
+        let alertInfo = {alertInfo:"<div style='word-break:break-all;font-size:1.2rem;font-family:serif;'>Do you wish to resend a <b>"+requestType[entry.type]+"</b> request for <b>"+entry.register.mail+"</b></div>"};
+        alertInfo.variables = entry;
+        $scope.applicationAdminSignal = alertInfo.signal =  'applicationResend' +Date.now() + entry._id;
+        $scope.$emit('showAlert',alertInfo);
+    };
 
 
     $scope.$on('filterTypeChange',function(event,data){
@@ -479,17 +501,59 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             loginManager.resetPwd({_id:data.variables._id,mail:data.variables.mail});
         }else if(data.signal === $scope.authorizeSignal){
             $scope.requesting = true;
-            adminManager.grantAuthorize({index:data.variables.index,user:data.variables.user});
+            adminManager.approveAccess({index:data.variables.index,user:data.variables.user});
         }else if(data.signal === $scope.applicationSignal){
             $scope.requesting = true;
             let request = data.variables || {};
-            request.statement = data.formData.admin_application_reason || "";
-            console.log(request);
-            adminManager.answerApplication(request);
+            request.attach = data.formData.admin_application_reason || "";
+            request.attach = encodeURIComponent(request.attach);
+            adminManager.answerApplicationQueue(request);
+        }else if(data.signal === $scope.applicationAdminSignal){
+            $scope.requesting = true;
+            adminManager.resendApplication(data.variables);
         }
     });
 
-    $scope.$on('authorizeAdminFinished',function(event,data){
+    $scope.$on('application answered',function(event,data){
+        $scope.requesting = false;
+        if(data.success){
+            for(let i=0; i<$scope.entries.length;++i){
+                if($scope.entries[i].application._id === data.result._id){
+                    $scope.entries.splice(i,1);
+                    break;
+                }
+            }
+            if($scope.entries.length === 0)
+                $scope.applyContents(HTMLTemplate['noInfo']);
+            let requestType = ['registration','writer','painter'];
+            let requestResult = ['reviewing','approved','denied','put on wait list'];
+            $scope.$emit('showExplain',{info:'<p style="font-family:serif;">The '+requestType[data.result.type]+' request has been <b>'+requestResult[data.result.result]+'</b></p>',height:12})
+        }else
+            $scope.$emit('showError',data.message);
+    });
+
+    $scope.$on('application added', function(event,data){
+        $scope.requesting = false;
+        if(!data.success)
+            $scope.$emit('showError',data.message);
+        else{
+            if($scope.selection >= 1 && $scope.selection <= 2)
+                $scope.entries.push(data.result);
+            else if($scope.selection === 3){
+                let application = data.result.application;
+                for(let i=0; i<$scope.entries.length;++i){
+                    if($scope.entries[i]._id === data.result.application._id){
+                        $scope.entries[i].result = data.result.application.result;
+                        $scope.$broadcast('application result changed',{id:data.result.application._id,result:data.result.application.result});
+                        return;
+                    }
+                }
+                $scope.entries.push(data.result.application);
+            }
+        }
+    });
+
+    $scope.$on('access approved',function(event,data){
         $scope.requesting = false;
         if(data.success){
             for(let i=0; i<$scope.entries.length;++i){
@@ -554,4 +618,40 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             $scope.$broadcast('updatePageIndex',{pageId:$scope.pageInfo.pageId, totalNum:$scope.pageInfo.maxCount});
         }
     })
+});
+
+
+app.controller("adminTopCon",function($scope,adminManager) {
+    $scope.requesting = false;
+    $scope.visible = false;
+    $scope.entry = null;
+    $scope.$on('showEnquire',function(event,data){
+        $scope.requesting = true;
+        $scope.entry = data;
+        if(!$scope.entry)
+            return;
+        let requestData = {
+            name:'conversation',
+            condition:{
+                application:$scope.entry._id,
+            },
+            option:{
+                sort:{date:1}
+            },
+            populate:{
+                path:     'from',
+                populate: { path:  'user',
+                    model: 'user' }
+            },
+            pageId:1,
+            perPage:15
+        };
+        $scope.requesting = true;
+        requestData.requestId = $scope.requestId = 'enquire conversation'+Date.now()+':'+$scope.selection;
+        adminManager.request('/admin/getTable/','admin enquire info received',requestData);
+    })
+
+    $scope.$on('admin enquire info received',function(){
+
+    });
 });

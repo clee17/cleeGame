@@ -122,11 +122,12 @@ let routeHandler = {
             .then(function(application){
                 response.success = true;
                 response.result = application._id;
+                let queue = new queueModel();
+                queue.application = application._id;
+                queue.type = application.type;
+                queue.save();
                 res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
-                let mailNotification = '<h1>您好，感谢注册CleeArchive！</h1>' +
-                    '<p><b>您的注册申请码是：'+application._id+'</b>，请使用该申请码查询您的申请进度以及当前所处的位置。</p>'+
-                    '<p>您的申请将在48小时内得到回应，如无进展，请联系管理员。</p>';
-                __sendMail(mailNotification,receivedData.mail,'感谢注册CleeArchive');
+                __processMail(0,receivedData.mail,application,__getCountryCode(req.ipData));
                 routeHandler.finalSend(res,response);
                 routeHandler.addQueue(application);
             })

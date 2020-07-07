@@ -6,8 +6,11 @@ let express = require('express'),
 
 let validModel = require(path.join(__dataModel,'valid'));
 let userModel = require(path.join(__dataModel,'user'));
-let queueModel = require(path.join(__dataModel,'application_queue'));
 let applicationModel = require(path.join(__dataModel,'application'));
+let queueModel = require(path.join(__dataModel,'application_queue'));
+let applicationConversationModel = require(path.join(__dataModel,'application_conversation'));
+
+
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
@@ -24,6 +27,17 @@ let handler = {
             return;
         data.sent = true;
         res.send(lzString.compressToBase64(JSON.stringify(data)));
+    },
+
+    sendError:function(res,response,err){
+        if(response.sent)
+            return;
+        if(typeof err != 'string')
+            err= JSON.stringify(err);
+        response.message=  err;
+        response.success = false;
+        response.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(response)));
     },
 
     validation:function(data,response,req){
@@ -245,88 +259,7 @@ let handler = {
         }
     },
 
-
-    getRegister:function(req,res){
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let response = {
-            sent:false,
-            message:'',
-            success:false
-        };
-
-        let pageId = receivedData.pageId;
-        let perPage = receivedData.perPage;
-
-        if(!req.session.user || req.session.user.userGroup < 999)
-            response.message = '您没有相应的权限';
-
-        if(response.message !== '')
-            handler.finalSend(res,response);
-
-
-
-        applicationModel.find({type:receivedData.type},{},{skip:pageId*perPage,limit:perPage,sort:{subType:1}},function(err,docs){
-            if(err)
-                response.message = err;
-            else if(docs)
-                response.contents = JSON.parse(JSON.stringify(docs));
-            if(response.message === '')
-                response.success = true;
-            handler.finalSend(res,response);
-        });
-    },
-
-    answerRegister:function(req,res){
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let response = {
-            sent:false,
-            message:'',
-            success:false
-        };
-
-        if(!req.session.user || req.session.user.userGroup < 999)
-            response.message = '您没有相应的权限';
-
-        if(response.message !== '')
-            handler.finalSend(res,response);
-
-
-        applicationModel.findOneAndUpdate({_id:receivedData.item._id},
-            {status:receivedData.status,subType:receivedData.subType},
-            {new:true},
-            function(err,doc){
-                if(err)
-                    response.message = err;
-                else if(doc)
-                    response.contents = JSON.parse(JSON.stringify(doc));
-                if(response.message === '')
-                    response.success = true;
-                if(response.success && doc.status === 1){
-                    let id = doc._id.toString();
-                    let mailContents = '<h1 style="color:rgba(158,142,166,255);">感谢您加入cleeArchive，您已经通过审核</h1>'+
-                        '<p>接下来您可以前往<a href="archive.cleegame.com/register/'+id+'">archive.cleegame.com/register/'+id+'</a>页面完成注册，如果无法直接跳转该链接，请复制到浏览器中打开</p>';
-                    __sendMail(mailContents,doc.mail);
-                }else if(response.success && doc.status === 2){
-                    let mailContents = '<h1 style="color:rgba(158,142,166,255);">感谢您申请cleeArchive，非常抱歉我们暂时无法通过您的申请</h1>'+receivedData.statements;
-                    __sendMail(mailContents,doc.mail);
-                }
-
-                if(!err && doc){
-                    countMapModel.findOneAndUpdate({infoType:201},{$inc:{number:-1},function(err,data){
-                        if(err)
-                            console.log(err);
-                        }});
-
-                    applicationModel.updateMany({subType:{$gte:doc.subType,$lt:9999}},{$inc:{number:-1}},function(err,doc){
-                        if(err)
-                            console.log(err);
-                    });
-                }
-                handler.finalSend(res,response);
-            });
-    },
-
-    addApplication:function(req,res){
+    addAccess:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             sent:false,
@@ -337,8 +270,10 @@ let handler = {
         if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.setting.access))
             response.message = '您没有相应的权限';
 
-        if(response.message !== '')
+        if(response.message !== ''){
             handler.finalSend(res,response);
+            return;
+        }
 
         userSettingModel.findOneAndUpdate({user:receivedData.item.user},
             {$push:{access:receivedData.item.subType+100}},
@@ -348,14 +283,11 @@ let handler = {
                     response.message = err;
                 else if(doc)
                     response.status  = 1;
-
-
-
                 handler.finalSend(res,response);
             });
     },
 
-    authorize:function(req,res){
+    approveAccess:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success: false,
@@ -389,13 +321,133 @@ let handler = {
                 handler.finalSend(res,response);
             })
             .catch(function(err){
-                console.log(err);
                 if(typeof err == 'string')
                     response.message = err
                 else
                     response.messaege = JSON.stringify(err);
                 response.success = false;
                 handler.finalSend(res,response);
+            })
+    },
+
+    sendApplicationMail:function(req,response){
+        let application = response.result;
+        application.attach = response.attach || '';
+        application.attach = decodeURIComponent(lzString.decompressFromBase64(application.attach));
+        let mail = application.register.mail;
+        // 0, reviewing, 1, 注册成功, 2 审核拒绝 3 waitingList
+        // 10, writer审核中, 1, 注册成功, 2 审核拒绝 3 waitingList
+        let mailId = application.type*10 + application.result;
+        if(typeof mailId != 'number')
+            mailId = 999;
+        let cc = __getCountryCode(req.ipData);
+        __processMail(mailId,mail,application,cc);
+    },
+
+    answerApplication:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+            attach:receivedData.attach || ""
+        };
+
+        if(!receivedData._id || !__validateId(receivedData._id)){
+            handler.sendError(res,response,'No valid application info received');
+            return;
+        }
+
+        if(receivedData.result === undefined){
+            handler.sendError(res,response,'No appication result provided');
+            return;
+        }
+
+        applicationModel.findOneAndUpdate({_id:receivedData._id},{result:receivedData.result},{new:true}).populate('register').exec()
+            .then(function(application){
+                if(!application)
+                    throw ' no application found in the database';
+                response.result = application;
+                response.attach = lzString.compressToBase64(response.attach);
+                let newConversation = new applicationConversationModel();
+                newConversation.type = application.type;
+                newConversation.result = application.result;
+                newConversation.contents = response.attach;
+                newConversation.from = req.session.user._id;
+                return newConversation.save();
+            })
+            .then(function(coversation){
+                response.success = true;
+                handler.finalSend(res,response);
+                handler.sendApplicationMail(req,response);
+            })
+            .catch(function(err){
+                console.log(err);
+                handler.sendError(res,response,err);
+            })
+    },
+
+    answerApplicationQueue:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+        };
+
+        if(!receivedData._id || !__validateId(receivedData._id)){
+            response.message=  'No valid application info received';
+            handler.finalSend(res,response);
+            return;
+        }
+
+        queueModel.findOneAndDelete({_id:receivedData._id},function(err,result){
+            if(err)
+                handler.sendError(res,response,err);
+            else{
+                let application = JSON.parse(JSON.stringify(result.application));
+                application.result = receivedData.result;
+                application.attach = receivedData.attach;
+                req.body.data = lzString.compressToBase64(JSON.stringify(application));
+                handler.answerApplication(req,res);
+            }
+        }).populate('application');
+
+    },
+
+
+    resendApplication:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+        };
+
+        if(!receivedData._id || !__validateId(receivedData._id)){
+            response.message=  'No valid application info received';
+            handler.finalSend(res,response);
+            return;
+        }
+
+        applicationModel.findOneAndUpdate({_id:receivedData._id},{result:0},{new:true}).populate('register').exec()
+            .then(function(application){
+                if(!application)
+                    throw ' no such application found in database';
+                response.application = JSON.parse(JSON.stringify(application));
+                let newQueue = new queueModel;
+                newQueue.application = application._id;
+                newQueue.type = application.type;
+                return newQueue.save();
+            })
+            .then(function(result){
+                response.success = true;
+                response.result = JSON.parse(JSON.stringify(result));
+                response.result.application = response.application;
+                handler.finalSend(res,response);
+            })
+            .catch(function(err){
+                handler.sendError(res,response,err);
             })
     }
 
