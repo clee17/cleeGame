@@ -9,8 +9,8 @@ global.__errInfo = require('../translation/cleegame_err.js');
 
 var app = express();
 
-app = config(app);
 route(app);
+app = config(app);
 
 var server = app.listen(3060);
 

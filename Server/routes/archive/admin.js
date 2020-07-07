@@ -6,8 +6,8 @@ let express = require('express'),
 
 let validModel = require(path.join(__dataModel,'valid'));
 let userModel = require(path.join(__dataModel,'user'));
+let registerModel = require(path.join(__dataModel,'user_register'));
 let applicationModel = require(path.join(__dataModel,'application'));
-let queueModel = require(path.join(__dataModel,'application_queue'));
 let applicationConversationModel = require(path.join(__dataModel,'application_conversation'));
 
 
@@ -52,6 +52,14 @@ let handler = {
         }
 
         return true;
+    },
+
+    clearApplicationQueue:function(user,type,success){
+        registerModel.findOne({user:user},function(err,docs){
+            if(err){}
+            else{}
+        })
+
     },
 
     aggregate:function(req,res){
@@ -318,11 +326,12 @@ let handler = {
                 doc = JSON.parse(JSON.stringify(doc));
                 response.success = true;
                 response.access =  doc.access;
+                handler.clearApplicationQueue(doc.user,index-100,true);
                 handler.finalSend(res,response);
             })
             .catch(function(err){
                 if(typeof err == 'string')
-                    response.message = err
+                    response.message = err;
                 else
                     response.messaege = JSON.stringify(err);
                 response.success = false;
