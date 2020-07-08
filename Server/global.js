@@ -25,12 +25,10 @@ global.redisClient = redis.createClient();
 global.asyncRedis = aRedis.createClient();
 
 let mailTransport = nodeMailer.createTransport({
-    host : 'smtp.office365.com',
-    port : 587,
-    secureConnection: true, // 使用SSL方式（安全方式，防止被窃取信息）
-    auth : {
-        user : 'cleegame@outlook.com',
-        pass : 'Qjlcj1989.*'
+    host : 'localhost',
+    port : 25,
+    tls:{
+        rejectUnauthorized:false
     }
 });
 
@@ -42,26 +40,32 @@ global.__getCountryCode = function(ipData){
         return 'OTHER';
 };
 
+global.__saveLog = function(logType,logInfo){
+    fs.appendFile(__basedir + '/log/'+logType+'.log', Date.now().toString() + '_____' + logInfo, function (err, result) {
+
+    });
+};
+
 global.__updateUserSetting = function(applicationId){
 
 };
 
 global.__sendMail = function(mailContents,userMail,title){
     var options = {
-        from        : '"cleegame admin" <cleegame@outlook.com>',
+        from        : '"cleeArchive admin" <no-replay@archive.cleegame.com>',
         to          : ' <'+userMail+'>',
         subject        : title || '感谢使用cleeArchive',
         html           : mailContents,
     };
 
     mailTransport.sendMail(options,function(err,result){
-        if(err)
-           console.log(err);
-        else
-            console.log(result);
+        if(err) {
+            if (typeof err !== 'string')
+                err = JSON.stringify(err);
+            __saveLog('mail',err);
+        }
     });
 };
-
 
 global.__getDateInfo = function(date){
     let timeStamp = date || Date.now();
@@ -86,7 +90,7 @@ global.__processMail = function(mailId,mail,data,countryCode){
         mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
     }
     __sendMail(mailContents,mail,mailTitle);
-}
+};
 
 module.exports = global;
 

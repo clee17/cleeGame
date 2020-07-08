@@ -151,8 +151,11 @@ app.directive('authorAccess',function($compile){
         },
         link:function(scope,element,attr){
             let refreshEle = function(){
-                if(!scope.setting)
-                    element.html('<span>Setting Missing</span>')
+                if(!scope.setting){
+                    element.css('color','gray');
+                    let innerHTML = '<i class="fa fa-info-circle" style="margin-right:0.5rem;"></i><span style="margin-top:auto;margin-bottom:auto;font-size:0.85rem;">user has not logged yet</span>';
+                    element.html(innerHTML);
+                }
                 else{
                     let access = scope.setting.access;
                     let badges = [101,102];
@@ -168,8 +171,6 @@ app.directive('authorAccess',function($compile){
                     element.html('');
                     if(innerHTML !== '')
                         element.append($compile(innerHTML)(scope.$parent.$parent));
-                    if(access.length === 0)
-                        element.html('EMPTY')
                 }
             }
 
@@ -226,7 +227,7 @@ let HTMLTemplate = {
         '<td style="max-width:4rem;">{{entry.userGroup | userGroup}}</td>'+
         '<td style="max-width:8rem;">{{entry.mail}}</td>'+
         '<td>{{entry.points}}</td>'+
-        '<td author-access setting="entry.setting" user="entry._id" name="entry.user" style="display:flex;flex-direction:row;"></td>'+
+        '<td author-access setting="entry.setting" user="entry._id" name="entry.user"></td>'+
         '<td class="btnArea"><button ng-click="pwdReset(entry)">PWRESET</button></td>'+
         '<td></td></tr>'+
         '</table>',
