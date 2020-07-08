@@ -6,4 +6,10 @@ module.exports = new mongoose.Schema({
     register:{type:mongoose.Schema.ObjectId,default:null,ref:'user_register'},
     statements:{type:String,default:''},
     result:{type:Number,default:0},//0,reviewing, 1 granted, 2 denied, 3 waiting list,
+    mail:{type:String},
+    subType:{type:Number},
+    count:{type:Number},
+    user:{type:mongoose.Schema.ObjectId,ref:'user'},
+    response:{type:Boolean},
+    status:{type:Number}
 });

@@ -204,7 +204,7 @@
                 <div style="position:relative;">邮箱账号:
                     <input ng-model="settings.mail" id="mailBoard">
                     <% if(user.mail && user.mail.length >0) { %>
-                    <span class="subInfo"><%= user.mail %></span>
+                    <span class="subInfo"><%= user.register.mail %></span>
                     <% }else{ %>
                     <span class="subInfo">暂无邮箱</span>
                     <% } %>

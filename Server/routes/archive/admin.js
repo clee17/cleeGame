@@ -9,8 +9,7 @@ let userModel = require(path.join(__dataModel,'user'));
 let registerModel = require(path.join(__dataModel,'user_register'));
 let applicationModel = require(path.join(__dataModel,'application'));
 let applicationConversationModel = require(path.join(__dataModel,'application_conversation'));
-
-
+let queueModel = require(path.join(__dataModel,'application_queue'));
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
 
@@ -18,6 +17,7 @@ let tableIndex ={
     'valid':validModel,
     'queue':queueModel,
     'user':userModel,
+    'conversation':applicationConversationModel,
     'application':applicationModel
 };
 
@@ -104,6 +104,9 @@ let handler = {
         let pageId = receivedData.pageId || 1;
         pageId--;
         let perPage = receivedData.perPage || 30;
+        let option = {skip:pageId*perPage,limit:perPage,sort:{_id: -1}};
+        if(receivedData.option)
+            option = receivedData.option;
         let data = {
             message:'',
             requestId:receivedData.requestId,
@@ -116,7 +119,7 @@ let handler = {
             return;
         }
 
-        tableIndex[receivedData.name].find(condition,null,{skip:pageId*perPage,limit:perPage,sort:{_id: -1}}).populate(populate).exec()
+        tableIndex[receivedData.name].find(condition,null,option).populate(populate).exec()
             .then(function(docs){
                 data.contents = JSON.parse(JSON.stringify(docs));
                 data.success = true;
@@ -275,7 +278,7 @@ let handler = {
             success:false
         };
 
-        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.setting.access))
+        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access))
             response.message = '您没有相应的权限';
 
         if(response.message !== ''){
@@ -304,14 +307,12 @@ let handler = {
         };
 
         if(!receivedData.user || !__validateId(receivedData.user)){
-            response.message=  'No valid user info received';
-            handler.finalSend(res,response);
+            handler.sendError(res,response,'No valid user info received');
             return;
         }
 
         if(!receivedData.index || receivedData.index <= 100 || receivedData.index >105 ){
-            response.message=  'No valid authorization code  received';
-            handler.finalSend(res,response);
+            handler.sendError(res,response, 'No valid authorization code  received');
             return;
         }
 
@@ -353,6 +354,31 @@ let handler = {
         __processMail(mailId,mail,application,cc);
     },
 
+    approveAccessWithApplication:function(application){
+        var userInfo = null;
+        registerModel.findOne({_id:application._id}).exec()
+            .then(function(register){
+                return userModel.findOne({register:register._id}).exec();
+            })
+            .then(function(user){
+                userInfo = user;
+                return userSettingModel.findOneAndUpdate( {user:userInfo._id,"access.index":(application.type)},{$inc:{"access.$.index":100}},{new:true}).exec();
+            })
+            .then(function(result){
+                if(!result)
+                    throw 'The access grant of user '+userInfo._id+'____'+userInfo.user+' of '+application.type+100+'has failed as we cannot find an access request';
+            })
+            .catch(function(err){
+               __saveLog('cleeArchive_approveAcces',err);
+            });
+    },
+
+    afterApplication:function(response){
+        let application = response.result;
+        if(application.type >=1 && application.type <=5 && application.result === 1)
+            handler.approveAccessWithApplication(response.result);
+    },
+
     answerApplication:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
@@ -361,6 +387,11 @@ let handler = {
             sent: false,
             attach:receivedData.attach || ""
         };
+
+        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access)){
+            handler.sendError(res,response,'No valid application info received');
+            return;
+        }
 
         if(!receivedData._id || !__validateId(receivedData._id)){
             handler.sendError(res,response,'No valid application info received');
@@ -379,15 +410,17 @@ let handler = {
                 response.result = application;
                 response.attach = lzString.compressToBase64(response.attach);
                 let newConversation = new applicationConversationModel();
+                newConversation.application = application._id;
                 newConversation.type = application.type;
                 newConversation.result = application.result;
                 newConversation.contents = response.attach;
-                newConversation.from = req.session.user._id;
+                newConversation.from = req.session.user.register;
                 return newConversation.save();
             })
             .then(function(coversation){
                 response.success = true;
                 handler.finalSend(res,response);
+                handler.afterApplication(response);
                 handler.sendApplicationMail(req,response);
             })
             .catch(function(err){
@@ -403,6 +436,11 @@ let handler = {
             message: '',
             sent: false,
         };
+
+        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access)){
+            handler.sendError(res,response,'No valid application info received');
+            return;
+        }
 
         if(!receivedData._id || !__validateId(receivedData._id)){
             response.message=  'No valid application info received';
@@ -439,23 +477,35 @@ let handler = {
             return;
         }
 
-        applicationModel.findOneAndUpdate({_id:receivedData._id},{result:0},{new:true}).populate('register').exec()
+        applicationModel.findOneAndUpdate({_id:receivedData._id},{result:0}).populate('register').exec()
             .then(function(application){
                 if(!application)
                     throw ' no such application found in database';
                 response.application = JSON.parse(JSON.stringify(application));
+                return queueModel.findOne({type:application.type},null,{sort:{date:1}}).exec();
+            })
+            .then(function(queue){
                 let newQueue = new queueModel;
-                newQueue.application = application._id;
-                newQueue.type = application.type;
+                newQueue.application = response.application._id;
+                newQueue.type = response.application.type;
+                newQueue.date = Date.now();
+                if(queue && response.application.result === 3){
+                    let firstDate = response.application.date;
+                    firstDate = new Date(firstDate);
+                    newQueue.date.setSeconds(firstDate.getSeconds() - 5);
+                }
                 return newQueue.save();
             })
             .then(function(result){
                 response.success = true;
+                response.application.result = 0;
                 response.result = JSON.parse(JSON.stringify(result));
                 response.result.application = response.application;
+                delete result.application;
                 handler.finalSend(res,response);
             })
             .catch(function(err){
+                console.log(err);
                 handler.sendError(res,response,err);
             })
     }

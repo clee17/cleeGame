@@ -87,7 +87,7 @@ let handler = {
         }
         else if(req.url ==='/donate'){
             if(req.session.user){
-                result.variables.mail = {mail:req.session.user.mail || ''};
+                result.variables.mail = {mail:req.session.user.register.mail || ''};
                 __renderIndex(req,res,result);
             } else
                 __renderError(req,res,_errAll[3]);

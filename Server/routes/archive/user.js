@@ -228,7 +228,7 @@ let handler = {
         if (!req.session.user || req.session.user._id != userId)
             __renderError(req, res, _errAll[3]);
         else {
-            let settings=  {mail:req.session.user.mail || '',
+            let settings=  {mail:req.session.user.register.mail || '',
             intro:req.session.user.intro ? req.session.user.intro : ''};
             __renderIndex(req, res, {
                 viewport: '/dynamic/users/setting/' + userId,

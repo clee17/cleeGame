@@ -37,6 +37,7 @@
 
     #admin_left_guide button:hover{
         background:rgba(223,221,220,1);
+        cursor:pointer;
     }
 
     #admin_left_guide button:disabled{
@@ -112,6 +113,7 @@
 
     .btnArea button:hover{
         background:rgba(181,163,160,0.2);
+        cursor:pointer;
     }
 
     .btnArea button:first-child{
@@ -193,6 +195,14 @@
         color:rgba(181,163,160,255);
     }
 
+    #adminTop_board{
+        min-width:50%;
+        overflow:hidden;
+        border-radius:1rem;margin:auto;background:white;
+        display:flex;flex-direction:column;z-index:99;height:0;opacity:0;transition:height 0.14s ease-in-out,opacity 0.24s ease-in-out;
+        pointer-events:auto;
+    }
+
 </style>
 
 <div id="admin_board" controller="admin_con" ng-controller="adminCon">
@@ -213,12 +223,10 @@
             <page-index pid='pageInfo.pageId' tnm="pageInfo.maxCount" ppg="pageInfo.perPage" style="margin-top:auto;margin-bottom:-1.5rem;"></page-index>
         </div>
     </div>
-</div>
-<div style="width:100vw;height:100vh;position:fixed;display:flex;pointer-events:none;" ng-controller="adminTopCon" >
-    <div style="width:100%;height:100%;background:rgba(223,221,220,0.9);pointer-events:none;" ng-show="visible"></div>
-    <div style="min-width:15rem;margin-left:auto;margin-right:auto;background:white;display:flex;" ng-show="visible" >
-        <div style="height:40px;background:rgba(223,221,220,1)">
+    <div style="width:100vw;height:100vh;left:0;top:0;position:fixed;display:flex;pointer-events:none;" ng-controller="adminTopCon" >
+        <div style="width:100%;height:100%;background:rgba(125,125,125,0.6);pointer-events:none;position:absolute;left:0;top:0;z-index:0;" ng-show="visible"></div>
+        <div  id="adminTop_board">
+            <img src="/img/loading.gif" style="width:4rem;height:4rem;margin:auto;" ng-show="requesting">
         </div>
-        <img src="/img/loading.gif" style="width:4rem;height:4rem;margin:auto;" ng-show="requesting">
     </div>
 </div>

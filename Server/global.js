@@ -1,5 +1,6 @@
 let path = require('path'),
     fs  = require('fs');
+    ejs = require('ejs');
 let aRedis = require("async-redis"),
     nodeMailer=require('nodemailer');
 
@@ -41,6 +42,8 @@ global.__getCountryCode = function(ipData){
 };
 
 global.__saveLog = function(logType,logInfo){
+    if (typeof logInfo !== 'string')
+        logInfo = JSON.stringify(logInfo);
     fs.appendFile(__basedir + '/log/'+logType+'.log', Date.now().toString() + '_____' + logInfo, function (err, result) {
 
     });
@@ -79,17 +82,20 @@ global.__processMail = function(mailId,mail,data,countryCode){
         mailName = '0'+mailName;
     let cc = countryCode || 'cn';
     mailName += '_'+cc.toLowerCase();
-    let mailContents = fs.readFileSync(path.join(__routes,'archive/mail/'+mailName+'.html'),{encoding:'utf-8'});
-    if(!mailContents)
-        return;
-    mailContents = ejs.render(mailContents, data);
-    let mailTitle = null;
-    let titleIndex = mailContents.indexOf('<title>');
-    if(titleIndex >=0){
-        mailTitle = mailContents.substring(titleIndex,mailContents.indexOf('</title>'));
-        mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
-    }
-    __sendMail(mailContents,mail,mailTitle);
+    fs.readFile(path.join(__routes,'archive/mail/'+mailName+'.html'),{encoding:'utf-8'},function(err,mailContents){
+        if(err){
+            __saveLog('mail',Date.now().toString()+'____mail templates read failed____'+JSON.stringify(err));
+            return;
+        }
+        mailContents = ejs.render(mailContents, data);
+        let mailTitle = null;
+        let titleIndex = mailContents.indexOf('<title>');
+        if(titleIndex >=0){
+            mailTitle = mailContents.substring(titleIndex,mailContents.indexOf('</title>'));
+            mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
+        }
+        __sendMail(mailContents,mail,mailTitle);
+    });
 };
 
 module.exports = global;

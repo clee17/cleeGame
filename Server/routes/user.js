@@ -45,7 +45,7 @@ let routeHandler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         }
         if(data) {
-            userModel.findOne({user: data.user}).exec()
+            userModel.findOne({user: data.user}).populate('register').exec()
                 .then(function (user) {
                     if (!user) {
                         throw '没有该用户';
@@ -62,7 +62,6 @@ let routeHandler = {
                     res.send(lzString.compressToBase64(JSON.stringify(response)));
                 })
                 .catch(function (err) {
-                    console.log(err);
                     response.message = err;
                     res.cookie('userId','',{maxAge:0});
                     res.send(lzString.compressToBase64(JSON.stringify(response)));
@@ -267,7 +266,7 @@ let routeHandler = {
     apply:function(req,res) {
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         receivedData.user = req.session.user ? req.session.user._id : null;
-        receivedData.mail = req.session.user? req.session.user.mail : '';
+        receivedData.mail = req.session.user? req.session.user.register.mail : '';
         if (!receivedData.subType)
             receivedData.subType = 0;
         let response = {
@@ -357,7 +356,7 @@ let routeHandler = {
             if(doc){
                 response.mail = doc.mail;
                 response.intro = doc.intro;
-                req.session.user.mail = doc.mail;
+                req.session.user.register.mail = doc.mail;
                 req.session.user.intro = doc.intro;
                 response.success = true;
             }
