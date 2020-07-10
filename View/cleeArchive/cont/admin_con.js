@@ -66,6 +66,7 @@ app.filter('userGroup',function(){
     }
 });
 
+
 app.directive('applicationType',function(){
     return {
         restrict: 'A',
@@ -225,7 +226,7 @@ let HTMLTemplate = {
         '<td style="max-width:6rem;">{{entry.user}}</td>'+
         '<td>{{entry.registered | date}} <br> {{entry.registered | time}}</td>'+
         '<td style="max-width:4rem;">{{entry.userGroup | userGroup}}</td>'+
-        '<td style="max-width:8rem;">{{entry.mail}}</td>'+
+        '<td style="max-width:8rem;">{{entry.register.mail}}</td>'+
         '<td>{{entry.points}}</td>'+
         '<td author-access setting="entry.setting" user="entry._id" name="entry.user" style="display:flex;flex-direction:row;"></td>'+
         '<td class="btnArea"><button ng-click="pwdReset(entry)">PWRESET</button></td>'+
@@ -314,7 +315,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             let condition = [{name:'user',condition:[
                     { $skip:$scope.pageInfo.perPage*($scope.pageInfo.pageId-1)},
                     { $limit:$scope.pageInfo.perPage},
-                    { $lookup:{from:'register',localField:"register",foreignField:"_id",as:"register"}},
+                    { $lookup:{from:'user_register',localField:"register",foreignField:"_id",as:"register"}},
                     { $unwind:{path: "$register", preserveNullAndEmptyArrays: true }},
                     { $lookup:{from:'user_setting',localField:"_id",foreignField:"user",as:"setting"}},
                     { $unwind:{path: "$setting", preserveNullAndEmptyArrays: true }}
@@ -576,6 +577,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 
     $scope.$on('access approved',function(event,data){
         $scope.requesting = false;
+        console.log(data);
         if(data.success){
             for(let i=0; i<$scope.entries.length;++i){
                 if($scope.entries[i]._id === data.user){
@@ -642,7 +644,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 });
 
 
-app.controller("adminTopCon",function($scope,$timeout,$compile,adminManager) {
+app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminManager) {
     $scope.requesting = false;
     $scope.visible = false;
     $scope.entry = null;
@@ -655,6 +657,9 @@ app.controller("adminTopCon",function($scope,$timeout,$compile,adminManager) {
             element.style.height = height;
             element.style.opacity = opacity;
         }
+        $scope.requesting = false;
+        $scope.messageRequesting = false;
+        $scope.messageSignal = "";
         $timeout(function(){
             $scope.visible = visible;
         },210);
@@ -675,6 +680,7 @@ app.controller("adminTopCon",function($scope,$timeout,$compile,adminManager) {
         $scope.visible = true;
         $scope.entry = data;
         $scope.entries = [];
+        $scope.contentScope = $scope;
         $scope.showBoard(true);
         if(!$scope.entry)
             return;
@@ -686,26 +692,58 @@ app.controller("adminTopCon",function($scope,$timeout,$compile,adminManager) {
             option:{
                 sort:{date:1}
             },
-            populate:{
-                path:     'from application'
-            }
+            populate:'from application'
         };
         $scope.requesting = true;
-        requestData.requestId = $scope.requestId = 'enquire conversation'+Date.now()+':'+$scope.selection;
+        requestData.requestId = $scope.requestId = 'enquire conversation'+Date.now()+':'+$scope.entry._id;
         adminManager.request('/admin/getTable/','application log info received',requestData);
-    })
+    });
+
+    $scope.sendMessage = function() {
+        let element = document.getElementById('adminTop_messageContents')
+        if(!element){
+            $scope.$emit('showError','No message element found');
+            return;
+        }
+        if(element.value.length <=10){
+            $scope.$emit('showError','The reason cannot be less than 10 characters');
+            return;
+        }
+        $scope.messageRequesting = true;
+        let requestData = {};
+        let conversation = requestData.conversation = {};
+        conversation.to = $scope.entry.register._id;
+        conversation.from = $rootScope.registerId;
+        conversation.application = $scope.entry._id;
+        conversation.type = $scope.entry.type;
+        conversation.result = $scope.entry.result;
+        conversation.contents = LZString.compressToBase64(encodeURIComponent(element.value));
+        requestData.targetMail = $scope.entry.register? $scope.entry.register.mail : "";
+        $scope.messageRequestId = requestData.requestId = "send conversation" + Date.now() + ':' +$scope.entry._id;
+        adminManager.request('/admin/addConversation', 'application conversation added', requestData);
+    }
 
     $scope.$on('application log info received',function(event,data){
         $scope.requesting = false;
+        if(data.requestId !== $scope.requestId)
+            return;
         if(data.success){
             $scope.entries = data.contents;
-            console.log($scope.entries);
             if($scope.entries.length === 0)
                 $scope.showInfo('<div style="margin:auto;">No Log found</div>');
             else
-                $scope.showInfo('<div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
-                    '<div style="display:flex;flex-direction:row;"><span>FROM: {{entry.user.user}}</span>' +
-                    '<span application-result result="entry.application.result"></span></div></div>')
+                $scope.showInfo('<div style="flex:1;padding:2rem;padding-bottom:1rem;display:flex;flex-direction:column;"><div style="flex:1;margin-left:2rem;margin-right:2rem;padding-right:2rem;overflow-y:scroll;display:flex;flex-direction:column;"><div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
+                    '<div style="display:flex;flex-direction:row;margin-top:1rem;margin-bottom:0.5rem;"><span style="font-weight:bold;">FROM:</span><span style="margin-left:0.8rem;"> {{entry.from? entry.from.user: "the user has no registration info" }}</span>' +
+                    '<span style="margin-left:4rem;font-weight:bold;">DATE:</span><span>{{entry.date | dateInfo}}</span>'+
+                    '<span style="margin-left:4rem;font-weight:bold;">STATUS:</span><span application-result result="entry.result" style="margin-left:0.8rem;"></span></div>' +
+                    '<div content-format content="entry.contents" style="margin-bottom:1.5rem;padding:0.5rem;"></div>'+
+                    '<div style="min-width:80%;background:rgba(185,185,185,0.6);height:1px;"></div>'+
+                    '</div></div>'+
+                    '<div style="margin-top:auto;margin-bottom:0.5rem;padding-left:2rem;padding-right:2rem;">' +
+                    '<div><span style="font-weight:bold;">FROM: YOU</span><span style="margin-left:0.8rem;font-size:0.8rem;color:gray;">You could send a message to the applicant for further information if you could not decide if the request should be approved or not.</span></div>'+
+                    '<div><textarea id="adminTop_messageContents" style="height:6rem;width:calc(100% - 3rem);margin-left:1.5rem;margin-top:0.5rem;resize:none;padding:8px;"></textarea></div>'+
+                    '<div style="display:flex;margin-top:0"><button class="grand-button" style="margin-left:auto;margin-right:2rem;margin-top:1rem;" ng-click="sendMessage()" ng-disabled="messageRequesting">SEND</button></div>'+
+                    '</div></div>')
         }else{
             $scope.showInfo('<div style="margin:auto;">No Log found</div>')
         }

@@ -327,10 +327,11 @@ let handler = {
                 doc = JSON.parse(JSON.stringify(doc));
                 response.success = true;
                 response.access =  doc.access;
-                handler.clearApplicationQueue(doc.user,index-100,true);
+                handler.clearApplicationQueue(doc.user,receivedData.index-100,true);
                 handler.finalSend(res,response);
             })
             .catch(function(err){
+                console.log(err);
                 if(typeof err == 'string')
                     response.message = err;
                 else
@@ -338,6 +339,43 @@ let handler = {
                 response.success = false;
                 handler.finalSend(res,response);
             })
+    },
+
+    addConversationWithMail:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            requestId:receivedData.requestId,
+            sent: false,
+            attach:receivedData.attach || ""
+        };
+
+        let conversation  = receivedData.conversation;
+
+        if(!conversation || !conversation.to._id || !__validateId(conversation.to._id)){
+            handler.sendError(res,response,'No valid receiver information provided');
+            return;
+        }
+
+        if(!receivedData.targetMail){
+            handler.sendError(res,response,'No valid mail address provided');
+            return;
+        }
+
+        let conversationModel = new applicationConversationModel();
+        conversationModel = response.conversation;
+        conversationModel.save(function(err,doc){
+            if(err){
+                handler.sendError(res,response,'No valid receiver information provided');
+                return;
+            }else if(!doc){
+                handler.sendError(res,response,'the save new conversation failed');
+                return;
+            }else{
+                handler.__processMail(11,)
+            }});
+
     },
 
     sendApplicationMail:function(req,response){
@@ -412,9 +450,11 @@ let handler = {
                 let newConversation = new applicationConversationModel();
                 newConversation.application = application._id;
                 newConversation.type = application.type;
+                console.log(application.result);
                 newConversation.result = application.result;
                 newConversation.contents = response.attach;
-                newConversation.from = req.session.user.register;
+                newConversation.from =  req.session.user.register? req.session.user.register._id : null;
+                console.log(newConversation);
                 return newConversation.save();
             })
             .then(function(coversation){
@@ -498,6 +538,15 @@ let handler = {
             })
             .then(function(result){
                 response.success = true;
+                let newConversation = new applicationConversationModel();
+                newConversation.application = response.application._id;
+                newConversation.type = response.application.type;
+                newConversation.result = 0;
+                let contents = '<b><a href="/users/'+req.session.user._id+'">'+ req.session.user.user +"</a> has changed resend an application for this request." +
+                    "the status is changed from "+'<span application-result result="'+response.application.result+'"></span> to  <span application-result result="0"></span></b>';
+                newConversation.contents = lzString.compressToBase64(encodeURIComponent(contents));
+                newConversation.from = req.session.user.register? req.session.user.register._id : null;
+                newConversation.save();
                 response.application.result = 0;
                 response.result = JSON.parse(JSON.stringify(result));
                 response.result.application = response.application;

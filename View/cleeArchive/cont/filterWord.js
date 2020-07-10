@@ -1,8 +1,8 @@
-
 app.filter('textInfo', function() { //可以注入依赖
-    return function(text) {
+    return function(text,noInfo) {
+        let noWord = noInfo || '暂无；'
         text = text.replace(/\n/gi,'<br>');
-        return text == ''? '暂无':text;
+        return text == ''? noWord:text;
     }
 });
 
@@ -77,5 +77,21 @@ app.filter('introType', function() { //可以注入依赖
             return '作者很懒，什么也没写。';
         else
             return info;
+    }
+});
+
+app.directive('contentFormat',function($compile){
+    return {
+        restrict: 'A',
+        scope:{
+            content:'='
+        },
+        link:function(scope,element,attr){
+            let contents = LZString.decompressFromBase64(scope.content);
+            contents = decodeURIComponent(contents);
+            contents = contents.replace(/\n/gi,'<br>');
+            contents = '<div>'+contents+ '</div>';
+            element.append($compile(contents)(scope));
+        }
     }
 });

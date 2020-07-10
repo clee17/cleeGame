@@ -77,17 +77,20 @@ global.__getDateInfo = function(date){
 };
 
 global.__processMail = function(mailId,mail,data,countryCode){
+    if(!mail)
+        return;
     let mailName = mailId.toString();
     while(mailName.length <3)
         mailName = '0'+mailName;
-    let cc = countryCode || 'cn';
+    let renderData = data || {};
+    let cc = countryCode || 'en';
     mailName += '_'+cc.toLowerCase();
     fs.readFile(path.join(__routes,'archive/mail/'+mailName+'.html'),{encoding:'utf-8'},function(err,mailContents){
         if(err){
             __saveLog('mail',Date.now().toString()+'____mail templates read failed____'+JSON.stringify(err));
             return;
         }
-        mailContents = ejs.render(mailContents, data);
+        mailContents = ejs.render(mailContents, renderData);
         let mailTitle = null;
         let titleIndex = mailContents.indexOf('<title>');
         if(titleIndex >=0){

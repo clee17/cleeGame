@@ -41,6 +41,7 @@ global.__renderIndex = function(req,res,renderInfo){
         renderPage.userId = req.session.user._id;
     else
         renderPage.userId = req.ip;
+    renderPage.registerId = req.session.user? req.session.user.register:null;
     renderPage.variables.preference = req.session.user? req.session.user.settings.preference : 29;
     renderPage.variables.countryCode = __getCountryCode(req.ipData);
     res.render('cleeArchive/index.html',renderPage);
@@ -66,6 +67,7 @@ global.__renderTemplates = function(req,res,pageId,renderInfo){
 
 global.__renderError = function(req,res,errMessage){
     let userId = req.ip;
+    let registerId = req.session.user? req.session.user.register : null;
     if(req.session.user)
         userId = req.session.user._id;
     let renderInfo = {viewport:'/view/error.html',
@@ -75,6 +77,7 @@ global.__renderError = function(req,res,errMessage){
         err:errMessage,
         user:req.session.user,
         userId:userId,
+        registerId:registerId,
         title:null,
         styles:[],
         variables:{},
@@ -200,6 +203,8 @@ router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);
 router.post('/admin/approveAccess',admin.approveAccess);
 router.post('/admin/addAccess',admin.addAccess);
+router.post('/admin/addAccess',admin.addAccess);
+router.post('/admin/addConversation',admin.addConversationWithMail);
 router.post('/admin/answerApplicationQueue',admin.answerApplicationQueue);
 router.post('/admin/resendApplication',admin.resendApplication);
 
