@@ -149,7 +149,6 @@ let handler = {
                         if(doc.slice(doc.lastIndexOf('.'))=== '.js')
                             data.contents += fs.readFileSync(data.subPath+'/'+path+'/'+docs[i],{encoding:'utf-8'});
                     }
-
                 }
             }
             console.log(data.loadList);
