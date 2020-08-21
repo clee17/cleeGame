@@ -76,8 +76,8 @@ global.__getDateInfo = function(date){
     return info.getFullYear()+'年'+(info.getMonth()+1) + '月'+ info.getDate()+'日'+info.getHours()+'时'+info.getMinutes()+'分';
 };
 
-global.__processMail = function(mailId,mail,data,countryCode){
-    if(!mail)
+global.__processMail = function(mailId,receiver,data,countryCode){
+    if(!receiver)
         return;
     let mailName = mailId.toString();
     while(mailName.length <3)
@@ -97,7 +97,7 @@ global.__processMail = function(mailId,mail,data,countryCode){
             mailTitle = mailContents.substring(titleIndex,mailContents.indexOf('</title>'));
             mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
         }
-        __sendMail(mailContents,mail,mailTitle);
+        __sendMail(mailContents,receiver,mailTitle);
     });
 };
 

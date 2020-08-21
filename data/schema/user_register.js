@@ -5,4 +5,5 @@ module.exports = new mongoose.Schema({
     user:{type:mongoose.ObjectId,default:null,ref:'user'},
     intro:{type:String,default:''},
     logged:{type:Date,default:Date.now()},
+    ip:{type:String,default:""}
 });

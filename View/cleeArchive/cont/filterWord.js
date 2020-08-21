@@ -6,6 +6,7 @@ app.filter('textInfo', function() { //可以注入依赖
     }
 });
 
+
 app.filter('dateInfo',function(){
     return function(date,format){
         if(!date)

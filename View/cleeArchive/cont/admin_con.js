@@ -57,15 +57,6 @@ app.filter('time',function(){
     }
 });
 
-app.filter('userGroup',function(){
-    return function(group){
-       if(group === 0)
-           return 'general user';
-       else if(group >= 99)
-           return 'administrator';
-    }
-});
-
 
 app.directive('applicationType',function(){
     return {
@@ -253,7 +244,7 @@ let HTMLTemplate = {
         '<td style="text-align:center;padding-left:0.4rem;padding-right:0.4rem;">{{entry.date | date}} <br> {{entry.date | time}}</td>'+
         '<td statements info="entry.statements" valign="top" style="max-width:15rem;padding-right:2rem;"></td>' +
         '<td style="font-weight:bold;text-align:center;padding:5px;" application-result result="entry.result" id="entry._id"></td>' +
-        '<td class="btnArea" style="min-width:4rem;"><button ng-disabled="entry.result <2" ng-show="entry.result >0" ng-click="resend(entry)">RESEND</button></td>'+
+        '<td class="btnArea" style="min-width:4rem;"><button ng-disabled="entry.result <2" ng-show="entry.result >1" ng-click="resend(entry)">RESEND</button></td>'+
         '<td></td></tr>'+
         '</table>'
 }
@@ -607,6 +598,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             if($scope.requestId  !== data.requestId)
                 return;
             $scope.entries = data.contents || [];
+            console.log($scope.entries);
             if($scope.entries.length === 0){
                 $scope.applyContents(HTMLTemplate['noInfo']);
             }else{
@@ -692,7 +684,12 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
             option:{
                 sort:{date:1}
             },
-            populate:'from application'
+            populate:[{
+                path : 'from',
+                populate : {
+                    path : 'user'
+                }
+            },{path:'to'},{path:'application'}]
         };
         $scope.requesting = true;
         requestData.requestId = $scope.requestId = 'enquire conversation'+Date.now()+':'+$scope.entry._id;
@@ -718,28 +715,44 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
         conversation.type = $scope.entry.type;
         conversation.result = $scope.entry.result;
         conversation.contents = LZString.compressToBase64(encodeURIComponent(element.value));
-        requestData.targetMail = $scope.entry.register? $scope.entry.register.mail : "";
+        requestData.targetMail = $scope.entry.register? $scope.entry.register.mail : null;
         $scope.messageRequestId = requestData.requestId = "send conversation" + Date.now() + ':' +$scope.entry._id;
         adminManager.request('/admin/addConversation', 'application conversation added', requestData);
     }
+
+    $scope.$on('application conversation added',function(event,data){
+        $scope.messageRequesting = false;
+        if(data.success){
+            $scope.entries.push(data.entry);
+            let element = document.getElementById('adminTop_messageContents');
+            if(element)
+                element.value = "";
+
+        }else
+            $scope.$emit('showError',data.message);
+    });
 
     $scope.$on('application log info received',function(event,data){
         $scope.requesting = false;
         if(data.requestId !== $scope.requestId)
             return;
         if(data.success){
+            console.log(data.contents);
             $scope.entries = data.contents;
             if($scope.entries.length === 0)
                 $scope.showInfo('<div style="margin:auto;">No Log found</div>');
             else
-                $scope.showInfo('<div style="flex:1;padding:2rem;padding-bottom:1rem;display:flex;flex-direction:column;"><div style="flex:1;margin-left:2rem;margin-right:2rem;padding-right:2rem;overflow-y:scroll;display:flex;flex-direction:column;"><div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
-                    '<div style="display:flex;flex-direction:row;margin-top:1rem;margin-bottom:0.5rem;"><span style="font-weight:bold;">FROM:</span><span style="margin-left:0.8rem;"> {{entry.from? entry.from.user: "the user has no registration info" }}</span>' +
+                $scope.showInfo('' +
+                    '<div style="flex:1;padding:2rem;padding-bottom:1rem;display:flex;flex-direction:column;max-height:calc(100% - 5rem);"><div style="flex:1;margin-left:2rem;margin-right:2rem;padding-right:2rem;overflow-y:scroll;display:flex;flex-direction:column;"><div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
+                    '<div style="display:flex;flex-direction:row;margin-top:1rem;margin-bottom:0.5rem;">' +
+                    '<span style="font-weight:bold;">FROM:</span><span style="margin-left:0.5rem;"> {{entry.from | userRegister }}</span>' +
+                    '<span style="font-weight:bold;margin-left:2rem;">TO:</span><span style="margin-left:0.5rem;"> {{entry.to | userRegister }}</span>' +
                     '<span style="margin-left:4rem;font-weight:bold;">DATE:</span><span>{{entry.date | dateInfo}}</span>'+
                     '<span style="margin-left:4rem;font-weight:bold;">STATUS:</span><span application-result result="entry.result" style="margin-left:0.8rem;"></span></div>' +
                     '<div content-format content="entry.contents" style="margin-bottom:1.5rem;padding:0.5rem;"></div>'+
                     '<div style="min-width:80%;background:rgba(185,185,185,0.6);height:1px;"></div>'+
                     '</div></div>'+
-                    '<div style="margin-top:auto;margin-bottom:0.5rem;padding-left:2rem;padding-right:2rem;">' +
+                    '<div style="margin-top:auto;margin-bottom:0.5rem;padding-top:2rem;padding-left:2rem;padding-right:2rem;">' +
                     '<div><span style="font-weight:bold;">FROM: YOU</span><span style="margin-left:0.8rem;font-size:0.8rem;color:gray;">You could send a message to the applicant for further information if you could not decide if the request should be approved or not.</span></div>'+
                     '<div><textarea id="adminTop_messageContents" style="height:6rem;width:calc(100% - 3rem);margin-left:1.5rem;margin-top:0.5rem;resize:none;padding:8px;"></textarea></div>'+
                     '<div style="display:flex;margin-top:0"><button class="grand-button" style="margin-left:auto;margin-right:2rem;margin-top:1rem;" ng-click="sendMessage()" ng-disabled="messageRequesting">SEND</button></div>'+

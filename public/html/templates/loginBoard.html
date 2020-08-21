@@ -28,8 +28,8 @@
         <div style="text-align:right;margin-right:10px;"><%- websiteInfo[23] %>:</div>
         <input ng-model="data[0]" ng-blur="checkUser()">
         <div ng-show="userChecking" class="anim" style="height:1rem;width:28px;max-width:28px;margin-left:5px;"><img src="/img/loading.gif" style="width:22px;height:22px;"></div>
+        <div ng-show="userErr!=''" style="margin-right:auto;margin-left:1rem;margin-top:auto;margin-bottom:auto;font-size:0.8rem;color:darkred;">{{userErr}}</div>
     </div>
-    <div ng-show="userErr!=''" style="margin-right:auto;margin-left:5.5rem;font-size:0.8rem;color:gray;">{{userErr}}</div>
     <div class="displayRow" ng-if="loginMode===1">
         <div style="text-align:right;margin-right:10px;"><%- websiteInfo[25] %>:</div>
         <div>{{mail}}</div>
@@ -40,7 +40,7 @@
     </div>
     <div class="displayRow" ng-if="loginMode===1">
         <div style="text-align:right;margin-right:10px;"><%- websiteInfo[26] %>:</div>
-        <div>{{intro}}</div>
+        <div style="max-width:10rem;">{{intro}}</div>
     </div>
     <div class="displayRow">
         <button style="margin-right:0;margin-left:auto;margin-top:1rem;" class="grand-button" ng-click="sendLogin()" ng-disabled="requesting">{{submitSign}}</button>

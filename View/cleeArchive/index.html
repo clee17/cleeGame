@@ -36,22 +36,24 @@
 
             $rootScope.err = "<%- err %>";
             $rootScope.readerId = '<%- userId %>';
-            $rootScope.registerId = '<%- userId %>';
+            $rootScope.registerId = '<%- registerId %>';
             $rootScope.variables = JSON.parse('<%- JSON.stringify(variables) %>');
             $rootScope.countryCode = "<%- countryCode %>";
             $rootScope.countryState = "<%- websiteInfo[88] %>";
             $rootScope.countryList = "<%- infoAll[5] %>";
             $rootScope.countryList = $rootScope.countryList.split(',');
             $rootScope.statementTitle = '<%- infoAll[6] %>';
+            for(let attr in $rootScope.variables){
+                $rootScope[attr] = $rootScope.variables[attr];
+            };
+
             if($cookies.getObject('readerLanguage')){
                 $rootScope.countryCode = $cookies.getObject('readerLanguage');
             }
+
             $rootScope.switchCountryCode = function(countryCode){
                 $cookies.putObject('readerLanguage',countryCode);
                 $window.location.reload();
-            };
-            for(let attr in $rootScope.variables){
-                $rootScope[attr] = $rootScope.variables[attr];
             };
 
             $scope.signal = '';
@@ -225,12 +227,14 @@
                     element.innerHTML =  statement;
             };
 
+
             $scope.initialize = function(){
                 if($scope._initialized)
                    return;
                 $scope._initialized = true;
                 $scope.countryStatement();
             };
+
 
             $scope.initialize();
         });
@@ -304,7 +308,7 @@
             </a>
         </div>
         <div id="languageSwitch">
-            <button id="BtnEn" ng-disabled="countryCode==='OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
+            <button id="BtnEn" ng-disabled="countryCode === 'OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
             <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')" style="font-weight:bold;">CN</button>
         </div>
         <span id="countryStatement"></span>

@@ -1,10 +1,9 @@
-var express = require('express'),
+const express = require('express'),
     path = require('path'),
     lzString = require(path.join(__basedir, 'js/lib/lz-string1.4.4'));
 
 let userModel = require(path.join(__dataModel, 'user')),
     registerModel = require(path.join(__dataModel,'user_register')),
-    settingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
     validModel = require(path.join(__dataModel,'valid')),
     queueModel = require(path.join(__dataModel,'application_queue')),
     applicationModel = require(path.join(__dataModel,'application')),
@@ -14,16 +13,15 @@ let router = express.Router();
 
 let routeHandler = {
     addQueue:function(application){
-        let queue = new queueModel();
-        queue.application = application._id;
-        queue.date = Date.now();
-        queue.save(function(err,doc){
+        queueModel.findOneAndUpdate({application:application._id},{date:Date.now()},
+            {upsert:true,setDefaultsOnInsert: true,new:true},
+            function(err,queue){
             if(err){
                 //CLEE TO BE ADDED;
-            }else if(!doc){
+            }else if(!queue){
                 //CLEE TO BE ADDED;
             }
-        });
+        })
     },
 
     finalSend:function(res,data){
@@ -85,6 +83,36 @@ let routeHandler = {
         res.send(lzString.compressToBase64(JSON.stringify(response)));
     },
 
+    findApplicationWithRegister:function(req,res,response,register){
+        if(register && register.user){
+            response.alertInfo = _statements[12];
+            routeHandler.finalSend(res,response);
+            return;
+        }
+        applicationModel.findOne({register:register._id},function(err,application){
+            if(err){
+                response.message = err.message;
+                routeHandler.finalSend(res,response);
+            }
+            if(!application){
+                let application = new applicationModel();
+                application.type = 0;
+                application.register = register._id;
+                application.statements = register.statements;
+                application.save(function(err){
+                    let render =  {code:""};
+                    if(!err)
+                        render.code = application._id;
+                     response.alertInfo =  ejs.render(_statements[10], {code:application._id});
+                    routeHandler.finalSend(res,response);
+                    routeHandler.addQueue(application);
+                })
+            }else{
+                response.alertInfo =  ejs.render(_statements[10], {code:application._id});
+                routeHandler.finalSend(res,response);
+            }
+        })
+    },
 
     requestRegister:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
@@ -96,19 +124,40 @@ let routeHandler = {
 
         receivedData.mail = receivedData.mail.toLowerCase();
         receivedData.statements = lzString.compressToBase64(receivedData.statements);
+
+        let register = null;
+        let time = Date.now();
+        let recentTime = 5*60*1000;
+        time -= recentTime;
+
         registerModel.findOne({mail:receivedData.mail}).exec()
-            .then(function(doc){
-                if(doc){
-                    response.message = '该邮箱已被注册';
+            .then(function(result){
+                register = result;
+                if(!result){
+                    return registerModel.countDocuments({logged:{$gte:time},ip:req.ip}).exec();
+                }else{
+                    response.message = _errAll[17];
+                    response.success = false;
+                    res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
+                    routeHandler.findApplicationWithRegister(req,res,response,register);
+                    throw 'SEND COMPLETE';
+                }
+            })
+            .then(function(count){
+                if(count >= 3){
+                    response.message = _errAll[16];
                     routeHandler.finalSend(res,response);
+                    throw 'SEND COMPLETE';
                 }else{
                     let newRecord= new registerModel();
                     newRecord.mail = receivedData.mail;
                     newRecord.intro = receivedData.statements;
+                    newRecord.ip = req.ip;
                     return newRecord.save();
                 }
             })
-            .then(function(register){
+            .then(function(result){
+                register = result;
                 if(register){
                     let application = new applicationModel();
                     application.type = 0;
@@ -121,16 +170,15 @@ let routeHandler = {
             .then(function(application){
                 response.success = true;
                 response.result = application._id;
-                let queue = new queueModel();
-                queue.application = application._id;
-                queue.type = application.type;
-                queue.save();
+                response.alertInfo = _statements[11];
                 res.cookie(receivedData.mail,'true',{maxAge:10*365*24*60*60*1000});
                 __processMail(0,receivedData.mail,application,__getCountryCode(req.ipData));
                 routeHandler.finalSend(res,response);
                 routeHandler.addQueue(application);
             })
             .catch(function(err){
+                if(err === 'SEND COMPLETE')
+                    return;
                 response.message = 'err';
                 routeHandler.finalSend(res,response);
             });
@@ -150,22 +198,21 @@ let routeHandler = {
                 let newModel = new userModel();
                 newModel.user = receivedData.user;
                 newModel.pwd = receivedData.pwd;
-                newModel.mail = receivedData.mail;
-                newModel.intro = receivedData.intro;
-                newModel.save(function(err,savedObj){
+                newModel.register = receivedData._id;
+                newModel.save(function(err){
                     if(err)
                         throw '注册失败'+err;
                     response.message = '注册成功';
                     response.success = true;
                     req.session.user = newModel;
-                    res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
-                    applicationModel.findOneAndUpdate({mail:receivedData.mail},{status:3},function(err,doc){
+                    registerModel.findOneAndUpdate({_id:newModel.register},{user:newModel._id},function(){
+                        res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
                         routeHandler.finalSend(res,response);
-                    });
-                    countMapModel.findOneAndUpdate({infoType:100},{$inc:{number:1}},function(err,doc){
-                        if(err)
-                            console.log(err);
-                    });
+                        countMapModel.findOneAndUpdate({infoType:100},{$inc:{number:1}},function(err){
+                            if(err)
+                                console.log(err);
+                        });
+                    })
                 });
             })
             .catch(function(err){
@@ -192,7 +239,7 @@ let routeHandler = {
             return;
         }
 
-        validModel.deleteMany({user:receivedData._id,type:0},function(err,docs){
+        validModel.deleteMany({user:receivedData._id,type:0},function(){
             let newLink = new validModel();
             newLink.user = receivedData._id;
             newLink.type = 0;
@@ -266,7 +313,7 @@ let routeHandler = {
     apply:function(req,res) {
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         receivedData.user = req.session.user ? req.session.user._id : null;
-        receivedData.mail = req.session.user? req.session.user.register.mail : '';
+        receivedData.mail = __getUserMail(req.session.user);
         if (!receivedData.subType)
             receivedData.subType = 0;
         let response = {
@@ -280,7 +327,7 @@ let routeHandler = {
             response.error = '创作者权限仅允许注册用户申请';
 
         if(response.error) {
-            handler.finalSend(res, data);
+            routeHandler.finalSend(res, data);
             return;
         }
 
@@ -319,7 +366,7 @@ let routeHandler = {
             response.error = '您的登录状态已过期';
 
         if(response.error) {
-            handler.finalSend(res, data);
+            routeHandler.finalSend(res, data);
             return;
         }
 
@@ -373,6 +420,7 @@ let routeHandler = {
             message: '',
             sent: false,
         };
+
         if(!receivedData.id){
             response.message = '没有收到邮箱地址';
         }
@@ -381,8 +429,12 @@ let routeHandler = {
             routeHandler.finalSend(res,response);
             return;
         }
+
+        let application = null;
+
         applicationModel.findOne({_id:receivedData.id})
-            .then(function(application){
+            .then(function(result){
+                application = result;
                 if(!application){
                     throw 'There is no record for your application, please contact the administrator.';
                 }else{
@@ -390,29 +442,38 @@ let routeHandler = {
                     response.requestId = application._id;
                     response.time = application.date;
                     routeHandler.success = true;
-                    if(application.result === 1){
+                    if(application.result >= 1){
                         userModel.findOne({register:application.register},function(err,user){
                             if(user)
                                 response.registered = true;
+                            response.success = true;
+                            response.message = 'The application has been completed';
                             routeHandler.finalSend(res,response);
                         });
+                        throw 'SEND COMPLETE';
                     }else{
                         return queueModel.findOne({application:application._id}).exec();
                     }
                 }
             })
             .then(function(queue){
-                if(!queue)
-                    throw 'Your application has been lost in the system, please kindly contact administrator for assistance.'
-                else{
-                    queueModel.countDocuments({date:{$lt:queue.date},type:0},function(err,count){
-                        response.position += count;
-                        response.success = true;
-                        routeHandler.finalSend(res,response);
-                    });
-                }
+                response.success = true;
+                let condition = {};
+                if(queue)
+                  condition = {date:{$lt:queue.date},type:0};
+                else
+                    routeHandler.addQueue(application);
+                queueModel.countDocuments(condition,function(err,count){
+                    response.position += count;
+                    if(queue)
+                        response.position --;
+                    response.success = true;
+                    routeHandler.finalSend(res,response);
+                });
             })
             .catch(function(err){
+                if(err === 'SEND COMPLETE')
+                    return;
                 response.message = err;
                 response.success = false;
                 routeHandler.finalSend(res,response);

@@ -9,11 +9,14 @@ var text = [
     'Your registration has been completed already, please kindly login instead',
     "Our Redis Server has failed, please contact us.",
     "You cannot register for a new account as a logined user",
-    "Sorry, we cannot find the page。<br>The developers may still be working on this.",
+    "Sorry, we cannot find the page。<br>The developers may still be working on this.", //10
     "We're experiencing an internal Server Error <br>, you may report the issue you run into at the bottom of page",
     "You are not authorized to make this change",
     "Your login status has expired, please refresh and login again",
-    "You need to provide a tag so you can browse that",
+    "You need to provide a tag so you can browse that", //14
+    "Registration with this application ID has been completed already, please login.", //15
+    "You've registered for too many times in the last few minutes, please come back later",
+    "This mail address has been registered already"
 ];
 
 module.exports = text;

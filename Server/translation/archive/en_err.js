@@ -9,15 +9,17 @@ var text = [
     "You are not allowed to edit the chapter",
     '',
     "You haven't followed any Tag",//9
-    'This work has been restricted to registered users, you must login first before you can read it',
+    'This work has been restricted to registered users, you must login first before you can read it', //10
     'This work is only accessable by the writer。',
     'This is not a valid work Id',
     'You have to provide your invitation code first',
     'Please provide correct invitation code',
-    'Your invitation code is not found',
+    'Your invitation code is not found', //15
     "The tag info sent is not correct",
+    "error happened",
     "This work can only be published by technical writers, you may get the identity from your user setting page",
-    "publishing"
+    "publishing",
+
 ];
 
 module.exports = text;

@@ -353,7 +353,7 @@ let handler = {
 
         let conversation  = receivedData.conversation;
 
-        if(!conversation || !conversation.to._id || !__validateId(conversation.to._id)){
+        if(!conversation || !conversation.to || !__validateId(conversation.to)){
             handler.sendError(res,response,'No valid receiver information provided');
             return;
         }
@@ -364,17 +364,32 @@ let handler = {
         }
 
         let conversationModel = new applicationConversationModel();
-        conversationModel = response.conversation;
+        conversationModel.to = conversation.to;
+        conversationModel.from = conversation.from;
+        conversationModel.contents = conversation.contents;
+        conversationModel.application = conversation.application;
+        conversationModel.type = conversation.type;
+        conversationModel.result = conversation.result;
+
         conversationModel.save(function(err,doc){
             if(err){
-                handler.sendError(res,response,'No valid receiver information provided');
+                handler.sendError(res,response,err.message);
                 return;
             }else if(!doc){
                 handler.sendError(res,response,'the save new conversation failed');
                 return;
             }else{
-                handler.__processMail(11,)
-            }});
+                doc
+                    .populate([{path:     'application', populate: { path:  'register', model: 'user_register' }},
+                        {path:'from'},{path:'to'}],function(err,entry){
+                        let cc = __getCountryCode(req.ipData);
+                        __processMail(11,receivedData.targetMail,conversation,cc);
+                        response.success = true;
+                        response.entry = JSON.parse(JSON.stringify(entry));
+                        handler.finalSend(res,response);
+                    });
+
+            }})
 
     },
 
@@ -450,11 +465,9 @@ let handler = {
                 let newConversation = new applicationConversationModel();
                 newConversation.application = application._id;
                 newConversation.type = application.type;
-                console.log(application.result);
                 newConversation.result = application.result;
                 newConversation.contents = response.attach;
                 newConversation.from =  req.session.user.register? req.session.user.register._id : null;
-                console.log(newConversation);
                 return newConversation.save();
             })
             .then(function(coversation){

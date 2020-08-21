@@ -41,7 +41,9 @@ global.__renderIndex = function(req,res,renderInfo){
         renderPage.userId = req.session.user._id;
     else
         renderPage.userId = req.ip;
-    renderPage.registerId = req.session.user? req.session.user.register:null;
+    renderPage.registerId = req.session.user&&req.session.user.register? req.session.user.register:"";
+    if(renderPage.registerId && renderPage.registerId._id)
+        renderPage.registerId = renderPage.registerId._id;
     renderPage.variables.preference = req.session.user? req.session.user.settings.preference : 29;
     renderPage.variables.countryCode = __getCountryCode(req.ipData);
     res.render('cleeArchive/index.html',renderPage);
@@ -67,7 +69,9 @@ global.__renderTemplates = function(req,res,pageId,renderInfo){
 
 global.__renderError = function(req,res,errMessage){
     let userId = req.ip;
-    let registerId = req.session.user? req.session.user.register : null;
+    let registerId = req.session.user? req.session.user.register : "";
+    if(registerId && registerId._id)
+        registerId = registerId._id;
     if(req.session.user)
         userId = req.session.user._id;
     let renderInfo = {viewport:'/view/error.html',
@@ -126,6 +130,7 @@ global.__validateId = function(id){
         return false;
 };
 
+
 let  main = require(path.join(__routes,"/archive/main")),
      dynamic = require(path.join(__routes,'/archive/dynamic')),
      subUser = require(path.join(__routes,'/archive/user')),
@@ -138,9 +143,25 @@ let  main = require(path.join(__routes,"/archive/main")),
      feedback = require(path.join(__routes,"/archive/feedback"));
 
 let userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting'));
+let registerModel = require(path.join(__dataModel,'user_register'));
 
 let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
+
+global.__getUserMail = async function(user){
+    if(!user.register)
+        return null;
+    else if(user.register && __validateId(user.register)){
+        let result = await registerModel.findOne({_id:user.register});
+        if(result)
+            return result.mail;
+        else
+            return null;
+    }else if(user.register && user.register.mail)
+        return user.register.mail;
+    else
+        return null;
+}
 
 global.__updateCountMap = function(countList) {
     let updateList = [];

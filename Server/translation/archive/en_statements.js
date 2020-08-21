@@ -17,7 +17,20 @@ var text = [
     " <p>We commit that we shall never divulge your personal information，please kindly leave us a nickname so that we could give you thanks in public.</p>",
     "        <p>For the users from China, you may transfer to the following Aplipay or wechat account, with a comment for your username on the website:</p>",
     "For overseas users, you may transfer to the following paypal account:",
-    "The information is waiting to be updated."
+    "The information is waiting to be updated.",
+    "<div>Do you wish to reset <%- user %>'s password？</div>",
+
+    "<h1>The mail address has been taken!</h1>"+
+    "<p>This mail address has an application connected now，please check the current status of that with the application ID <%- code %>. </p>",
+
+    "<h1>ACCOUNT REQUEST SUCCESS！</h1>" +
+    "<p>Your mail and statements has been successfully submitted for review. You may receive a mail including a link for registration after the request is accepted。</p>" +
+    "<p>You could also check the current status of your request here <a href=\"/registerProcess\">GO</a></p>" +
+    "<p>Administrators review the queue every night so please kindly come back after 24 to 48 hours.</p>" +
+    "<p>Enjoy!</p>",
+
+    "<h1>There is an account connected to this mail！</h1>"+
+    "<p>There is an account connected to this mail already, please login. Or you may <b> <a href='/resetPwdRequest'>reset your password</a></b>.</p>"
 
 
 ];
