@@ -67,11 +67,11 @@ global.__sendMail = function(mailContents,userMail,title){
     });
 };
 
-global.__multiLang = function(str,ip){
+global.__multiLang = function(str,ipData){
     if(str.substring(0,6).toLowerCase() === "multil"){
         str = str.substring(6);
         str = JSON.parse(decodeURIComponent(str));
-        let cc = __getCountryCode(ip);
+        let cc = __getCountryCode(ipData);
         if(str[cc])
             return str[cc];
         else
@@ -81,7 +81,7 @@ global.__multiLang = function(str,ip){
 }
 
 global.__packMultiLang = function(llist){
-    if(!typeof llist !== 'object'){
+    if(typeof llist !== 'object'){
         let obj = {};
         obj.DEFAULT = llist;
         return encodeURIComponent('multil'+JSON.stringify(obj));
@@ -90,7 +90,7 @@ global.__packMultiLang = function(llist){
         let configured = false;
         let firstItem = "";
         for (let attr in llist){
-            obj[attr.toUpperCase()] = llist;
+            obj[attr.toUpperCase()] = llist[attr];
             if(firstItem === "")
                 firstItem = obj[attr.toUpperCase()];
             if(attr.toUpperCase() === 'DEFAULT')

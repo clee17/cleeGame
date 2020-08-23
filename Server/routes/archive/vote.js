@@ -27,17 +27,17 @@ let handler = {
             if(err){
                 __renderError(req,res,err.message);
             }else if(!vote){
-                __renderError(req,res,err._errInfo[20]);
+                __renderError(req,res,_errInfo[20]);
             }else{
                 let detail = JSON.parse(JSON.stringify(vote));
-                detail.title = __multiLang(vote.title,req.ip);
-                detail.description = __multiLang(vote.description,req.ip);
+                detail.title = __multiLang(vote.title,req.ipData);
+                detail.description = __multiLang(vote.description,req.ipData);
                 let start = new Date(detail.start);
                 let end = new Date(detail.end);
-                let queryStr = 'start='+start.getTime()+'%end='+end.getTime();
+                let queryStr = 'A='+start.getTime()+'&B='+end.getTime();
                 __renderIndex(req,res,{viewport:'/voteDetail/'+voteId+'?'+queryStr,
                     controllers:['/view/cont/vote_con.js'],
-                    services:['/view/cont/voteService.js'],
+                    services:['/view/cont/voteService.js','/view/cont/filterWord.js'],
                     variables:detail});
             }
 
@@ -45,12 +45,11 @@ let handler = {
     },
 
     sub:function(req,res){
-        console.log('entered');
         let voteId = req.params.voteId;
-        let start = new Date(req.params.start);
-        let end = new Date(req.params.end);
+        let start = req.query.A;
+        let end = req.query.B;
         if(!voteId || !__validateId(voteId)){
-            __renderError(req,res, __errInfo[20]);
+            __renderError(req,res, _errInfo[20]);
             return;
         }
 

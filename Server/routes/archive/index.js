@@ -278,6 +278,7 @@ module.exports = function(app)
         {
             res.cookie('userId','',{maxAge:0});
         }
+
         if(req.session.user && !req.session.user.settings)
         {
             userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){
