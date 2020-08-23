@@ -35,6 +35,8 @@ let mailTransport = nodeMailer.createTransport({
 
 
 global.__getCountryCode = function(ipData){
+    if(ipData.readerLanguage)
+        return ipData.readerLanguage.toUpperCase();
     if(ipData.country === '中国')
         return 'CN';
     else
