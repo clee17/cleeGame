@@ -58,6 +58,10 @@ let handler = {
                 __renderError(req,res,err.message);
                 return;
             }
+            for(let i=0; i<options.length;++i){
+                options[i].title = __multiLang(options[i].title,req.ipData);
+                options[i].description = __multiLang(options[i].description,req.ipData);
+            }
             let voted = false;
             if(req.session.user&& req.session.user.userGroup >= 999){
                 voted  = false;
