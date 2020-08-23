@@ -33,6 +33,11 @@ let addVote = function() {
     });
 };
 
+let addOptions = function(){
+    let multiTask = [];
+    multiTask.push({insertOne:{description:"updateDoc"}});
+};
+
 
 addVote();
 

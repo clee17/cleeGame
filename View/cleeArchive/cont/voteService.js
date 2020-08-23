@@ -14,8 +14,8 @@ app.service('voteManager',function($http,$rootScope){
                 });
     };
 
-    this.saveResults = function(data){
-        manager.requestAll('/votes/save','votes Save Finished',data);
+    this.submitResult = function(data){
+        manager.requestAll('/vote/save','votes Save Finished',data);
     };
 
 });

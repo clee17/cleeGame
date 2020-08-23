@@ -174,6 +174,7 @@ router.get('/countryStatement/:countryId',main.statement);
 
 //votes
 router.get('/vote/:voteId',vote.index);
+router.post('/vote/save',vote.save);
 router.get('/voteDetail/:voteId',vote.sub);
 
 

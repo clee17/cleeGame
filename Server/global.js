@@ -72,7 +72,7 @@ global.__sendMail = function(mailContents,userMail,title){
 global.__multiLang = function(str,ipData){
     if(str.substring(0,6).toLowerCase() === "multil"){
         str = str.substring(6);
-        str = JSON.parse(decodeURIComponent(str));
+        str = JSON.parse(str);
         let cc = __getCountryCode(ipData);
         if(str[cc])
             return str[cc];
@@ -80,13 +80,13 @@ global.__multiLang = function(str,ipData){
             return str['DEFAULT'];
     }else
         return str;
-}
+};
 
 global.__packMultiLang = function(llist){
     if(typeof llist !== 'object'){
         let obj = {};
         obj.DEFAULT = llist;
-        return encodeURIComponent('multil'+JSON.stringify(obj));
+        return'multil'+JSON.stringify(obj);
     }else{
         let obj = {};
         let configured = false;
@@ -100,9 +100,9 @@ global.__packMultiLang = function(llist){
         }
         if(!configured)
             obj.DEFAULT = obj['EN'] || firstItem;
-        return  encodeURIComponent('multil'+JSON.stringify(obj));
+        return 'multil'+JSON.stringify(obj);
     }
-}
+};
 
 module.exports = global;
 
