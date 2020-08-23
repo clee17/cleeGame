@@ -9,8 +9,12 @@ global.__errInfo = require('../translation/archive_err.js');
 global.__statements = require('../translation/archive_statements.js');
 global.__infoAll = require('../translation/info.js');
 
+global.__viewFolder = '';
+
 var app = express();
 app = config(app);
 route(app);
 
 var server = app.listen(3000);
+
+global.__viewFolder ='cleeArchive/';
