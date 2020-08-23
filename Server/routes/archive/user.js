@@ -64,7 +64,7 @@ let handler = {
             handler.filterContents(req,res, data);
     },
 
-    register: function (req, res) {
+    register:function(req,res){
         let registerId = req.params.registerId;
 
         if (req.session.user) {
@@ -83,13 +83,18 @@ let handler = {
             }else if(doc.status === 3){
                 __renderError(req,res,_errAll[7]);
             }else{
-                __renderIndex(req, res, {
-                    viewport: '/view/register.html',
-                    controllers: ['/templates/login.js', '/templates/register_con.js'],
-                    services: [],
-                    variables: {registerId: registerId, mail:doc.mail,intro:doc.statements, loginMode: 1}});
+                if(!doc.register.user){
+                    __renderIndex(req, res, {
+                        viewport: '/view/register.html',
+                        controllers: ['/templates/login.js', '/templates/register_con.js'],
+                        services: [],
+                        variables: {registerId: registerId, mail:doc.register.mail,intro:doc.register.intro, loginMode: 1}});
+                }else{
+                    __renderError(req,res,_errAll[15]);
+                }
+
             }
-        });
+        }).populate('register');
     },
 
     follow:function(req,res){
@@ -228,7 +233,7 @@ let handler = {
         if (!req.session.user || req.session.user._id != userId)
             __renderError(req, res, _errAll[3]);
         else {
-            let settings=  {mail:req.session.user.mail || '',
+            let settings=  {mail:__getUserMail(req.session.user),
             intro:req.session.user.intro ? req.session.user.intro : ''};
             __renderIndex(req, res, {
                 viewport: '/dynamic/users/setting/' + userId,

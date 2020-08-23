@@ -63,11 +63,13 @@ let handler = {
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
             variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
         viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
-        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js','/service/copyService.js'],modules:['/view/modules/pageIndex.js']});
+        viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js','/service/copyService.js','/view/cont/filterWord.js','/view/cont/filterUser.js'],modules:['/view/modules/pageIndex.js']});
         viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/statement/registerProcess',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+        viewPortMap.set('/resetPwdRequest',{viewport:'/view/resetPwdRequest.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+
         let result = viewPortMap.get(req.url);
         if(!result)
             next();
@@ -87,7 +89,7 @@ let handler = {
         }
         else if(req.url ==='/donate'){
             if(req.session.user){
-                result.variables.mail = {mail:req.session.user.mail || ''};
+                result.variables.mail = {mail:__getUserMail(req.session.user)};
                 __renderIndex(req,res,result);
             } else
                 __renderError(req,res,_errAll[3]);

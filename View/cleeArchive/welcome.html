@@ -146,10 +146,10 @@
         <p>即使没有本站账号，您也可以浏览符合您国家与地区政策法规的内容，但只有拥有账号后才能发布作品。</p>
         <p>您可以在<a href="/registerProcess">这里</a>查询您的注册审核进度</p>
         <div id="applyBoard">
-            <div style="margin-top:1.5rem;"><input ng-model="mail" ng-disabled="requesting" placeholder="请输入您的邮箱地址"></div>
-            <div style="min-height:0.8rem;margin-left:2rem;margin-right:2rem;"><span id="existedSign" style="display:none;">&nbsp&nbsp&nbsp&nbsp您已用该邮箱完成过申请，请勿重复申请，申请需要经过管理
+            <div style="margin-top:1.5rem;"><input ng-model="mail" ng-disabled="requesting" placeholder="请输入您的邮箱地址"> <i class="fa fa-spinner fa-spin" style="margin-left:5px;" ng-show="requesting"></i></div>
+            <div style="min-height:0.8rem;margin-left:2rem;margin-right:2rem;"><span id="existedSign" style="display:none;margin-top:5px;">&nbsp&nbsp&nbsp&nbsp您已用该邮箱完成过申请，请勿重复申请，申请需要经过管理
                 员的审核，您可以前往<a href="/registerProcess">审核</a>页面确认审核进度。</span></div>
-            <div><textarea ng-model="statements" ng-disabled="requesting" placeholder="请输入您的个人陈述,您可以在个人陈述中阐述您想要创作什么作品、喜好什么作品，越详细的个人陈述越有可能帮助您尽快获得注册链接,最长不超过500字。" maxlength="500"></textarea></div>
+            <div><textarea ng-model="statements" ng-disabled="requesting || existed" placeholder="请输入您的个人陈述,您可以在个人陈述中阐述您想要创作什么作品、喜好什么作品，越详细的个人陈述越有可能帮助您尽快获得注册链接,最长不超过500字。" maxlength="500"></textarea></div>
             <div  style="display:flex;margin-bottom:1rem;">
                 <button class="grand-button" ng-click="submitApplication()" ng-disabled="requesting || existed" style="height:2rem;padding-top:5px;margin-left:auto;margin-right:1rem;margin-bottom:1rem;">发送</button>
             </div>
