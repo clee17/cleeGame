@@ -42,6 +42,10 @@
             $rootScope.countryList = "<%- infoAll[5] %>";
             $rootScope.countryList = $rootScope.countryList.split(',');
             $rootScope.statementTitle = '<%- infoAll[6] %>';
+            for(let attr in $rootScope.variables){
+                $rootScope[attr] = $rootScope.variables[attr];
+            };
+            
             if($cookies.getObject('readerLanguage')){
                 $rootScope.countryCode = $cookies.getObject('readerLanguage');
             }
@@ -49,9 +53,7 @@
                 $cookies.putObject('readerLanguage',countryCode);
                 $window.location.reload();
             };
-            for(let attr in $rootScope.variables){
-                $rootScope[attr] = $rootScope.variables[attr];
-            };
+
 
             $scope.signal = '';
             $scope.alertInfo = '';
