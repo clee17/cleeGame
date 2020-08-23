@@ -81,6 +81,7 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
     };
 
     $scope.submit = function(){
+        $scope.requesting = true;
         let elements = document.getElementsByClassName('selection');
         let selected = [];
         for(let i=0;i<elements.length;++i){
