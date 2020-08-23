@@ -87,7 +87,9 @@ var text = [
     "Works",
     "Unfollow",
     "only registered users could follow a tag",
-    "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district"
+    "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district",
+    "The vote shall begin at %d。",//89
+    "The vote is finished already。" //90
 ];
 
 module.exports = text;

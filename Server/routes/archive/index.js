@@ -116,6 +116,7 @@ global.__validateId = function(id){
 };
 
 let  main = require(path.join(__routes,"/archive/main")),
+     vote = require(path.join(__routes,"/archive/vote")),
      dynamic = require(path.join(__routes,'/archive/dynamic')),
      subUser = require(path.join(__routes,'/archive/user')),
      feed = require(path.join(__routes,"/archive/feed")),
@@ -170,6 +171,11 @@ router.get('/registerProcess',main.index);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement/:countryId',main.statement);
+
+//votes
+router.get('/vote/:voteId',vote.index);
+router.get('/voteDetail/:voteId',vote.sub);
+
 
 //tag pages
 

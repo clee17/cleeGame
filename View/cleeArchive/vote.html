@@ -1,0 +1,18 @@
+<style>
+
+    @media screen and (min-device-width:80rem){}
+</style>
+
+<div id="voteBoard" ng-controller="voteCon">
+    <div id="headTitle">{{title}}</div>
+    <div>{{description}}</div>
+    <div style="margin-left:auto;margin-right:auto;">
+        <% if(Date.now() <= start) { %>
+        <%- websiteInfo[89] %>
+        <% } else if(Date.now() > end) { %>
+        <%- websiteInfo[90] %>
+        <% } else{ %>
+        <div style="margin-left:auto;margin-right:auto;"><button><%- websiteInfo[60] %></button></div>
+        <% } %>
+    </div>
+</div>
