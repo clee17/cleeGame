@@ -68,6 +68,8 @@ let handler = {
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/statement/registerProcess',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+        viewPortMap.set('/resetPwdRequest',{viewport:'/view/resetPwdRequest.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+
         let result = viewPortMap.get(req.url);
         if(!result)
             next();

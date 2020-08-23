@@ -74,3 +74,14 @@ app.controller("registerStatusCon",['$scope','$rootScope','$cookies','userManage
        }
    };
 }]);
+
+
+app.controller("pwdCon",['$scope','$rootScope','$cookies','userManager',function($scope,$rootScope,$cookies,userManager){
+    $scope.id = '';
+    $scope.requestId = '';
+    $scope.requesting = false;
+    $scope.status = -1;
+    $scope.position = -1;
+
+
+}]);

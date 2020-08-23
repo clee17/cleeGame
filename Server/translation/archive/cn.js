@@ -89,6 +89,7 @@ var cn = [
     "只有注册用户才能订阅tag",
     "尊敬的%s访问者您好，欢迎访问cleeArchive，您可以在此处查看%l",
     '首 页', //89
+    '重设密码?',
 ];
 
 module.exports = cn;

@@ -247,6 +247,7 @@ input{
     display:flex;
     flex-direction:column;
     flex:1;
+    padding-top:1.5rem;
 }
 
 #footer{
@@ -540,4 +541,14 @@ input{
     0%{opacity:0;}
     50%{opacity:1;}
     100%{opacity:0;}
+}
+
+a{
+    color:rgba(109,100,136,1);
+    font-weight:bold;
+    text-decoration:none;
+}
+
+a:hover{
+    color:rgba(184,173,217,1);
 }
