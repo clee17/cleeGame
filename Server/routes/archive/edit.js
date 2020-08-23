@@ -597,7 +597,7 @@ let handler = {
         }
 
         let isFirst = false;
-        isFirst = (saveData.index[0].chapter._id === saveData.chapter._id);
+        isFirst = (saveData.index[0].chapter && saveData.index[0].chapter._id === saveData.chapter._id);
 
 
         let updateTagData = {chapterId:saveData.chapter._id,infoType:1,workId:saveData.book._id,user:saveData.chapter.user,tagList:[]};
