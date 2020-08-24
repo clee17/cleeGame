@@ -91,7 +91,8 @@ var text = [
     "The vote shall begin at %s。",//89
     "The vote is finished at %e already。", //90
     "The vote shall be open from %s till %e", //91
-    "You have voted, please wait for the final result." //92
+    "You have voted, please wait for the final result.",//92
+    "Multiple choice，please pick all options that suit your needs.%nextYou may pick %s options at most。", //93
 ];
 
 module.exports = text;

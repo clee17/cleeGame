@@ -65,6 +65,29 @@ app.directive('votePercent',function(){
     }
 });
 
+app.directive('voteOptionCount',function($rootScope){
+    return {
+        restrict: 'A',
+        scope:{
+
+        },
+        link:function(scope,element,attr){
+           scope.html = element.html();
+           if(scope.initialized)
+               return;
+            let middleIndex = scope.html.indexOf("%next");
+           if($rootScope.maxOption <0){
+               scope.html = scope.html.substring(0,middleIndex);
+           }else{
+               scope.html = scope.html.substring(middleIndex+5);
+               scope.html = scope.replace(/%s/g,$rootScope.maxOption);
+           }
+           element.html(scope.html);
+           scope.initialized = true;
+        }
+    }
+});
+
 app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManager',function($scope,$rootScope,$cookies,$window,voteManager){
     $scope.completed = false;
     $scope.requesting = false;
