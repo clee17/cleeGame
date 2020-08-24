@@ -31,9 +31,14 @@ app.directive('voteBar',function(){
                 countAll += options[i].count;
             }
 
-            let percent = Math.round(count / countAll)*100;
+            let percent =Math.round((count / countAll)*100);
+            percent = percent + "%";
+            if(count === 0)
+                percent = "0";
 
-            element.css('width',percent+'%');
+
+            element.css('width',percent);
+
         }
     }
 });
@@ -51,6 +56,8 @@ app.directive('votePercent',function(){
 
             let percent = Math.round((count / countAll)*100);
             percent = percent + "%";
+            if(count === 0)
+                percent = "0%";
 
             element.html("<div style='display:flex;flex-direction:column;height:2rem;'><div style='height:0.9rem;text-align:center;'>"+percent+"</div><div style='font-size:0.8rem;height:1.2rem;font-weight:normal;line-height:1.2rem;color:gray;font-weight:bold;'>"+count+" votes</div></div>");
             element.css('letter-spacing','0');
