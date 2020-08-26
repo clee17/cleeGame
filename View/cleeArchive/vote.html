@@ -1,0 +1,69 @@
+<style>
+    #voteBoard{
+        display:flex;
+        flex-direction:column;
+        margin-left:auto;
+        margin-right:auto;
+        max-width:45rem;
+        min-width:45rem;
+        padding-left:2.5rem;
+        padding-right:2.5rem;
+        flex:1;
+    }
+
+    #headTitle{
+        font-weight:bold;
+        margin-left:auto;
+        margin-right:auto;
+        text-align:center;
+        font-size:1.5rem;
+        margin-bottom:1.5rem;
+    }
+
+    #voteContents{
+        display:flex;
+        flex-direction:column;
+        flex:1;
+    }
+    @media screen and (min-device-width:80rem){}
+</style>
+
+<div id="voteBoard" ng-controller="voteCon">
+    <info-receiver
+            ng-init="options= '<%= encodeURIComponent(JSON.stringify(options)) %>';">
+    </info-receiver>
+    <div id="headTitle">{{title}}</div>
+    <div>{{description}}</div>
+    <% if(Date.now() >= Number(start) && Date.now() < Number(end)) { %>
+    <% if(voted) { %>
+    <div vote-time style="text-align:center;font-weight:bold;margin-bottom:3rem;"> <%- websiteInfo[92] %></div>
+    <% } else { %>
+    <div vote-time style="text-align:center;font-weight:bold;margin-bottom:2rem;"> <%- websiteInfo[91] %></div>
+    <% }} else if(Date.now() < Number(start)){ %>
+    <div vote-time style="margin-top:auto;margin-bottom:auto;text-align:center;font-weight:bold;font-size:1.3rem;"><b> <%- websiteInfo[89] %></b></div>
+    <% } else if(Date.now() > Number(end)) { %>
+    <div vote-time style="margin-bottom:auto;text-align:center;font-weight:bold;margin-top:0.5rem;"> <%- websiteInfo[90] %></div>
+    <% } %>
+    <div id="voteContents">
+        <% if(!voted && Date.now() >= Number(start) && Date.now() < Number(end)){ %>
+        <div vote-option-count style="text-decoration:underline;font-size:1rem;"><%- websiteInfo[93] %></div>
+        <div ng-repeat="option in options track by $index" style="margin-top:1rem;margin-bottom:1rem;padding-left:1.5rem;">
+            <label><input class="selection" type="radio" value="{{option._id}}" ng-click="checkOption($event)"/> {{option.description}}</label>
+        </div>
+        <div style="margin-left:auto;margin-right:auto;height:2rem;margin-top:auto;margin-bottom:2rem;" >
+            <button class="grand-button" style="height:100%;padding-top:4px;padding-bottom:4px;" ng-disabled="!completed || requesting" ng-click="submit()"><%- websiteInfo[60] %></button>
+        </div>
+        <% } %>
+        <% if(voted || Date.now() > Number(end)){ %>
+        <div ng-repeat="option in options track by $index" style="margin-top:1rem;margin-bottom:1rem;height:2rem;position:relative;">
+            <div style="width:100%;height:100%;border:solid 1px rgba(108,95,93,1);">
+                <div vote-bar style="background:rgba(181,163,160,0.6);height:100%;"></div>
+            </div>
+            <div style="width:100%;height:100%;position:absolute;left:0;top:0;font-weight:bold;display:flex;flex-direction:row;">
+                <span style="margin-left:1rem;font-size:0.9rem;line-height:2rem;" >{{option.title}} </span>
+                <span style="margin-left:auto;margin-right:1rem;" vote-percent> </span></div>
+        </div>
+        <% } %>
+    </div>
+</div>
+<div ng-show="requesting" style="position:absolute;left:0;top:0;z-index:99;background:rgba(91,91,91,0.5);width:100%;height:100%;display:flex;pointer-events:auto;">><i class="fa fa-spinner fa-spin fa-5x" style="opacity:0.6;color:black;margin:auto;"></i></div>

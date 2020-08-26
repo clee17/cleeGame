@@ -10,16 +10,16 @@ var text = [
     '',
     "You haven't followed any Tag",//9
     'This work has been restricted to registered users, you must login first before you can read it', //10
-    'This work is only accessable by the writer。',
+    'This work is only accessible by the writer。',
     'This is not a valid work Id',
     'You have to provide your invitation code first',
     'Please provide correct invitation code',
     'Your invitation code is not found', //15
     "The tag info sent is not correct",
-    "error happened",
+    "There is an error happening when following the tag",
     "This work can only be published by technical writers, you may get the identity from your user setting page",
     "publishing",
-
+    'The vote does not exist.<br>     Please check on your vote’s address.' //20
 ];
 
 module.exports = text;

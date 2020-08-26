@@ -46,7 +46,7 @@
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
-
+            
             if($cookies.getObject('readerLanguage')){
                 $rootScope.countryCode = $cookies.getObject('readerLanguage');
             }

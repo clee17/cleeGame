@@ -53,7 +53,20 @@ module.exports=function(app){
             req.ipData.country = '中国';
         }
 
-        if((req.ipData && req.ipData.country === '中国' && !req.cookies['readerLanguage']) || req.cookies['readerLanguage'] === '"CN"'){
+        if(req.cookies['readerLanguage']){
+            req.ipData.readerLanguage = req.cookies['readerLanguage'];
+            req.ipData.readerLanguage = req.ipData.readerLanguage.replace(/"/g,"");
+        }
+
+        if(req.ipData.readerLanguage){
+            let cc = req.ipData.readerLanguage.toLowerCase();
+            global._websiteInfo = __websiteInfo[cc] || __websiteInfo['en'];
+            global._errInfo = __errInfo[cc] || __errInfo['en'] ;
+            global._errAll = __errAll[cc] || __errAll['en'];
+            global._infoAll = __infoAll[cc] || __infoAll['en'];
+            if(global.__statements)
+              global._statements =  global.__statements[cc] || global.__statements['en'] || null;
+        }else if(req.ipData && req.ipData.country === '中国'){
             global._websiteInfo = __websiteInfo.cn;
             global._errInfo = __errInfo.cn;
             global._errAll = __errAll.cn;

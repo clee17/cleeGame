@@ -35,6 +35,8 @@ let mailTransport = nodeMailer.createTransport({
 
 
 global.__getCountryCode = function(ipData){
+    if(ipData.readerLanguage)
+        return ipData.readerLanguage.toUpperCase();
     if(ipData.country === '中国')
         return 'CN';
     else
@@ -99,6 +101,41 @@ global.__processMail = function(mailId,receiver,data,countryCode){
         }
         __sendMail(mailContents,receiver,mailTitle);
     });
+};
+
+global.__multiLang = function(str,ipData){
+    if(str.substring(0,6).toLowerCase() === "multil"){
+        str = str.substring(6);
+        str = JSON.parse(str);
+        let cc = __getCountryCode(ipData);
+        if(str[cc])
+            return str[cc];
+        else
+            return str['DEFAULT'];
+    }else
+        return str;
+};
+
+global.__packMultiLang = function(llist){
+    if(typeof llist !== 'object'){
+        let obj = {};
+        obj.DEFAULT = llist;
+        return'multil'+JSON.stringify(obj);
+    }else{
+        let obj = {};
+        let configured = false;
+        let firstItem = "";
+        for (let attr in llist){
+            obj[attr.toUpperCase()] = llist[attr];
+            if(firstItem === "")
+                firstItem = obj[attr.toUpperCase()];
+            if(attr.toUpperCase() === 'DEFAULT')
+                configured = true;
+        }
+        if(!configured)
+            obj.DEFAULT = obj['EN'] || firstItem;
+        return 'multil'+JSON.stringify(obj);
+    }
 };
 
 module.exports = global;

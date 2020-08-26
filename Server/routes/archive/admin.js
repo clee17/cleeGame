@@ -240,7 +240,7 @@ let handler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
 
-        if(req.session.user && req.session.user.userGruop >= 999)
+        if(req.session.user && req.session.user.userGroup >= 999)
         {
             let index = Number(receivedData.name);
             if(index >= tableIndex.length || index <0)

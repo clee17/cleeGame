@@ -132,6 +132,7 @@ global.__validateId = function(id){
 
 
 let  main = require(path.join(__routes,"/archive/main")),
+     vote = require(path.join(__routes,"/archive/vote")),
      dynamic = require(path.join(__routes,'/archive/dynamic')),
      subUser = require(path.join(__routes,'/archive/user')),
      feed = require(path.join(__routes,"/archive/feed")),
@@ -203,6 +204,12 @@ router.get('/resetPwdRequest',main.index);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement/:countryId',main.statement);
+
+//votes
+router.get('/vote/:voteId',vote.index);
+router.post('/vote/save',vote.save);
+router.get('/voteDetail/:voteId',vote.sub);
+
 
 //tag pages
 
@@ -311,6 +318,7 @@ module.exports = function(app)
         {
             res.cookie('userId','',{maxAge:0});
         }
+
         if(req.session.user && !req.session.user.settings)
         {
             userSettingModel.findOneAndUpdate({user:req.session.user._id},{lastLogin:Date.now()},{new: true, upsert: true,setDefaultsOnInsert: true},function(err,doc){

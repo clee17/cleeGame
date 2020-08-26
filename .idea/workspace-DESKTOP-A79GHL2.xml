@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e496565f46c0f4700e24df4/Scene/Title.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e496565f46c0f4700e24df4/Scene/Title.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/5e4bf4ff70646974e76fd0f0.zip" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/5e4bf4ff70646974e76fd0f0.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Button_Map.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Button_Map.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/DisplayPort.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/DisplayPort.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/MapDisplay.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/MapDisplay.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Sprite_Player.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Sprite_Player.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Item.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Item.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Talk.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Talk.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Task.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Display/Window_Task.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Manager/Manager_Game.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Manager/Manager_Game.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/options.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/options.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/title.js" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/Scene/title.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/dialog.json" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/dialog.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/event_map.json" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/event_map.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/fall.json" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/fall.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/mapInfo.json" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/mapInfo.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/tile.json" beforeDir="false" afterPath="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data/tile.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/cleeGame/game.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/cleeGame/game.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/game/Sprite_Button.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/game/Sprite_Button.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/game/windowText.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/game/windowText.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="cleegame" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1QJHjGQWEKYVRawPTi07ZRtQZYW" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON&#10;EJS" />
+    <property name="javascript.nodejs.core.library.configured.version" value="12.14.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Directory/5e4bf4ff70646974e76fd0f0/data" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0\data" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\js\game" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0\Display" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0\Scene" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0\data" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\Directory\5e4bf4ff70646974e76fd0f0" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\svg" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+    </key>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+      <created>1578012691015</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578012691015</updated>
+      <workItem from="1578012713165" duration="4075000" />
+      <workItem from="1578019362854" duration="18737000" />
+      <workItem from="1578099856745" duration="335000" />
+      <workItem from="1578100220738" duration="314000" />
+      <workItem from="1578100561435" duration="1059000" />
+      <workItem from="1578101744591" duration="322000" />
+      <workItem from="1578102087423" duration="297000" />
+      <workItem from="1578102410551" duration="214000" />
+      <workItem from="1578102646489" duration="33839000" />
+      <workItem from="1578270513343" duration="1463000" />
+      <workItem from="1578405271324" duration="17679000" />
+      <workItem from="1578476977797" duration="98000" />
+      <workItem from="1578478083461" duration="34336000" />
+      <workItem from="1578659981798" duration="102172000" />
+      <workItem from="1579219834585" duration="1799000" />
+      <workItem from="1579253796300" duration="1227000" />
+      <workItem from="1579327857879" duration="2182000" />
+      <workItem from="1580633856870" duration="145000" />
+      <workItem from="1582704828182" duration="24966000" />
+      <workItem from="1582797746632" duration="9296000" />
+      <workItem from="1582811117015" duration="71651000" />
+      <workItem from="1583021745764" duration="95945000" />
+      <workItem from="1583251032382" duration="13836000" />
+      <workItem from="1583284712498" duration="25601000" />
+      <workItem from="1583323363970" duration="129660000" />
+      <workItem from="1583671816957" duration="37954000" />
+      <workItem from="1583835050442" duration="69355000" />
+      <workItem from="1584031170023" duration="52777000" />
+      <workItem from="1584147185290" duration="17201000" />
+      <workItem from="1584182898294" duration="20015000" />
+      <workItem from="1584252668562" duration="17867000" />
+      <workItem from="1584335003282" duration="67371000" />
+      <workItem from="1584488902481" duration="52789000" />
+      <workItem from="1584599625623" duration="15917000" />
+      <workItem from="1584628045718" duration="5493000" />
+      <workItem from="1584658742583" duration="36500000" />
+      <workItem from="1584744468198" duration="2661000" />
+      <workItem from="1584747311550" duration="36275000" />
+      <workItem from="1584791939163" duration="49877000" />
+      <workItem from="1584888377125" duration="1227000" />
+      <workItem from="1584889624457" duration="26000" />
+      <workItem from="1584964947850" duration="5013000" />
+      <workItem from="1585048766435" duration="34000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1129" y="242" key="#Deployment" timestamp="1578012748833">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="308" y="139" key="#Deployment/0.0.1368.912@0.0.1368.912" timestamp="1577941607872" />
+    <state x="1129" y="242" key="#Deployment/0.0.2560.1080@0.0.2560.1080" timestamp="1578012748833" />
+    <state x="872" y="198" key="#Options" timestamp="1577279113904">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="872" y="198" key="#Options/0.0.2560.1080@0.0.2560.1080" timestamp="1577279113904" />
+    <state x="1101" y="316" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1583720205671">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1101" y="316" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1080@0.0.2560.1080" timestamp="1583720205671" />
+    <state x="1304" y="585" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1584660430577">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1304" y="585" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2560.1080@0.0.2560.1080" timestamp="1584660430577" />
+    <state x="1049" y="418" key="#com.intellij.ide.fileTemplates.ui.ConfigureTemplatesDialog" timestamp="1584521573286">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1049" y="418" key="#com.intellij.ide.fileTemplates.ui.ConfigureTemplatesDialog/0.0.2560.1080@0.0.2560.1080" timestamp="1584521573286" />
+    <state x="382" y="239" key="FileChooserDialogImpl" timestamp="1578271043780">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="382" y="239" key="FileChooserDialogImpl/0.0.1368.912@0.0.1368.912" timestamp="1578271043780" />
+    <state x="714" y="283" key="FileChooserDialogImpl/0.0.2560.1080@0.0.2560.1080" timestamp="1578022717362" />
+    <state x="161" y="186" key="SettingsEditor" timestamp="1578271050774">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="161" y="186" key="SettingsEditor/0.0.1368.912@0.0.1368.912" timestamp="1578271050774" />
+    <state x="776" y="195" key="SettingsEditor/0.0.2560.1080@0.0.2560.1080" timestamp="1578022758614" />
+    <state x="263" y="221" width="1981" height="718" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1583798331831">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="263" y="221" width="1981" height="718" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog/0.0.2560.1080@0.0.2560.1080" timestamp="1583798331831" />
+    <state x="1544" y="235" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1583680420411">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1544" y="235" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.2560.1080@0.0.2560.1080" timestamp="1583680420411" />
+    <state x="1483" y="511" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1584583898889">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1483" y="511" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.2560.1080@0.0.2560.1080" timestamp="1584583898889" />
+    <state x="-32" y="252" width="1433" height="979" key="dock-window-1" timestamp="1585048800261">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="-32" y="252" width="1433" height="979" key="dock-window-1/0.0.2560.1080@0.0.2560.1080" timestamp="1585048800261" />
+    <state x="75" y="198" width="1675" height="807" key="dock-window-2" timestamp="1578750841635">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="75" y="198" width="1675" height="807" key="dock-window-2/0.0.2560.1080@0.0.2560.1080" timestamp="1578750841635" />
+    <state x="0" y="18" width="833" height="807" key="dock-window-3" timestamp="1578742136298">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="0" y="18" width="833" height="807" key="dock-window-3/0.0.2560.1080@0.0.2560.1080" timestamp="1578742136298" />
+    <state x="0" y="0" width="1675" height="807" key="dock-window-4" timestamp="1578750841636">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="0" y="0" width="1675" height="807" key="dock-window-4/0.0.2560.1080@0.0.2560.1080" timestamp="1578750841636" />
+    <state x="0" y="0" width="1531" height="943" key="dock-window-5" timestamp="1579153323522">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="0" y="0" width="1531" height="943" key="dock-window-5/0.0.2560.1080@0.0.2560.1080" timestamp="1579153323522" />
+    <state x="-384" y="217" width="1715" height="943" key="dock-window-6" timestamp="1579159641217">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="-384" y="217" width="1715" height="943" key="dock-window-6/0.0.2560.1080@0.0.2560.1080" timestamp="1579159641217" />
+    <state x="905" y="89" width="1655" height="991" key="find.popup" timestamp="1585048815309">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="397" y="336" width="655" height="576" key="find.popup/0.0.1368.912@0.0.1368.912" timestamp="1578381222572" />
+    <state x="905" y="89" width="1655" height="991" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1585048815309" />
+    <state x="586" y="215" key="ftp.server.browser" timestamp="1577941605939">
+      <screen x="0" y="0" width="1368" height="912" />
+    </state>
+    <state x="586" y="215" key="ftp.server.browser/0.0.1368.912@0.0.1368.912" timestamp="1577941605939" />
+    <state x="955" y="428" key="jetbrains.nodejs.interpreters-dialog" timestamp="1578022724759">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="955" y="428" key="jetbrains.nodejs.interpreters-dialog/0.0.2560.1080@0.0.2560.1080" timestamp="1578022724759" />
+    <state x="1037" y="428" key="publish.login" timestamp="1578012722265">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="554" y="361" key="publish.login/0.0.1368.912@0.0.1368.912" timestamp="1577941197994" />
+    <state x="1037" y="428" key="publish.login/0.0.2560.1080@0.0.2560.1080" timestamp="1578012722265" />
+    <state x="1442" y="333" key="run.anything.popup" timestamp="1584762967128">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1442" y="333" key="run.anything.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1584762967128" />
+    <state x="1434" y="364" width="672" height="569" key="search.everywhere.popup" timestamp="1585048820163">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="1434" y="364" width="672" height="569" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1585048820163" />
+  </component>
+</project>

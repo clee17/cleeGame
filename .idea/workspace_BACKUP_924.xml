@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/global.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/global.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/routes/archive/vote.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/archive/vote.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/translation/archive/cn.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/translation/archive/cn.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/vote_con.js" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/cont/vote_con.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/vote.html" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/vote.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataProcessor/TestVote.js" beforeDir="false" afterPath="$PROJECT_DIR$/data/dataProcessor/TestVote.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1QJHjGQWEKYVRawPTi07ZRtQZYW" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON&#10;EJS" />
+    <property name="javascript.nodejs.core.library.configured.version" value="12.14.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Program Files/nodejs/node.exe" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path" value="node" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Development\cleeGame\data\dataProcessor" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\image\2019" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive\cont" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeArchive" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\public\svg" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeFanfic" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\View\cleeGame\gameEntry" />
+      <recent name="D:\OneDrive\MyProjects\Website\cleegame\js\lib" />
+    </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+      <created>1578012691015</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578012691015</updated>
+      <workItem from="1578012713165" duration="4075000" />
+      <workItem from="1578019362854" duration="18737000" />
+      <workItem from="1578099856745" duration="335000" />
+      <workItem from="1578100220738" duration="314000" />
+      <workItem from="1578100561435" duration="1059000" />
+      <workItem from="1578101744591" duration="322000" />
+      <workItem from="1578102087423" duration="297000" />
+      <workItem from="1578102410551" duration="214000" />
+      <workItem from="1578102646489" duration="33839000" />
+      <workItem from="1578270513343" duration="1463000" />
+      <workItem from="1578405271324" duration="17679000" />
+      <workItem from="1578476977797" duration="98000" />
+      <workItem from="1578478083461" duration="34336000" />
+      <workItem from="1578659981798" duration="102172000" />
+      <workItem from="1579219834585" duration="1799000" />
+      <workItem from="1579253796300" duration="1227000" />
+      <workItem from="1579327857879" duration="2182000" />
+      <workItem from="1580633856870" duration="145000" />
+      <workItem from="1598167044583" duration="4483000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="1362" height="434" key="GridCell.Tab.0.bottom" timestamp="1598167416876">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state width="1362" height="434" key="GridCell.Tab.0.bottom/0.0.2560.1080@0.0.2560.1080" timestamp="1598167416876" />
+    <state width="1362" height="434" key="GridCell.Tab.0.center" timestamp="1598167416876">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state width="1362" height="434" key="GridCell.Tab.0.center/0.0.2560.1080@0.0.2560.1080" timestamp="1598167416876" />
+    <state width="1362" height="434" key="GridCell.Tab.0.left" timestamp="1598167416876">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state width="1362" height="434" key="GridCell.Tab.0.left/0.0.2560.1080@0.0.2560.1080" timestamp="1598167416876" />
+    <state width="1362" height="434" key="GridCell.Tab.0.right" timestamp="1598167416876">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state width="1362" height="434" key="GridCell.Tab.0.right/0.0.2560.1080@0.0.2560.1080" timestamp="1598167416876" />
+    <state x="1000" y="377" width="1560" height="703" key="find.popup" timestamp="1598171594108">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="600" y="288" width="936" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1598164145668" />
+    <state x="1000" y="377" width="1560" height="703" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1598171594108" />
+    <state x="708" y="87" width="1120" height="887" key="search.everywhere.popup" timestamp="1598171642376">
+      <screen x="0" y="0" width="2560" height="1080" />
+    </state>
+    <state x="425" y="66" width="672" height="676" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1598163648271" />
+    <state x="708" y="87" width="1120" height="887" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1598171642376" />
+  </component>
+</project>
