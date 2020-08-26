@@ -212,16 +212,13 @@
             $scope.countryStatement = function(){
                 let element = document.getElementById("countryStatement");
                 let statement = $rootScope.countryState;
-                let s = statement.indexOf('%s');
-                let l = statement.indexOf('%l');
-                if($rootScope.countryCode === 'CN'){
-                    statement = statement.substring(0,s)+$rootScope.countryList[1]+statement.substring(s+2);
-                    statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
+                let index = 2;
+                switch($rootScope.countryCode){
+                    case 'CN':
+                        index = 1;
                 }
-                else{
-                    statement = statement.substring(0,s)+statement.substring(s+2);
-                    statement = statement.substring(0,l)+"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>";
-                }
+                statement = statement.replace(/%s/g,$rootScope.countryList[index]);
+                statement = statement.replace(/%l/g,"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>");
 
                 if(element)
                     element.innerHTML =  statement;

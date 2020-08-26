@@ -382,7 +382,7 @@ let handler = {
                 doc
                     .populate([{path:     'application', populate: { path:  'register', model: 'user_register' }},
                         {path:'from'},{path:'to'}],function(err,entry){
-                        let cc = __getCountryCode(req.ipData);
+                        let cc = __getReaderCode(req.ipData);
                         __processMail(11,receivedData.targetMail,conversation,cc);
                         response.success = true;
                         response.entry = JSON.parse(JSON.stringify(entry));
@@ -403,7 +403,7 @@ let handler = {
         let mailId = application.type*10 + application.result;
         if(typeof mailId != 'number')
             mailId = 999;
-        let cc = __getCountryCode(req.ipData);
+        let cc = __getReaderCode(req.ipData);
         __processMail(mailId,mail,application,cc);
     },
 

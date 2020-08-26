@@ -35,13 +35,19 @@ let mailTransport = nodeMailer.createTransport({
 
 
 global.__getCountryCode = function(ipData){
-    if(ipData.readerLanguage)
-        return ipData.readerLanguage.toUpperCase();
+
     if(ipData.country === '中国')
         return 'CN';
     else
         return 'OTHER';
 };
+
+global.__getReaderCode = function(ipData){
+    if(ipData.readerLanguage)
+        return ipData.readerLanguage.toUpperCase();
+    return __getCountryCode(ipData);
+}
+
 
 global.__saveLog = function(logType,logInfo){
     if (typeof logInfo !== 'string')
@@ -107,7 +113,7 @@ global.__multiLang = function(str,ipData){
     if(str.substring(0,6).toLowerCase() === "multil"){
         str = str.substring(6);
         str = JSON.parse(str);
-        let cc = __getCountryCode(ipData);
+        let cc = __getReaderCode(ipData);
         if(str[cc])
             return str[cc];
         else
