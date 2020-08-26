@@ -89,7 +89,7 @@ var text = [
     "only registered users could follow a tag",
     "Dear %s visitors, welcome to cleeArchive, you may refer to %l for the detailed service statement of your district",
     "HOME",
-    "Forgot password?"
+    "Forgot password?" //90
 ];
 
 module.exports = text;
