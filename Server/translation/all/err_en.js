@@ -16,7 +16,11 @@ var text = [
     "You need to provide a tag so you can browse that", //14
     "Registration with this application ID has been completed already, please login.", //15
     "You've registered for too many times in the last few minutes, please come back later",
-    "This mail address has been registered already"
+    "This mail address has been registered already",
+    "This mail address does not exist", //18
+    "There is no mail connected to this account, please contact the administrator. ",
+    "You've applied for this identity before, you cannot apply again.",
+    "A user could only apply for the identity by itself",
 ];
 
 module.exports = text;

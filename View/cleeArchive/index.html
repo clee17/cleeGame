@@ -218,7 +218,7 @@
                         index = 1;
                 }
                 statement = statement.replace(/%s/g,$rootScope.countryList[index]);
-                statement = statement.replace(/%l/g,"<a href='/countryStatement/" + $rootScope.countryCode+"'>"+$rootScope.statementTitle+"</a>");
+                statement = statement.replace(/%l/g,"<a href='/countryStatement'>"+$rootScope.statementTitle+"</a>");
 
                 if(element)
                     element.innerHTML =  statement;
@@ -251,6 +251,29 @@
                 }
             };
         }]);
+
+        app.filter('base64', function() { //可以注入依赖
+            return function(str,html) {
+                if(!str || str.length === 0)
+                    return str;
+                return LZString.decompressFromBase64(str);
+            }
+        });
+
+        app.directive('base64',function(){
+            return {
+                restrict: 'A',
+                link:function(scope,element,attr){
+                   let str = element.html();
+                    if(str.length === 0)
+                        return;
+                   str = LZString.decompressFromBase64(str);
+                   if(str)
+                       str = str.replace(/\n/g,'<br>');
+                   element.html(str);
+                }
+            }
+        });
     </script>
     <% services.forEach(function(item){ %>
     <script src='<%= item %>'></script>
@@ -328,7 +351,7 @@
         <div ng-show="showLoginboard" id="loginParent">
             <div ng-include="'/templates/loginBoard'" ng-controller="loginCon"></div>
         </div>
-        <a style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
+        <a class="button-hover" style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;font-family:Arial, serif;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
         <% } %>
     </div>
     <div id="headerGuideBar">

@@ -4,7 +4,7 @@
     }
 
     .displayRow >div:first-child{
-        min-width:4rem;
+        min-width:6rem;
         text-align:right;
     }
 
@@ -47,10 +47,10 @@
     </div>
     <div class="displayRow" ng-if="loginMode===1">
         <div style="text-align:right;margin-right:10px;"><%- websiteInfo[26] %>:</div>
-        <div style="max-width:10rem;">{{intro}}</div>
+        <div id="register_intro">{{intro}}</div>
     </div>
     <div class="displayRow">
-        <a href="/resetPwdRequest" class="pwdReset"><%- websiteInfo[95] %></a>
+        <a href="/resetPwdRequest" class="pwdReset" ng-if="loginMode ===0"><%- websiteInfo[95] %></a>
         <button style="margin-right:0;margin-left:auto;margin-top:1rem;" class="grand-button" ng-click="sendLogin()" ng-disabled="requesting">{{submitSign}}</button>
     </div>
     <div class="displayRow"></div>

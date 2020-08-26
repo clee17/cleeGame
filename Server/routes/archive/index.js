@@ -150,18 +150,18 @@ let countMapModel = require(path.join(__dataModel,'cleeArchive_countMap'));
 
 
 global.__getUserMail = async function(user){
-    if(!user.register)
+    if(!user.register){
         return null;
-    else if(user.register && __validateId(user.register)){
+    }else if(user.register && user.register.mail){
+        return user.register.mail;
+    }else if(user.register && __validateId(user.register)){
         let result = await registerModel.findOne({_id:user.register});
         if(result)
             return result.mail;
         else
             return null;
-    }else if(user.register && user.register.mail)
-        return user.register.mail;
-    else
-        return null;
+     } else{
+        return null;}
 }
 
 global.__updateCountMap = function(countList) {
@@ -204,7 +204,7 @@ router.get('/resetPwdRequest',main.index);
 router.get('/sub/:pageId',main.sub);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
-router.get('/countryStatement/:countryId',main.statement);
+router.get('/countryStatement',main.statement);
 
 //votes
 router.get('/vote/:voteId',vote.index);
@@ -244,6 +244,7 @@ router.get('/register/:registerId',subUser.register);
 router.post('/users/follow',subUser.follow);
 router.post('/users/followedTag',subUser.getTagFollowed);
 router.post('/users/updateFollow',subUser.updateFollowed);
+router.post('/users/apply',subUser.apply);
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/settings/reload',subUser.reloadSettings);
 router.get('/users/settings/:userId',subUser.userSetting);

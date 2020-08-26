@@ -30,8 +30,8 @@ app.service('loginManager',function($http,$rootScope){
         manager.request('/user/checkUsername','nameCheckFinished',data);
     };
 
-    this.resetPwd = function(data){
-        manager.request('/user/resetPwd','pwdResetFinished',data);
+    this.resetPwdUser = function(data){
+        manager.request('/user/resetPwdUser','pwdResetFinished',data);
     };
 
     this.saveNewPwd = function(data){

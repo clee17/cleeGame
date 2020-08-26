@@ -6,6 +6,7 @@ let express = require('express'),
 
 let applicationModel = require(path.join(__dataModel,'application')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
+    queueModel = require(path.join(__dataModel,'application_queue')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
     visitorModel = require(path.join(__dataModel,'cleeArchive_userValidate')),
@@ -64,6 +65,18 @@ let handler = {
             handler.filterContents(req,res, data);
     },
 
+    addQueue:function(application){
+        queueModel.findOneAndUpdate({application:application._id,type:application.type},{date:Date.now()},
+            {upsert:true,setDefaultsOnInsert: true,new:true},
+            function(err,queue){
+                if(err){
+                    //CLEE TO BE ADDED;
+                }else if(!queue){
+                    //CLEE TO BE ADDED;
+                }
+            })
+    },
+
     register:function(req,res){
         let registerId = req.params.registerId;
 
@@ -85,10 +98,10 @@ let handler = {
             }else{
                 if(!doc.register.user){
                     __renderIndex(req, res, {
-                        viewport: '/view/register.html',
+                        viewport: '/sub/register',
                         controllers: ['/templates/login.js', '/templates/register_con.js'],
                         services: [],
-                        variables: {registerId: registerId, mail:doc.register.mail,intro:doc.register.intro, loginMode: 1}});
+                        variables: {registerId: doc.register._id, mail:doc.register.mail,intro:doc.register.intro, loginMode: 1}});
                 }else{
                     __renderError(req,res,_errAll[15]);
                 }
@@ -233,17 +246,63 @@ let handler = {
         if (!req.session.user || req.session.user._id != userId)
             __renderError(req, res, _errAll[3]);
         else {
-            let settings=  {mail:__getUserMail(req.session.user),
-            intro:req.session.user.intro ? req.session.user.intro : ''};
             __renderIndex(req, res, {
                 viewport: '/dynamic/users/setting/' + userId,
                 title: req.session.user.user + '的个人设置',
                 controllers: ['/view/cont/userSet_con.js'],
                 modules: ['/view/modules/workInfo.js', '/view/modules/commentList.js', '/view/modules/pageIndex.js'],
                 services: ['/view/cont/userService.js'],
-                variables: {settings:settings,userAccess:req.session.user.settings.access,userName:req.session.user.user,preference:req.session.user.settings.preference || 29}
+                variables: {userAccess:req.session.user.settings.access,userName:req.session.user.user,preference:req.session.user.settings.preference || 29}
             });
         }
+    },
+
+    apply:function(req,res) {
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            error:false,
+            sent: false,
+        };
+
+        if (receivedData.type >= 1 && !req.session.user)
+            response.error = '创作者权限仅允许注册用户申请';
+
+        if(req.session.user._id !== receivedData.user)
+            throw {message:_errAll[21]};
+
+        if(response.error) {
+            handler.finalSend(res, data);
+            return;
+        }
+
+        applicationModel.findOne({register:receivedData.register,type:receivedData.type,statements:receivedData.statements}).exec()
+            .then(function(result){
+                if(result){
+                    throw {message:_errAll[20]};
+                } else {
+                    let application = new applicationModel();
+                    application.register = receivedData.register;
+                    application.type = receivedData.type;
+                    return application.save();
+                }
+            })
+            .then(function(application){
+                handler.addQueue(application);
+                return userSettingModel.findOneAndUpdate({user:receivedData.user},{$push:{access:{index:receivedData.type}}},{new:true}).exec();
+            })
+            .then(function(setting){
+                response.success = true;
+                response.access = setting.access;
+                handler.finalSend(res,response);
+            })
+            .catch(function(err){
+                console.log(err);
+                response.success = false;
+                response.message = err.message;
+                handler.finalSend(res,response);
+            })
     },
 
     userPage: function (req, res) {

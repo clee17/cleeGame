@@ -57,10 +57,6 @@ global.__saveLog = function(logType,logInfo){
     });
 };
 
-global.__updateUserSetting = function(applicationId){
-
-};
-
 global.__sendMail = function(mailContents,userMail,title){
     var options = {
         from        : '"cleeArchive admin" <no-replay@archive.cleegame.com>',
@@ -78,10 +74,23 @@ global.__sendMail = function(mailContents,userMail,title){
     });
 };
 
-global.__getDateInfo = function(date){
+global.__getDateInfo = function(cc,date){
     let timeStamp = date || Date.now();
     let info = new Date(timeStamp);
-    return info.getFullYear()+'年'+(info.getMonth()+1) + '月'+ info.getDate()+'日'+info.getHours()+'时'+info.getMinutes()+'分';
+    let dateInfo = {
+        year:info.getFullYear(),
+        month: info.getMonth(),
+        date:info.getDate(),
+        hour: info.getHours(),
+        time:info.getTime(),
+        seconds: info.getSeconds()
+    }
+    let dateline = {
+        'CN':'<%- year %>年<%- month %>月<%- date %>日 <%- hour %>:<%- time %>:<%- seconds %>',
+        'EN':'<%- year %>/<%- month %>月<%- date %>日 <%- hour %>:<%- time %>:<%- seconds %>',
+        'OTHER':'<%- year %>年<%- month %>月<%- date %>日 <%- hour %>:<%- time %>:<%- seconds %>',
+    };
+    return ejs.render(dateline,dateInfo);
 };
 
 global.__processMail = function(mailId,receiver,data,countryCode){

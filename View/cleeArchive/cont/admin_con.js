@@ -510,7 +510,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 
     $scope.$on('tellYes',function(event,data){
         if(data.signal === $scope.pwdSignal){
-            loginManager.resetPwd({_id:data.variables._id,mail:data.variables.mail});
+            loginManager.resetPwdUser({_id:data.variables._id,mail:data.variables.mail});
         }else if(data.signal === $scope.authorizeSignal){
             $scope.requesting = true;
             adminManager.approveAccess({index:data.variables.index,user:data.variables.user});
@@ -519,7 +519,6 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             let request = data.variables || {};
             request.attach = data.formData.admin_application_reason || "";
             request.attach = encodeURIComponent(request.attach);
-            console.log(request);
             adminManager.answerApplicationQueue(request);
         }else if(data.signal === $scope.applicationAdminSignal){
             $scope.requesting = true;

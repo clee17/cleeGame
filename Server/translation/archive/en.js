@@ -94,7 +94,15 @@ var text = [
     "You have voted, please wait for the final result.",//92
     "Multiple choice，please pick all options that suit your needs.%nextYou may pick %s options at most。", //93
     "HOME", //94
-    "Forgot password?" //95
+    "Forgot password?", //95
+    "Reset your password",
+    "Enter your email address that is used to register your account and we will send you a password reset link.",
+    "Enter your email address",
+    "Send password reset mail",
+    "Return to home page", //100
+    "Check your email for a link to reset your password. Please check your spam folder if you could not find it.",
+    "You must configure your mail before you continue using this site",
+    "The user does not plan to introduce itself",
 ];
 
 module.exports = text;

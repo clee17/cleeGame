@@ -26,8 +26,7 @@ let handler = {
     },
 
     statement:function(req,res){
-        let countryID = req.params.countryId;
-        let data = {viewport:"/view/countryStatement_"+countryID+'.html'};
+        let data = {viewport:"/view/countryStatement.html"};
         __renderIndex(req,res,data);
     },
 

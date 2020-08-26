@@ -9,7 +9,7 @@ let routeHandler = {
         if(__entryFile.indexOf(fileName)!=-1)
             next();
         if(fileName.indexOf('.html')!= -1)
-            res.render(path.join(__viewFolder,fileName));
+            res.render(path.join(__viewFolder,fileName),{err:""});
         else
             res.sendFile(path.join(__basedir,'View/',__viewFolder,'/',fileName));
     },

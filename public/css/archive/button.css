@@ -68,6 +68,7 @@
     border-radius: 5px;
     margin-top:auto;
     margin-bottom:auto;
+    transition:background-color 0.15s;
 }
 
 .grand-button:disabled{
@@ -82,6 +83,39 @@
 
 .grand-button:hover{
     background:#c1a6cf;
+}
+
+.ghost-button{
+    background-color: #a192a9;
+    border: 1px solid #73637b;
+    color:white;
+    border-radius:5px;
+    transition:background-color 0.15s;
+    font-family:Arial, serif;
+}
+
+
+.ghost-button:hover{
+    background-color: #857290;
+    cursor:pointer;
+}
+
+.white_ghost{
+    background-color:white;
+    color:#73637b;
+}
+
+.white_ghost:hover{
+    background-color:rgba(215,215,215,0.6);
+}
+
+.ghost-button:disabled{
+    background-color:  rgba(158,158,158,1);
+}
+
+
+.button-hover:hover{
+    cursor:pointer;
 }
 
 .back-button{

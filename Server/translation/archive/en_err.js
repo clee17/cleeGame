@@ -19,7 +19,7 @@ var text = [
     "There is an error happening when following the tag",
     "This work can only be published by technical writers, you may get the identity from your user setting page",
     "publishing",
-    'The vote does not exist.<br>     Please check on your vote’s address.' //20
+    'The vote does not exist.<br>     Please check on your vote’s address.', //20
 ];
 
 module.exports = text;

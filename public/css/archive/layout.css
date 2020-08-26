@@ -218,22 +218,32 @@ input{
 
 #loginParent{
     position:absolute;
-    right:0;
+    right:2px;
     top:0;
-    width:auto;
     color:inherit;
+    max-width:25rem;
 }
 
 #loginParent #loginWindow{
     color:inherit;
     box-shadow:none;
     background:rgba(223,216,214,1);
-    padding-top:3rem;
-    padding-right:4rem;
-    padding-left:4rem;
     font-size:14px;
     z-index:0;
     border: solid 1px rgba(181,163,160,218);
+}
+
+#loginParent #loginWindow>div{
+    margin-right:4rem;
+    margin-left:4rem;
+}
+
+#loginParent #loginWindow>div:first-child{
+    margin-top:3rem;
+}
+
+#loginParent #loginWindow>div:last-child{
+    margin-bottom:3rem;
 }
 
 .errorInfo{
@@ -487,7 +497,7 @@ input{
 
 #languageSwitch{
     margin-left:1.5rem;
-    margin-right:auto;
+    margin-right:3rem;
     margin-top:auto;
     margin-bottom:0.2rem;
     width:auto;

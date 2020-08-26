@@ -171,9 +171,7 @@ let handler = {
             res.render('cleeArchive/errorB.html',{error:'您没有获取该页面的权限'});
             return;
         }
-        let settings=  {mail:__getUserMail(req.session.user),
-            intro:req.session.user.intro&&req.session.user.intro !== '' ? lzString.decompressFromBase64(req.session.user.intro) : null};
-        res.render('cleeArchive/userSetting.html',{user:req.session.user,settings:settings});
+        __renderSubPage(req,res,'userSetting',{user:req.session.user});
     },
 
     userPage:function(req,res){

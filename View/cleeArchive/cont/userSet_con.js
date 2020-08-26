@@ -12,10 +12,6 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.badgeImage = null;
     $scope.preferenceUploading = false;
     $scope.mailEditing = false;
-    $rootScope.settings.intro = LZString.decompressFromBase64($rootScope.settings.intro);
-    if(!$rootScope.settings.intro)
-        $rootScope.settings.intro = "";
-    $rootScope.settings.intro = $rootScope.settings.intro.replace(/\n/gi,'<br>');
 
     $scope.splitStr = function(str){
         let list = [];
@@ -56,10 +52,20 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         else if(data.type === 'mail')
             $scope.mailRequesting = false;
         if(data.success){
-            if(data.type === 'intro')
-                $rootScope.settings.intro = LZString.decompressFromBase64(data.intro);
-            else if(data.type === 'mail')
-                $rootScope.settings.mail = data.mail;
+            if(data.type === 'intro'){
+                let intro = LZString.decompressFromBase64(data.intro);
+                intro = intro.replace(/\n/g,'<br>');
+                let element = document.getElementById('introInfo');
+                if(element){
+                    element.innerHTML = intro;
+                }
+            }
+            else if(data.type === 'mail'){
+                let element = document.getElementById('mailInfo');
+                if(element)
+                    element.innerHTML = data.mail;
+            }
+
         }
         else
             $scope.$emit('showError',data.message);
@@ -81,16 +87,15 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         }
     });
 
-    $scope.$on('requestSettingFinished',function(event,data){
-        $scope.requestSetting = false;
-        if(data.success)
-        {
-            $rootScope.userAccess = data.result.access;
-            let element  = document.getElementById('badgeRow');
+
+    $scope.$on('applicationEnded',function(event,data){
+        $scope.creatorRequesting = false;
+        if(data.success){
+            $rootScope.userAccess = data.access;
+            let element  = document.getElementById('badgeRow_sub');
             $scope.initBadge(element);
             $scope.refreshApplicationBtn();
-        }
-        else{
+        }else{
             $scope.$emit('showError',data.message);
         }
     })
@@ -104,10 +109,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
             $scope.application.error = '您已经提交了该权限的申请，请勿重复提交';
         else
             $scope.application.error = '';
-        $scope.enabledSubmit = $scope.application.error === '';
-        let element = document.getElementById('submitButton');
-        if(element)
-            element.disabled = $scope.enabledSubmit? null : true;
+        $scope.creatorForbidden = $scope.application.error !== '';
     };
 
     $scope.message = [
@@ -130,24 +132,21 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.initBadge = function(element){
         if(!element)
             return;
-        if($rootScope.userAccess.length === 0)
-            element.innerHTML = '您暂无任何创作者权限，欢迎提交申请';
-        else{
-            console.log('badge initialization repeat');
-            let innerHTML = '';
-            let badges = [101,102];
-            for(let i=0;i< badges.length;++i){
-                let index = badges[i];
-                if(__isIdentity(index,$rootScope.userAccess))
-                    innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
-                else if(__isAccessReq(index,$rootScope.userAccess))
-                    innerHTML +=  '<div style="position:relative" ><div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>'+
-                        '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;">申请中</span></div></div>';
-                else
-                    innerHTML +=  '<div style="filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
-            }
-            element.innerHTML = innerHTML;
+        let innerHTML = '';
+        let badges = [101,102];
+        for(let i=0;i< badges.length;++i){
+            let index = badges[i];
+            if(__isIdentity(index,$rootScope.userAccess))
+                innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
+            else if(__isAccessReq(index,$rootScope.userAccess))
+                innerHTML +=  '<div style="position:relative">' +
+                    '<div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>'+
+                    '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;">申请中</span></div>' +
+                    '</div>';
+            else
+                innerHTML +=  '<div style="filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
         }
+        element.innerHTML = innerHTML;
     };
 
     $scope.requestFile = function() {
@@ -162,7 +161,7 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
                     accessApplicator.disabled=  null;
                 $scope.refreshApplicationBtn();
                 $scope.badgeImage = requestFile.response;
-                let element  = document.getElementById('badgeRow');
+                let element  = document.getElementById('badgeRow_sub');
                 $scope.initBadge(element);
             }
         };
@@ -200,17 +199,16 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
                  $scope.$emit('showError',error);
                  return;
              }
-             $rootScope.userAccess.push({
-                 index:$scope.application.order
-             });
              let data = {
-                 type:1,
-                 statements:children[1].value,
-                 subType:$scope.application.order,
+                 type:$scope.application.order,
+                 user:$rootScope.readerId,
+                 register:$rootScope.registerId,
+                 statements:LZString.compressToBase64(children[1].value)
              };
+             $scope.creatorRequesting = true;
              userManager.requestApplication(data);
              $scope.refreshApplicationBtn();
-             let element  = document.getElementById('badgeRow');
+             let element  = document.getElementById('badgeRow_sub');
              $scope.initBadge(element);
              board.style.height = '0';
          }else{
@@ -224,28 +222,30 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         if($scope.mailRequesting)
             return;
         if($scope.mailEditing){
-            if(!$rootScope.settings.mail.match(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/)){
-                $scope.$emit('showError','请输入正确的邮箱格式');
-                return;
-            }
-            $scope.mailRequesting = true;
-            let prev = event.target.previousElementSibling;
-            if(prev){
-                prev.innerHTML = $rootScope.settings.mail;
-                if($rootScope.settings.mail.length === 0)
-                    prev.innerHTML = '暂无邮箱';
-            }
-            userManager.saveBasicInfo({mail:$rootScope.settings.mail,type:'mail'});
+            // if(!$rootScope.settings.mail.match(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/)){
+            //     $scope.$emit('showError','请输入正确的邮箱格式');
+            //     return;
+            // }
+            // $scope.mailRequesting = true;
+            // let prev = event.target.previousElementSibling;
+            // if(prev){
+            //     prev.innerHTML = $rootScope.settings.mail;
+            //     if($rootScope.settings.mail.length === 0)
+            //         prev.innerHTML = '暂无邮箱';
+            // }
+            // userManager.saveBasicInfo({mail:$rootScope.settings.mail,type:'mail'});
 
         }
-        $scope.mailEditing = !$scope.mailEditing;
-        let element = document.getElementById('mailBoard');
-        if(element){
-            element.style.opacity = $scope.mailEditing? '1':'0';
-            element.style.pointerEvents = $scope.mailEditing?'auto':'none';
-            event.target.previousElementSibling.style.opacity =  $scope.mailEditing? '0':'1';
-            event.target.innerHTML = $scope.mailEditing? '保存':'编辑';
-        }
+        // $scope.mailEditing = !$scope.mailEditing;
+        // let element = document.getElementById('mailBoard');
+        // if(element){
+        //     element.style.opacity = $scope.mailEditing? '1':'0';
+        //     element.style.pointerEvents = $scope.mailEditing?'auto':'none';
+        //     event.target.previousElementSibling.style.opacity =  $scope.mailEditing? '0':'1';
+        //     event.target.innerHTML = $scope.mailEditing? '保存':'编辑';
+        // }
+
+        $scope.$emit('showError','To be updated');
     };
 
     $scope.editIntro = function(event){
@@ -258,13 +258,16 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
             return;
         if($scope.introEditing){
             let prev = element.nextElementSibling;
-            if(prev){
-                prev.innerHTML = $rootScope.settings.intro;
-                if($rootScope.settings.intro.length === 0)
-                    prev.innerHTML = '暂无简介';
-            }
+            let intro = element.value;
+            let contents = intro.replace(/\n/g,'<br>');
+            prev.innerHTML = contents;
             $scope.introRequesting = true;
-            userManager.saveBasicInfo({intro:LZString.compressToBase64($rootScope.settings.intro),type:'intro'});
+            userManager.saveBasicInfo({intro:LZString.compressToBase64(intro),type:'intro'});
+        }else{
+            let prev = element.nextElementSibling;
+            let contents = prev.innerHTML;
+            contents = contents.replace(/<br>/g,'\n');
+            element.value = contents;
         }
         $scope.introEditing = !$scope.introEditing;
         element.nextElementSibling.style.opacity =  $scope.introEditing? '0':'1';
@@ -279,15 +282,6 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         $scope.requestFile();
         $scope.reloadAccess();
         $scope.initializePreference();
-        let element = document.getElementById('introBoard');
-        if(element){
-            let prev = element.nextElementSibling;
-            if(prev){
-                prev.innerHTML = $rootScope.settings.intro;
-                if($rootScope.settings.intro.length === 0)
-                    prev.innerHTML = '暂无简介';
-            }
-        }
         $scope.initialized = true;
     };
 

@@ -13,7 +13,7 @@ let router = express.Router();
 
 let routeHandler = {
     addQueue:function(application){
-        queueModel.findOneAndUpdate({application:application._id},{date:Date.now()},
+        queueModel.findOneAndUpdate({application:application._id,type:application.type},{date:Date.now()},
             {upsert:true,setDefaultsOnInsert: true,new:true},
             function(err,queue){
             if(err){
@@ -56,6 +56,7 @@ let routeHandler = {
                     response.message = '登录成功';
                     response.name = user.user;
                     req.session.user = user;
+                    console.log(req.session.user);
                     res.cookie('userId',user._id.toString(),{maxAge:7*24*60*60*1000});
                     res.send(lzString.compressToBase64(JSON.stringify(response)));
                 })
@@ -205,13 +206,11 @@ let routeHandler = {
                     response.message = '注册成功';
                     response.success = true;
                     req.session.user = newModel;
-                    registerModel.findOneAndUpdate({_id:newModel.register},{user:newModel._id},function(){
+                    console.log(receivedData._id);
+                    registerModel.findOneAndUpdate({_id:newModel.register},{user:newModel._id},{new:true},function(err,register){
                         res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
+                        req.session.user.register = register;
                         routeHandler.finalSend(res,response);
-                        countMapModel.findOneAndUpdate({infoType:100},{$inc:{number:1}},function(err){
-                            if(err)
-                                console.log(err);
-                        });
                     })
                 });
             })
@@ -222,7 +221,36 @@ let routeHandler = {
             });
     },
 
-    resetPwd:function(req,res){
+    resetPwd:function(req,res,user,response){
+        validModel.deleteMany({type:0,user:user._id}).exec()
+            .then(function(results){
+                let newValid = new validModel();
+                newValid.type = 0;
+                newValid.user = user._id;
+                return newValid.save();
+            })
+            .then(function(valid){
+                if(!user.register){
+                    response.success = false;
+                    response.message = _errAll[21];
+                    routeHandler.finalSend(res,response);
+                    return;
+                }
+                __processMail(12,user.register.mail,
+                    {link:'https://archive.cleegame.com/password_reset/'+valid._id},
+                    __getReaderCode(req.ipData));
+                response.success = true;
+                routeHandler.finalSend(res,response);
+            })
+            .catch(function(err){
+                response.message= err.message;
+                response.success = false;
+                routeHandler.finalSend(res,response);
+            })
+
+    },
+
+    resetPwdUser:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success:false,
@@ -239,27 +267,46 @@ let routeHandler = {
             return;
         }
 
-        validModel.deleteMany({user:receivedData._id,type:0},function(){
-            let newLink = new validModel();
-            newLink.user = receivedData._id;
-            newLink.type = 0;
-            newLink.save(function(err){
-                if(err)
-                    response.message = err;
-                else{
-                    let resetLink = 'archive.cleegame.com/user/resetPwd/'+newLink._id;
-                    let mailContents = '<body><h1>您于'+__getDateInfo()+'申请了密码重置，如果这不是您本人的操作，请无视</h1>' +
-                        '<p>您可以通过本链接重置密码:<a href="'+resetLink+'">'+resetLink+'</a>,如果无法点击链接，请复制到浏览器中打开</p>' +
-                        '<p>该链接将为您保存24小时，请尽快操作</p>'+
-                        '<p>如果您没有申请过密码重新设定，请无视该邮件。</p>'+
-                        '</body>';
-                    response.success = true;
-                    __sendMail(mailContents,receivedData.mail,'cleeArchive用户密码重设');
-                }
+        userModel.findOne({_id:receivedData._id},function(err,user){
+            if(err){
+                response.message= err.message;
                 routeHandler.finalSend(res,response);
-            })
-        });
+            }else{
+                routeHandler.resetPwd(req,res,user,response);
+            }
+        }).populate('register');
     },
+
+
+    resetPwdMail:function(req,res){
+        let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            sent:false,
+            success:false,
+            message: ''
+        };
+
+        registerModel.findOne({mail:received.mail},function(err,register){
+            if(err){
+                response.message = err.message;
+                routeHandler.finalSend(res,response);
+            }else if(!register){
+                response.message = _errAll[18];
+                routeHandler.finalSend(res,response);
+            }else if(register && !register.user){
+                response.message = _errAll[19];
+                routeHandler.finalSend(res,response);
+            }else if(register && register.user) {
+                let user = JSON.parse(JSON.stringify(register.user));
+                user.register = register;
+                routeHandler.resetPwd(req,res,user,response)
+            }else{
+                response.message = 'unknown error';
+                routeHandler.finalSend(res,response);
+            }
+        }).populate('user');
+    },
+
 
     resetPwdPage:function(req,res){
         let resetId = req.params.resetId;
@@ -310,50 +357,6 @@ let routeHandler = {
             });
     },
 
-    apply:function(req,res) {
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        receivedData.user = req.session.user ? req.session.user._id : null;
-        receivedData.mail = __getUserMail(req.session.user);
-        if (!receivedData.subType)
-            receivedData.subType = 0;
-        let response = {
-            success: false,
-            message: '',
-            error:false,
-            sent: false,
-        };
-
-        if (receivedData.type === 1 && !req.session.user)
-            response.error = '创作者权限仅允许注册用户申请';
-
-        if(response.error) {
-            routeHandler.finalSend(res, data);
-            return;
-        }
-
-        applicationModel.findOneAndUpdate({user:receivedData.user,mail:receivedData.mail,type:receivedData.type,subType:receivedData.subType},
-            {statements:receivedData.statements, $inc:{count:1}},
-            {new:true,upsert:true,setDefaultsOnInsert: true},
-            function(err,doc){
-                 if(err){
-                     response.error = true;
-                     response.message = err;
-                 }else if(doc.count >1)
-                     response.message = '您已经提交过申请，无法重复申请';
-                 if(doc)
-                     response.applicationId = doc._id;
-                 if(!response.error)
-                     response.success = true;
-                 else
-                     routeHandler.finalSend(res,response);
-                 if(response.error)
-                     return;
-                  __updateUserSetting(doc._id.toString(),receivedData,req,function(){
-                      routeHandler.finalSend(res,response);
-                  });
-            });
-    },
-
     requestBill:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
@@ -399,12 +402,10 @@ let routeHandler = {
             routeHandler.finalSend(res,response);
             return;
         }
-        userModel.findOneAndUpdate({_id:req.session.user._id},receivedData,{new:true},function(err,doc){
+        registerModel.findOneAndUpdate({_id:req.session.user.register}, {intro:receivedData.intro},{new:true},function(err,doc){
             if(doc){
-                response.mail = doc.mail;
                 response.intro = doc.intro;
-                req.session.user.register.mail = doc.mail;
-                req.session.user.intro = doc.intro;
+                req.session.user.register.intro = doc.intro;
                 response.success = true;
             }
             routeHandler.finalSend(res,response);
@@ -525,10 +526,11 @@ router.post('/login',routeHandler.login);
 router.post('/logout',routeHandler.logout);
 router.post('/register',routeHandler.register);
 router.post('/registerRequest',routeHandler.requestRegister);
-router.post('/resetPwd',routeHandler.resetPwd);
-router.get('/resetPwd/:resetId',routeHandler.resetPwdPage);
+router.post('/resetPwdUser',routeHandler.resetPwdUser);
+router.post('/resetPwdMail',routeHandler.resetPwdMail)
+router.get('/password_reset/:resetId',routeHandler.resetPwdPage);
 router.post('/checkUsername',routeHandler.checkUser);
-router.post('/apply',routeHandler.apply);
+// router.post('/apply',routeHandler.apply);
 router.post('/saveInfo',routeHandler.saveInfo);
 router.post('/requestBill',routeHandler.requestBill);
 router.post('/getStatus',routeHandler.getStatus);

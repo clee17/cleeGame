@@ -32,7 +32,7 @@ app.service('userManager',function($http,$rootScope){
     };
 
     this.requestApplication = function(data){
-        manager.requestAll('/user/apply','applicationEnded',data);
+        manager.requestAll('/users/apply','applicationEnded',data);
     };
 
     this.saveBasicInfo = function(data){
@@ -66,4 +66,8 @@ app.service('userManager',function($http,$rootScope){
     this.updateFollow = function(data){
         manager.requestAll('/users/updateFollow/','updateFollowFinished',data);
     };
+
+    this.resetPwdMail = function(data){
+        manager.requestAll('/user/resetPwdMail/','resetPwdMail sent',data);
+    }
 });

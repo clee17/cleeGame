@@ -7,11 +7,18 @@ app.controller('registerInfoCon',function($scope){
 });
 
 
-app.controller('loginCon',function($scope,$window,loginManager){
+app.controller('loginCon',function($rootScope,$scope,$window,loginManager){
     $scope.data  = ['',''];
     $scope.error = null;
     $scope.loginMode = 0;
 
+    let countryCode = $rootScope.countryCode || 'OTHER';
+
+    let submitSign = {
+        'CN': '登录',
+        'EN': 'Login',
+        'OTHER':'Login'
+    };
     $scope.userResult = '';
     $scope.submitSign = '登录';
     $scope.requesting = false;
@@ -46,10 +53,16 @@ app.controller('loginCon',function($scope,$window,loginManager){
 });
 
 
-app.controller('registerCon',function($scope,$window,$location,$rootScope,loginManager){
+app.controller('registerCon',function($rootScope,$scope,$window,$location,$rootScope,loginManager){
+    let countryCode = $rootScope.countryCode;
+    let submitSign = {
+        'CN':'注册',
+        'EN':'Register',
+        'OTHER': 'Register'
+    };
     $scope.data  = ['',''];
     $scope.error = null;
-    $scope.submitSign = '注册';
+    $scope.submitSign = submitSign[countryCode] || 'Register';
     $scope.userChecking = false;
     $scope.requesting = false;
     $scope.loginMode = 1;
@@ -57,6 +70,7 @@ app.controller('registerCon',function($scope,$window,$location,$rootScope,loginM
     $scope.userErr = '';
     $rootScope.intro = LZString.decompressFromBase64($rootScope.intro);
 
+    console.log($rootScope.registerId);
     $scope.checkUser = function(){
         if($scope.userChecking)
             return;
@@ -89,7 +103,7 @@ app.controller('registerCon',function($scope,$window,$location,$rootScope,loginM
         if($scope.error == null)
         {
             $scope.requesting = true;
-            let cryptoData = {_id:$scope.id,user:$scope.data[0],pwd:md5($scope.data[1]).toString(),intro:LZString.compressToBase64($rootScope.intro),mail:$rootScope.mail};
+            let cryptoData = {_id:$rootScope.registerId||'',user:$scope.data[0],pwd:md5($scope.data[1]).toString(),intro:LZString.compressToBase64($rootScope.intro),mail:$rootScope.mail};
             loginManager.requestRegister(cryptoData);
         }
     };

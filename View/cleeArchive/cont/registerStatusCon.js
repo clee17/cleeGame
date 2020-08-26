@@ -50,7 +50,6 @@ app.controller("registerStatusCon",['$scope','$rootScope','$cookies','userManage
 
     $scope.$on('requestStatusFinished',function(event,data){
         $scope.requesting =false;
-        console.log(data);
         if(data.success){
             let element = document.getElementById('mainAnswer');
             if(element)
@@ -82,6 +81,36 @@ app.controller("pwdCon",['$scope','$rootScope','$cookies','userManager',function
     $scope.requesting = false;
     $scope.status = -1;
     $scope.position = -1;
+    $scope.resetCompleted = false;
+    $scope.error = null;
+
+    $scope.mail = '';
 
 
+    $scope.resetPwdMail = function(){
+        if($scope.mail.length === 0){
+            $scope.$emit('showError','The mail cannot be empty');
+            return;
+        }
+        $scope.requesting = true;
+        userManager.resetPwdMail({mail:$scope.mail});
+    }
+
+    $scope.$on('resetPwdMail sent',function(event,data){
+        $scope.requesting = false;
+        $scope.mail = '';
+        if(!data){
+            alert('internal error, please contact administrator');
+        }else if(!data.success){
+            $scope.error = data.message;
+            $scope.$emit('showError',data.message);
+        }else if(data.success){
+            $scope.error = null;
+            $scope.resetCompleted = true;
+        }
+    })
+
+    $scope.returnToHome = function(){
+        window.open('/','_self');
+    }
 }]);
