@@ -68,7 +68,7 @@ let handler = {
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/statement/registerProcess',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
-        viewPortMap.set('/resetPwdRequest',{viewport:'/view/resetPwdRequest.html',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+        viewPortMap.set('/resetPwdRequest',{viewport:'/sub/resetPwdRequest',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
 
         let result = viewPortMap.get(req.url);
         if(!result)
@@ -99,6 +99,14 @@ let handler = {
         }
         else
             __renderIndex(req,res,result);
+    },
+
+    sub:function(req,res){
+        let pageId = req.params.pageId;
+        if(!pageId)
+           __renderSubPage(req,res,'error',{error:_errInfo[10]});
+        else
+           __renderSubPage(req,res,pageId,{});
     },
 
     fanficSearch:function(req,res,result){

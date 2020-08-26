@@ -201,6 +201,7 @@ router.get('/fanfic',main.index);
 router.get('/donate',main.index);
 router.get('/registerProcess',main.index);
 router.get('/resetPwdRequest',main.index);
+router.get('/sub/:pageId',main.sub);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement/:countryId',main.statement);
