@@ -29,31 +29,15 @@ var createNewAuthor = function(access){
 var updateAccess = function(){
 	var id = 'userSetting.Access';
 	settingModel.find({},function(err,docs){
-		let bulkWriteDocs = [];
-		for(let i=0; i< docs.length;++i){
-			let doc = docs[i];
-			let oldAccess = doc.access || [];
-			let newAccess = createNewAuthor(doc.access);
-			if(newAccess) {
-				let newUpdate = {updateOne: {
-					'filter': {'_id': doc._id},
-						'update':{$set: {access:[]}}
-				}};
-				let newPush = {updateOne: {
-						'filter': {'_id': doc._id},
-						'update':{$push:{access:{$each:newAccess}}}
-				}};
-				bulkWriteDocs.push(newUpdate);
-				bulkWriteDocs.push(newPush);
-			}
+		for(let i =0;i <docs.length;++i){
+			settingModel.findOneAndUpdate({_id:docs[i]._id},{role:1}).exec()
+				.then(function(){
+					return settingModel.update({_id:docs[i]._id},{$unset:{access:""}}).exec();
+				})
+				.then(function(result){
+					console.log (docs[i]._id +' access reset success');
+				})
 		}
-		if(bulkWriteDocs.length>=0)
-			settingModel.bulkWrite(bulkWriteDocs,null,function(err,result){
-				if(err)
-					console.log(err);
-				else
-					console.log(result);
-			});
 	}).lean();
 };
 
@@ -69,7 +53,7 @@ var updateUserRegister = function(){
 						return userModel.findOneAndUpdate({_id: user._id}, {register: register._id}).exec();
 					})
 						.then(function(userInfo){
-							return userModel.findOneAndUpdate({_id:userInfo._id}, {$unset:{mail:"",intro:""}},{new:true}).exec();
+							return userModel.findOneAndUpdate({_id:userInfo._id}, {$unset:{mail:"",intro:"",userGroup:""}},{new:true}).exec();
 						})
 				    	.then(function(result){
 				    		console.log(result);
@@ -149,4 +133,5 @@ var clearApplicationModel = function(){
 updateAccess();
 updateUserRegister();
 clearApplicationModel();
+
 
