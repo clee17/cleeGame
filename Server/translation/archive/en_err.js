@@ -20,6 +20,7 @@ var text = [
     "This work can only be published by technical writers, you may get the identity from your user setting page",
     "publishing",
     'The vote does not exist.<br>     Please check on your vote’s address.', //20
+    "only registered users could apply for a role."
 ];
 
 module.exports = text;

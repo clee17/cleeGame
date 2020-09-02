@@ -46,11 +46,11 @@ let handler = {
     },
 
     filter: function (req, res, data) {
-        if (req.session.user && __isIdentity(202,req.session.user.settings.access))
+        if (req.session.user && req.session.user.isAdmin)
             handler.finalSend(res, data);
         else if (req.session.user && req.session.user._id == data.userId)
             handler.finalSend(res, data);
-        else if (req.session.user && req.session.user.userGroup >= 999)
+        else if (req.session.user && req.session.user.isAdmin)
             handler.finalSend(res, data);
         else if (__getCountryCode(req.ipData) !== 'CN')
             handler.finalSend(res, data);

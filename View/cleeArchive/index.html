@@ -43,6 +43,8 @@
             $rootScope.countryList = "<%- infoAll[5] %>";
             $rootScope.countryList = $rootScope.countryList.split(',');
             $rootScope.statementTitle = '<%- infoAll[6] %>';
+            $rootScope.settings = '<%- user&&user.settings ? JSON.stringify(user.settings):"{}" %>';
+            $rootScope.settings=  JSON.parse($rootScope.settings);
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
@@ -253,10 +255,13 @@
         }]);
 
         app.filter('base64', function() { //可以注入依赖
-            return function(str,html) {
+            return function(str,type) {
                 if(!str || str.length === 0)
                     return str;
-                return LZString.decompressFromBase64(str);
+                let result = LZString.decompressFromBase64(str);
+                if(type && type === 1)
+                    result = decodeURIComponent(result);
+                return result;
             }
         });
 
@@ -271,6 +276,19 @@
                    if(str)
                        str = str.replace(/\n/g,'<br>');
                    element.html(str);
+                }
+            }
+        });
+
+        app.directive('html',function(){
+            return {
+                restrict: 'A',
+                scope:{
+                    contents:"@",
+                },
+                link:function(scope,element,attr){
+                    let str = scope.contents || element.html();
+                    element.html(str);
                 }
             }
         });
@@ -340,7 +358,7 @@
             <div style="margin-left:8px;"><i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:-3px;"></i></div>
         </a>
         <div ng-show="showDashboard" id="dashboard">
-            <% if(user.userGroup >= 999){ %>
+            <% if(user.isAdmin){ %>
             <a class="dashboardSelect" href="/admin"><%- websiteInfo[5] %></a>
             <% } %>
             <a class="dashboardSelect" href="/donate"><%- websiteInfo[6] %></a>
@@ -376,6 +394,5 @@
         <div><a href="mailto:cleegame@outlook.com"><%- websiteInfo[19] %></a></div>
     </div>
 </div>
-
 </body>
 </html>

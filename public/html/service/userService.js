@@ -41,19 +41,23 @@ app.service('loginManager',function($http,$rootScope){
 });
 
 
-var __isIdentity = function(id,group){
-    for(let i=0; i<group.length;++i){
-        if(group[i].index === id)
-            return true;
+var __isRole = function(id,settings){
+    let role = settings.role;
+    let str = "";
+    for(let i=1; i<id;++i){
+        str = str + '0';
     }
-    return false;
+    str = '1'+str;
+    str = parseInt(str,2);
+    return (str & settings.role)>0;
 }
 
-var __isAccessReq = function(id, group){
-    let index=  id- 100;
-    for(let i=0; i<group.length;++i){
-        if(group[i].index === index)
+var __isApplicating = function(index,application){
+    if(!Array.isArray(application))
+        return false;
+    for(let i=0; i<application.length;++i){
+        if(application[i].type === index)
             return true;
     }
     return false;
-}
+};

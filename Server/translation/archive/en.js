@@ -103,6 +103,8 @@ var text = [
     "Check your email for a link to reset your password. Please check your spam folder if you could not find it.",
     "You must configure your mail before you continue using this site",
     "The user does not plan to introduce itself",
+    "Application's statements",
+    "You have received no replies from the administrator so far"
 ];
 
 module.exports = text;

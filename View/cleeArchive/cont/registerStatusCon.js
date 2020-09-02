@@ -1,9 +1,40 @@
+app.directive('infoReceiver',function(){
+    return {
+        restrict: 'E',
+        link:function(scope){
+        }
+    }
+});
+
 app.controller("registerStatusCon",['$scope','$rootScope','$cookies','userManager',function($scope,$rootScope,$cookies,userManager){
     $scope.id = '';
     $scope.requestId = '';
     $scope.requesting = false;
+    $scope.replying = false;
+    $scope.registerId = "";
     $scope.status = -1;
     $scope.position = -1;
+    $scope.statements = "";
+
+    $scope.couldNotResponse = function(){
+        if(!$scope.answered)
+            return true;
+        else if($scope.conversationRequesting)
+            return true;
+        else if($scope.conversations.length ===0)
+            return true;
+        else if($scope.status >= 1){
+            return true;
+        } else if($scope.conversations.length >0 ){
+            let last = $scope.conversations[$scope.conversations.length-1];
+            return last.from && last.from._id === $scope.registerId;
+        }
+        return false;
+    }
+
+    $scope.conversationPage = {
+        pageId:1
+    };
 
     $scope.message =[
     ];
@@ -51,20 +82,69 @@ app.controller("registerStatusCon",['$scope','$rootScope','$cookies','userManage
     $scope.$on('requestStatusFinished',function(event,data){
         $scope.requesting =false;
         if(data.success){
+            console.log(data);
+            $scope.answered = true;
+            $scope.statements = data.statements;
+            $scope.registerId = data.register;
+            $scope.status = data.result;
+            $scope.application = data.requestId;
             let element = document.getElementById('mainAnswer');
             if(element)
                 element.innerHTML = '<div>您的申请当前状态为：<b>'+$scope.getStatusText(data)+'</b></div>'+
                     '<div>'+$scope.getStatusExplain(data)+'</div>';
+            $scope.conversationRequesting = true;
+            userManager.requestApplicationConversation(data.requestId);
         }else{
             $scope.$emit('showError',data.message);
         }
     });
 
+    $scope.$on('application conversation received',function(event,data){
+        $scope.conversationRequesting = false;
+        if(!data.success){
+            $scope.$emit('showError',data.message);
+        }else{
+            $scope.conversations = [];
+            $scope.conversations = data.conversations;
+        }
+    });
+
+    $scope.reply = "";
+
+    $scope.replyToMail = function(){
+        if($scope.reply.length <= 15){
+            $scope.$emit('showError',$scope['message_replylength']);
+        }else{
+            let requestData = {};
+            let conversation = requestData.conversation = {};
+            let last = $scope.conversations[$scope.conversations.length-1];
+            let lastUser = last.from;
+            conversation.to = lastUser? lastUser._id: null;
+            conversation.from = $scope.registerId;
+            conversation.application = $scope.application;
+            conversation.type = 0;
+            conversation.result = last.result;
+            conversation.contents = LZString.compressToBase64($scope.reply);
+            requestData.targetMail = null;
+            $scope.messageRequestId = requestData.requestId = "send conversation" + Date.now() + ':' +$scope.application;
+            userManager.requestAll('/admin/addConversation', 'application conversation added', requestData);
+        }
+    };
+
+    $scope.$on('application conversation added',function(event,data){
+        if(!data.success){
+            $scope.$emit('showError',data.message);
+        }else{
+            $scope.conversations.push(data.entry);
+            $scope.reply = '';
+        }
+    });
+
    $scope.submitRequest = function(){
        if($scope.id.length === 0){
-            $scope.$emit('showError','您的邀请码不能为空');
+            $scope.$emit('showError',$scope['message_invitationEmply']);
        } else if(!$scope.id.match(/^[0-9a-fA-F]{24}$/)){
-           $scope.$emit('showError','请输入有效的邀请码格式');
+           $scope.$emit('showError',$scope['message_invitationValid']);
        }else{
            if($scope.requesting)
                return;

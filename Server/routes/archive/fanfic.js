@@ -489,7 +489,7 @@ let handler = {
             }
             else if(doc)
             {
-                if(!req.session.user || (doc.targetUser != req.session.user._id && req.session.user.userGroup < 999 && !__isIdentity(202,req.session.user.settings.access)))
+                if(!req.session.user || (doc.targetUser != req.session.user._id && !req.session.user.isAdmin))
                     result.message = '您没有删除该评论的权限';
                 if(result.message === '')
                     commentModel.findByIdAndDelete(postData._id,function(err,doc){

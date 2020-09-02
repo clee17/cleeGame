@@ -91,7 +91,28 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.$on('applicationEnded',function(event,data){
         $scope.creatorRequesting = false;
         if(data.success){
-            $rootScope.userAccess = data.access;
+            let push = true;
+            for(let i=0;i<$scope.applicationList.length;++i){
+                 if($scope.applicationList[i]._id === data.application._id || $scope.applicationList[i].type === data.application.type ){
+                     $scope.applicationList[i] = data.application;
+                     push = false;
+                 }
+            }
+            if(push)
+               $scope.applicationList.push(data.application);
+            let element  = document.getElementById('badgeRow_sub');
+            $scope.initBadge(element);
+            $scope.refreshApplicationBtn();
+        }else{
+            $scope.$emit('showError',data.message);
+        }
+    })
+
+    $scope.$on('application received',function(event,data){
+        console.log(data);
+        if(data.success){
+            $scope.applicationList = data.applications;
+            console.log(data.applications);
             let element  = document.getElementById('badgeRow_sub');
             $scope.initBadge(element);
             $scope.refreshApplicationBtn();
@@ -103,9 +124,9 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
     $scope.refreshApplicationBtn = function(){
         if($scope.enabled.indexOf($scope.application.order) < 0)
             $scope.application.error = '该功能尚未开发完成，敬请期待';
-        else if(__isIdentity(100+$scope.application.order,$rootScope.userAccess))
+        else if(__isRole($scope.application.order,$rootScope.settings))
             $scope.application.error = '您已经拥有该项权限，无法继续申请';
-        else if(__isIdentity($scope.application.order,$rootScope.userAccess))
+        else if(__isApplicating($scope.application.order,$scope.applicationList))
             $scope.application.error = '您已经提交了该权限的申请，请勿重复提交';
         else
             $scope.application.error = '';
@@ -136,9 +157,9 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         let badges = [101,102];
         for(let i=0;i< badges.length;++i){
             let index = badges[i];
-            if(__isIdentity(index,$rootScope.userAccess))
+            if(__isRole(index-100,$rootScope.settings))
                 innerHTML += '<div style="background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>';
-            else if(__isAccessReq(index,$rootScope.userAccess))
+            else if(__isApplicating(index-100,$scope.applicationList))
                 innerHTML +=  '<div style="position:relative">' +
                     '<div style="min-width:100%;min-height:100%;filter:grayscale(1);background-image:url('+$scope.getBadgeUrl()+');background-position-x:'+70*(index-101)+'px;"></div>'+
                     '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;">申请中</span></div>' +
@@ -186,14 +207,12 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
 
     $scope.applyConfirm = function(condition){
         let board = document.getElementById('userAccessApplication');
-        let children = board.children;
-        if(!board)
-            return;
-        if(children.length <3)
+        let statement = document.getElementById('userAccessStatements');
+        if(!statement)
             return;
          if(condition) {
              let error = null;
-             if(children[1].value.length <= 15)
+             if(statement.value.length <= 15)
                  error = '申请陈述不能少于15个字';
              if(error!=null){
                  $scope.$emit('showError',error);
@@ -203,16 +222,19 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
                  type:$scope.application.order,
                  user:$rootScope.readerId,
                  register:$rootScope.registerId,
-                 statements:LZString.compressToBase64(children[1].value)
+                 statements:LZString.compressToBase64(statement.value)
              };
              $scope.creatorRequesting = true;
              userManager.requestApplication(data);
+             $scope.applicationList.push(data);
              $scope.refreshApplicationBtn();
              let element  = document.getElementById('badgeRow_sub');
              $scope.initBadge(element);
-             board.style.height = '0';
+             if(board)
+               board.style.height = '0';
          }else{
-             board.style.height = '0';
+             if(board)
+                board.style.height = '0';
          }
     };
 
@@ -234,7 +256,6 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
             //         prev.innerHTML = '暂无邮箱';
             // }
             // userManager.saveBasicInfo({mail:$rootScope.settings.mail,type:'mail'});
-
         }
         // $scope.mailEditing = !$scope.mailEditing;
         // let element = document.getElementById('mailBoard');
@@ -276,12 +297,17 @@ app.controller("userSetCon",['$scope','$rootScope','$timeout','userManager',func
         event.target.innerHTML = $scope.introEditing? '保存':'编辑';
     };
 
+    $scope.initializeApplication = function(){
+        userManager.requestApplications({type:{$gt:0,$lte:10},register:$rootScope.registerId},"application received");
+    }
+
     $scope.initialize = function(){
         if($scope.initialized)
             return;
         $scope.requestFile();
         $scope.reloadAccess();
         $scope.initializePreference();
+        $scope.initializeApplication();
         $scope.initialized = true;
     };
 

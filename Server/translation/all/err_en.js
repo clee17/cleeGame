@@ -21,6 +21,7 @@ var text = [
     "There is no mail connected to this account, please contact the administrator. ",
     "You've applied for this identity before, you cannot apply again.",
     "A user could only apply for the identity by itself",
+    "There is no valid register information connected to your account, please contact administrator."
 ];
 
 module.exports = text;

@@ -63,7 +63,7 @@ let handler = {
                 options[i].description = __multiLang(options[i].description,req.ipData);
             }
             let voted = false;
-            if(req.session.user&& req.session.user.userGroup >= 999){
+            if(req.session.user&& req.session.user.isAdmin){
                 voted  = false;
                 if(req.cookies[voteId])
                     voted = true;
@@ -99,7 +99,7 @@ let handler = {
 
         if(!received._id || !__validateId(received._id)){
             response.message = ' no validate vote id received';
-            handler.finalSend(response);
+            handler.finalSend(res, response);
         }
 
         optionModel.updateMany({vote:received._id,_id:{$in:list}},{$inc : {count: 1} },function(err,result){

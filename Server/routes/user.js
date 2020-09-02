@@ -31,7 +31,7 @@ let routeHandler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
-    login:function(req,res){
+    login: function(req,res){
         let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success:false,
@@ -43,8 +43,8 @@ let routeHandler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         }
         if(data) {
-            userModel.findOne({user: data.user}).populate('register').exec()
-                .then(function (user) {
+             userModel.findOne({user: data.user}).populate('register').exec()
+                .then(async function (user) {
                     if (!user) {
                         throw '没有该用户';
                     }
@@ -55,8 +55,8 @@ let routeHandler = {
                     response.success = true;
                     response.message = '登录成功';
                     response.name = user.user;
-                    req.session.user = user;
-                    console.log(req.session.user);
+                    req.session.user = JSON.parse(JSON.stringify(user));
+                    req.session.user.isAdmin = await __isIdentity('admin',req.session.user);
                     res.cookie('userId',user._id.toString(),{maxAge:7*24*60*60*1000});
                     res.send(lzString.compressToBase64(JSON.stringify(response)));
                 })
@@ -200,13 +200,13 @@ let routeHandler = {
                 newModel.user = receivedData.user;
                 newModel.pwd = receivedData.pwd;
                 newModel.register = receivedData._id;
-                newModel.save(function(err){
+                newModel.save(async function(err){
                     if(err)
                         throw '注册失败'+err;
                     response.message = '注册成功';
                     response.success = true;
-                    req.session.user = newModel;
-                    console.log(receivedData._id);
+                    req.session.user = JSON.parse(JSON.stringify(newModel));
+                    req.session.user.isAdmin = await __isIdentity('admin',req.session.user._id);
                     registerModel.findOneAndUpdate({_id:newModel.register},{user:newModel._id},{new:true},function(err,register){
                         res.cookie('userId',newModel._id.toString(),{maxAge:7*24*60*60*1000});
                         req.session.user.register = register;
@@ -441,7 +441,9 @@ let routeHandler = {
                 }else{
                     response.result = application.result;
                     response.requestId = application._id;
+                    response.register = application.register;
                     response.time = application.date;
+                    response.statements = application.statements;
                     routeHandler.success = true;
                     if(application.result >= 1){
                         userModel.findOne({register:application.register},function(err,user){
@@ -466,8 +468,6 @@ let routeHandler = {
                     routeHandler.addQueue(application);
                 queueModel.countDocuments(condition,function(err,count){
                     response.position += count;
-                    if(queue)
-                        response.position --;
                     response.success = true;
                     routeHandler.finalSend(res,response);
                 });

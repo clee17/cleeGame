@@ -15,12 +15,8 @@ app.service('adminManager',function($http,$rootScope){
                 });
     };
 
-    this.addAccess = function(data){
-        manager.request('/admin/addAccess','access added',data);
-    };
-
-    this.approveAccess = function(data){
-        manager.request('/admin/approveAccess','access approved',data);
+    this.approveAccessWithoutApplication = function(data){
+        manager.request('/admin/approveAccessWithoutApplication','access approved',data);
     };
 
     this.resendApplication = function(data){
@@ -154,9 +150,9 @@ app.directive('authorAccess',function($compile){
                     let innerHTML = '';
                     for(let i=0;i< badges.length;++i){
                         let index = badges[i];
-                        if(__isIdentity(index,access))
+                        if(__isRole(index-100,scope.setting))
                             innerHTML += '<div class="badges" style="background-position-x:'+70*(index-101)+'px;"></div>';
-                        else if(__isAccessReq(index,access))
+                        else if(__isApplicating(index-100,scope.applications))
                             innerHTML +=  '<div style="position:relative;width:70px;height:70px;transform:scale(0.75);" class="badgesR" ng-click="approveAccess('+index+",'"+scope.user+"','"+scope.name+"'"+')"><div class="badges"  style="min-width:100%;min-height:100%;filter:grayscale(1);background-position-x:'+70*(index-101)+'px;"></div>'+
                                 '<div style="position:absolute;width:100%;height:100%;left:0;top:0;display:flex;font-weight:bold;"><span style="margin:auto;transform:scale(1.5);" class="badgeFont">申请中</span></div></div>';
                     }
@@ -309,7 +305,8 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
                     { $lookup:{from:'user_register',localField:"register",foreignField:"_id",as:"register"}},
                     { $unwind:{path: "$register", preserveNullAndEmptyArrays: true }},
                     { $lookup:{from:'user_setting',localField:"_id",foreignField:"user",as:"setting"}},
-                    { $unwind:{path: "$setting", preserveNullAndEmptyArrays: true }}
+                    { $unwind:{path: "$setting", preserveNullAndEmptyArrays: true }},
+                    { $lookup:{from:'application',localField:"register",foreignField:"register",as:"applications"}}
                 ]},{name:'queue',condition:{type:0},populate:{
                     path:     'application',
                     populate: { path:  'register',
@@ -513,7 +510,7 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             loginManager.resetPwdUser({_id:data.variables._id,mail:data.variables.mail});
         }else if(data.signal === $scope.authorizeSignal){
             $scope.requesting = true;
-            adminManager.approveAccess({index:data.variables.index,user:data.variables.user});
+            adminManager.approveAccessWithoutApplication({index:data.variables.index,user:data.variables.user});
         }else if(data.signal === $scope.applicationSignal){
             $scope.requesting = true;
             let request = data.variables || {};
@@ -567,11 +564,10 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
 
     $scope.$on('access approved',function(event,data){
         $scope.requesting = false;
-        console.log(data);
         if(data.success){
             for(let i=0; i<$scope.entries.length;++i){
                 if($scope.entries[i]._id === data.user){
-                    $scope.entries[i].setting.access = data.access;
+                    $scope.entries[i].setting.role = data.role;
                 }
             }
             $scope.$broadcast('identityUpdated',{user:data.user});
@@ -597,7 +593,6 @@ app.controller("adminCon",function($scope,$location,$compile,adminManager,loginM
             if($scope.requestId  !== data.requestId)
                 return;
             $scope.entries = data.contents || [];
-            console.log($scope.entries);
             if($scope.entries.length === 0){
                 $scope.applyContents(HTMLTemplate['noInfo']);
             }else{
@@ -658,11 +653,16 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
 
     $scope.showInfo = function(HTML){
         let header = '<div style="height:2rem;background:rgba(223,221,220,0.9);display:flex;flex-direction:row;"><button style="margin-left:auto;margin-right:1rem;" class="closeBtn" ng-click="showBoard(false)"><i class="fas fa-times fa-2x" ></i></button></div>'
+        let bottom =  '<div style="margin-top:auto;margin-bottom:0.5rem;padding-top:2rem;padding-left:2rem;padding-right:2rem;">' +
+            '<div><span style="font-weight:bold;">FROM: YOU</span><span style="margin-left:0.8rem;font-size:0.8rem;color:gray;">You could send a message to the applicant for further information if you could not decide if the request should be approved or not.</span></div>'+
+            '<div><textarea id="adminTop_messageContents" style="height:6rem;width:calc(100% - 3rem);margin-left:1.5rem;margin-top:0.5rem;resize:none;padding:8px;"></textarea></div>'+
+            '<div style="display:flex;margin-top:0"><button class="grand-button" style="margin-left:auto;margin-right:2rem;margin-top:1rem;" ng-click="sendMessage()" ng-disabled="messageRequesting">SEND</button></div>'+
+            '</div></div>';
         let element = document.getElementById('adminTop_board');
         if(element){
             element.innerHTML = '';
             let angularElement = angular.element(element);
-            angularElement.append($compile(header + HTML)($scope));
+            angularElement.append($compile(header + HTML+bottom)($scope));
         }
     }
 
@@ -726,7 +726,6 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
             let element = document.getElementById('adminTop_messageContents');
             if(element)
                 element.value = "";
-
         }else
             $scope.$emit('showError',data.message);
     });
@@ -736,13 +735,12 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
         if(data.requestId !== $scope.requestId)
             return;
         if(data.success){
-            console.log(data.contents);
             $scope.entries = data.contents;
+            let innerHTML = "";
             if($scope.entries.length === 0)
-                $scope.showInfo('<div style="margin:auto;">No Log found</div>');
+                innerHTML = '<div style="margin:auto;">No Log found</div>';
             else
-                $scope.showInfo('' +
-                    '<div style="flex:1;padding:2rem;padding-bottom:1rem;display:flex;flex-direction:column;max-height:calc(100% - 5rem);"><div style="flex:1;margin-left:2rem;margin-right:2rem;padding-right:2rem;overflow-y:scroll;display:flex;flex-direction:column;"><div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
+                innerHTML = '<div style="flex:1;padding:2rem;padding-bottom:1rem;display:flex;flex-direction:column;max-height:calc(100% - 5rem);"><div style="flex:1;margin-left:2rem;margin-right:2rem;padding-right:2rem;overflow-y:scroll;display:flex;flex-direction:column;"><div ng-repeat="entry in entries" style="display:flex;flex-direction:column;">' +
                     '<div style="display:flex;flex-direction:row;margin-top:1rem;margin-bottom:0.5rem;">' +
                     '<span style="font-weight:bold;">FROM:</span><span style="margin-left:0.5rem;"> {{entry.from | userRegister }}</span>' +
                     '<span style="font-weight:bold;margin-left:2rem;">TO:</span><span style="margin-left:0.5rem;"> {{entry.to | userRegister }}</span>' +
@@ -750,12 +748,8 @@ app.controller("adminTopCon",function($scope,$rootScope,$timeout,$compile,adminM
                     '<span style="margin-left:4rem;font-weight:bold;">STATUS:</span><span application-result result="entry.result" style="margin-left:0.8rem;"></span></div>' +
                     '<div content-format content="entry.contents" style="margin-bottom:1.5rem;padding:0.5rem;"></div>'+
                     '<div style="min-width:80%;background:rgba(185,185,185,0.6);height:1px;"></div>'+
-                    '</div></div>'+
-                    '<div style="margin-top:auto;margin-bottom:0.5rem;padding-top:2rem;padding-left:2rem;padding-right:2rem;">' +
-                    '<div><span style="font-weight:bold;">FROM: YOU</span><span style="margin-left:0.8rem;font-size:0.8rem;color:gray;">You could send a message to the applicant for further information if you could not decide if the request should be approved or not.</span></div>'+
-                    '<div><textarea id="adminTop_messageContents" style="height:6rem;width:calc(100% - 3rem);margin-left:1.5rem;margin-top:0.5rem;resize:none;padding:8px;"></textarea></div>'+
-                    '<div style="display:flex;margin-top:0"><button class="grand-button" style="margin-left:auto;margin-right:2rem;margin-top:1rem;" ng-click="sendMessage()" ng-disabled="messageRequesting">SEND</button></div>'+
-                    '</div></div>')
+                    '</div></div>';
+            $scope.showInfo(innerHTML);
         }else{
             $scope.showInfo('<div style="margin:auto;">No Log found</div>')
         }

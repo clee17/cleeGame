@@ -61,6 +61,10 @@ var updateUserRegister = function(){
 						.catch(function(err){
 							console.log(err);
 						})
+			}else{
+				userModel.findOneAndUpdate({_id:result[i]._id}, {$unset:{mail:"",intro:"",userGroup:""}},{new:true},function(err,result){
+					 console.log('success');
+				});
 			}
 		 }
 	});
@@ -133,5 +137,4 @@ var clearApplicationModel = function(){
 updateAccess();
 updateUserRegister();
 clearApplicationModel();
-
 

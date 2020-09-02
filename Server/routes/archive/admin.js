@@ -195,7 +195,7 @@ let handler = {
             res.send(lzString.compressToBase64(JSON.stringify(data)));
         };
 
-        if(req.session.user && req.session.user.userGroup >= 999)
+        if(req.session.user && req.session.user.isAdmin)
         {
             let index = Number(receivedData.name);
             if(index >= tableIndex.length || index <0)
@@ -240,7 +240,7 @@ let handler = {
             res.send(lzString.compressToBase64(JSON.stringify(response)));
         };
 
-        if(req.session.user && req.session.user.userGroup >= 999)
+        if(req.session.user && req.session.user.isAdmin)
         {
             let index = Number(receivedData.name);
             if(index >= tableIndex.length || index <0)
@@ -270,75 +270,24 @@ let handler = {
         }
     },
 
-    addAccess:function(req,res){
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let response = {
-            sent:false,
-            message:'',
-            success:false
-        };
-
-        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access))
-            response.message = '您没有相应的权限';
-
-        if(response.message !== ''){
-            handler.finalSend(res,response);
+    approveAccess:function(user,index){
+        if(!user || !index)
             return;
-        }
-
-        userSettingModel.findOneAndUpdate({user:receivedData.item.user},
-            {$push:{access:receivedData.item.subType+100}},
-            {new:true},
-            function(err,doc){
-                if(err)
-                    response.message = err;
-                else if(doc)
-                    response.status  = 1;
-                handler.finalSend(res,response);
-            });
-    },
-
-    approveAccess:function(req,res){
-        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
-        let response = {
-            success: false,
-            message: '',
-            sent: false,
-        };
-
-        if(!receivedData.user || !__validateId(receivedData.user)){
-            handler.sendError(res,response,'No valid user info received');
-            return;
-        }
-
-        if(!receivedData.index || receivedData.index <= 100 || receivedData.index >105 ){
-            handler.sendError(res,response, 'No valid authorization code  received');
-            return;
-        }
-
-        response.index = receivedData.index;
-        response.user = receivedData.user;
-
-        userSettingModel.findOneAndUpdate({user:receivedData.user,"access.index":(receivedData.index-100)},{$inc:{"access.$.index":100}},{new:true}).exec()
-            .then(function(doc){
-                if(!doc){
-                    throw 'Please request the authorization first.'
+        userSettingModel.findOne({user:user}).exec()
+            .then(function(setting){
+                if(setting && _ROLE[index]){
+                    let newRole = setting.role | _ROLE[index].value;
+                    return userSettingModel.findOneAndUpdate({_id:setting._id},{role:newRole},{new:true}).exec();
                 }
-                doc = JSON.parse(JSON.stringify(doc));
-                response.success = true;
-                response.access =  doc.access;
-                handler.clearApplicationQueue(doc.user,receivedData.index-100,true);
-                handler.finalSend(res,response);
+            })
+            .then(function(result){
+                console.log(result);
+                //TBADDED
             })
             .catch(function(err){
-                console.log(err);
-                if(typeof err == 'string')
-                    response.message = err;
-                else
-                    response.messaege = JSON.stringify(err);
-                response.success = false;
-                handler.finalSend(res,response);
+                //TBADDED
             })
+
     },
 
     addConversationWithMail:function(req,res){
@@ -353,13 +302,14 @@ let handler = {
 
         let conversation  = receivedData.conversation;
 
-        if(!conversation || !conversation.to || !__validateId(conversation.to)){
-            handler.sendError(res,response,'No valid receiver information provided');
-            return;
-        }
 
-        if(!receivedData.targetMail){
-            handler.sendError(res,response,'No valid mail address provided');
+        if(conversation.from === "")
+            conversation.from = null;
+        if(conversation.to === "")
+            conversation.to = null;
+
+        if(!conversation){
+            handler.sendError(res,response,'No valid receiver information provided');
             return;
         }
 
@@ -370,7 +320,6 @@ let handler = {
         conversationModel.application = conversation.application;
         conversationModel.type = conversation.type;
         conversationModel.result = conversation.result;
-
         conversationModel.save(function(err,doc){
             if(err){
                 handler.sendError(res,response,err.message);
@@ -383,7 +332,9 @@ let handler = {
                     .populate([{path:     'application', populate: { path:  'register', model: 'user_register' }},
                         {path:'from'},{path:'to'}],function(err,entry){
                         let cc = __getReaderCode(req.ipData);
-                        __processMail(11,receivedData.targetMail,conversation,cc);
+                        if(receivedData.targetMail){
+                            __processMail(11,receivedData.targetMail,conversation,cc);
+                        }
                         response.success = true;
                         response.entry = JSON.parse(JSON.stringify(entry));
                         handler.finalSend(res,response);
@@ -407,32 +358,7 @@ let handler = {
         __processMail(mailId,mail,application,cc);
     },
 
-    approveAccessWithApplication:function(application){
-        var userInfo = null;
-        registerModel.findOne({_id:application._id}).exec()
-            .then(function(register){
-                return userModel.findOne({register:register._id}).exec();
-            })
-            .then(function(user){
-                userInfo = user;
-                return userSettingModel.findOneAndUpdate( {user:userInfo._id,"access.index":(application.type)},{$inc:{"access.$.index":100}},{new:true}).exec();
-            })
-            .then(function(result){
-                if(!result)
-                    throw 'The access grant of user '+userInfo._id+'____'+userInfo.user+' of '+application.type+100+'has failed as we cannot find an access request';
-            })
-            .catch(function(err){
-               __saveLog('cleeArchive_approveAcces',err);
-            });
-    },
-
-    afterApplication:function(response){
-        let application = response.result;
-        if(application.type >=1 && application.type <=5 && application.result === 1)
-            handler.approveAccessWithApplication(response.result);
-    },
-
-    answerApplication:function(req,res){
+    answerApplication:async function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success: false,
@@ -441,7 +367,7 @@ let handler = {
             attach:receivedData.attach || ""
         };
 
-        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access)){
+        if(!req.session.user || !req.session.user.isAdmin){
             handler.sendError(res,response,'No valid application info received');
             return;
         }
@@ -459,7 +385,7 @@ let handler = {
         applicationModel.findOneAndUpdate({_id:receivedData._id},{result:receivedData.result},{new:true}).populate('register').exec()
             .then(function(application){
                 if(!application)
-                    throw ' no application found in the database';
+                    throw 'no application found in the database';
                 response.result = application;
                 response.attach = lzString.compressToBase64(response.attach);
                 let newConversation = new applicationConversationModel();
@@ -472,9 +398,11 @@ let handler = {
             })
             .then(function(coversation){
                 response.success = true;
-                handler.finalSend(res,response);
-                handler.afterApplication(response);
+                if(response.result.type >=1 && response.result.type <=10 && response.result.result === 1){
+                    handler.approveAccess(response.result.register.user,response.result.type);
+                }
                 handler.sendApplicationMail(req,response);
+                handler.finalSend(res,response);
             })
             .catch(function(err){
                 console.log(err);
@@ -482,7 +410,7 @@ let handler = {
             })
     },
 
-    answerApplicationQueue:function(req,res){
+    answerApplicationQueue:async function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
         let response = {
             success: false,
@@ -490,7 +418,7 @@ let handler = {
             sent: false,
         };
 
-        if(!req.session.user || req.session.user.userGroup < 999 || __isIdentity(202, req.session.user.settings.access)){
+        if(!req.session.user || !req.session.user.isAdmin){
             handler.sendError(res,response,'No valid application info received');
             return;
         }
@@ -514,7 +442,6 @@ let handler = {
         }).populate('application');
 
     },
-
 
     resendApplication:function(req,res){
         let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
@@ -570,8 +497,51 @@ let handler = {
                 console.log(err);
                 handler.sendError(res,response,err);
             })
-    }
+    },
 
+
+    approveAccessWithoutApplication:function(req,res){
+        let receivedData = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            message: '',
+            sent: false,
+        };
+
+        if(!receivedData.user || !__validateId(receivedData.user)){
+            handler.sendError(res,response,'No valid user info received');
+            return;
+        }
+
+        if(!receivedData.index || receivedData.index <= 100 || receivedData.index >105 ){
+            handler.sendError(res,response, 'No valid authorization code  received');
+            return;
+        }
+
+        response.index = receivedData.index-100;
+        response.user = receivedData.user;
+
+        applicationModel.findOne({user:receivedData.user,index:response.index}).exec()
+            .then(function(doc){
+                if(!doc){
+                    throw 'Please request the authorization first.'
+                }
+                doc = JSON.parse(JSON.stringify(doc));
+                response.success = true;
+                response.access =  doc.access;
+                handler.clearApplicationQueue(doc.user,receivedData.index-100,true);
+                handler.approveAccess(receivedData.user,receivedData.index-100);
+                handler.finalSend(res,response);
+            })
+            .catch(function(err){
+                if(typeof err == 'string')
+                    response.message = err;
+                else
+                    response.messaege = JSON.stringify(err);
+                response.success = false;
+                handler.finalSend(res,response);
+            })
+    },
 };
 
 module.exports = handler;

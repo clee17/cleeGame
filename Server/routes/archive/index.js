@@ -1,12 +1,13 @@
 const express = require('express'),
     path = require('path');
 
+const identityModel =  require(path.join(__dataModel,"role"));
+const userRoleModel =  require(path.join(__dataModel,"user_role"));
+
 let fs = require('fs');
 
-global.__msgList = new Array();
-
 global.__chapterCount = function(index){
-    if(index==0)
+    if(index===0)
         return '首章';
     else if(index>0)
         return '第'+index+'章';
@@ -14,17 +15,38 @@ global.__chapterCount = function(index){
         return '无法转义';
 };
 
-global.__isIdentity = function(index,access){
-    for(let i =0;i<access.length;++i){
-        if(access[i].index === index)
-            return true;
-    }
-    return false;
+global._ROLE = [
+    {},
+    {name:'writer',value:parseInt('000000001',2)},
+    {name:'painter',value:parseInt('00000010',2)}
+];
+
+global.__isRole = function(index,setting){
+    if(!setting)
+        return false;
+    let role = setting.role;
+    if(!_ROLE[index])
+        return false;
+    return _ROLE[index].value&role >0;
 }
+
+global.__isIdentity = async function(title,user){
+    if(!user)
+        return false;
+    let result = await identityModel.findOne({title:'admin'});
+    let userRole = await userRoleModel.findOne({role:result._id,user:user._id});
+    return !!userRole;
+}
+
 
 global.__renderIndex = function(req,res,renderInfo){
     let renderPage = {viewport:'',controllers:[],modules:[],
-        services:[],err:'',user:req.session.user,userId:'',title:null,styles:[],variables:{},
+        services:[],err:'',
+        user:req.session.user,
+        userId:'',
+        title:null,
+        styles:[],
+        variables:{},
         websiteInfo:_websiteInfo,
         infoAll:_infoAll,
         countryCode:__getCountryCode(req.ipData)};
@@ -49,23 +71,6 @@ global.__renderIndex = function(req,res,renderInfo){
     res.render('cleeArchive/index.html',renderPage);
 };
 
-global.__renderSubPage = function(req,res,pageId,renderInfo){
-    let renderPage = {};
-    for(let attr in renderInfo){
-        renderPage[attr] = renderInfo[attr];
-    }
-    renderPage.websiteInfo = _websiteInfo;
-    renderPage.infoAll = _infoAll;
-    res.render('cleeArchive/'+pageId+'.html',renderPage);
-};
-
-global.__renderTemplates = function(req,res,pageId,renderInfo){
-    let renderPage = {};
-    for(let attr in renderInfo){
-        renderPage[attr] = renderInfo[attr];
-    }
-    res.render(path.join(__templates,pageId+'.html'),renderPage);
-};
 
 global.__renderError = function(req,res,errMessage){
     let userId = req.ip;
@@ -95,6 +100,25 @@ global.__renderError = function(req,res,errMessage){
         'https://cdn.jsdelivr.net/npm/angular-cookies@1.5.9/angular-cookies.min.js'];
     res.render('cleeArchive/index.html',renderInfo);
 };
+
+global.__renderSubPage = function(req,res,pageId,renderInfo){
+    let renderPage = {};
+    for(let attr in renderInfo){
+        renderPage[attr] = renderInfo[attr];
+    }
+    renderPage.websiteInfo = _websiteInfo;
+    renderPage.infoAll = _infoAll;
+    res.render('cleeArchive/'+pageId+'.html',renderPage);
+};
+
+global.__renderTemplates = function(req,res,pageId,renderInfo){
+    let renderPage = {};
+    for(let attr in renderInfo){
+        renderPage[attr] = renderInfo[attr];
+    }
+    res.render(path.join(__templates,pageId+'.html'),renderPage);
+};
+
 
 global.__readSettings = function (callBack,data) {
     let redisList = ['grade','warning'];
@@ -231,9 +255,7 @@ router.post('/admin/aggregate',admin.aggregate);
 router.post('/admin/countRec',admin.countRec);
 router.post('/admin/addRecord',admin.addRec);
 router.post('/admin/removeRec',admin.removeRec);
-router.post('/admin/approveAccess',admin.approveAccess);
-router.post('/admin/addAccess',admin.addAccess);
-router.post('/admin/addAccess',admin.addAccess);
+router.post('/admin/approveAccessWithoutApplication',admin.approveAccessWithoutApplication);
 router.post('/admin/addConversation',admin.addConversationWithMail);
 router.post('/admin/answerApplicationQueue',admin.answerApplicationQueue);
 router.post('/admin/resendApplication',admin.resendApplication);
@@ -241,10 +263,13 @@ router.post('/admin/resendApplication',admin.resendApplication);
 
 //user
 router.get('/register/:registerId',subUser.register);
+router.post('/users/application',subUser.application);
 router.post('/users/follow',subUser.follow);
 router.post('/users/followedTag',subUser.getTagFollowed);
 router.post('/users/updateFollow',subUser.updateFollowed);
 router.post('/users/apply',subUser.apply);
+router.post('/users/getConversationForApplication',subUser.getConversation)
+
 router.get('/users/:userId',subUser.userPage);
 router.post('/users/settings/reload',subUser.reloadSettings);
 router.get('/users/settings/:userId',subUser.userSetting);

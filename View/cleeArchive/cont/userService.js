@@ -35,6 +35,10 @@ app.service('userManager',function($http,$rootScope){
         manager.requestAll('/users/apply','applicationEnded',data);
     };
 
+    this.requestApplications = function(data,sign){
+        manager.requestAll('/users/application',sign,data);
+    }
+
     this.saveBasicInfo = function(data){
         manager.requestAll('/user/saveInfo','basicInfoSaveFinished',data);
     };
@@ -69,5 +73,9 @@ app.service('userManager',function($http,$rootScope){
 
     this.resetPwdMail = function(data){
         manager.requestAll('/user/resetPwdMail/','resetPwdMail sent',data);
+    }
+
+    this.requestApplicationConversation = function(requestId){
+        manager.requestAll('/users/getConversationForApplication/','application conversation received', {application:requestId});
     }
 });

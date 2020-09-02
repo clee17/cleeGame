@@ -295,7 +295,7 @@
     </div>
     <div>
     </div>
-    <% if (user && user.settings && user.userGroup >= 999){ %>
+    <% if (user && user.settings && user.isAdmin){ %>
     <div style="margin:0;padding-left:2rem;min-height:2rem;border-top:solid 1px gray;display:flex;flex-direction:row;background:rgba(223,216,214,255);">
         <div style="margin-top:auto;margin-bottom:auto;">调整分级:</div>
         <select ng-model="targetGrade" style="height:1.5rem;margin-top:auto;margin-bottom:auto;">

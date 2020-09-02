@@ -6,6 +6,7 @@ let express = require('express'),
 
 let applicationModel = require(path.join(__dataModel,'application')),
     userSettingModel = require(path.join(__dataModel,'cleeArchive_userSetting')),
+    conversationModel = require(path.join(__dataModel,'application_conversation')),
     queueModel = require(path.join(__dataModel,'application_queue')),
     userModel = require(path.join(__dataModel,'user')),
     worksModel = require(path.join(__dataModel,'cleeArchive_works')),
@@ -18,7 +19,7 @@ let md5 = crypto.createHash('md5');
 
 let handler = {
     finalSend: function (res, data) {
-        if (data.sent)
+        if (!data || data.sent)
             return;
         data.sent = true;
         res.send(lzString.compressToBase64(JSON.stringify(data)));
@@ -53,11 +54,11 @@ let handler = {
     },
 
     filter: function (req, res, data) {
-        if (req.session.user && __isIdentity(202,req.session.user.settings.access))
+        if (req.session.user && req.session.user.isAdmin)
             handler.finalSend(res, data);
         else if (req.session.user && req.session.user._id == data.userId)
             handler.finalSend(res, data);
-        else if (req.session.user && req.session.user.userGroup >= 999)
+        else if (req.session.user && req.session.user.isAdmin)
             handler.finalSend(res, data);
         else if (__getCountryCode(req.ipData) !== 'CN')
             handler.finalSend(res, data);
@@ -89,11 +90,11 @@ let handler = {
                 __renderError(req,res,err);
             }else if(!doc){
                 __renderError(req,res,_errAll[4]);
-            }else if (doc.status < 1){
+            }else if (doc.result < 1){
                 __renderError(req,res,_errAll[5]);
-            }else if (doc.status === 2){
+            }else if (doc.result === 2){
                 __renderError(req,res,_errAll[6]);
-            }else if(doc.status === 3){
+            }else if(doc.result === 3){
                 __renderError(req,res,_errAll[7]);
             }else{
                 if(!doc.register.user){
@@ -266,16 +267,25 @@ let handler = {
             sent: false,
         };
 
-        if (receivedData.type >= 1 && !req.session.user)
-            response.error = '创作者权限仅允许注册用户申请';
+        if (receivedData.type >= 1 && receivedData.type <= 10 && !req.session.user)
+            response.error = _errInfo[22];
 
-        if(req.session.user._id !== receivedData.user)
-            throw {message:_errAll[21]};
+        if(req.session.user._id !== receivedData.user){
+            response.message = _errAll[21];
+            response.error = true;
+        }
+
+        if(receivedData.register === ""){
+            response.message = _errAll[22];
+            response.error = true;
+        }
 
         if(response.error) {
-            handler.finalSend(res, data);
+            handler.finalSend(res, response);
             return;
         }
+
+
 
         applicationModel.findOne({register:receivedData.register,type:receivedData.type,statements:receivedData.statements}).exec()
             .then(function(result){
@@ -285,20 +295,17 @@ let handler = {
                     let application = new applicationModel();
                     application.register = receivedData.register;
                     application.type = receivedData.type;
+                    application.statements = receivedData.statements || "";
                     return application.save();
                 }
             })
             .then(function(application){
                 handler.addQueue(application);
-                return userSettingModel.findOneAndUpdate({user:receivedData.user},{$push:{access:{index:receivedData.type}}},{new:true}).exec();
-            })
-            .then(function(setting){
                 response.success = true;
-                response.access = setting.access;
+                response.application = JSON.parse(JSON.stringify(application));
                 handler.finalSend(res,response);
             })
             .catch(function(err){
-                console.log(err);
                 response.success = false;
                 response.message = err.message;
                 handler.finalSend(res,response);
@@ -951,7 +958,78 @@ let handler = {
                response.preference = doc.preference;
                handler.finalSend(res,data);
         });
+    },
 
+    application:async function(req,res){
+        let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            sent: false,
+            applications:[],
+            message:''
+        };
+
+        let search = data.search || data;
+        let cond = data.cond || {};
+        let register = req.session.user.register;
+        if(!register){
+            register = {};
+            register._id = "";
+        }
+        if(!req.session.user || (register._id !== search.register && !req.session.user.isAdmin)){
+            response.message = "You are not authorized to get the information";
+            handler.finalSend(res,response);
+            return;
+        }
+        if(search.register === "")
+            search.register = null;
+
+        applicationModel.find(search,cond,function(err,result){
+            if(err){
+                response.message = err.message;
+                handler.finalSend(res,response);
+            }else{
+                response.success = true;
+                response.applications = JSON.parse(JSON.stringify(result));
+                handler.finalSend(res,response);
+            }
+        })
+    },
+
+    getConversation:function(req,res){
+        let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+        let response = {
+            success: false,
+            sent: false,
+            conversations:[],
+            message:''
+        };
+
+        if(!received.application || !__validateId(received.application)){
+            response.message = 'no valid application id received';
+            handler.finalSend(res,response);
+            return;
+        }
+        let pageId = received.pageId || 1;
+        pageId--;
+
+        if(pageId <0){
+            response.message = 'no valid page id received';
+            handler.finalSend(res,response);
+            return;
+        }
+
+        conversationModel.find({application:received.application},null,{skip:pageId*10,limit:10},function(err,conversations){
+            if(err){
+                console.log(err);
+                response.message = err.message;
+                response.success = false;
+            }else{
+                response.success = true;
+                response.conversations = JSON.parse(JSON.stringify(conversations));
+            }
+            handler.finalSend(res,response);
+        }).populate('from to');
     }
 };
 

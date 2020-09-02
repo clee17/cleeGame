@@ -106,13 +106,13 @@ let handler = {
         });
     },
 
-    newTech:function(req,res){
+    newTech:async function(req,res){
         let authorize = false;
         if(!req.session.user)
             __renderError(req,res,_errInfo[2]);
-        else if(req.session.user.userGroup <999 && !__isIdentity(104,req.session.user.settings))
+        else if(!req.session.user.isAdmin && !__isRole(4,req.session.user.settings))
             __renderError(req,res,_errInfo[18]);
-        else if(req.session.user.userGroup >=999 && __isIdentity(104,req.session.user.settings))
+        else if(req.session.user.isAdmin || __isRole(4,req.session.user.settings))
             __renderIndex(req,res,{viewport:'/dynamic/techNew',
                 controllers:['/view/cont/edit_tech_con.js'],
                 services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
@@ -122,21 +122,12 @@ let handler = {
             __renderError(req,res,_errInfo[2]);
     },
 
-    newFanfic:function(req,res){
-        let authorize = false;
-        if(req.session.user)
-        {
-            if(req.session.user.userGroup>= 999)
-                authorize = true;
-            else if(req.session.user.settings&& __isIdentity(105,req.session.user.settings.access))
-                authorize = true;
-        }
-
+    newFanfic:async function(req,res){
         if(!req.session.user)
             __renderError(req,res,_errInfo[2]);
-        else if(req.session.user && !authorize)
+        else if(req.session.user && (!__isRole(1,req.session.user.settings) && !req.session.user.isAdmin))
             __renderError(req,res,_errInfo[3]);
-        else if(req.session.user && authorize)
+        else if(req.session.user&& (__isRole(1,req.session.user.settings) || req.session.user.isAdmin))
             __renderIndex(req,res,{viewport:'/dynamic/booknew',
                 controllers:['/view/cont/edit_con.js'],
                 services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
@@ -698,7 +689,7 @@ let handler = {
             });
     },
 
-    changeInfo:function(req,res){
+    changeInfo:async function(req,res){
         try{
             let data = JSON.parse(lzString.decompressFromBase64(req.body.data));
             let response = {
@@ -714,7 +705,7 @@ let handler = {
             if(!req.session.user ) {
                 response.message = _errAll[13];
                 handler.finalSend(res,response);
-            }else if(req.session.user.userGroup <999 && !__isIdentity(202,req.session.user.settings.access)){
+            }else if(! req.session.user.isAdmin){
                 response.message = _errAll[12];
                 handler.finalSend(res,response);
             }else{
