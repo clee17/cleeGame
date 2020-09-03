@@ -10,7 +10,8 @@ var text = [
     "The length of password has to be set between 6-12 digits.<br>The length of username cannot exceeds 12 characters.",
     "The length of your reply cannot be less than 15 characters",
     "You must provide an application code",
-    "Your application code provided is not valid"
+    "Your application code provided is not valid",
+    "Your password has been successfully reset, please login with the new password at the top right corner."
 ];
 
 module.exports = text;

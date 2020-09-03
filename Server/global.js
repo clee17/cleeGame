@@ -112,6 +112,7 @@ global.__processMail = function(mailId,receiver,data,countryCode){
         let titleIndex = mailContents.indexOf('<title>');
         if(titleIndex >=0){
             mailTitle = mailContents.substring(titleIndex,mailContents.indexOf('</title>'));
+            mailTitle = mailTitle.substring(mailTitle.indexOf('<title>')+7);
             mailContents = mailContents.substring(mailContents.indexOf('</title>')+8);
         }
         __sendMail(mailContents,receiver,mailTitle);

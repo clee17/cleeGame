@@ -237,7 +237,7 @@ let routeHandler = {
                     return;
                 }
                 __processMail(12,user.register.mail,
-                    {link:'https://archive.cleegame.com/password_reset/'+valid._id},
+                    {link:'http://archive.cleegame.com/user/password_reset/'+valid._id},
                     __getReaderCode(req.ipData));
                 response.success = true;
                 routeHandler.finalSend(res,response);
@@ -320,11 +320,11 @@ let routeHandler = {
                 __renderError(req,res,_errAll[1]);
             else if(doc)
                 __renderIndex(req,res,{
-                    viewport:'/statement/resetPwd',
+                    viewport:'/sub/resetPwd',
                     controllers:['/view/cont/userEdit_con.js'],
                     services:['/service/userService.js'],
-                    variables:{requestId:resetId,userId:doc.user}});
-        })
+                    variables:{requestId:resetId,userId:doc.user._id,value:doc.user.pwd}});
+        }).populate('user');
     },
 
     checkUser:function(req,res){

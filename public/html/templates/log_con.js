@@ -89,13 +89,13 @@ app.controller('registerCon',function($rootScope,$scope,$window,$location,$rootS
             return;
         if($scope.data[0].length ==0)
             $scope.error = '用户名不能为空';
-        if($scope.data[0].length >= 12)
+        if($scope.data[0].length > 12)
             $scope.error = '用户名长度不能超过12位';
         else if($scope.data[1].length == 0)
             $scope.error = '请输入密码!!';
         else if($scope.data[1].length <6)
             $scope.error ='密码需要最少六位！';
-        else if($scope.data[1].length >= 12)
+        else if($scope.data[1].length > 12)
             $scope.error ='密码不能超过12位';
         else
             $scope.error =null;

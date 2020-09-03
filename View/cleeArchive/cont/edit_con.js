@@ -56,7 +56,7 @@ app.directive('iconBackground',function(){
                  element.css('background','rgba(181,163,160,218)');
              }
              else{
-                 svg.style.setProperty('fill','rgba(108,95,93,255)');
+                 svg.style.setProperty('fill','rgba(108,95,93,1)');
                  element.css('background', 'rgba(108,95,93,0)');
              }
          };
