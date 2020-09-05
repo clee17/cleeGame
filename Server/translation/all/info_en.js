@@ -11,7 +11,11 @@ var text = [
     "The length of your reply cannot be less than 15 characters",
     "You must provide an application code",
     "Your application code provided is not valid",
-    "Your password has been successfully reset, please login with the new password at the top right corner."
+    "Your password has been successfully reset, please login with the new password at the top right corner.",
+    "general",
+    "NC-17",
+    "NC-21",
+    "no replies"
 ];
 
 module.exports = text;

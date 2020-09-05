@@ -6,5 +6,5 @@ module.exports = new mongoose.Schema({
     points:{type:Number,default:0},
     register:{type:mongoose.Schema.ObjectId,default:null,ref:'user_register'}
 },{
-    timestamps:true
+    timestamps:{ createdAt: true, updatedAt: false }
 });

@@ -108,6 +108,7 @@ global.__renderSubPage = function(req,res,pageId,renderInfo){
     }
     renderPage.websiteInfo = _websiteInfo;
     renderPage.infoAll = _infoAll;
+    renderPage.errAll = _errAll;
     res.render('cleeArchive/'+pageId+'.html',renderPage);
 };
 
@@ -157,6 +158,7 @@ global.__validateId = function(id){
 
 let  main = require(path.join(__routes,"/archive/main")),
      vote = require(path.join(__routes,"/archive/vote")),
+     board = require(path.join(__routes,"/archive/board")),
      dynamic = require(path.join(__routes,'/archive/dynamic')),
      subUser = require(path.join(__routes,'/archive/user')),
      feed = require(path.join(__routes,"/archive/feed")),
@@ -222,13 +224,22 @@ let router = express.Router();
 //entry pages
 router.get('/',main.index);
 router.get('/fanfic',main.index);
+router.get('/news',main.index);
 router.get('/donate',main.index);
 router.get('/registerProcess',main.index);
 router.get('/resetPwdRequest',main.index);
 router.get('/sub/:pageId',main.sub);
+router.get('/board/:boardId',board.entry);
+router.post('/board/threads',board.threads);
+router.post('/board/submitThread',board.submitThread);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement',main.statement);
+
+//mce
+router.get('/testMce',function(req,res){
+    res.render('cleeArchive/testTinyMce.html',{});
+});
 
 //votes
 router.get('/vote/:voteId',vote.index);

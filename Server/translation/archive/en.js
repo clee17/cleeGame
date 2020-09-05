@@ -11,7 +11,7 @@ var text = [
     'Login',
     'FAN WORKS', // 10
     'TUTORIALS',
-    'DEVELOPMENT',
+    'NEWS',
     'About Site',
     'Site Map',
     'Site Intro',
@@ -104,7 +104,12 @@ var text = [
     "You must configure your mail before you continue using this site",
     "The user does not plan to introduce itself",
     "Application's statements",
-    "You have received no replies from the administrator so far"
+    "You have received no replies from the administrator so far",
+    "There is no message here yet",
+    "new thread",
+    "Title (necessary)",
+    "publish",
+    "new thread cannot be less than 50 characters"
 ];
 
 module.exports = text;

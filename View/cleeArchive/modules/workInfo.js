@@ -90,9 +90,9 @@ app.directive('gradeShow',function(){
         },
         link: function (scope, element, attr) {
             if(scope.grade  == 1)
-                element.css('background','rgba(251,161,0,255)');
+                element.css('background','rgba(251,161,0,1)');
             else if(scope.grade == 2)
-                element.css('background','rgba(139,100,127,255)');
+                element.css('background','rgba(139,100,127,1)');
         }
     }
 });

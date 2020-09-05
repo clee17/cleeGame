@@ -102,14 +102,16 @@
 .white_ghost{
     background-color:white;
     color:#73637b;
+    border:solid 1px rgba(185,185,185,0.8);
 }
 
 .white_ghost:hover{
     background-color:rgba(215,215,215,0.6);
+    border:solid 1px rgba(185,185,185,0.8);
 }
 
 .ghost-button:disabled{
-    background-color:  rgba(158,158,158,1);
+    background-color:rgba(185,185,185,0.8);
 }
 
 

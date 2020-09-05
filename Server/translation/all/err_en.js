@@ -19,9 +19,12 @@ var text = [
     "This mail address has been registered already",
     "This mail address does not exist", //18
     "There is no mail connected to this account, please contact the administrator. ",
-    "You've applied for this identity before, you cannot apply again.",
+    "You've applied for this identity before, you cannot apply again.", //20
     "A user could only apply for the identity by itself",
-    "There is no valid register information connected to your account, please contact administrator."
+    "There is no valid register information connected to your account, please contact administrator.",
+    "Your user id is not consistent with the one on server",
+    "The length of your title cannot be less than %l",
+    "The title cannot be empty"
 ];
 
 module.exports = text;

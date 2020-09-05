@@ -16,24 +16,25 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/svgxuse@1.2.6/svgxuse.min.js"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/js/all.min.js"></script>
 
+    <% if(variables.editor){ %>
+    <script src="/tinymce/tinymce.js" referrerpolicy="origin"></script>
+    <script src="/templates/tinymce.js" referrerpolicy="origin"></script>
+    <% } %>
+
     <script src="/js/JsExt.js"></script>
 
     <link rel="stylesheet" href="/css/archive/layout.css">
     <link rel="stylesheet" href="/css/archive/button.css">
     <link rel="stylesheet" href="/css/animation.css">
-
     <script>var app = angular.module('cleeArchive',['ngCookies']);</script>
-    <script src="/service/userService.js"></script>
-    <script src="/templates/log_con.js"></script>
-    <script>
-        app.controller('entryCon',function($scope,$rootScope,$window,$timeout,$cookies,loginManager){
-            window.addEventListener("click",function(event){
-                if($rootScope._buttonClicked)
-                    $rootScope._buttonClicked = false;
-                else
-                    $rootScope.$broadcast('clicked',{event:event});
-            });
 
+    <% if(variables.editor){ %>
+    <script>
+        angular.module("cleeArchive").requires.push('ui.tinymce');
+    </script>
+    <% } %>
+    <script>
+        app.controller('entry_infoCon',function($scope,$rootScope,$window,$timeout,$cookies,loginManager){
             $rootScope.err = "<%- err %>";
             $rootScope.readerId = '<%- userId %>';
             $rootScope.registerId = '<%- registerId %>';
@@ -48,251 +49,18 @@
             for(let attr in $rootScope.variables){
                 $rootScope[attr] = $rootScope.variables[attr];
             };
-            
+
             if($cookies.getObject('readerLanguage')){
                 $rootScope.countryCode = $cookies.getObject('readerLanguage');
             }
 
-            $rootScope.switchCountryCode = function(countryCode){
-                $cookies.putObject('readerLanguage',countryCode);
-                $window.location.reload();
-            };
-
-            $scope.signal = '';
-            $scope.alertData = null;
-            $scope.showAlert = false;
-            $scope.showError = false;
-            $scope.alertValidate = null;
-
-            $scope.hideAlert = function(scope){
-                scope.showAlert = false;
-            }
-
-            $scope.$on('showAlert',function(event,data){
-                $scope.alertWindow = 3;
-                $scope.showAlert = true;
-                $scope.signal = data.signal || '';
-                $scope.alertData = data.variables;
-                $scope.alertValidate = data.validate || null;
-                let alertInfo = document.getElementById('alertInfo');
-                if(alertInfo)
-                    alertInfo.innerHTML = data.alertInfo || '<span>error</span>';
-                let height = data.height || 13;
-                $timeout(function(){
-                    let element = document.getElementById('alertContents');
-                    if(element){
-                        element.style.height = height + 'rem';
-                    }
-                },10)
-            });
-
-            $scope.$on('showExplain',function(event,data){
-                $scope.alertWindow = 1;
-                $scope.showAlert = true;
-                let showExplain = function(data){
-                    let explain = document.getElementById('explainBoard');
-                    if(explain){
-                        let children = explain.children;
-                        children[0].innerHTML = '<div style="margin:2rem">'+data.info+'</div>';
-                        explain.style.height = data.height ? data.height+'rem': '30rem';
-                    }
-                };
-                $timeout(showExplain(data),10)
-            });
-
-            $scope.$on('showError',function(event,data){
-                $scope.showError = true;
-                $scope.$broadcast('showErrorText',data);
-            });
-
-            $scope.$on('showHeadSign',function(event,data){
-                let element = document.getElementById('headSign');
-                if(element)
-                    element.innerHTML = data.message;
-            });
-
-            $scope.hideExplain = function(){
-                let explain = document.getElementById('explainBoard');
-                if(explain){
-                    explain.style.height = '0';
-                }
-                $timeout($scope.hideAlert($scope),140);
-            };
-
-            $scope.collectFormData = function(response){
-                response.formData = {};
-                let infoNodes = ['TEXTAREA','INPUT'];
-                let element = document.getElementById('alertInfo');
-                let children = element.children;
-                for(let i=0; i<children.length;++i){
-                    let subDocs=  children[i].children;
-                    for(let j =0; j<subDocs.length;++j){
-                        if(infoNodes.indexOf(subDocs[j].nodeName)>=0)
-                            response.formData[subDocs[j].id] = subDocs[j].value;
-                    }
-                }
-            };
-
-            $scope.tellYes = function(){
-                if($scope.alertValidate && !$scope.alertValidate())
-                    return;
-                let finishTellYes = function(scope,rootScope){
-                    let response = {signal:scope.signal};
-                    if(scope.alertData)
-                        response.variables = scope.alertData;
-                    scope.collectFormData(response);
-                    rootScope.$broadcast('tellYes',response);
-                    scope.hideAlert(scope);
-                }
-                let element = document.getElementById('alertContents');
-                if(element){
-                    element.style.height = '0';
-                }
-                $timeout(finishTellYes($scope,$rootScope),140);
-            };
-
-            $scope.tellNo = function(){
-                let finishTellNo = function(scope,rootScope){
-                    rootScope.$broadcast('tellNo',{signal:scope.signal});
-                    scope.hideAlert(scope);
-                }
-                let element = document.getElementById('alertContents');
-                if(element){
-                    element.style.height = '0';
-                }
-                $timeout(finishTellNo($scope,$rootScope),140);
-            };
-
-            $scope.loggingOut = false;
-            $scope.freezingClick = false;
-
-            $scope.showDashboard = false;
-            $scope.showLoginboard = false;
-
-            $scope.switchDashboard = function(event){
-                $scope.showDashboard = !$scope.showDashboard;
-                $scope.freezingClick = true;
-                $timeout(function(){
-                    $scope.freezingClick = false;
-                },500);
-            };
-
-            $scope.switchLoginboard = function(event){
-                $scope.showLoginboard = !$scope.showLoginboard;
-                $scope.freezingClick = true;
-                $timeout(function(){
-                    $scope.freezingClick = false;
-                },500);
-            };
-
-            $scope.logout = function(){
-                loginManager.requestLogout();
-                $scope.loggingOut = true;
-                $scope.showDashboard = false;
-            };
-
-            $scope.$on('logoutFinished',function(event,data){
-                $scope.loggingOut = false;
-                if(data.success)
-                    window.location.reload();
-                else
-                    $scope.$emit('showError',data.message);
-            });
-
-            $scope.$on('clicked',function(event,data) {
-                if(!data.event.target)
-                    return;
-                if(!data.event.target.className.indexOf)
-                    return;
-                if (data.event.target.className.indexOf('dashboard') == -1 && !$scope.freezingClick && $scope.showDashboard)
-                {
-                    $scope.showDashboard = false;
-                    $scope.$apply();
-                }
-            });
-
-            $scope.countryStatement = function(){
-                let element = document.getElementById("countryStatement");
-                let statement = $rootScope.countryState;
-                let index = 2;
-                switch($rootScope.countryCode){
-                    case 'CN':
-                        index = 1;
-                }
-                statement = statement.replace(/%s/g,$rootScope.countryList[index]);
-                statement = statement.replace(/%l/g,"<a href='/countryStatement'>"+$rootScope.statementTitle+"</a>");
-
-                if(element)
-                    element.innerHTML =  statement;
-            };
-
-
-            $scope.initialize = function(){
-                if($scope._initialized)
-                   return;
-                $scope._initialized = true;
-                $scope.countryStatement();
-            };
-
-
-            $scope.initialize();
-        });
-
-        app.directive('initialisation',['$rootScope',function() {
-            return {
-                restrict: 'AC',
-                link: function($scope) {
-                    var to;
-                    var listener = $scope.$watch(function() {
-                        clearTimeout(to);
-                        to = setTimeout(function () {
-                            listener();
-                            $scope.$broadcast('initialisation completed');
-                        }, 50);
-                    });
-                }
-            };
-        }]);
-
-        app.filter('base64', function() { //可以注入依赖
-            return function(str,type) {
-                if(!str || str.length === 0)
-                    return str;
-                let result = LZString.decompressFromBase64(str);
-                if(type && type === 1)
-                    result = decodeURIComponent(result);
-                return result;
-            }
-        });
-
-        app.directive('base64',function(){
-            return {
-                restrict: 'A',
-                link:function(scope,element,attr){
-                   let str = element.html();
-                    if(str.length === 0)
-                        return;
-                   str = LZString.decompressFromBase64(str);
-                   if(str)
-                       str = str.replace(/\n/g,'<br>');
-                   element.html(str);
-                }
-            }
-        });
-
-        app.directive('html',function(){
-            return {
-                restrict: 'A',
-                scope:{
-                    contents:"@",
-                },
-                link:function(scope,element,attr){
-                    let str = scope.contents || element.html();
-                    element.html(str);
-                }
-            }
+            $rootScope.$broadcast('settings finish');;
         });
     </script>
+    <script src="/service/userService.js"></script>
+    <script src="/templates/log_con.js"></script>
+    <script src="/view/cont/index_con.js"></script>
+    <script src="/view/cont/index_filter.js"></script>
     <% services.forEach(function(item){ %>
     <script src='<%= item %>'></script>
     <% }) %>
@@ -312,86 +80,86 @@
     <% }) %>`
 
 </head>
-<style>
-</style>
-<body ng-app="cleeArchive" ng-controller="entryCon" style="padding:0;margin:0;">
-<div id="alertWindow" class="topBoard">
-    <div style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(125,125,125,0.6);z-index:0;pointer-events:auto;" ng-show="showAlert"></div>
-    <div class="error-box" ng-show="showError" style="z-index:10;">
-    </div>
-    <div id="explainBoard" ng-show="alertWindow === 1" style="z-index:20;">
-        <div style="margin:2rem;flex:1;">
+<body ng-app="cleeArchive" ng-controller="entryCon">
+<div ng-controller="entry_infoCon" style=" display:flex;flex-direction:column;width:100%;height:100%;">
+    <div id="alertWindow" class="topBoard">
+        <div style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(125,125,125,0.6);z-index:0;pointer-events:auto;" ng-show="showAlert"></div>
+        <div class="error-box" ng-show="showError" style="z-index:999;">
         </div>
-        <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
-    </div>
-    <div id="alertBox" ng-show="alertWindow === 2"></div>
-    <div id="alertContents" class="alert" ng-show="alertWindow === 3" style="height:0;">
-        <div><div style="padding-top:3px;"><%- websiteInfo[2] %></div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
-        <div style="background:rgba(200,200,200,1);height:1px;width:68%;margin-left:auto;margin-right:auto;margin-bottom:0.5rem;"></div>
-        <div style="flex:1;display:flex;flex-direction:column;" id="alertInfo">
+        <div id="explainBoard" ng-show="alertWindow === 1" style="z-index:20;">
+            <div style="margin:2rem;flex:1;">
+            </div>
+            <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
         </div>
+        <div id="alertBox" ng-show="alertWindow === 2"></div>
+        <div id="alertContents" class="alert" ng-show="alertWindow === 3" style="height:0;">
+            <div><div style="padding-top:3px;"><%- websiteInfo[2] %></div> <button style="margin-left:auto;" ng-click="tellNo()"><i class="fas fa-times"></i></button></div>
+            <div style="background:rgba(200,200,200,1);height:1px;width:68%;margin-left:auto;margin-right:auto;margin-bottom:0.5rem;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;" id="alertInfo">
+            </div>
 
-        <div style="margin-bottom:2rem;">
-            <button ng-click="tellYes()" class="grand-button" style="padding-top:5px;padding-bottom:10px;"><%- websiteInfo[0] %></button>
-            <button ng-click="tellNo()" class="back-button"><%- websiteInfo[1] %></button>
+            <div style="margin-bottom:2rem;">
+                <button ng-click="tellYes()" class="grand-button" style="padding-top:5px;padding-bottom:10px;"><%- websiteInfo[0] %></button>
+                <button ng-click="tellNo()" class="back-button"><%- websiteInfo[1] %></button>
+            </div>
         </div>
     </div>
-</div>
-<div id="header">
-    <div id="userBoard">
-        <div id="logo">
-            <a href="/">
-                <div>ARCHIVE</div>
-                <div>CLEE</div>
+    <div id="header">
+        <div id="userBoard">
+            <div id="logo">
+                <a href="/">
+                    <div>ARCHIVE</div>
+                    <div>CLEE</div>
+                </a>
+            </div>
+            <div id="languageSwitch">
+                <button id="BtnEn" ng-disabled="countryCode === 'OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
+                <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')" style="font-weight:bold;">CN</button>
+            </div>
+            <span id="countryStatement"></span>
+            <% if(user) { %>
+            <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div><%- websiteInfo[3] %></div></a>
+            <a href="/fanfic/post/new" target="_blank"><div><%- websiteInfo[4] %></div></a>
+            <a href="" style="display:flex;flex-direction:row;margin-right:2.5rem;" ng-click="switchDashboard($event)">
+                <div style="margin-top:auto;margin-bottom:auto;text-align:right;"><%= user.user %></div>
+                <div style="margin-left:8px;"><i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:-3px;"></i></div>
             </a>
-        </div>
-        <div id="languageSwitch">
-            <button id="BtnEn" ng-disabled="countryCode === 'OTHER'" ng-click="switchCountryCode('OTHER')" style="font-weight:bold;">EN</button>
-            <button id="BtnJp" ng-disabled="countryCode === 'CN'" ng-click="switchCountryCode('CN')" style="font-weight:bold;">CN</button>
-        </div>
-        <span id="countryStatement"></span>
-        <% if(user) { %>
-        <a href="<%= '/users/'+user._id %>" style="margin-left:auto;"><div><%- websiteInfo[3] %></div></a>
-        <a href="/fanfic/post/new" target="_blank"><div><%- websiteInfo[4] %></div></a>
-        <a href="" style="display:flex;flex-direction:row;margin-right:2.5rem;" ng-click="switchDashboard($event)">
-            <div style="margin-top:auto;margin-bottom:auto;text-align:right;"><%= user.user %></div>
-            <div style="margin-left:8px;"><i class="fas fa-caret-down" style="font-size:1.3rem;margin-left:-3px;"></i></div>
-        </a>
-        <div ng-show="showDashboard" id="dashboard">
-            <% if(user.isAdmin){ %>
-            <a class="dashboardSelect" href="/admin"><%- websiteInfo[5] %></a>
+            <div ng-show="showDashboard" id="dashboard">
+                <% if(user.isAdmin){ %>
+                <a class="dashboardSelect" href="/admin"><%- websiteInfo[5] %></a>
+                <% } %>
+                <a class="dashboardSelect" href="/donate"><%- websiteInfo[6] %></a>
+                <a class="dashboardSelect" href="/users/settings/<%- user._id %>"><%- websiteInfo[7] %></a>
+                <button class="dashboardBtn" ng-click="logout()" ng-disabled="loggingOut"><%- websiteInfo[8] %></button>
+            </div>
+            <% }else{ %>
+            <div ng-show="showLoginboard" id="loginParent">
+                <div ng-include="'/templates/loginBoard'" ng-controller="loginCon"></div>
+            </div>
+            <a class="button-hover" style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;font-family:Arial, serif;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
             <% } %>
-            <a class="dashboardSelect" href="/donate"><%- websiteInfo[6] %></a>
-            <a class="dashboardSelect" href="/users/settings/<%- user._id %>"><%- websiteInfo[7] %></a>
-            <button class="dashboardBtn" ng-click="logout()" ng-disabled="loggingOut"><%- websiteInfo[8] %></button>
         </div>
-        <% }else{ %>
-        <div ng-show="showLoginboard" id="loginParent">
-            <div ng-include="'/templates/loginBoard'" ng-controller="loginCon"></div>
+        <div id="headerGuideBar">
+            <guide_button color="rgba(119,111,144,1)" height="1.8rem" style="margin-left:auto;"><a href="/"><%- websiteInfo[94] %></a></guide_button>
+            <guide_button color="rgba(119,111,144,1)" height="1.8rem" ><a href="/news"><%- websiteInfo[12] %></a></guide_button>
+            <guide_button color="rgba(119,111,144,1)" height="1.8rem" style="margin-right:auto;"><a href="/fanfic"><%- websiteInfo[10] %></a></guide_button>
         </div>
-        <a class="button-hover" style="right:2rem;line-height:2.5rem;z-index:99;position:absolute;font-family:Arial, serif;" ng-click="switchLoginboard()"><%- websiteInfo[9] %></a>
-        <% } %>
     </div>
-    <div id="headerGuideBar">
-        <guide_button color="rgba(119,111,144,1)" height="1.8rem" style="margin-left:auto;"><a href="/"><%- websiteInfo[94] %></a></guide_button>
-        <guide_button color="rgba(119,111,144,1)" height="1.8rem" ><a href="/fanfic"><%- websiteInfo[10] %></a></guide_button>
-        <guide_button color="rgba(119,111,144,1)" height="1.8rem" style="margin-right:auto;"><a href="/develop"><%- websiteInfo[12] %></a></guide_button>
+    <div id="main" ng-include="'<%= viewport %>'">
     </div>
-</div>
-<div id="main" ng-include="'<%= viewport %>'">
-</div>
-<div id="footer" style="margin-top:0">
-    <div id="publication" class="board" style="margin-left:auto;">
-        <div class="headline"><%- websiteInfo[13] %></div>
-        <div><a href="/siteMap"><%- websiteInfo[14] %></a></div>
-        <div><a href="/siteIntro"><%- websiteInfo[15] %></a></div>
-        <div><a href="/declare"><%- websiteInfo[16] %></a></div>
-    </div>
+    <div id="footer" style="margin-top:0;">
+        <div id="publication" class="board" style="margin-left:auto;">
+            <div class="headline"><%- websiteInfo[13] %></div>
+            <div><a href="/siteMap"><%- websiteInfo[14] %></a></div>
+            <div><a href="/siteIntro"><%- websiteInfo[15] %></a></div>
+            <div><a href="/declare"><%- websiteInfo[16] %></a></div>
+        </div>
 
-    <div id="contact" class="board" style="margin-right:auto;border:none;">
-        <div class="headline"><%- websiteInfo[17] %></div>
-        <div><a href="/develop?type=submitBug"><%- websiteInfo[18] %></a></div>
-        <div><a href="mailto:cleegame@outlook.com"><%- websiteInfo[19] %></a></div>
+        <div id="contact" class="board" style="margin-right:auto;border:none;">
+            <div class="headline"><%- websiteInfo[17] %></div>
+            <div><a href="/develop?type=submitBug"><%- websiteInfo[18] %></a></div>
+            <div><a href="mailto:cleegame@outlook.com"><%- websiteInfo[19] %></a></div>
+        </div>
     </div>
 </div>
 </body>
