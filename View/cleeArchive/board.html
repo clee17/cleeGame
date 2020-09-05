@@ -225,25 +225,27 @@
             <td>[{{thread.category | category:$parent.board_category}}]</td>
             <td><a href="{{'/thread/'+thread._id}}">{{thread.title}}</a></td>
             <td style="font-size:0.85rem;">
-                <a href="{{'/users/'+author._id}}" target="_blank">{{thread.author | username}}</a>
+                <a href="{{'/users/'+ thread.author._id}}" target="_blank">{{thread.author | username}}</a>
             </td>
             <td style="width:8.5rem;font-size:0.85rem;">
                 {{thread.createdAt | dateInfo}}
             </td>
             <td>
-                <span><a href="{{'/thread'+thread._id}}">{{thread.replied}}</a></span>
+                <span><a href="{{'/thread/'+thread._id}}">{{thread.replied}}</a></span>
                 <span>{{thread.visited}}</span>
             </td>
 
-            <td><div style="display:flex;flex-direction:column;width:4rem;font-size:0.8rem;">
+            <td style="width:4rem;font-size:0.8rem;">
                 {{thread.repliedAt ? (thread.repliedAt | dateInfo) : '<%- infoAll[16] %>'; }}
             </td>
         </tr>
     </table>
     </div>
-    <div style="display:flex;flex-direction:row;margin-bottom:1rem;">
-        <button class="grand-button" style="margin-left:auto;margin-right:2rem;padding-top:0.5rem;" ng-click="newThread()"><%- websiteInfo[107] %></button>
+    <% if((user && user._id === owner) || allowNew ) { %>
+    <div style="display:flex;flex-direction:row;margin-bottom:2.5rem;margin-left:auto;margin-right:auto;width:63rem;">
+        <button class="grand-button" style="margin-left:auto;margin-right:0;padding-top:0.5rem;" ng-click="newThread()"><%- websiteInfo[107] %></button>
     </div>
+    <% } %>
     <div id="reply_board" >
         <div id="editorPanel">
             <div id="thread_grade" ng-disalbed="requesting">

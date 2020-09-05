@@ -30,9 +30,28 @@ var text = [
     "<p>Enjoy!</p>",
 
     "<h1>There is an account connected to this mail！</h1>"+
-    "<p>There is an account connected to this mail already, please login. Or you may <b> <a href='/resetPwdRequest'>reset your password</a></b>.</p>"
+    "<p>There is an account connected to this mail already, please login. Or you may <b> <a href='/resetPwdRequest'>reset your password</a></b>.</p>",
 
+    "<p>This site is created to provide a place where artists could keep their works more privately and share the experience when creating them. </p>" +
+    "<p>There are various forms of fan arts now days, fan artists are no longer satisfied by simply writing and drawing, they could express their love by  。</p>" +
+    "<p>You could choose to become one or more of the following roles here : <b>fan fiction writers、fan game designers、fan arts painters</b>，and publish or keep them private to yourself, we do sincerely welcome you here. Please contact administrator if you have any other good ideas in mind.</p>" +
+    "<p>Enjoy!</p>",
 
+    "<p>This site's server is located in Japan, where the culture of 'doujin' has been existing for a long time. </p>" +
+    "<p>As we choose to apply the Japanese law to this site in general, please carefully grade your post no matter what you are posting.</p>" +
+    "<p>Also, as we decide to respect visitors from various background,<b>you might not be able to browse or publish some of the posts. However, you may still choose to archive your works here and they will be kept and protected by us</b>.</p>" +
+    "<p>We commit that we will do whatever we can to protect your works as long as this site is online.</p>"+
+    "<p>There are some contents that this site would reject to accept as stated in <a href='/countryStatement' target='_blank'>service statement</a>.</p>",
+
+    "<p>You could help us through donation. </p>" +
+    "<p>You may specifically specifies to which form of fan arts you would donate , thus to purchase resource for the mentioned form of arts. Or you could skip this part and let the developers decide which one needs the most.</p>" +
+    "<p>We listed below the form of fan arts we support now, which is to be updated constantly. The colored ones indicates that they are available now.</p>",
+
+    "<p>You could <b>login at the top right corner</b> if you own an account already.</p>" +
+    "<p>Even without an account, you could still read the posts that are published and suited to the policy and laws of your location, however you could only post your work with an account.</p>" +
+    "<p>You may check <a href=\"/registerProcess\">here</a> for the progress of your registration as all applications will have to be reviewed by administrators.</p>",
+
+    "&nbsp&nbsp&nbsp&nbspYou've requested an account with this mail address before,please do not resubmit it, you may check the current status of your application <a href=\"/registerProcess\">here</a>.</span>"
 ];
 
 module.exports = text;

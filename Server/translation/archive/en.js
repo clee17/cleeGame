@@ -109,7 +109,27 @@ var text = [
     "new thread",
     "Title (necessary)",
     "publish",
-    "new thread cannot be less than 50 characters"
+    "new thread cannot be less than 50 characters",
+    "STATICS",
+    "This website is currently released as a beta version, please follow the news for latest updates.",
+    "Fan artists",
+    "Fan-fiction writers",
+    "Fan-game designers",
+    "Fan-arts painters",
+    "Fan-works counted as ",
+    "pieces",
+    "pieces",
+    "pieces",
+    "Fan fictions",
+    "Fan paints",
+    "Fan games",
+    "History",
+    "Legal",
+    "Help us",
+    "Join us",
+    "please introduce yourself here, you may mention what kind of arts you'd like to post and what are your favorite characters, TVs or movies etc. The statements should be as detailed as possible and could not exceeds 500 characters",
+    "Please make sure the mail address provided is valid."
+
 ];
 
 module.exports = text;

@@ -15,7 +15,11 @@ var text = [
     "general",
     "NC-17",
     "NC-21",
-    "no replies"
+    "no replies",
+    "persons (or those that are not)",
+    "Donate",
+    "your valid mail address",
+    "send"
 ];
 
 module.exports = text;
