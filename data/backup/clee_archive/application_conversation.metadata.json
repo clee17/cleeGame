@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"clee_archive.application_conversation"}],"uuid":"4f753bcf91bb49678a9c3cb4fccf3fa9"}

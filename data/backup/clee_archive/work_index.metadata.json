@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"clee_archive.work_index"}],"uuid":"e86d7f768afd4ef2bb6e672b36f4ef4b"}

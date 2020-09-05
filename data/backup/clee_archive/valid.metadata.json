@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"clee_archive.valid"},{"v":{"$numberInt":"2"},"key":{"valid":{"$numberInt":"1"}},"name":"valid_1","ns":"clee_archive.valid","expireAfterSeconds":{"$numberInt":"86400"},"background":true}],"uuid":"97b6868a93cf434b9d0826fe4ded68c1"}
