@@ -2,20 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2c194dae-8acb-4a1f-bfe1-1000bb288402" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/err_cn.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/err_en.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/err_jp.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/info_cn.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/info_en.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/translation/cleeGame/info_jp.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/app/root.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/app/root.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/routes/cleeGame/game.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/cleeGame/game.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/routes/cleeGame/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/cleeGame/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/routes/cleeGame/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/routes/cleeGame/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/translation/cleegame.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/translation/cleegame.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/translation/cleegame_err.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/translation/cleegame_err.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/ext/loader.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ext/loader.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,13 +111,13 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1317" y="388" width="647" height="534" key="find.popup" timestamp="1599432086446">
+    <state x="1317" y="388" width="647" height="534" key="find.popup" timestamp="1599432930741">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="1317" y="388" width="647" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432086446" />
-    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup" timestamp="1599432380126">
+    <state x="1317" y="388" width="647" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432930741" />
+    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup" timestamp="1599432918578">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
-    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432380126" />
+    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432918578" />
   </component>
 </project>
