@@ -9,6 +9,7 @@ module.exports = new mongoose.Schema({
     owner:{type:mongoose.Schema.ObjectId,default:null,ref:'user'},
     title:{type:String,default:""},
     description:{type:String,default:''},
+    threads:{type:Number,default:0},
     category:[{order:{type:Number,default:0},name:{type:String,default:""}}],
     setting:{type:Number,default:0},//通过属性来控制board，例如
 },{

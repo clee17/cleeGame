@@ -109,6 +109,7 @@ global.__renderSubPage = function(req,res,pageId,renderInfo){
     renderPage.websiteInfo = _websiteInfo;
     renderPage.infoAll = _infoAll;
     renderPage.errAll = _errAll;
+    renderPage.errInfo  = _errInfo;
     renderPage.statements = _statements;
     renderPage.user = req.session.user;
     res.render('cleeArchive/'+pageId+'.html',renderPage);

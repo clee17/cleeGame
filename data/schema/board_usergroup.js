@@ -12,6 +12,7 @@ module.exports = new mongoose.Schema({
     maxCount:{type:Number,default:10},//用户组最大成员数量
     board:{type:mongoose.Schema.ObjectId,default:null,ref:'board'},
     users:[{type:mongoose.Schema.ObjectId,default:null,ref:'users'}],
+    ips:[{type:String}],
     type:{type:Number,default:0},
     access:{type:Number,default:1},
 },{

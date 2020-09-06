@@ -218,7 +218,13 @@
                 <div>个人简介: <button class="infoEditBtn" style="margin-left:3rem;margin-bottom:-1rem;" ng-click="editIntro($event)">编辑</button></div>
                 <div style="padding-left:2rem;position:relative;min-height:6rem;display:flex;padding-top:0.5rem;">
                     <textarea id="introBoard" maxlength="100"></textarea>
-                    <span base64 id="introInfo"><% if(user.register && user.register.intro) { %><%= user.register.intro %><% }else{ %><%- websiteInfo[103] %><% } %></span>
+                    <span base64 id="introInfo">
+                        <% if(user.register && user.register.intro) { %>
+                        <%- escape(user.register.intro) %>
+                        <% }else{ %>
+                        <%- websiteInfo[103] %>
+                        <% } %>
+                    </span>
                 </div>
             </div>
         </div>

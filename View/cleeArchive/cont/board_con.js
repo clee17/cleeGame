@@ -4,6 +4,10 @@ app.directive('infoReceiver',function(){
         link:function(scope){
             scope.board_category = JSON.parse(scope['board_category']);
             scope.newThread_category = scope.board_category[0];
+            scope.totalNum = Number(scope.totalNum);
+            scope.personal_usergroup =  Number(scope.personal_usergroup);
+            scope.personal_user =  Number(scope.personal_user);
+            scope.personal_visitor =  Number(scope.personal_visitor);
             scope.initialize();
         }
     }
@@ -55,12 +59,16 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     $scope.newThread_category = null;
     $scope.threads = [];
 
+    $scope.pageIndex =  $location.search().id ||1;
+    $scope.perPage = 35;
+
     $scope.pageId = $location.search().id || 1;
 
     $scope.initialize = function(){
         $scope.requesting= true;
+        $scope.$broadcast('initialize editor', {usergroup:$scope.usergroup,user:$scope.user});
         boardManager.requestThreads({board_id:$scope['board_id'],board_setting:['board_setting'],pageId:$scope.pageId});
-    }
+    };
 
     $scope.newThread = function(){
         let element =  document.getElementById("reply_board");
@@ -89,7 +97,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
         if(input)
             input.style.background = 'white';
         $scope.requesting = false;
-    }
+    };
 
     $scope.publish = function(){
         if($scope.newThread_title.length ==0){
@@ -134,23 +142,12 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
 
 }]);
 
-
-app.directive('infoReceiver',function(){
-    return {
-        restrict: 'E',
-        link:function(scope){
-
-            scope.initialize();
-        }
-    }
-});
-
 app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location','boardManager',function($scope,$rootScope,$cookies,$location,boardManager){
-    $scope.tinymceModel = 'Initial content';
+    $scope.tinymceModel = '';
 
     $scope.$on('textFinished',function(event,data){
         $scope.tinymceText = data["text"] || "";
-    })
+    });
 
     $scope.tinymceOptions = {
         height:"100%",
@@ -181,7 +178,7 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
             $scope.toggleEditor(false);
         data.contents = encodeURIComponent($scope.tinymceModel);
         boardManager.submitNewThread(data);
-    })
+    });
 
     $scope.$on('new thread submitted',function(event,data){
         if($scope.toggleEditor)
@@ -190,5 +187,18 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
             $scope.tinymceModel = "";
             $scope.tinymceText = "";
         }
-    })
+    });
+    $scope.$on('initialize editor',function(event,data){
+        let allowNew = parseInt('0000001',2);
+        if(data.user >=0){
+            $scope.toggleEditor((data.usergroup & allowNew) >0);
+            $scope.tinymceModel = (data.usergroup & allowNew) >0 ? '':data.noNew_user;
+        }else if(data.usergroup >=0){
+            $scope.toggleEditor((data.usergroup & allowNew) >0);
+            $scope.tinymceModel = (data.usergroup & allowNew) >0 ? '':data.noNew_usergroup;
+        }else{
+            $scope.toggleEditor((data.visitor & allowNew) >0);
+            $scope.tinymceModel = (data.visitor & allowNew) >0 ? '':data.noNew_visitor;
+        }
+    });
 }]);

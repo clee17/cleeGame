@@ -23,6 +23,9 @@ var text = [
     "only registered users could apply for a role.",
     "The discussion board does not exist, please check your address",
     "You haven't provided a valid board to which the thread belong",
+    "You've been forbidden by the administrators of this discussion board to publish a new thread",
+    "The user group to which you belong is not allowed to publish a thread here",
+    "As a visitor, you cannot publish a new thread here",
 ];
 
 module.exports = text;

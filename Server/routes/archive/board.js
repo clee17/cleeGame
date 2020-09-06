@@ -5,6 +5,7 @@ let express = require('express'),
 let boardModel = require(path.join(__dataModel,'board')),
     threadModel = require(path.join(__dataModel,'board_thread')),
     userGroupModel = require(path.join(__dataModel,'board_usergroup')),
+    userModel = require(path.join(__dataModel,'board_user')),
     htmlModel = require(path.join(__dataModel,'cleeContents_board'));
 
 
@@ -51,7 +52,55 @@ let handler = {
                 for(let i=0;i<detail.category.length;++i){
                     detail.category[i].name = encodeURIComponent(__multiLang(detail.category[i].name,req.ipData));
                 }
-                __renderSubPage(req,res,'board',detail);
+
+                let searchgroup = {ips:req.ip,board:detail._id};
+                let searchuser = {ip:req.ip,user:null,board:detail._id};
+                if(req.session.user) {
+                    searchgroup = {users: req.session.user._id,board:detail._id};
+                    searchuser = {user:req.session.user._id,board:detail._id};
+                }
+
+
+                let process = function(type,results){
+                    if(type === 'usergroup'){
+                        let temp = results.length >0? 0 : -1;
+                        for(let i=0; i<results.length;++i)
+                            temp = temp | results[i].access;
+                        detail.usergroup = temp;
+                    }
+                    if(type === 'user')
+                        detail.user = results.length>0? results[0].access : -1;
+
+                    if(type === 'visitor')
+                        detail.visitor = results.length>0? results[0].access : 2;
+
+                    if(detail.user !== undefined && detail.usergroup !== undefined && detail.visitor !== undefined){
+                        __renderSubPage(req,res,'board',detail);
+                    }
+                };
+
+
+                userGroupModel.find(searchgroup,function(err,response){
+                    if(!err){
+                        process('usergroup',response);
+                    }else
+                        __renderSubPage(req,res,'error',err.message);
+                });
+
+                userGroupModel.find({title:'visitor',board:detail._id},function(err,response){
+                    if(!err){
+                        process('visitor',response);
+                    }else
+                        __renderSubPage(req,res,'error',err.message);
+                });
+
+                userModel.find(searchuser,function(err,response){
+                    if(!err){
+                        process('user',response);
+                    }else
+                        __renderSubPage(req,res,'error',err.message);
+                });
+
             }
         });
     },
@@ -150,7 +199,6 @@ let handler = {
         thread.title = info['title'];
         thread.board = info['board_id'];
         thread.grade = info['grade'];
-        console.log(thread);
         thread.save()
             .then(function(){
                 let contents = new htmlModel();
@@ -164,6 +212,7 @@ let handler = {
                 response.thread.html = article._id;
                 threadModel.findOneAndUpdate({_id:response.thread._id},{html:article._id},{new:true},function(err,result){
                 });
+                boardModel.findOneAndUpdate({_id:response.thread.board},{$inc:{threads:1}},null,function(err,result){});
                 handler.finalSend(res,response);
             })
             .catch(function(err){

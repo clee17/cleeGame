@@ -1,19 +1,17 @@
-app.controller("introCon",['$scope','$rootScope','$cookies','userManager','countManager',function($scope,$rootScope,$cookies,userManager,countManager){
-    $scope.message = [
-        '<p>本站暂时不接受不记名捐赠，您至少需要通过下方的注册申请栏完成预申请，才能够对本站进行捐赠。</p>'+
-        '<p>捐赠不是强制的，捐赠也并不会对申请过程造成加速，所以希望大家不要为了获得账户而浪费自己的收入。</p>'+
-        '<p>如果您已经是会员了，那么您可以在您的个人用户名下的下拉框里，点击捐赠页面，进入捐赠信息页</p>'+
-        '<p>如果您还没有获得会员许可，则可以通过<a href="/registerProcess">+click+</a>界面查看您的申请进度并进行捐赠。'+
-        '<p>不管身处世界的哪个角落，都祝大家创作愉快。</p>',
-        '<h1><span>文章创作权限</span></h1>' +
-        '<p>该功能已开放完成，会基于网站资金能够承受的范围内永久免费提供给需要使用的作者使用。</p>'+
-        '<p>如果您需要使用该权限，可以直接于网站下方申请</p>',
-        '<h1> <span>艺术家权限</span></h1>' +
-        '<p>该功能尚在开发集资中，如果您有任何建议与兴趣，可以发送邮件到<a href="mailto:cleegame@outlook.com">点击</a>邮箱向我和相关管理员提出建议。</p>' +
-        '<p>我们会努力阅读并考虑每一条建议</p>' +
-        '<p>祝生活与创作愉快</p>'
-    ];
+app.directive('infoReceiver',function(){
+    return {
+        restrict: 'E',
+        link:function(scope,element,attr){
+            scope.message = [];
+            for(let i=0; i< 5; ++i){
+                if(scope['message_'+i])
+                    scope.message.push(unescape(scope['message_'+i]));
+            }
+        }
+    }
+});
 
+app.controller("introCon",['$scope','$rootScope','$cookies','userManager','countManager',function($scope,$rootScope,$cookies,userManager,countManager){
     $scope.mail = '';
     $scope.existed = false;
     $scope.statements = '';

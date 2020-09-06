@@ -51,7 +51,21 @@ var text = [
     "<p>Even without an account, you could still read the posts that are published and suited to the policy and laws of your location, however you could only post your work with an account.</p>" +
     "<p>You may check <a href=\"/registerProcess\">here</a> for the progress of your registration as all applications will have to be reviewed by administrators.</p>",
 
-    "&nbsp&nbsp&nbsp&nbspYou've requested an account with this mail address before,please do not resubmit it, you may check the current status of your application <a href=\"/registerProcess\">here</a>.</span>"
+    "&nbsp&nbsp&nbsp&nbspYou've requested an account with this mail address before,please do not resubmit it, you may check the current status of your application <a href=\"/registerProcess\">here</a>.</span>",
+
+    '<p>We we do not accept donation from non-users so far, you need at least send an application below before you could review the information for donation.</p>'+
+    '<p>It is not a must nor will it help the process of your application.</p>'+
+    '<p>You may enter the page of donation under your username when you are logged in.</p>'+
+    '<p>Enjoy the site!</p>',
+
+    '<h1><span>Fan fiction writer\'s tool</span></h1>' +
+    '<p>This tool is completed and will provided to users now.</p>'+
+    '<p>You may gain this role as soon as you complete a registration of our site. </p>',
+
+    '<h1> <span>Fan arts painter</span></h1>' +
+    '<p>This tool is still under development, you may reply to thread with your idea on our news\' board about this tool <a href="/news">here</a>.</p>' +
+    '<p>We will try our best to read and consider every suggestion that is sent to us. </p>' +
+    '<p>Enjoy!</p>',
 ];
 
 module.exports = text;

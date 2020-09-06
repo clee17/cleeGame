@@ -100,6 +100,11 @@
 </style>
 
 <div id="introBoard" ng-controller="introCon">
+    <info-receiver
+            ng-init="message_0 = '<%- escape(statements[18]) %>';
+            message_1 = '<%- escape(statements[19]) %>';
+            message_2 = '<%- escape(statements[20]) %>';">
+    </info-receiver>
     <div class="contents" style="text-indent:1rem;">
         <h1><%- websiteInfo[111] %></h1>
         <p><%- websiteInfo[112] %> </p>

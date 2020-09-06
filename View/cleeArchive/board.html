@@ -210,12 +210,19 @@
     <info-receiver
             ng-init="board_id = '<%- _id %>';
             board_setting =  '<%- setting %>';
+            personal_usergroup =  '<%- usergroup %>';
+            personal_user =  '<%- user %>';
+            personal_visitor =  '<%- visitor %>';
             board_description='<%- description %>';
             board_title = '<%- title %>';
             board_category = '<%= JSON.stringify(category) %>';
             message_threadlen = '<%- websiteInfo[110] %>';
             message_title = '<%- errAll[24] %>';
             message_no_title  = '<%- errAll[25] %>';
+            message_nonew_user = '<%- errInfo[25] %>';
+            message_nonew_usergroup = '<%- errInfo[26] %>';
+            message_nonew_visitor = '<%- errInfo[27] %>';
+            totalNum = '<%- threads %>';
             allow_reply = '<%- allowReply %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
@@ -241,6 +248,7 @@
         </tr>
     </table>
     </div>
+    <page-index pid='pageIndex' tnm="totalNum" ppg="perPage" style="margin-top:auto;"></page-index>
     <% if((user && user._id === owner) || allowNew ) { %>
     <div style="display:flex;flex-direction:row;margin-bottom:2.5rem;margin-left:auto;margin-right:auto;width:63rem;">
         <button class="grand-button" style="margin-left:auto;margin-right:0;padding-top:0.5rem;" ng-click="newThread()"><%- websiteInfo[107] %></button>
