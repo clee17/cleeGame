@@ -70,8 +70,8 @@ let handler = {
         viewPortMap.set('/resetPwdRequest',{viewport:'/sub/resetPwdRequest',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
         viewPortMap.set('/news',{viewport:'/board/5f50a851722e69306462daf8',
             modules:['/view/modules/pageIndex.js'],
-            controllers:['/view/cont/board_con.js'],
-            services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:{editor:true}});
+            controllers:['/view/cont/board_info.js','/view/cont/board_con.js'],
+            services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:{editor:true,boardType:'news'}});
 
         let result = viewPortMap.get(req.url);
         if(!result)

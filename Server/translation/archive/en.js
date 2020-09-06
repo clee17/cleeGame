@@ -128,8 +128,10 @@ var text = [
     "Help us",
     "Join us",
     "please introduce yourself here, you may mention what kind of arts you'd like to post and what are your favorite characters, TVs or movies etc. The statements should be as detailed as possible and could not exceeds 500 characters",
-    "Please make sure the mail address provided is valid."
-
+    "Please make sure the mail address provided is valid.",
+    "<div>Do you wish to delete [%t] </div>?",
+    "replied",
+    "Published on"
 ];
 
 module.exports = text;

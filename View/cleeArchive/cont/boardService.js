@@ -21,4 +21,9 @@ app.service('boardManager',function($http,$rootScope){
     this.submitNewThread = function(data){
         manager.requestAll('/board/submitThread','new thread submitted',data);
     }
+
+
+    this.deleteThread = function(data){
+        manager.requestAll('/board/deleteThread','thread deleted',data);
+    }
 });

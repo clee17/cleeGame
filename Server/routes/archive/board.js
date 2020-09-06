@@ -6,6 +6,7 @@ let boardModel = require(path.join(__dataModel,'board')),
     threadModel = require(path.join(__dataModel,'board_thread')),
     userGroupModel = require(path.join(__dataModel,'board_usergroup')),
     userModel = require(path.join(__dataModel,'board_user')),
+    replyModel = require(path.join(__dataModel,'board_message')),
     htmlModel = require(path.join(__dataModel,'cleeContents_board'));
 
 
@@ -74,6 +75,8 @@ let handler = {
                     if(type === 'visitor')
                         detail.visitor = results.length>0? results[0].access : 2;
 
+                    detail.boardType = type;
+
                     if(detail.user !== undefined && detail.usergroup !== undefined && detail.visitor !== undefined){
                         __renderSubPage(req,res,'board',detail);
                     }
@@ -103,6 +106,93 @@ let handler = {
 
             }
         });
+    },
+
+    threadDetail:function(req,res,type){
+        let threadId = req.params.threadId;
+        let pageId = req.query.pid || 1;
+        if(!threadId || !__validateId(threadId)){
+            __renderError(req,res,_errInfo[29]);
+            return;
+        }
+
+        let details ={};
+
+        let findHtml = function(details,result){
+            let replies = details.replies;
+            for(let i=0; i<replies.length;++i){
+                if(result.link.toString() === replies[i]._id.toString())
+                    replies[i].html = lzString.compressToBase64(result.contents);
+            }
+        };
+
+        let send = function(details,contentsId,ifFirst){
+             htmlModel.find({link:{$in:contentsId}},function(err,result) {
+                 if (err)
+                     __renderError(req, res, err.message);
+                 else {
+                     for(let i=0;i<result.length;++i){
+                         if(ifFirst && details.thread._id.toString() === result[i].link.toString()){
+                             details.thread.html = lzString.compressToBase64(result[i].contents);
+                             continue;
+                         }
+                         findHtml(details,result[i]);
+                     }
+                     details.editor = true;
+                     if(type === 'events'){}
+                     else
+                         __renderIndex(req,res,{viewport:'/sub/board_thread',
+                             modules:['/view/modules/pageIndex.js'],
+                             controllers:['/view/cont/board_thread_info.js','/view/cont/board_con.js'],
+                             services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:details});
+                 }
+             });
+        };
+
+        threadModel.findOne({_id:threadId},function(err,thread){
+            if(err)
+                __renderError(req,res,err.message);
+            else if(!thread)
+                __renderError(req,res,_errInfo[29]);
+            else{
+                if(thread.replied>0 && pageId > Math.ceil(thread.replied/20))
+                    pageId = Math.ceil(thread.replied /20);
+                else if(pageId < 1)
+                    pageId = 1;
+                let perPage = 20;
+                if(pageId === 1)
+                    perPage --;
+                details.thread = JSON.parse(JSON.stringify(thread));
+                let temp = details.thread;
+                for(let i=0; i<temp.board.category.length;++i){
+                    temp.board.category[i].name = encodeURIComponent(__multiLang(temp.board.category[i].name,req.ipData));
+                }
+                temp.board.title = escape(temp.board.title);
+                details.replies = [];
+                let contentsId = [];
+                if(pageId === 1)
+                    contentsId.push(thread._id);
+                //关联所有回复
+                details.thread.isFirst = pageId === 1;
+                if(thread.replied >0){
+                    replyModel.find({thread:thread._id},null,{sort:{createdAt:1},limit:perPage,skip:perPage*20},function(err,replies) {
+                           if(err)
+                               __renderError(req,res,err.message);
+                           else{
+                               details.replies = replies;
+                               contentsId = contentsId.concat(replies.map(function(value){return value._id}));
+                               send(details,contentsId,pageId===1);
+                           }
+                        });
+                }else
+                    send(details,contentsId,pageId===1);
+            }
+        }).populate([{path:'author',select:'_id user'},{path:'board',select:'category title _id visited replied'}]);
+
+    },
+
+    thread_main:function(req,res){
+        handler.threadDetail(req,res,'main');
     },
 
     threads: function(req,res){
@@ -186,7 +276,8 @@ let handler = {
             if(info['author'] === '')
                 info['author'] = null;
 
-            info['grade'] = received.grade || 99;
+            info['grade'] = received.grade === undefined? 99: received.grade;
+            info['category'] = received.category === undefined?  0 : received.category;
          }catch(err){
             response.message = err.message;
             handler.finalSend(res,response);
@@ -199,6 +290,7 @@ let handler = {
         thread.title = info['title'];
         thread.board = info['board_id'];
         thread.grade = info['grade'];
+        thread.category = info['category'];
         thread.save()
             .then(function(){
                 let contents = new htmlModel();
@@ -210,6 +302,8 @@ let handler = {
             .then(function(article){
                 response.success = true;
                 response.thread.html = article._id;
+                if(response.thread.author)
+                     response.thread.author = {_id:info['author'], user:req.session.user.user};
                 threadModel.findOneAndUpdate({_id:response.thread._id},{html:article._id},{new:true},function(err,result){
                 });
                 boardModel.findOneAndUpdate({_id:response.thread.board},{$inc:{threads:1}},null,function(err,result){});
@@ -220,6 +314,108 @@ let handler = {
                 response.message = err.message;
                 handler.finalSend(res,response);
             })
+    },
+
+    validateAccess:function(req,res,received,callback,identity,response){
+        if(!req.session.user){
+            response.message = _errInfo[28];
+            handler.finalSend(res,response);
+        }else if(req.session.user && req.session.user.isAdmin){
+            callback(received);
+        }else if(req.session.user && req.session.user._id === received.author){
+            callback(received);
+        }else if(req.session.user){
+            let access = 0;
+            userModel.find({board:received.board_id,user:received.user}).exec()
+                .then(function(results){
+                    for(let i=0;i<results.length;++i)
+                        access = access | results[i].access;
+                    if((access & identity) >0){
+                        callback(received);
+                    }else
+                        return userGroupModel.find({board:received.board_id,users:received.user}).exec();
+                })
+                .then(function(results){
+                    for(let i=0;i<results.length;++i)
+                        access = access | results[i].access;
+                    if((access & identity) >0) {
+                        callback(received);
+                    }
+                })
+                .catch(function(err){
+                    response.message = err.message;
+                    handler.finalSend(res,response);
+                })
+        }
+    },
+
+    deleteThread:function(req,res){
+        let response = {
+            sent:false,
+            message:'',
+            success:false,
+        };
+
+        try{
+            let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+            if(!received.board_id || !__validateId(received.board_id))
+                throw Error(_errInfo[24]);
+
+            if(!received.id || !__validateId(received.id))
+                throw Error(_errInfo[24]);
+
+            response.board = received.board_id;
+            response._id = received.id;
+            let checkSuccess = function(result,type){
+                response[type] =  true;
+                if(response['thread'] && response['reply']){
+                    response.success = true;
+                    handler.finalSend(res,response);
+                }
+            };
+
+            let deleteThread = function(received){
+                threadModel.findOneAndDelete({board:received.board_id,_id:received.id},function(err,doc){
+                    if(err)
+                        throw Error(err.message);
+                    else
+                        htmlModel.deleteOne({link:doc._id},function(err,result){
+                            if(err)
+                                throw Error(err.message);
+                            else
+                                checkSuccess(result,'thread');
+                        });
+                });
+
+                replyModel.find({thread:received.id},{_id:1},null,function(err,result){
+                    if(err)
+                        throw Error(err.message);
+                    else
+                        htmlModel.deleteMany({link:{$in:result.map(function(value){return value._id})}},function(err){
+                            if(err)
+                                throw Error(err.message);
+                            else
+                                checkSuccess(result,'reply');
+                        });
+                });
+
+                boardModel.findOneAndUpdate({_id:received.board_id},{$inc:{threads:-1}},null,function(err,result){
+                    if(err)
+                        throw Error(err.message);
+                })
+            };
+
+            handler.validateAccess(req,res,
+                received,
+                deleteThread,
+                parseInt('000100',2),
+                response);
+        }catch(err){
+            response.message = err.message;
+            response.success = false;
+            handler.finalSend(res,response);
+        }
+
     }
 };
 

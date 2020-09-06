@@ -171,7 +171,7 @@
         }
 
         #contents_list{
-            width:55rem;
+            width:60rem;
         }
 
         #contents_list tr>td{
@@ -215,13 +215,14 @@
             personal_visitor =  '<%- visitor %>';
             board_description='<%- description %>';
             board_title = '<%- title %>';
-            board_category = '<%= JSON.stringify(category) %>';
+            board_category = '<%- escape(JSON.stringify(category)) %>';
             message_threadlen = '<%- websiteInfo[110] %>';
             message_title = '<%- errAll[24] %>';
             message_no_title  = '<%- errAll[25] %>';
-            message_nonew_user = '<%- errInfo[25] %>';
+            message_nonew_user = '<%- escape(errInfo[25]) %>';
             message_nonew_usergroup = '<%- errInfo[26] %>';
             message_nonew_visitor = '<%- errInfo[27] %>';
+            alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
             totalNum = '<%- threads %>';
             allow_reply = '<%- allowReply %>';">
     </info-receiver>
@@ -230,7 +231,7 @@
     <div style="flex:1;"><table id="contents_list" ng-show="threads.length >0 && !requesting">
         <tr ng-repeat="thread in threads">
             <td>[{{thread.category | category:$parent.board_category}}]</td>
-            <td><a href="{{'/thread/'+thread._id}}">{{thread.title}}</a></td>
+            <td><a href="{{getBoard(thread)+'/thread/'+thread._id}}">{{thread.title}}</a></td>
             <td style="font-size:0.85rem;">
                 <a href="{{'/users/'+ thread.author._id}}" target="_blank">{{thread.author | username}}</a>
             </td>
@@ -238,21 +239,27 @@
                 {{thread.createdAt | dateInfo}}
             </td>
             <td>
-                <span><a href="{{'/thread/'+thread._id}}">{{thread.replied}}</a></span>
+                <span><a href="{{getBoard(thread)+'/thread/'+thread._id}}">{{thread.replied}}</a></span>
                 <span>{{thread.visited}}</span>
             </td>
-
             <td style="width:4rem;font-size:0.8rem;">
                 {{thread.repliedAt ? (thread.repliedAt | dateInfo) : '<%- infoAll[16] %>'; }}
             </td>
+            <% if((user && user._id === owner) || (user && user.isAdmin) ) { %>
+            <td>
+                <button class="linkBtn" style="font-weight:bold;" ng-click="deleteThread(thread)"><%- websiteInfo[45] %></button>
+            </td>
+            <% } %>
         </tr>
     </table>
     </div>
     <page-index pid='pageIndex' tnm="totalNum" ppg="perPage" style="margin-top:auto;"></page-index>
+
     <% if((user && user._id === owner) || allowNew ) { %>
     <div style="display:flex;flex-direction:row;margin-bottom:2.5rem;margin-left:auto;margin-right:auto;width:63rem;">
         <button class="grand-button" style="margin-left:auto;margin-right:0;padding-top:0.5rem;" ng-click="newThread()"><%- websiteInfo[107] %></button>
     </div>
+
     <% } %>
     <div id="reply_board" >
         <div id="editorPanel">
@@ -262,10 +269,10 @@
                          style="margin-left:1rem;margin-right:auto;width:4rem;">
                 </select>
 
-                <select style="margin-left:auto;margin-right:1rem;">
+                <select ng-model="newThread_grade" style="margin-left:auto;margin-right:1rem;">
                     <option value="0"><%- infoAll[13] %></option>
-                    <option value="0"><%- infoAll[14] %></option>
-                    <option value="0"><%- infoAll[15] %></option>
+                    <option value="1"><%- infoAll[14] %></option>
+                    <option value="2"><%- infoAll[15] %></option>
                 </select></div>
             <div id="mce_title" >
                 <input placeholder="<%- websiteInfo[108] %>"

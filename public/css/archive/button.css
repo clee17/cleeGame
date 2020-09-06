@@ -201,3 +201,34 @@
     color:rgba(181,163,160,1);
     cursor:pointer;
 }
+
+.linkBtn{
+    color:rgba(139,100,127,1);
+    border:none;
+    background:none;
+}
+
+.linkBtn:hover{
+    text-decoration:underline;
+    cursor:pointer;
+}
+
+
+
+.grade{
+    display:block;
+    width:auto;
+    border-radius:15px;
+    padding-left:10px;
+    padding-right:10px;
+    color:white;
+    font-family: "Microsoft YaHei UI",serif;
+    font-weight:bold;
+    background:rgba(182,161,147,255);
+    font-size:12px;
+    margin-right:1rem;
+    height:1.5rem;
+    line-height:1.5rem;
+    margin-top:auto;
+    margin-bottom:auto;
+}

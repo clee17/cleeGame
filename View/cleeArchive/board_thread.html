@@ -1,0 +1,152 @@
+<style>
+    #contents_list {
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        width:100%;
+        border:solid 1px rgba(185,185,185,0.6);
+    }
+
+    .grade{
+        margin-left:1rem;
+    }
+
+    #contents_list >div:first-child{
+        border-bottom:solid 1px rgba(185,185,185,0.6);
+        height:2rem;
+    }
+
+    #contents_list >div:first-child span{
+          margin-top:auto;
+         margin-bottom:auto;
+         margin-left:1rem;
+    }
+
+    #contents_list >div:first-child span:nth-child(n+3){
+        font-size:0.9rem;
+    }
+
+    #contents_list>div:nth-child(n+2){
+        width:100%;
+        min-height:10rem;
+    }
+
+    #thread_title{
+        width:100%;
+        padding-left:2rem;
+        padding-bottom:5px;
+        border-bottom:solid 1px rgba(205,205,205,0.8);
+        margin-bottom:2rem;
+    }
+
+    .author_info{
+        width:100%;
+        height:5rem;
+        background:rgba(181,163,160,0.2);
+        padding:1.5rem;
+        border-bottom:solid 4px rgba(181,163,160,0.3);
+    }
+
+    .thread_info{
+        font-size:0.9rem;
+        border-bottom:solid 4px rgba(158,142,166,0.4);
+        flex:1;
+        display:flex;
+        flex-direction:column;
+    }
+
+    .thread_info >div:first-child{
+        border-bottom:solid 1px rgba(185,185,185,0.6);
+        padding-bottom:5px;
+        margin-bottom:8px;
+    }
+
+    #thread_title a{
+        color:inherit;
+    }
+
+    #thread_title a:hover{
+        text-decoration:underline;
+    }
+
+    #thread_title span:first-child{
+        font-weight:bold;
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    #thread_title span:nth-child(3){
+        font-weight:bold;
+        color:rgba(182,161,147,1);
+    }
+
+    .thread_info{
+        padding:1rem;
+    }
+
+    #contents_thread{
+        display:flex;
+        flex-direction:column;
+    }
+
+    @media screen and (min-device-width:80rem){
+        #contents_list{
+            width:60rem;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        #thread_title{
+            width:60rem;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .author_info{
+            width:8rem;
+            background:rgba(181,163,160,0.5);
+            height:auto;
+        }
+
+        #contents_thread{
+            display:flex;
+            flex-direction:row;
+        }
+    }
+
+</style>
+
+<div id="boardPanel" ng-controller="thread_con">
+    <info-receiver ng-init="grade_0='<%- infoAll[13] %>';
+    grade_1='<%- infoAll[14] %>';
+    grade_2='<%- infoAll[15] %>';">
+    </info-receiver>
+    <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+    <div ng-show="threads.length === 0 && !requesting" style="margin:auto;"><%- websiteInfo[106] %></div>
+    <div id="thread_title">
+        <span><a href="{{getBoardLink()}}">{{thread.board.title}} </a> </span>
+        <i class="fas fa-caret-right"> </i>
+       <span>[{{thread.category | category:thread.board.category}}]</span>
+       <span>{{thread.title}}</span>
+    </div>
+    <div ng-if="userId === thread.author._id">
+
+    </div>
+    <div style="flex:1;" id="contents_list">
+        <div style="display:flex;flex-direction:row;overflow:hidden;">
+            <span>【{{thread.category | category:thread.board.category}}】</span>
+            <span>{{thread.title}}</span>
+            <div class="grade" grade-show grade="{{thread.grade}}">{{thread.grade | grade:gradeTemplate }} </div>
+            <span style="margin-left:auto;"><%- websiteInfo[35] %>:{{thread.visited}}</span>
+            <span style="margin-left:1rem;margin-right:2rem;"><%- websiteInfo[131] %>:{{thread.replied}}</span>
+        </div>
+        <div ng-if="thread.isFirst" id="contents_thread">
+            <div class="author_info"><a href="{{'/users/'+thread.author._id}}">{{thread.author.user}}</a></div>
+            <div class="thread_info">
+                <div><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</div>
+                <div base64 contents="{{thread.html}}"></div>
+            </div>
+        </div>
+    </div>
+    <page-index pid='pageIndex' tnm="totalNum" ppg="perPage" style="margin-top:auto;"></page-index>
+</div>

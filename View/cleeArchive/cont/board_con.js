@@ -1,18 +1,3 @@
-app.directive('infoReceiver',function(){
-    return {
-        restrict: 'E',
-        link:function(scope){
-            scope.board_category = JSON.parse(scope['board_category']);
-            scope.newThread_category = scope.board_category[0];
-            scope.totalNum = Number(scope.totalNum);
-            scope.personal_usergroup =  Number(scope.personal_usergroup);
-            scope.personal_user =  Number(scope.personal_user);
-            scope.personal_visitor =  Number(scope.personal_visitor);
-            scope.initialize();
-        }
-    }
-});
-
 app.filter('username', function() { //可以注入依赖
     return function(user) {
         if(!user)
@@ -51,6 +36,20 @@ app.filter('category', function() { //可以注入依赖
 
 
 
+app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$timeout','boardManager',function($scope,$rootScope,$cookies,$location,$timeout,boardManager){
+    $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
+    $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
+
+    $scope.getBoardLink = function(){
+        let boardTitle = $rootScope.thread.board.title;
+        if(boardTitle === 'NEWS')
+            return '/news';
+        else
+            return '/board/'+$rootScope.thread.board._id;
+    }
+}]);
+
+
 app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeout','boardManager',function($scope,$rootScope,$cookies,$location,$timeout,boardManager){
     $scope.requested = false;
     $scope.requesting = false;
@@ -75,11 +74,21 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
         if(element){
             element.style.display = 'flex';
         }
-
         $timeout(function(){
             element.style.opacity = '1';
         },10)
-    }
+    };
+
+
+    $scope.deleteThread = function(thread){
+        let alertMessage= $scope['alert_delete_thread'];
+        if(alertMessage)
+            alertMessage = unescape(alertMessage);
+        alertMessage=  alertMessage.replace(/%t/g,thread.title);
+        let alertInfo = {alertInfo:alertMessage};
+        alertInfo.variables = {_id:thread._id,author:thread.author,info:'delete thread'};
+        $scope.$emit('showAlert', alertInfo);
+    };
 
     $scope.cancelNewthread = function(){
         let element =  document.getElementById("reply_board");
@@ -89,7 +98,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
         $timeout(function(){
             element.style.display = 'none';
         },150)
-    }
+    };
 
 
     $scope.cancelSubmitThread  = function(event,data){
@@ -116,16 +125,42 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             editor_id:'thread_editor',
             user:$rootScope.readerId,
             grade:Number($scope.newThread_grade),
+            category:Number($scope.newThread_category.order),
             title:encodeURIComponent($scope.newThread_title)});
-    }
+    };
 
+    $scope.sendDeleteThread = function(data){
+        let threadId = data._id;
+        for(let i=0; i<$scope.threads.length;++i){
+            if($scope.threads[i]._id === threadId){
+                $scope.threads.splice(i,1);
+                boardManager.deleteThread({id:threadId,board_id:$scope.board_id,author:data.author._id});
+                break;
+            }
+        }
+    };
+
+    $scope.getBoard = function(thread){
+       if($rootScope.boardType === 'news')
+           return '/news';
+        else if($rootScope.boardType === 'event')
+            return '/events';
+        else
+            return '/board'+thread._id;
+    };
+
+    $scope.$on('tellYes',function(event,data){
+       if(data.variables['info'] === 'delete thread'){
+           $scope.sendDeleteThread(data.variables);
+       }
+    });
 
     $scope.$on('new thread submitted',function(event,data){
         $scope.cancelSubmitThread();
         if(data.success){
             $scope.newThread_title = "";
             $scope.newThread_grade = '0';
-            $scope.threads.push(data.thread);
+            $scope.threads.unshift(data.thread);
             $scope.cancelNewthread();
         }else{
             $scope.$emit('showError',data.message);
@@ -140,6 +175,9 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             $scope.$emit('showError',data.message);
     });
 
+    $scope.$on('thread deleted',function(event,data){
+        console.log(data);
+    })
 }]);
 
 app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location','boardManager',function($scope,$rootScope,$cookies,$location,boardManager){
