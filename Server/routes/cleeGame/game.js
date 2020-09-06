@@ -41,6 +41,7 @@ let handler = {
     },
 
     getGame:function(req,res){
+        console.log('entered');
         let data = {rendered:false};
         let gameName = req.params.gameId;
         if(!gameName)
