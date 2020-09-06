@@ -1,6 +1,7 @@
 [{
   "index": 0,
-  "type": "text",
+  "repeat": false,
+  "type": "EventText",
   "name": "找到警局就任的前同事，并向他了解线索",
   "cost": 0,
   "contents": [5,6,7,8,9,10,11,12,13],
@@ -12,7 +13,9 @@
 },
   {
   "index": 1,
-  "type": "text",
+  "repeat": false,
+  "hidden": true,
+  "type": "mapEventText",
   "name": "意外的偶遇",
   "cost": 10,
   "description": "在哥谭警局遇到了意想不到的人",
@@ -20,63 +23,68 @@
 },
   {
     "index": 2,
-    "type": "map",
-    "cost": 5,
-    "name": "17号人物赠送防弹背心",
-    "repeat": false,
-    "contents": [30],
-    "fall": [0]
-  },
-  {
-    "index": 3,
-    "type": "map",
-    "cost": 5,
     "repeat": true,
-    "name": "18号人物赠送防弹背心",
+    "type": "mapText",
+    "cost": 5,
+    "name": "警局地图17号人物赠送防弹背心",
     "contents": [31],
     "fall": [0]
   },
   {
-    "index": 4,
-    "type": "map",
+    "index": 3,
     "repeat": true,
+    "type": "mapText",
     "cost": 5,
-    "name": "19号人物赠送防弹背心",
+    "name": "警局地图18号赠送防弹背心",
     "contents": [32],
     "fall": [0]
   },
   {
+    "index": 4,
+    "repeat": true,
+    "type": "mapText",
+    "cost": 3,
+    "name": "警局地图日常胜利对话",
+    "contents": [],
+    "fall": []
+  },
+  {
     "index": 5,
-    "type": "map",
+    "type": "mapText",
     "cost": 5,
     "repeat": false,
-    "name": "20号人物赠送防弹背心",
+    "name": "警局地图20号人物初次见面",
     "contents": [32],
     "fall": [0]
   },
   {
     "index": 6,
-    "type": "map",
+    "type": "mapText",
+    "repeat": false,
     "cost": 0,
-    "name": "返回事件",
-    "contents": [41]
+    "prev": 8,
+    "name": "28号警局调查事件II",
+    "contents": [41,42]
   },
   {
     "index": 7,
-    "type": "map",
+    "repeat": false,
+    "type": "mapText",
     "cost": 0,
     "name": "支线事件1，option1,放弃帮助;",
-    "contents": [38]
+    "contents": [40]
   },
   {
     "index": 8,
-    "type": "map",
+    "repeat": false,
+    "type": "mapText",
     "cost": 0,
     "name": "支线事件2，option2,坦诚需要帮助",
-    "contents": [36,37]
+    "contents": [38,39]
   },
   {
     "index": 9,
+    "repeat": true,
     "type": "map",
     "cost": 0,
     "name": "放弃挑战",
@@ -86,12 +94,14 @@
   },
   {
     "index": 10,
+    "repeat": true,
     "type": "map",
     "cost": 0,
     "name": "放弃选项"
   },
   {
     "index": 11,
+    "repeat": true,
     "type": "mapText",
     "cost": 0,
     "name": "我必须先找到调查这件事的线索",
@@ -101,6 +111,7 @@
   },
   {
     "index": 12,
+    "repeat": true,
     "type": "mapText",
     "cost": 0,
     "name": "关卡1,当前关卡挑战失败，冒出提示信息",
@@ -114,6 +125,7 @@
   },
   {
     "index": 13,
+    "repeat": true,
     "type": "mapText",
     "cost": 0,
     "name": "步数清零，离开游戏",
@@ -124,5 +136,81 @@
       }
     },
     "task": null
+  },
+  {
+    "index": 14,
+    "repeat": true,
+    "type": "mapText",
+    "cost": 0,
+    "name": "获取探照灯失败",
+    "contents": [48],
+    "result":null,
+    "task": null
+  },
+  {
+    "index": 15,
+    "repeat": true,
+    "type": "mapText",
+    "cost": 10,
+    "name": "获取探照灯成功",
+    "contents": [49],
+    "fall": [3],
+    "task": null
+  },
+  {
+    "index": 16,
+    "repeat": false,
+    "type": "mapText",
+    "cost": 10,
+    "name": "警局地图27号人物闲聊,年轻警察，预备有后续支线剧情。",
+    "contents": [35],
+    "result": null,
+    "fall": null,
+    "task": null
+  },
+  {
+    "index": 17,
+    "repeat": false,
+    "type": "mapText",
+    "cost": 10,
+    "name": "警局地图28号人物闲聊，可以获取关于过去毒品案的支线。",
+    "contents": [37],
+    "result": null,
+    "fall": null,
+    "task": null
+  },
+  {
+    "index": 18,
+    "repeat": false,
+    "type": "mapText",
+    "cost": 5,
+    "prev": 15,
+    "name": "警局地图20号人物闲聊II，可以拿到稍多一点防弹背心",
+    "contents": [32],
+    "fall": [0]
+  },
+  {
+    "index": 19,
+    "repeat": true,
+    "type": "mapText",
+    "cost": 5,
+    "name": "警局地图19号人物闲聊无掉落",
+    "contents": [33]
+  },
+  {
+    "index": 20,
+    "repeat": true,
+    "type": "mapHint",
+    "cost": 3,
+    "name": "警局地图指路提示",
+    "contents": [50,54]
+  },
+  {
+    "index": 21,
+    "repeat": true,
+    "type": "mapHint",
+    "cost": 3,
+    "name": "警局地图指路提示",
+    "contents": [51,55]
   }
 ]

@@ -7,6 +7,7 @@ var express = require('express'),
 global.__websiteInfo = require('../translation/cleegame.js');
 global.__errInfo = require('../translation/cleegame_err.js');
 
+
 var app = express();
 
 route(app);

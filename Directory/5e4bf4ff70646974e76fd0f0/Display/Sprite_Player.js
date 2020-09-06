@@ -57,7 +57,7 @@ Sprite_Player.prototype.checkAnimationFrame = function(){
     if(this._faceId === 1 && this._stayCount >= this._maxCount)
         return true;
     return false;
-}
+};
 
 Sprite_Player.prototype.updateAnimation = function(){
       this._stayCount++;

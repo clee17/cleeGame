@@ -66,9 +66,9 @@ router.post('/games/admin/gameList',admin.fullList);
 
 router.get('/games/request',game.getResource);
 router.get('/games/load',game.loadScripts);
-router.get('/games/:gameId/',game.getGame);
-router.post('/games/:gameId/requestPreview',game.getPreview);
 
+router.post('/games/:gameId/requestPreview',game.getPreview);
+router.get('/games/:gameId/',game.getGame);
 
 //显示与阅读小说
 router.post('/getWorksList',works.getWorksList);

@@ -163,7 +163,6 @@ Scene_Title.prototype.changeStatus = function(status){
 };
 
 Scene_Title.prototype.commandNewGame = function() {
-    DataManager.setupNewGame();
     this._titleCommand.close();
     this._titleSign.close();
     this.changeStatus('observe');

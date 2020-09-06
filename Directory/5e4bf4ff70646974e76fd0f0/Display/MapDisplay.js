@@ -141,6 +141,7 @@ Map_Display.prototype.movePlayer = function(){
         this.refreshPlayer();
         this.refreshMove();
         this.checkExitPoint();
+        this.checkEndPoint();
         this.checkMapEvent();
         this._playerStay = 0;
     }
@@ -182,24 +183,42 @@ Map_Display.prototype.checkExitPoint = function(){
     this.updateExitAnimate(this._exitPoint,index === this._exitPoint);
 };
 
+Map_Display.prototype.checkEndPoint = function(){
+    let index = this._player._location.index;
+    if(index === this._endPoint){
+        this._currentRoute = [];
+        GameManager.winMapEvent();
+    }
+};
+
 Map_Display.prototype.checkMapEvent = function(){
     let currentIndexX = Math.floor((this._player.x - 50)/60);
     let currentIndexY = Math.floor((this._player.y - 55)/60);
-    let mapIndex = currentIndexY * this.size.width + currentIndexX;
-    let tileId = this._mapMatrix[mapIndex]._tileId;
+    let playerIndex =  currentIndexY * this.size.width + currentIndexX;
+    let tileId = this._mapMatrix[playerIndex]._tileId;
     let tileInfo = Game_Database.getData('tile',tileId);
-    if(tileInfo.type !== "normal"){
-        let map = Game_Database.getData('map',this._mapIndex);
-        let info = Game_Database.getData('mapinfo',map.info);
-        this._player.shock();
-        this._currentRoute = [];
-        if(tileInfo.type === 'treasure'){
-
-        }else if (tileInfo.type === 'events'){
-
-        }else if (tileInfo.type === 'special'){
-
+    let mapIndex = currentIndexY * this.size.width + currentIndexX;
+    let map = Game_Database.getData('map',this._mapIndex);
+    let mapInfo = Game_Database.getData('mapinfo',map.info);
+    if(tileInfo.type === 'treasure'){
+        let result = GameManager.processMapEvent(tileInfo,this.changeTile.bind(this,mapIndex,mapInfo.defaultTile));
+        if(result){
+            this._currentRoute = [];
+            this._player.shock();
         }
+    }else if (tileInfo.type === 'events'){
+        let result = GameManager.processMapEvent(tileInfo,null);
+        if(result){
+            this._currentRoute = [];
+        }
+    }else if (tileInfo.type === 'special'){
+        this._player.shock();
+        let result = GameManager.processMapEvent(tileInfo,this.changeTile.bind(this,mapIndex,mapInfo.defaultTile));
+        if(result){
+            this._player.shock();
+            this._currentRoute = [];
+        }
+
     }
 };
 
@@ -312,6 +331,9 @@ Map_Display.prototype.update = function() {
         this._player.update();
         this.movePlayer();
     }
+};
+
+Map_Display.prototype.updateInputEvent = function(){
     this.updateTouch();
     this.updateInput();
 };
@@ -332,6 +354,7 @@ Map_Display.prototype.createTileMap = function(){
     let info = Game_Database.getData('mapinfo',mapInfo.info);
     if(!info)
         return;
+    this._currentRoute = [];
     this.size = info.size;
     let specialTile = {};
     for(let i=0;i<info.map.length;++i){
@@ -357,16 +380,32 @@ Map_Display.prototype.createTileMap = function(){
     }
 };
 
-Map_Display.prototype.isEndOK = function(end){
-    if(end === this._startPoint)
-        return false;
-    return !!this._mapMatrix[end];
-};
+
 
 Map_Display.prototype.showTileTexture = function(tileIndex,textureId){
     let frameX = textureId%5;
     let frameY = Math.floor(textureId/5);
     this._mapMatrix[tileIndex].setFrame(frameX*60,frameY*60,60,60);
+};
+
+Map_Display.prototype.isExitOK = function(end){
+    if(end === this._startPoint)
+        return false;
+    return !!this._mapMatrix[end];
+};
+
+Map_Display.prototype.isEndOK = function(end){
+    if(end === this._startPoint)
+        return false;
+    if(end === this._exitPoint)
+        return false;
+    if(this._mapMatrix[end]){
+        let tileId = this._mapMatrix[this._mapIndex]._tileId;
+        let tileInfo = Game_Database.getData('tile',tileId);
+        if(tileInfo.type !== "normal")
+            return false;
+    }
+    return !!this._mapMatrix[end];
 };
 
 Map_Display.prototype.changeTile = function(index,tileId){
@@ -381,11 +420,20 @@ Map_Display.prototype.changeTile = function(index,tileId){
 
 Map_Display.prototype.createExitPoint = function(){
     let exitPoint = Math.randomInt(this._mapMatrix.length);
-    while(!this.isEndOK(exitPoint)){
+    while(!this.isExitOK(exitPoint)){
         exitPoint = Math.randomInt(this._mapMatrix.length);
     }
     this._exitPoint = exitPoint;
     this.changeTile(exitPoint,4);
+};
+
+Map_Display.prototype.createEndPoint = function(){
+    let endPoint = Math.randomInt(this._mapMatrix.length);
+    while(!this.isEndOK(endPoint)){
+        endPoint = Math.randomInt(this._mapMatrix.length);
+    }
+    this._endPoint = endPoint;
+    GameManager.setEndPoint(endPoint);
 };
 
 Map_Display.prototype.initializePlayer = function(){
@@ -415,6 +463,7 @@ Map_Display.prototype.loadMap = function(callback){
         this.createTileMap();
         this.initializePlayer();
         this.createExitPoint();
+        this.createEndPoint();
         GameManager.loadChallenge();
         if(callback)
            callback();

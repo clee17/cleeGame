@@ -7,7 +7,6 @@ Window_Item.prototype.constructor = Window_Item;
 
 Window_Item.prototype.initialize = function(x,y) {
     Window_Base.prototype.initialize.call(this,x-1,y,1,1,true);
-    this.loadBackground('sideWindow');
     this._align = 'left';
     this._target = new Point(this.x,this.y);
     this._origin = new Point(this.x+1,this.y);
@@ -17,6 +16,7 @@ Window_Item.prototype.initialize = function(x,y) {
     this._maxStay = 150;
     this._windowBackSprite.anchor.x = 1;
     this._item = [];
+    this.loadBackground('sideWindow');
     this.createAllItem();
 };
 
@@ -28,6 +28,7 @@ Window_Item.prototype.createAllItem = function(){
         this._item[i].alpha = 0;
         this.addChild(this._item[i]);
     }
+    this.resetItem();
 };
 
 Window_Item.prototype.loadBackground = function(filename){
@@ -88,15 +89,19 @@ Window_Item.prototype.updateStay = function(){
         this.close();
 };
 
+Window_Item.prototype.resetItem = function(){
+    let backPack = GameManager.getValue('backpack');
+    for(let i=0; i<6;++i){
+        if(backPack[i]){
+            this._item[i].alpha = 1;
+            this._item[i].setItem(backPack[i]);
+        }else this._item[i].alpha = 0;
+    }
+};
+
 Window_Item.prototype.updateItem = function(){
     if(GameManager._backpackUpdated){
-        let backPack = GameManager.getValue('backpack');
-        for(let i=0; i<6;++i){
-            if(backPack[i]){
-                this._item[i].alpha = 1;
-                this._item[i].setItem(backPack[i]);
-            }else this._item[i].alpha = 0;
-        }
+        this.resetItem();
     }
 };
 

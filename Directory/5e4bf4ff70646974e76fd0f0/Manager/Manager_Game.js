@@ -47,22 +47,26 @@ Event_Cache.prototype.getValue = function(value){
 
 GameManager._event = null;
 GameManager._mapUpdated = false;
-GameManager._backpackUpdated = false;
+GameManager._backpackUpdated = null;
 GameManager._playerUpdated = false;
 GameManager._alertChanged = false;
 GameManager._infoChange = {};
 GameManager._stashedEvent = [];
+GameManager._backpack = [];
+GameManager._backpackChange = null;
 
 GameManager.initialize = function(){
     if(this._game.map === undefined)
         this._game.map = 0;
-    if(typeof this._game._completedEvent != 'array')
+    if(!this._game._completedEvent)
         this._game._completedEvent = [];
-    if(typeof this._game._completedEventHidden != 'array')
+    if(!this._game._completedEventHidden)
         this._game._completedEventHidden = [];
-    if(typeof this._game._completedTask != 'array')
+    if(!this._game._completedEventMap)
+        this._game._completedEventMap = [];
+    if(!this._game._completedTask)
         this._game._completedTask = [];
-    if(typeof this._game._task != 'array')
+    if(!this._game._task)
         this._game._task = [];
     if(typeof this._game._event != 'number')
         this._game._event = 0;
@@ -119,6 +123,10 @@ GameManager.changeMap = function(index){
     if(this.isTalkEvent())
         return;
     this._game.map = index;
+    if(this._game.map >0){
+        this._backpack = [];
+        this._mapInfo = Game_Database.getMap(this._game.map);
+    }
     this._mapChanged = true;
 };
 
@@ -196,15 +204,49 @@ GameManager.updateValue = function(value,exec){
     this._infoChange[value] = true;
 };
 
+GameManager.addToBackpack = function(itemInfo,realBackpack){
+    let backpack = this._game.backpack;
+    if(!realBackpack)
+        backpack = this._backpack;
+    for(let i=0; i< backpack.length;++i){
+        if(backpack[i].index === itemInfo.index){
+            backpack[i].num += itemInfo.num;
+            return;
+        }
+    };
+    backpack.push({index:itemInfo.index,num:itemInfo.num});
+};
+
+GameManager.mergeBackpack = function(){
+    let backpack = this._backpack;
+    for(let i=0; i <backpack.length;++i){
+        this.addToBackpack(backpack[i],true);
+    }
+    this._backpack = [];
+};
+
 GameManager.resultEvent = function(){
     let resultInfo = this._event.getValue('result');
-    if(!resultInfo)
-        return;
-    for(let attr in resultInfo){
-        this.updateValue(attr,resultInfo[attr]);
-        if(attr === 'map')
-            this._mapChanged = true;
+    if(resultInfo){
+        for(let attr in resultInfo){
+            this.updateValue(attr,resultInfo[attr]);
+            if(attr === 'map')
+                this._mapChanged = true;
+        }
     }
+    let fallIndex = this._event.getValue('fall');
+    if(!fallIndex)
+        return;
+    this._backPackChange = [];
+    for(let i =0; i <fallIndex.length;++i){
+        let fallInfo = Game_Database.getData('fall',fallIndex[i]);
+        let itemIndex = fallInfo.item;
+        let itemNum = Math.randomInt(fallInfo.num[1]-fallInfo.num[0])+fallInfo.num[0];
+        this._backPackChange.push({num:itemNum,index:itemIndex});
+    }
+    for(let i =0; i<this._backPackChange.length;++i){
+        this.addToBackpack(this._backPackChange[i]);
+    };
 };
 
 GameManager.refreshTask = function(){
@@ -221,26 +263,31 @@ GameManager.refreshTask = function(){
             this._game._task.splice(this._game._task.indexOf(index),1);
         }
     }
-    this._taskChanged = true;
+    this._infoChange['task'] = true;
 };
 
 GameManager.completeEvent = function(){
-    if(!this._event.isMapEvent())
-        this._game._completedEvent.push(this._event.getValue('index'));
+    if(this._event.callback){
+        let callback = this._event.callback;
+        callback();
+    }
     this._eventChanged = true;
     this._processing = false;
     this._event = null;
     if(this._stashedEvent.length > 0){
         this._event = this._stashedEvent.pop();
     }
+
 };
 
 GameManager.storeEvent = function(){
     if(this._event && this._event._type.indexOf('map') <0){
+        this._game._completedEvent.push(this._event.getValue('index'));
+    }else if (this._event && !this._event.getValue('repeat')){
         if(this._event.getValue('hidden'))
-            this._game._completedEventHidden.push(this._event.getValue('index'));
+             this._game._completedEventHidden.push(this._event.getValue('index'));
         else
-            this._game._completedEvent.push(this._event.getValue('index'));
+            this._game._completedEventMap.push(this._event.getValue('index'));
     }
 };
 
@@ -255,6 +302,103 @@ GameManager.refreshEvent = function(){
         viewport.printError('some error happened, please report the bug you encountered to the author');
 };
 
+
+
+GameManager.getMapTarget = function(){
+    if(this._mapInfo && this._mapInfo.target)
+        return this._mapInfo.target;
+};
+
+GameManager.getMapEnd = function(){
+    if(typeof this._endPoint === 'number')
+        return this._endPoint;
+};
+
+GameManager.setEndPoint = function(endPoint){
+   if(this._game._map){
+       this._mapInfo._endPoint = endPoint;
+   }
+};
+
+GameManager.playerStatus = function(){
+    return {step:this._game.step,hp:this._game.hp};
+};
+
+GameManager.moveStep = function(tileInfo){
+    this._game.step += tileInfo.step;
+    this._game.hp += tileInfo.hp;
+    this._game.hp =  this._game.hp.clamp(0,this._game.maxHP || 100);
+    this._game.step = this._game.step.clamp(0,this._game.maxStep || 100);
+    this._infoChange['hp'] = true;
+    this._infoChange['step'] = true;
+    return this.playerStatus();
+};
+
+GameManager.randomEvents = function(events){
+    let maxRate = 0;
+    let step = [];
+    for(let i = 0; i<events.length;++i){
+        let event = events[i];
+        maxRate += event.rate;
+        step.push(maxRate);
+    }
+    if(maxRate === 0)
+        return null;
+    let int = Math.randomInt(maxRate);
+    if(int < step[0])
+        return events[0];
+    for(let i=0;i<step.length-1;++i){
+        if(int > step[i] && int <= step[i+1])
+            return events[i+1];
+    }
+    return events.pop();
+};
+
+GameManager.isMapEventOK = function(event){
+    let info = Game_Database.getData('event_map',event.index);
+    let ifPrev = true;
+    let ifRepeat = false;
+    if(typeof info.prev === 'number'){
+        let prevEvent = Game_Database.getData('event_map',info.prev);
+        if(prevEvent.hidden)
+           ifPrev=  this._game._completedEventHidden.indexOf(prevEvent.index)>=0;
+        else
+            ifPrev = this._game._completedEventMap.indexOf(prevEvent.index) >= 0;
+    }
+    if(info.repeat !== undefined && !info.repeat){
+        if(info.hidden)
+            ifRepeat = this._game._completedEventHidden.indexOf(info.index)>=0;
+        else
+            ifRepeat = this._game._completedEventMap.indexOf(info.index)>=0;
+    }
+    let result =  ifPrev && (!ifRepeat);
+    return result;
+};
+
+GameManager.processMapEvent = function(tileInfo,callback){
+    let events = tileInfo.events || [];
+    events = JSON.parse(JSON.stringify(events));
+    let event = this.randomEvents(events);
+    while(event && !this.isMapEventOK(event)){
+        event = this.randomEvents(events);
+    }
+    if(!event)
+        return false;
+    let eventInfo = Game_Database.getData('event_map',event.index);
+    if(eventInfo){
+        if(this._event) {
+            this._stashedEvent.push(this._event);
+        }
+        this._event = new Event_Cache(eventInfo);
+        this._game.hp -= eventInfo.cost;
+        this._infoChange['hp'] = true;
+        if(callback)
+            this._event.callback = callback;
+        return true;
+    }else
+        return false;
+};
+
 GameManager.endMapEvent = function(){
     if(this.isChallenge() && this._event.getValue('exit')){
         this._stashedEvent.push(this._event);
@@ -264,6 +408,21 @@ GameManager.endMapEvent = function(){
     }else{
         this._stashedEvent.push(this._event);
         let eventInfo = Game_Database.getData('event_map',5);
+        this._event = new Event_Cache(eventInfo);
+    }
+};
+
+GameManager.winMapEvent = function(){
+    if(this.isChallenge()){
+        this._stashedEvent.push(this._event);
+        let eventId = this.getChallengeEvent();
+        let eventInfo = Game_Database.getData('event_map',eventId);
+        this._event = new Event_Cache(eventInfo);
+    }else{
+        this._stashedEvent.push(this._event);
+        let map = Game_Database.getData('map',this._game.map);
+        let mapInfo = Game_Database.getData('mapinfo',map.info);
+        let eventInfo = Game_Database.getData('event_map',mapInfo.win);
         this._event = new Event_Cache(eventInfo);
     }
 };
@@ -282,36 +441,9 @@ GameManager.failMapEvent = function(){
     }
 };
 
-GameManager.playerStatus = function(){
-    return {step:this._game.step,hp:this._game.hp};
-};
-
-GameManager.moveStep = function(tileInfo){
-    if(this._game.step <= 0){
-        return this.playerStatus();
-    }
-    else if(this._game.hp <=0)
-        return this.playerStatus();
-    this._game.step += tileInfo.step;
-    this._game.hp += tileInfo.hp;
-    this._infoChange['hp'] = true;
-    this._infoChange['step'] = true;
-    return this.playerStatus();
-};
-
 GameManager.showAlertSign = function(text){
     this._alert = text;
     this._alertChanged = true;
-};
-
-GameManager.updateMapEnd = function(){
-    if(!this._endChallenge)
-        return;
-    if(!this._event && this._game.map >0)
-        this._game.map = 0;
-    else if(this._event && this._event.isEnd() && this._game.map >0 )
-        this._game.map = 0;
-    this._mapChanged = true;
 };
 
 GameManager.updateNewStatus = function(){
@@ -321,28 +453,19 @@ GameManager.updateNewStatus = function(){
             this._playerUpdated = true;
         this._infoChange[attr] = false;
     }
-    this._backpackUpdated = false;
-    for(let i =0; i<this._game.backpack.length;++i){
-        if(this._game.backpack[i].updated)
-            this._backpackUpdated = true;
-        this._game.backpack[i].updated = false;
-    }
+    this._backpackUpdated = this._backPackChange;
+    this._backPackChange = null;
 
     this._eventUpdated = this._eventChanged;
     this._mapUpdated = this._mapChanged;
-    this._taskUpdated = this._taskChanged;
-    this._alertUpdated = this._alertChanged;
 
     this._mapChanged = false;
     this._eventChanged = false;
-    this._taskChanged = false;
-    this._alertChanged = false;
 };
 
 GameManager.update = function(){
     if(this._gameStarted){
         this.updateNewStatus();
-        this.updateMapEnd();
         this.updateAutoEvents();
         if(TalkManager)
             TalkManager.update();

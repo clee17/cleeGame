@@ -41,6 +41,7 @@ let handler = {
     },
 
     getGame:function(req,res){
+        console.log('entered');
         let data = {rendered:false};
         let gameName = req.params.gameId;
         if(!gameName)
@@ -151,7 +152,6 @@ let handler = {
                     }
                 }
             }
-            console.log(data.loadList);
             if(data.loadList.length === 0)
             {
                 data.status = 200;

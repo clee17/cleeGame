@@ -59,21 +59,19 @@ Scene_Title.prototype.createBackground = function() {
 };
 
 Scene_Title.prototype.createWindow = function(){
-   this._titleCommand = new Window_Title('rgba(247,244,221,255)','rgba(221,188,109,255)',viewport.width/2-185, viewport.height*0.35,345, 328,false);
-   this._titleCommand._fontSize = 35;
-   this._titleCommand._lineHeight = 75;
-   this._titleCommand._letterSpacing = 4;
-   this._titleCommand._fontWidth = 35;
-   this._titleCommand._openness = 0;
-   this._titleCommand.addCommand(TextManager.newGame(),'newGame');
-   this._titleCommand.addCommand(TextManager.continue(),'continue',StorageManager.localSaveExisted());
-   this._titleCommand.addCommand(TextManager.rewards(), 'rewards',StorageManager.localSaveExisted());
-   // this._titleCommand.addCommand(TextManager.options(),'options');
+    this._titleCommand = new Window_Title('rgba(247,244,221,255)','rgba(221,188,109,255)',viewport.width/2-185, viewport.height*0.35,345, 328,false);
+    this._titleCommand._fontSize = 35;
+    this._titleCommand._lineHeight = 75;
+    this._titleCommand._letterSpacing = 4;
+    this._titleCommand._fontWidth = 35;
+    this._titleCommand._openness = 0;
+    this._titleCommand.addCommand(TextManager.newGame(),'newGame');
+    this._titleCommand.addCommand(TextManager.rewards(), 'rewards',StorageManager.localSaveExisted());
+    this._titleCommand.addCommand(TextManager.options(),'options');
     this._titleCommand.setHandler('newGame',  this.commandNewGame.bind(this));
-    this._titleCommand.setHandler('continue', this.commandContinue.bind(this));
     this._titleCommand.setHandler('rewards', this.commandRewards.bind(this));
-    // this._titleCommand.setHandler('options',  this.commandOptions.bind(this));
-   this.addChild(this._titleCommand);
+    this._titleCommand.setHandler('options',  this.commandOptions.bind(this));
+    this.addChild(this._titleCommand);
 };
 
 Scene_Title.prototype.create = function() {
@@ -142,17 +140,16 @@ Scene_Title.prototype.isStarted = function(){
 };
 
 Scene_Title.prototype.commandNewGame = function() {
-    viewport.startNewGame();
-    return;
-    DataManager.setupNewGame();
+    // viewport.startNewGame();
+    // return;
+    if(GameManager._second === undefined)
+        GameManager._second = false;
+    else if (GameManager._second === false)
+        GameManager._second = true;
+    GameManager.startGame();
     this._titleCommand.close();
     this.fadeOutAll();
     SceneManager.goto(Scene_Main);
-};
-
-Scene_Title.prototype.commandContinue = function() {
-    this._titleCommand.close();
-    SceneManager.push(Scene_Load);
 };
 
 Scene_Title.prototype.commandRewards = function() {
@@ -163,5 +160,6 @@ Scene_Title.prototype.commandRewards = function() {
 
 Scene_Title.prototype.commandOptions = function() {
     this._titleCommand.close();
+    this.startFadeOut();
     SceneManager.push(Scene_Options);
 };

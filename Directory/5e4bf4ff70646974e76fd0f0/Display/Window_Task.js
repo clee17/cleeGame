@@ -8,7 +8,6 @@ Window_Task.prototype.constructor = Window_Task;
 
 Window_Task.prototype.initialize = function(x,y) {
     Window_Base.prototype.initialize.call(this,x-1,y,1,1,true);
-    this.loadBackground('sideWindow');
     this._align = 'left';
     this._fontSize = 16;
     this._padding = 12;
@@ -20,6 +19,7 @@ Window_Task.prototype.initialize = function(x,y) {
     this._blockTouch = true;
     this._maxStay = 150;
     this._initializeTaskLine();
+    this.loadBackground('sideWindow');
 };
 
 Window_Task.prototype._initializeTaskLine = function(){
@@ -138,7 +138,7 @@ Window_Task.prototype.updateStay = function(){
 };
 
 Window_Task.prototype.updateTask = function(){
-    if(GameManager._taskUpdated)
+    if(GameManager._playerUpdated)
         this._refreshContents();
 };
 

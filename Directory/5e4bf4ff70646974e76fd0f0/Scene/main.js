@@ -15,7 +15,19 @@ Scene_Main.prototype.initialize = function() {
 Scene_Main.prototype.reserveImages = function(){
     ImageManager.reserveBitmap('item_small.png');
     ImageManager.reserveBitmap('item_large.png');
-}
+};
+
+Scene_Main.prototype.createReturnButton = function(){
+    this._returnButton  = new Sprite_Button(new Rectangle(0,0,150,60),'return');
+    this._returnButton.setEvent(this.leaveGame.bind(this));
+    this._returnButton.setFontSize(35);
+    this._returnButton.setName("返回");
+    this._returnButton.setNormalColor('rgba(255,255,255,0.8)','rgba(148,187,248,1)');
+    this._returnButton.setSelectedColor('rgba(255,255,255,0.8)','rgba(148,187,248,0.6)','rgba(75,195,255)');
+    this._returnButton.setEnabled();
+    this._returnButton.move(viewport.width - 150,10);
+    this.addChild(this._returnButton);
+};
 
 Scene_Main.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
@@ -39,6 +51,7 @@ Scene_Main.prototype.create = function() {
     this.addChild(this._itemWindow);
     this.addChild(this._talkWindow);
     this.addChild(this._alertWindow);
+    this.createReturnButton();
     this.reserveImages();
 };
 
@@ -49,15 +62,44 @@ Scene_Main.prototype.start = function() {
     this.startFadeIn();
 };
 
+Scene_Main.prototype.updateReturn = function(){
+    if(this._returnButton._enabled && GameManager.getCurrentMap().index>0)
+        this._returnButton.setDisabled();
+    else if(!this._returnButton._enabled && GameManager.getCurrentMap().index === 0 && !this._mainMap.isBusy())
+        this._returnButton.setEnabled();
+
+};
+
 Scene_Main.prototype.update = function() {
     Scene_Base.prototype.update.call(this);
+    this.updateReturn();
+    this._mainMap.updateInputEvent();
 };
 
 Scene_Main.prototype.isBusy = function(){
     let result = Scene_Base.prototype.isBusy.call(this);
     if(!this._alertWindow.isClosed())
         return true;
-    if(!this._talkWindow.isClosed())
+    if(!this._talkWindow.isClosed()){
         return true;
+    }
+
     return result;
+};
+
+Scene_Main.prototype.closeAll = function(){
+    this._infoWindow.close();
+    this._taskWindow.close();
+    this._itemWindow.close();
+    TalkManager.terminate();
+    this._talkWindow.deactivate();
+    this._talkWindow.close();
+    this._alertWindow.deactivate();
+    this._alertWindow.close();
+};
+
+Scene_Main.prototype.leaveGame = function(){
+    this.closeAll();
+    this.startFadeOut();
+    SceneManager.goto(Scene_Title);
 };

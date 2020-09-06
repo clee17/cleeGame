@@ -17,11 +17,13 @@ Button_Map.prototype._createAllParts = function(){
     this._disabledDeco.x = 25;
     this._disabledDeco.y = 8;
     this.addChild(this._disabledDeco);
+    this._disabledDeco.visible = !this._enabled;
 };
 
 Button_Map.prototype._refreshStatus = function(){
     Sprite_Button.prototype._refreshStatus.call(this);
-    this._disabledDeco.visible = !this._enabled;
+    if(this._disabledDeco)
+       this._disabledDeco.visible = !this._enabled;
 };
 
 Button_Map.prototype.setEnabled = function(enabled){

@@ -8,8 +8,31 @@
     "step": -8,
     "hp": 0,
     "description": "去这里碰碰运气，总有些老朋友愿意帮忙",
-    "role": [17,18,19,20,21,23,24,25,26],
-    "events":[1,2,3,4,5]
+    "events":[{
+      "index": 19,
+      "rate": 20
+    },{
+      "index": 2,
+      "rate": 20
+    },{
+      "index": 3,
+      "rate": 20
+    },{
+      "index": 5,
+      "rate": 25
+    },{
+      "index": 6,
+      "rate": 25
+    },{
+      "index": 16,
+      "rate": 20
+    },{
+      "index": 17,
+      "rate": 20
+    },{
+      "index": 18,
+      "rate": 45
+    }]
   },
   {
     "index": 1,
@@ -20,12 +43,8 @@
     "description": "故地重游，总会发生意想不到的事情",
     "step": -5,
     "hp": 0,
-    "role": [17,18,19,20,21,23,24,25,26],
-    "events":[],
-    "special": [{
-      "index": 0,
-      "rate": 10
-    }]
+    "hint":[20,21],
+    "events": []
   },
   {
     "index": 2,
@@ -36,7 +55,6 @@
     "hp": 0,
     "name": "平安无事的警局",
     "description": "今天的哥谭警局也像一如既往那么平静",
-    "role": [],
     "events":[]
   },
   {
@@ -47,9 +65,8 @@
     "step": -1,
     "hp": 0,
     "name": "神奇的探照灯",
-    "description": "在警局发现了罚没的神奇微型探照灯",
-    "role": [],
-    "events":[]
+    "description": "在警局发现了神奇的微型探照灯",
+    "events":[{"index":14,"rate":20},{"index":15,"rate":80}]
   },
   {
     "index": 4,

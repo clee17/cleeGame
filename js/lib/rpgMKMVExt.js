@@ -437,11 +437,13 @@ Bitmap.prototype.initialize = function(width, height,status) {
     this.fontFace = 'Arial';
     this.fontSize = 28;
     this.fontWidth = this.fontSize;
+    this._thickText = false;
     this.letterSpacing = 4;
     this.fontItalic = false;
     this.textColor = '#ffffff';
     this.outlineColor = 'rgba(0, 0, 0, 0.5)';
     this.outlineWidth = 4;
+    this.shadowBlur = 0;
 };
 
 Bitmap.load = function() {
@@ -1044,9 +1046,9 @@ Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
             if(this._showShadow){
                 context.shadowColor = this.shadowColor;
                 context.shadowBlur = this.shadowBlur;
-                context.globalAlpha = 0.9;
-            }else{
                 context.globalAlpha = 0.6;
+            }else{
+                context.globalAlpha = 0.8;
                 context.shadowBlur = 0;
             }
             this._drawTextOutline(text, tx, ty, maxWidth);
@@ -1192,14 +1194,16 @@ Bitmap.prototype._drawTextOutline = function(text, tx, ty, maxWidth) {
     if(!this.outlineWidth)
         return;
     var context = this._context;
-    context.globalAlpha =  0.5;
     context.strokeStyle = this.outlineColor;
     context.lineWidth = this.outlineWidth;
     context.lineJoin = 'round';
     context.strokeText(text, tx, ty, maxWidth);
-    context.globalAlpha = 1;
-    context.lineWidth = this.outlineWidth -2.5;
-    context.strokeText(text, tx, ty, maxWidth);
+    if(this._thickText){
+        context.globalAlpha = 1;
+        context.lineWidth = this.outlineWidth -2.5;
+        context.strokeText(text, tx, ty, maxWidth);
+    }
+
 };
 
 Bitmap.prototype._drawTextBody = function(text, tx, ty, maxWidth) {
@@ -1309,7 +1313,7 @@ Sprite.prototype.generateKey = function(filename){
     return filename +':' + Sprite._defaultId++;
 };
 
-Sprite.prototype.initialize = function(filename) {
+Sprite.prototype.initialize = function(filename,type) {
     let texture = new PIXI.Texture(new PIXI.BaseTexture());
 
     PIXI.Sprite.call(this, texture);
@@ -1334,7 +1338,7 @@ Sprite.prototype.initialize = function(filename) {
         loader.getBitmapInfo(filename,this.initializeBitmap.bind(this));
     }else if(filename && typeof filename === 'object'){
         this.bitmap = filename;
-        this.bitmap.fillAll('rgba(255,255,255,1)');
+        // this.bitmap.fillAll('rgba(255,255,255,1)');
     }else{
         this.bitmap = null;
     }
@@ -2523,6 +2527,7 @@ TouchInput._onLeftButtonDown = function(event) {
 };
 
 TouchInput._onMiddleButtonDown = function(event) {
+
 };
 
 TouchInput._onRightButtonDown = function(event) {
@@ -4272,10 +4277,6 @@ DataManager.checkError = function() {
     }
 };
 
-DataManager.setupNewGame = function() {
-    GameManager.startGame(Game_Database.getDefaultPlayer());
-};
-
 DataManager.loadGlobalInfo = function() {
     var json;
     try {
@@ -4451,11 +4452,12 @@ function GameManager() {
     throw new Error('This is a static class');
 }
 
-GameManager._game = {};
+GameManager._game = null;
 GameManager._gameStarted = false;
 
-GameManager.startGame = function(saveFile){
-    this._game = saveFile;
+GameManager.startGame = function(){
+    if(!this._game)
+        this._game = Game_Database.getDefaultPlayer();
     GameManager.initialize();
     this._gameStarted = true;
 };
@@ -4882,7 +4884,6 @@ Scene_Boot.prototype.attachReservation = function() {
 
 Scene_Boot.prototype.isReady = function() {
     if (Scene_Base.prototype.isReady.call(this) && window['loader'] && loader._isLoaded) {
-
         return DataManager.isDatabaseLoaded();
     } else {
         return false;

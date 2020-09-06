@@ -34,7 +34,7 @@ Window.prototype.initialize = function(showBack,showPause) {
 
     this.origin = new Point();
 
-    this.active = true;
+    this._active = true;
 
     this.pause = false;
 };
@@ -158,7 +158,7 @@ Window.prototype.updateOpenness = function(){
 };
 
 Window.prototype.update = function() {
-    if (this.active) {
+    if (this._active) {
         this._animationCount++;
     }
     this.children.forEach(function(child) {
@@ -301,7 +301,7 @@ Window.prototype._reposPauseSign = function(){
 Window.prototype._updateCursor = function() {
     var blinkCount = this._animationCount % 40;
     var cursorOpacity = this.contentsOpacity;
-    if (this.active) {
+    if (this._active) {
         if (blinkCount < 20) {
             cursorOpacity -= blinkCount * 8;
         } else {
@@ -486,11 +486,11 @@ Window_Base.prototype.hide = function() {
 };
 
 Window_Base.prototype.activate = function() {
-    this.active = true;
+    this._active = true;
 };
 
 Window_Base.prototype.deactivate = function() {
-    this.active = false;
+    this._active = false;
 };
 
 Window_Base.prototype.normalColor = function() {
@@ -605,7 +605,8 @@ Window_Base.prototype.textWidth = function(text) {
 
 Window_Base.prototype.drawTextOneByOne = function(text,tx,ty){
     for(let i=0; i<text.length;++i){
-        this.contents.drawText(text[i],tx,ty,this._fontSize,this.lineHeight(),'left');
+        this.resetFontSettings();
+        this.contents.drawText(text[i],tx,ty,this._fontSize,this.lineHeight(),'center');
         tx += this._fontSize;
         tx += this.standardLetterSpacing();
     }
@@ -887,7 +888,7 @@ Window_Title.prototype.callHandler = function(symbol) {
 };
 
 Window_Title.prototype.isOpenAndActive = function() {
-    return this.isOpen() && this.active;
+    return this.isOpen() && this._active;
 };
 
 Window_Title.prototype.isCursorMovable = function() {
