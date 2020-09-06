@@ -7,11 +7,12 @@ var express = require('express'),
 global.__websiteInfo = require('../translation/cleegame.js');
 global.__errInfo = require('../translation/cleegame_err.js');
 
+global.__viewFolder = '';
 
 var app = express();
-
-route(app);
 app = config(app);
+route(app);
+
 
 var server = app.listen(3060);
 

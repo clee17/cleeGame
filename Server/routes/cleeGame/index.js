@@ -93,7 +93,7 @@ router.post('/works/edit/addChapter/',works.addChapter);
 module.exports = function(app)
 {
     app.use('*',function(req,res,next){
-        if(!req.session.user)
+        if(!req.session || !req.session.user)
         {
             res.cookie('userId','',{maxAge:0});
         }
