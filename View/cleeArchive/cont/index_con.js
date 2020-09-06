@@ -19,7 +19,7 @@ app.controller('entryCon',function($scope,$rootScope,$window,$timeout,$cookies,l
 
     $scope.hideAlert = function(scope){
         scope.showAlert = false;
-    }
+    };
 
     $scope.$on('showAlert',function(event,data){
         $scope.alertWindow = 3;
