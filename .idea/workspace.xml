@@ -4,7 +4,6 @@
     <list default="true" id="2c194dae-8acb-4a1f-bfe1-1000bb288402" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/ext/scriptManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ext/scriptManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
