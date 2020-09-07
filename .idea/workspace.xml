@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2c194dae-8acb-4a1f-bfe1-1000bb288402" name="Default Changelist" comment="" />
+    <list default="true" id="2c194dae-8acb-4a1f-bfe1-1000bb288402" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/ext/scriptManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ext/scriptManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/lib/rpgMKMVExt.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,7 +65,6 @@
       <recent name="D:\OneDrive\MyProjects\Website\cleegame\js\lib" />
     </key>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -97,15 +100,15 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="858" y="279" width="570" height="536" key="find.popup" timestamp="1599467050839">
+    <state x="514" y="288" width="1022" height="536" key="find.popup" timestamp="1599474880162">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="858" y="279" width="570" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1599467050839" />
-    <state x="1317" y="388" width="647" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432930741" />
-    <state x="629" y="268" width="672" height="516" key="search.everywhere.popup" timestamp="1599466914246">
+    <state x="514" y="288" width="1022" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1599474880162" />
+    <state x="1317" y="388" width="647" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432086446" />
+    <state x="629" y="268" width="672" height="516" key="search.everywhere.popup" timestamp="1599475008173">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="629" y="268" width="672" height="516" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1599466914246" />
-    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432918578" />
+    <state x="629" y="268" width="672" height="516" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1599475008173" />
+    <state x="1049" y="351" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599432380126" />
   </component>
 </project>
