@@ -7,14 +7,20 @@ var scriptManager = function(){
 scriptManager.initialize = function(){
     this._fullList = window['libs'] || [];
     this._moduleList = window['modules'] || [];
+    this._checkList = this._fullList.concat(this._moduleList);
+    this._checkList = this._checkList.map(function(value){
+        return value.name;
+    })
     this._gameTextLoading = false;
     this._reloadList = [];
     this._loadedList = [];
     this._retryList = [];
     this._errorList = [];
     this._initialized = true;
+    this._bootAttempted = 0;
     this.requestLoad();
 };
+
 
 scriptManager.loadGameText = function(){
     this._gameTextLoading = true;
@@ -177,6 +183,16 @@ scriptManager.finishLibrary = function(filename){
     }
 };
 
+scriptManager.finishModules = function(filename){
+    for(let i=0; i<scriptManager._moduleList.length;++i)
+    {
+        if(this._moduleList[i].name === filename) {
+            this._moduleList.splice(i,1);
+            break;
+        }
+    }
+};
+
 scriptManager.finishRetry = function(filename){
     for(let i=0; i<scriptManager._retryList.length;++i)
     {
@@ -187,23 +203,36 @@ scriptManager.finishRetry = function(filename){
     }
 };
 
-scriptManager.modulesLoaded = function(){
-  for(let i=0; i<this._moduleList.length;++i){
-      if(this._loadedList.indexOf(this._moduleList[i])<0)
+scriptManager.checkFullyLoaded = function(){
+  for(let i=0; i<this._checkList.length;++i){
+      if(this._loadedList.indexOf(this._checkList[i])<0)
           return false;
   }
   return !!gameText;
 };
 
+scriptManager.failBoot = function(){
+    viewport.printError('Game boot failed'," we failed to boot the game due to unknown reason");
+}
+
 scriptManager.autoStart = function(){
-    if(this._loadedList.indexOf('boot') >0 && this.modulesLoaded())
+    if(this._loadedList.indexOf('boot') >0 && this.checkFullyLoaded())
         Game_Boot.boot();
+    else{
+        if(this._bootAttempted>= 10){
+            this.failBoot();
+        }
+        this._bootAttempted ++;
+        setTimeout(this.autoStart.bind(this),500);
+    }
+
 };
 
 scriptManager.finishLoad = function(filename){
     this._loadedList.push(filename);
     this.finishReload(filename);
     this.finishLibrary(filename);
+    this.finishModules(filename);
     this.finishRetry(filename);
     this.autoStart()
     scriptManager.requestLoad();

@@ -5169,7 +5169,7 @@ Game_Boot.loadGame = function(){
             let script = document.createElement('script');
             script.innerHTML = LZString.decompressFromBase64(requestFile.response);
             document.body.appendChild(script);
-            Game_Boot.run();
+            setTimeout(Game_Boot.run,100);
         }else{
             viewport.printError('loadFailed', 'failed to load game');
             Game_Boot._booted = false;
@@ -5219,7 +5219,7 @@ Game_Boot.startNewGame = function(){
 
 Game_Boot.run = function(){
     try {
-        this.initializeEnvironment();
+        Game_Boot.initializeEnvironment();
         SceneManager.goto(Scene_Boot);
         updateManager.registerUpdate(SceneManager);
     } catch (e) {
