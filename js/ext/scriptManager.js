@@ -17,7 +17,6 @@ scriptManager.initialize = function(){
     this._retryList = [];
     this._errorList = [];
     this._initialized = true;
-    this._bootAttempted = 0;
     this.requestLoad();
 };
 
@@ -218,14 +217,6 @@ scriptManager.failBoot = function(){
 scriptManager.autoStart = function(){
     if(this._loadedList.indexOf('boot') >0 && this.checkFullyLoaded())
         Game_Boot.boot();
-    else{
-        if(this._bootAttempted>= 10){
-            this.failBoot();
-        }
-        this._bootAttempted ++;
-        setTimeout(this.autoStart.bind(this),500);
-    }
-
 };
 
 scriptManager.finishLoad = function(filename){
