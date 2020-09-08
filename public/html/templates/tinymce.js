@@ -208,6 +208,7 @@ angular.module('ui.tinymce', [])
                     ) {
                         let text = tinyInstance.getContent({format:"text"});
                         scope['tinymceText'] = text;
+                        updateView(tinyInstance);
                     }
                 }
 

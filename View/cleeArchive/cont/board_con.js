@@ -40,7 +40,7 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
     $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
     $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
 
-    $scope.totalNum = $rootScope.replies.length;;
+    $scope.totalNum = $rootScope.replies.length;
 
     $scope.pageIndex =  $location.search().id ||1;
     $scope.perPage = 35;
@@ -81,12 +81,12 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
 
     $scope.$on('new reply submitted',function(event,data){
         $scope.requesting = false;
-        $scope.$broadcast('new contents submitted', {success:data.success});
-        if(!data.success){
-            $scope.$emit('showError',data.message);
-        }else{
+        $scope.$broadcast('new contents submitted', {success:data.success,message:data.message});
+        if(data.success){
             $rootScope.replies.push(data.reply);
             $rootScope.thread.replied = $rootScope.replies.length;
+        }else{
+            $scope.$emit('showError',data.message);
         }
     })
 }]);
@@ -272,9 +272,13 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
             $scope.$parent.cancelSubmitThread();
             return;
         }
+        data.contents = LZString.compressToBase64($scope.tinymceModel);
+        if(data.contents.length === 0){
+            $scope.$parent.cancelSubmitThread();
+            return;
+        }
         if($scope.toggleEditor)
             $scope.toggleEditor(false);
-        data.contents = escape($scope.tinymceModel);
         data.editor_id = $scope.editor_id;
         $scope.$emit('send new editor contents', data);
     });
@@ -291,21 +295,28 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
             $scope.$parent.cancelPublishReply();
             return;
         }
+        data.contents = LZString.compressToBase64($scope.tinymceModel);
+        if(data.contents.length === 0){
+            $scope.$parent.cancelPublishReply();
+            return;
+        }
         if($scope.toggleEditor)
             $scope.toggleEditor(false);
-        data.contents = escape($scope.tinymceModel);
         data.editor_id = $scope.editor_id;
         $scope.$emit('send new editor contents', data);
     });
 
 
     $scope.$on('new contents submitted',function(event,data){
-        if($scope.toggleEditor)
-            $scope.toggleEditor(true);
+        $scope.awaitingReply = false;
         if(data.success){
+            console.log('entered cleaning stuff');
             $scope.tinymceModel = "";
             $scope.tinymceText = "";
+        }else{
         }
+        if($scope.toggleEditor)
+            $scope.toggleEditor(true);
     });
 
     $scope.$on('initialize editor',function(event,data){

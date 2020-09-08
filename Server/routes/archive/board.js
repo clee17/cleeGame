@@ -364,8 +364,10 @@ let handler = {
                       response.success = false;
                       response.message = _errInfo[30];
                       response.errorType = 'alert';
-                 }
-                 handler.finalSend(res,response);
+                     handler.finalSend(res,response);
+                 }else
+                     callback(req,res,response,info);
+
             });
         }
     },
@@ -376,7 +378,7 @@ let handler = {
             info['board_id'] = null;
 
         info['contents'] = received.contents || "";
-        info['contents'] = unescape(info['contents']);
+        info['contents'] = lzString.decompressFromBase64(info['contents']);
 
         info['author'] = received.author || null;
         if(info['author'] === '')
@@ -447,7 +449,7 @@ let handler = {
             info['thread'] = received.thread || null;
             if(info['thread'] === '')
                 info['thread'] = null;
-            else if(info['thread'] && !__validateId(info['author']))
+            else if(info['thread'] && !__validateId(info['thread']))
                 info['thread'] = null;
 
             if(!info['thread'])

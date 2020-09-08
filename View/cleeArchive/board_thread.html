@@ -212,17 +212,27 @@
             <span style="margin-left:1rem;margin-right:2rem;"><%- websiteInfo[131] %>:{{thread.replied}}</span>
         </div>
         <div ng-if="thread.isFirst" class="contents_thread">
-            <div class="author_info"><a href="{{'/users/'+thread.author._id}}">{{thread.author.user}}</a></div>
+            <div class="author_info">
+                <a href="{{'/users/'+thread.author._id}}">{{thread.author.user}}</a>
+                <% if (user && user.isAdmin ) { %>
+                    {{thread.ip}}
+                <% } %>
+            </div>
             <div class="thread_info">
                 <div><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</div>
-                <div base64 contents="{{thread.html}}"></div>
+                <div base64 contents="{{thread.html}}" style="word-break:break-all;"></div>
             </div>
         </div>
         <div ng-repeat="reply in replies" class="contents_thread">
-            <div class="author_info"><a href="{{'/users/'+reply.author._id}}">{{reply.author.user}}</a></div>
+            <div class="author_info">
+                <a href="{{'/users/'+reply.author._id}}">{{reply.author.user}}</a>
+                <% if (user && user.isAdmin ) { %>
+                {{thread.ip}}
+                <% } %>
+            </div>
             <div class="thread_info">
                 <div><%- websiteInfo[132] %> {{reply.createdAt | dateInfo}}</div>
-                <div base64 contents="{{reply.html}}"></div>
+                <div base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
             </div>
         </div>
     </div>
