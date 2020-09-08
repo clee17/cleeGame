@@ -236,6 +236,7 @@ router.get('/sub/:pageId',main.sub);
 router.get('/board/:boardId',board.entry);
 router.post('/board/threads',board.threads);
 router.post('/board/submitThread',board.submitThread);
+router.post('/board/submitReply',board.submitReply);
 router.post('/board/deleteThread',board.deleteThread);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);

@@ -1,4 +1,22 @@
 <style>
+    #boardPanel select{
+        height:1.5rem;
+        border:solid 1px rgba(185,185,185,0.8);
+        color:inherit;
+        border-radius:5px;
+        background:white;
+        transition:background 0.25s;
+        margin-top:0.5rem;
+        margin-bottom:0.5rem;
+        margin-left:auto;
+        margin-right:4rem;
+    }
+
+
+    #boardPanel select:hover{
+        background:rgba(238,238,238,1);
+    }
+
     #contents_list {
         flex:1;
         display:flex;
@@ -84,9 +102,47 @@
         padding:1rem;
     }
 
-    #contents_thread{
+    .contents_thread{
         display:flex;
         flex-direction:column;
+    }
+
+    #reply_line{
+        display:flex;
+        flex-direction:column;
+        border:solid 1px rgba(181,181,181,1);
+        height:18rem;
+    }
+
+    #reply_main{
+        display:flex;
+        flex-direction: column;
+        flex:1;
+    }
+
+    #reply_btn{
+        background:rgba(223,216,214,0.4);
+        height:2.5rem;
+        display:flex;
+        flex-direction:row;
+    }
+
+    #reply_btn>button{
+        margin-top:auto;
+        margin-bottom:auto;
+        margin-left:auto;
+        margin-right:2rem;
+        height:1.8rem;
+        line-height:1.8rem;
+        text-align:center;
+        border-radius:5px;
+        padding-left:8px;
+        padding-right:8px;
+    }
+
+    #tinyMceEditor{
+        flex:1;
+        box-shadow:0 5px 10px -5px rgba(185,185,185,0.6);
     }
 
     @media screen and (min-device-width:80rem){
@@ -94,6 +150,14 @@
             width:60rem;
             margin-left:auto;
             margin-right:auto;
+        }
+
+        #reply_line{
+            width:60rem;
+            margin-left:auto;
+            margin-right:auto;
+
+            margin-bottom:3rem;
         }
 
         #thread_title{
@@ -108,7 +172,13 @@
             height:auto;
         }
 
-        #contents_thread{
+        .contents_thread{
+            display:flex;
+            flex-direction:row;
+        }
+
+
+        #reply_line{
             display:flex;
             flex-direction:row;
         }
@@ -119,7 +189,8 @@
 <div id="boardPanel" ng-controller="thread_con">
     <info-receiver ng-init="grade_0='<%- infoAll[13] %>';
     grade_1='<%- infoAll[14] %>';
-    grade_2='<%- infoAll[15] %>';">
+    grade_2='<%- infoAll[15] %>';
+    message_length = '<%- infoAll[23] %>'">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div ng-show="threads.length === 0 && !requesting" style="margin:auto;"><%- websiteInfo[106] %></div>
@@ -140,13 +211,45 @@
             <span style="margin-left:auto;"><%- websiteInfo[35] %>:{{thread.visited}}</span>
             <span style="margin-left:1rem;margin-right:2rem;"><%- websiteInfo[131] %>:{{thread.replied}}</span>
         </div>
-        <div ng-if="thread.isFirst" id="contents_thread">
+        <div ng-if="thread.isFirst" class="contents_thread">
             <div class="author_info"><a href="{{'/users/'+thread.author._id}}">{{thread.author.user}}</a></div>
             <div class="thread_info">
                 <div><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</div>
                 <div base64 contents="{{thread.html}}"></div>
             </div>
         </div>
+        <div ng-repeat="reply in replies" class="contents_thread">
+            <div class="author_info"><a href="{{'/users/'+reply.author._id}}">{{reply.author.user}}</a></div>
+            <div class="thread_info">
+                <div><%- websiteInfo[132] %> {{reply.createdAt | dateInfo}}</div>
+                <div base64 contents="{{reply.html}}"></div>
+            </div>
+        </div>
     </div>
     <page-index pid='pageIndex' tnm="totalNum" ppg="perPage" style="margin-top:auto;"></page-index>
+
+    <div id="reply_line">
+        <div class="author_info">{{userInfo.name}}</div>
+        <div id="reply_main">
+            <div style="display:flex;flex-direction:row;">
+                <select ng-model="newReply_grade" style="margin-left:auto;margin-right:1rem;">
+                    <option value="0"><%- infoAll[13] %></option>
+                    <option value="1"><%- infoAll[14] %></option>
+                    <option value="2"><%- infoAll[15] %></option>
+                </select>
+            </div>
+            <div ng-controller="TinyMceController" id="tinyMceEditor"   ng-init="editor_id = 'reply_editor';">
+                <textarea ui-tinymce="tinymceOptions" ng-model="tinymceModel">Tiny MCE</textarea>
+                <textarea class="tinymce_codeEditor" id="tinymce_codeEditor"
+                          style="position:absolute;left:0;top:40px;z-index:85;
+                          background:rgba(0,0,0,0);
+                          border:none;
+                          resize:none;
+                          display:none;
+                          width:calc(100% - 40px);
+                          height:calc(100% - 60px);"></textarea>
+            </div>
+            <div id="reply_btn"><button class="ghost-button" ng-click="publishReply()" ng-disabled="requesting"><%- infoAll[22] %></button></div>
+        </div>
+    </div>
 </div>

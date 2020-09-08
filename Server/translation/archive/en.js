@@ -131,7 +131,8 @@ var text = [
     "Please make sure the mail address provided is valid.",
     "<div>Do you wish to delete [%t] </div>?",
     "replied",
-    "Published on"
+    "Published at",
+    "Replied at"
 ];
 
 module.exports = text;

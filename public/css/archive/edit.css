@@ -39,7 +39,7 @@
     width:10px;
     margin-left:auto;
     height:100%;
-    background:rgba(181,163,160,218);
+    background:rgba(181,163,160,0.8);
 }
 
 #headerTitle>div:nth-child(2){
@@ -70,7 +70,7 @@
     margin-left:8px;
     outline:none;
     font-size:14px;
-    color:rgba(108,95,93,255);
+    color:rgba(108,95,93,1);
     height:100%;
     flex:1;
     font-family: SimSun-ExtB,serif, Arial, "Microsoft YaHei UI";
@@ -158,12 +158,12 @@
 }
 
 #rightEditBoard select{
-    border: solid 1px rgba(181,163,160,128);
+    border: solid 1px rgba(181,163,160,0.8);
     outline: none;
 }
 
 .icon{
-    fill:rgba(108,95,93,255);
+    fill:rgba(108,95,93,1);
     padding-left:10px;
     padding-right:10px;
     margin:auto;
@@ -241,7 +241,7 @@
 }
 
 #icon-bar{
-    background:rgba(223,216,214,255);
+    background:rgba(223,216,214,1);
     border:solid 1px rgba(223,216,214,128);
     border-top:none;
     height:2rem;
@@ -305,13 +305,13 @@
 }
 
 .tool-section>div:hover{
-    background:rgba(218,218,218,228);
+    background:rgba(218,218,218,0.85);
 }
 
 #warningScroll{
     border-bottom:dashed 1px rgba(181,163,160,188);
     display:flex;
-    background:rgba(223,216,214,255);
+    background:rgba(223,216,214,1);
     min-height:4rem;
     max-height:6rem;
     overflow:auto;

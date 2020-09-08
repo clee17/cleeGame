@@ -40,13 +40,55 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
     $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
     $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
 
+    $scope.totalNum = $rootScope.replies.length;;
+
+    $scope.pageIndex =  $location.search().id ||1;
+    $scope.perPage = 35;
+
+    $scope.newReply_grade = '0';
+
     $scope.getBoardLink = function(){
         let boardTitle = $rootScope.thread.board.title;
         if(boardTitle === 'NEWS')
             return '/news';
         else
             return '/board/'+$rootScope.thread.board._id;
+    };
+
+    $scope.publishReply = function(){
+        $scope.requesting  = true;
+        let data = {
+            board_id:$rootScope.thread.board._id,
+            editor_id:'reply_editor',
+            author:$rootScope.readerId,
+            thread:$rootScope.thread._id,
+            grade:Number($scope.newReply_grade),
+        }
+        $scope.$broadcast('publish new reply',data);
+    };
+
+    $scope.cancelPublishReply = function(){
+        $scope.requesting  = false;
     }
+
+    $scope.$on('send new editor contents',function(event,data){
+        if(data.editor_id === "reply_editor"){
+            if(data.editor_id !== undefined)
+                delete data.editor_id;
+            boardManager.submitNewReply(data);
+        }
+    });
+
+    $scope.$on('new reply submitted',function(event,data){
+        $scope.requesting = false;
+        $scope.$broadcast('new contents submitted', {success:data.success});
+        if(!data.success){
+            $scope.$emit('showError',data.message);
+        }else{
+            $rootScope.replies.push(data.reply);
+            $rootScope.thread.replied = $rootScope.replies.length;
+        }
+    })
 }]);
 
 
@@ -123,16 +165,20 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             input.style.background = 'rgba(185,185,185,0.8)';
         $scope.$broadcast('publish new thread',{board_id:$scope.board_id,
             editor_id:'thread_editor',
-            user:$rootScope.readerId,
+            author:$rootScope.readerId,
             grade:Number($scope.newThread_grade),
             category:Number($scope.newThread_category.order),
-            title:encodeURIComponent($scope.newThread_title)});
+            title:escape($scope.newThread_title)});
     };
 
     $scope.sendDeleteThread = function(data){
         let threadId = data._id;
         for(let i=0; i<$scope.threads.length;++i){
             if($scope.threads[i]._id === threadId){
+                $scope.tempstorage = {
+                    i:i,
+                    thread:$scope.threads[i]
+                }
                 $scope.threads.splice(i,1);
                 boardManager.deleteThread({id:threadId,board_id:$scope.board_id,author:data.author._id});
                 break;
@@ -157,6 +203,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
 
     $scope.$on('new thread submitted',function(event,data){
         $scope.cancelSubmitThread();
+        $scope.$broadcast('new contents submitted', {success:data.success});
         if(data.success){
             $scope.newThread_title = "";
             $scope.newThread_grade = '0';
@@ -176,11 +223,22 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     });
 
     $scope.$on('thread deleted',function(event,data){
-        console.log(data);
+        if(!data.success){
+            $scope.entries.splice($scope.tempstorage.i,0,$scope.tempStorage.thread);
+        }
+        $scope.tempStorage = null;
+    })
+
+    $scope.$on('send new editor contents',function(event,data){
+        if(data.editor_id === "thread_editor"){
+            if(data.editor_id !== undefined)
+                 delete data.editor_id;
+            boardManager.submitNewThread(data);
+        }
     })
 }]);
 
-app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location','boardManager',function($scope,$rootScope,$cookies,$location,boardManager){
+app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location',function($scope,$rootScope,$cookies,$location){
     $scope.tinymceModel = '';
 
     $scope.$on('textFinished',function(event,data){
@@ -197,28 +255,51 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
         skin:"archive_cleegame",
         content_css:"archive",
         plugins: 'paste link image lists code',
-        toolbar: 'fontsizeselect forecolor backcolor | bold italic strikethrough underline | alignleft aligncenter alignright | bullist numlist | link image | code',
+        toolbar: 'fontsizeselect forecolor backcolor | bold italic strikethrough underline | alignleft aligncenter alignright | bullist numlist | link image ',
         image_dimensions: false,
         image_description:false,
     };
+    //注意后面可以增加一个code用来设置代码
 
     $scope.$on('publish new thread',function(event,data){
         if(data['editor_id'] !== $scope.editor_id)
             return;
         if($scope.getPlainText)
             $scope.getPlainText();
-        if($scope.tinymceText.length <= 25){
+        let trueText = $scope.tinymceText.replace(/\s+/g,"");
+        if(trueText <= 25){
             $scope.$emit('showError',$scope.$parent['message_threadlen']);
             $scope.$parent.cancelSubmitThread();
             return;
         }
         if($scope.toggleEditor)
             $scope.toggleEditor(false);
-        data.contents = encodeURIComponent($scope.tinymceModel);
-        boardManager.submitNewThread(data);
+        data.contents = escape($scope.tinymceModel);
+        data.editor_id = $scope.editor_id;
+        $scope.$emit('send new editor contents', data);
     });
 
-    $scope.$on('new thread submitted',function(event,data){
+    $scope.$on('publish new reply',function(event,data){
+        if(data['editor_id'] !== $scope.editor_id)
+            return;
+        if($scope.getPlainText)
+            $scope.getPlainText();
+        let trueText = $scope.tinymceText.replace(/\s+/g,"");
+        if(trueText.length <= 15){
+            let text = $scope.$parent['message_length'].replace(/%n/g,15);
+            $scope.$emit('showError',text);
+            $scope.$parent.cancelPublishReply();
+            return;
+        }
+        if($scope.toggleEditor)
+            $scope.toggleEditor(false);
+        data.contents = escape($scope.tinymceModel);
+        data.editor_id = $scope.editor_id;
+        $scope.$emit('send new editor contents', data);
+    });
+
+
+    $scope.$on('new contents submitted',function(event,data){
         if($scope.toggleEditor)
             $scope.toggleEditor(true);
         if(data.success){
@@ -226,6 +307,7 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
             $scope.tinymceText = "";
         }
     });
+
     $scope.$on('initialize editor',function(event,data){
         let allowNew = parseInt('0000001',2);
         if(data.user >=0){

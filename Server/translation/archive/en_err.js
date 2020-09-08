@@ -28,7 +28,10 @@ var text = [
     "The user group to which you belong is not allowed to publish a thread here",
     "As a visitor, you cannot publish a new thread here",
     "only administrators could do this",
-    "we could not find the thread in database"
+    "we could not find the thread in database",
+    "As non-registered users, you are limited to publish or reply to threads 5 times every 10 minutes respectively. please register to remove the limit.",
+    "This board has forbidden anyone beside from the owner to publish a new tread",
+    "The thread you are replying to does not exist"
 ];
 
 module.exports = text;

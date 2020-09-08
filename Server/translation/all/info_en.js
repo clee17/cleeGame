@@ -19,7 +19,10 @@ var text = [
     "persons (or those that are not)",
     "Donate",
     "your valid mail address",
-    "send"
+    "send",
+    "visitor",
+    "publish",
+    "Your reply cannot be shorter than 15 characters."
 ];
 
 module.exports = text;
