@@ -465,15 +465,18 @@ app.controller("editCon",function($scope,$http,$rootScope,$interval,$timeout,$wi
     };
 
    $scope.loadContent = function(){
-       $scope.requestingFanfic = true;
-       if($scope.contentsLoaded && $scope.currentIndex._id){
-           $scope.contentsLoaded = false;
-           fanficManager.requestFanfic($scope.currentIndex);
-       }else if($scope.loadAutoSave()){
+       if($scope.loadAutoSave()) {
            $scope.contentsLoaded = true;
            $scope.requestingFanfic = false;
-           $rootScope.$broadcast('fanficReceived',{success:true,file:JSON.parse(LZString.decompressFromBase64($scope.loadAutoSave()))})
-       }else{
+           $rootScope.$broadcast('fanficReceived', {
+               success: true,
+               file: JSON.parse(LZString.decompressFromBase64($scope.loadAutoSave()))
+           })
+       }else if($scope.currentIndex._id){
+           $scope.contentsLoaded = false;
+           $scope.requestingFanfic = true;
+           fanficManager.requestFanfic($scope.currentIndex);
+       }else {
            $scope.contentsLoaded = true;
            $scope.requestingFanfic = false;
            $scope.initializeChapter();
