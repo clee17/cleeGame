@@ -14,15 +14,13 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
 let handler = {
     index:function(req,res,next){
         let response = {};
-        let callBack = function(){
-            handler.indexDetail(req,res,next,response.fanfic_grade);
-        };
-        redisClient.get('fanfic_grade',function(err,docs) {
-            if (!err && docs) {
-                handler.indexDetail(req,res,next,JSON.parse(docs));
-            } else
-                __readSettings(callBack, response);
-        });
+        response.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+        for(let i=0;i<response.fanfic_grade.length;++i){
+            let num = response .fanfic_grade[i].refer;
+            let item =  response .fanfic_grade[i];
+            item.refer = _infoAll[num];
+        }
+        handler.indexDetail(req,res,next,response.fanfic_grade);
     },
 
     statement:function(req,res){

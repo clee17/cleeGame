@@ -54,7 +54,23 @@
         padding-left:2rem;
         padding-bottom:5px;
         border-bottom:solid 1px rgba(205,205,205,0.8);
-        margin-bottom:2rem;
+    }
+
+    #thread_control{
+        width:100%;
+        height:2rem;
+        display:flex;
+        flex-direction:row;
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    #thread_control >button:last-child{
+        margin-right:2rem;
+    }
+
+    #thread_control >button:first-child{
+        margin-left:auto;
     }
 
     .author_info{
@@ -166,6 +182,10 @@
             margin-right:auto;
         }
 
+        #thread_control{
+            width:60rem;
+        }
+
         .author_info{
             width:8rem;
             background:rgba(181,163,160,0.5);
@@ -190,6 +210,7 @@
     <info-receiver ng-init="grade_0='<%- infoAll[13] %>';
     grade_1='<%- infoAll[14] %>';
     grade_2='<%- infoAll[15] %>';
+    alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
     message_length = '<%- infoAll[23] %>'">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
@@ -200,8 +221,10 @@
        <span>[{{thread.category | category:thread.board.category}}]</span>
        <span>{{thread.title}}</span>
     </div>
-    <div ng-if="userId === thread.author._id">
-
+    <div id="thread_control">
+        <% if(user && user.isAdmin) { %>
+        <div ng-if="readerId === thread.author._id" class="button button1" style="margin-right:auto;margin-left:20px;" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
+        <% } %>
     </div>
     <div style="flex:1;" id="contents_list">
         <div style="display:flex;flex-direction:row;overflow:hidden;">
@@ -209,7 +232,7 @@
             <span>{{thread.title}}</span>
             <div class="grade" grade-show grade="{{thread.grade}}">{{thread.grade | grade:gradeTemplate }} </div>
             <span style="margin-left:auto;"><%- websiteInfo[35] %>:{{thread.visited}}</span>
-            <span style="margin-left:1rem;margin-right:2rem;"><%- websiteInfo[131] %>:{{thread.replied}}</span>
+            <span style="margin-left:1rem;margin-right:2rem;"><%- websiteInfo[131] %>:{{thread.replied - thread.deleted}}</span>
         </div>
         <div ng-if="thread.isFirst" class="contents_thread">
             <div class="author_info">
@@ -219,7 +242,9 @@
                 <% } %>
             </div>
             <div class="thread_info">
-                <div><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</div>
+                <div><span><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</span>
+                    <span></span>
+                </div>
                 <div base64 contents="{{thread.html}}" style="word-break:break-all;"></div>
             </div>
         </div>
@@ -230,8 +255,11 @@
                 {{thread.ip}}
                 <% } %>
             </div>
-            <div class="thread_info">
-                <div><%- websiteInfo[132] %> {{reply.createdAt | dateInfo}}</div>
+            <div class="thread_info" >
+                <div style="display:flex;flex-direction:row;">
+                    <span><%- websiteInfo[132] %> {{reply.createdAt | dateInfo}}</span>
+                    <span style="margin-left:auto;margin-right:1rem;">#{{reply.threadIndex}}</span>
+                </div>
                 <div base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
             </div>
         </div>

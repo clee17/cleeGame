@@ -131,7 +131,7 @@ let handler = {
             __renderIndex(req,res,{viewport:'/dynamic/booknew',
                 controllers:['/view/cont/edit_con.js'],
                 services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
-                variables:{type:0},
+                variables:{type:0,editor:true},
                 styles:['archive/edit']});
         else
             __renderError(req,res,_errInfo[4]);

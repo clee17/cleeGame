@@ -17,12 +17,8 @@ module.exports = new mongoose.Schema({
     date: { type: Date, default: Date.now },
     chapterCount: {type:Number,default:0},
     updated: {type:Date,default:Date.now()},
-
     comments: {type:Number,default:0},
-
     liked:{type:Number,default:0},
-
     visitorLiked:{type:Number,default:0},
-
     bookmarked: {type:Number,default:0}, //收藏人数
-},{timeStamps:true});
+});

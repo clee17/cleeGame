@@ -9,6 +9,7 @@ let schema = new mongoose.Schema({
     author:{type:mongoose.Schema.ObjectId,default:null,ref:'user'},
     grade:{type:Number,default:0},
     category:{type:Number,default:0},
+    deleted:{type:Number,default:0}, //统计被删除的回复数量
     replied:{type:Number,default:0} ,//统计被回复的数量；
     visited:{type:Number,default:0} ,//统计被阅读的数量
     repliedAt:{type:Date,default:null}

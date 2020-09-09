@@ -71,6 +71,23 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
         $scope.requesting  = false;
     }
 
+    $scope.sendDeleteThread = function(data){
+        $scope.$broadcast('stop thread');
+        boardManager.deleteThread({id:threadId,board_id:$rootScope.thread.board._id,author:data.author._id});
+        $scope.requesting = true;
+    };
+
+    $scope.deleteThread = function(){
+        let alertMessage= $scope['alert_delete_thread'];
+        if(alertMessage)
+            alertMessage = unescape(alertMessage);
+        alertMessage=  alertMessage.replace(/%t/g,$rootScope.thread.title);
+        let alertInfo = {alertInfo:alertMessage};
+        alertInfo.variables = {_id:$rootScope.thread._id,author:$rootScope.thread.author._id,info:'delete thread'};
+        $scope.$emit('showAlert', alertInfo);
+    };
+
+
     $scope.$on('send new editor contents',function(event,data){
         if(data.editor_id === "reply_editor"){
             if(data.editor_id !== undefined)
@@ -89,6 +106,13 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
             $scope.$emit('showError',data.message);
         }
     })
+
+    $scope.$on('tellYes',function(event,data){
+        if(data.variables['info'] === 'delete thread'){
+            $scope.sendDeleteThread(data.variables);
+        }
+    });
+
 }]);
 
 
@@ -151,11 +175,11 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     };
 
     $scope.publish = function(){
-        if($scope.newThread_title.length ==0){
+        if($scope.newThread_title.length === 0){
             $scope.$emit('showError', $scope['message_no_title']);
             return;
-        }else if($scope.newThread_title.length < 8){
-            let error = $scope['message_title'].replace(/%l/,'8');
+        }else if($scope.newThread_title.length < 5){
+            let error = $scope['message_title'].replace(/%l/,'5');
             $scope.$emit('showError',error);
             return;
         }
@@ -170,6 +194,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             category:Number($scope.newThread_category.order),
             title:escape($scope.newThread_title)});
     };
+
 
     $scope.sendDeleteThread = function(data){
         let threadId = data._id;
@@ -186,13 +211,9 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
         }
     };
 
-    $scope.getBoard = function(thread){
-       if($rootScope.boardType === 'news')
-           return '/news';
-        else if($rootScope.boardType === 'event')
-            return '/events';
-        else
-            return '/board'+thread._id;
+
+    $scope.getBoardLink = function(){
+            return window.location.pathname;
     };
 
     $scope.$on('tellYes',function(event,data){
@@ -317,6 +338,12 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
         }
         if($scope.toggleEditor)
             $scope.toggleEditor(true);
+    });
+
+
+    $scope.$on('stop thread',function(event,data){
+        if($scope.toggleEditor)
+            $scope.toggleEditor(false);
     });
 
     $scope.$on('initialize editor',function(event,data){

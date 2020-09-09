@@ -11,6 +11,35 @@ global.__infoAll = require('../translation/info.js');
 
 global.__viewFolder = '';
 
+
+global.__identityInfo = {};
+
+__identityInfo.fanfic_warning =[{
+    "code": 100,
+    "refer": 139
+},{
+    "code": 101,
+    "refer": 140
+},{
+    "code": 102,
+    "refer": 141
+},{
+    "code": 103,
+    "refer": 142
+}];
+
+__identityInfo.fanfic_grade = [{
+    "code": 0,
+    "refer":13
+},{
+    "code": 1,
+    "refer": 14
+},{
+    "code": 2,
+    "refer": 15
+}];
+
+
 var app = express();
 app = config(app);
 route(app);

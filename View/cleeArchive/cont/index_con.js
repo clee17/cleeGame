@@ -106,7 +106,10 @@ app.controller('entryCon',function($scope,$rootScope,$window,$timeout,$cookies,l
 
     $scope.tellNo = function(){
         let finishTellNo = function(scope,rootScope){
-            rootScope.$broadcast('tellNo',{signal:scope.signal});
+            let response = {signal:scope.signal};
+            if(scope.alertData)
+                response.variables = scope.alertData;
+            rootScope.$broadcast('tellNo',response);
             scope.hideAlert(scope);
         }
         let element = document.getElementById('alertContents');

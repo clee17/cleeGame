@@ -6,5 +6,6 @@ module.exports = new mongoose.Schema({
     thread:{type:mongoose.Schema.ObjectId,default:null,ref:'board_thread'},
     contents:{type:mongoose.Schema.ObjectId,default:null,ref:'html'},
     grade:{type:Number,default:0},
+    threadIndex:{type:Number,default:1},
     createdAt:{type:Date,default:Date.now(),index:1}
 });

@@ -1,12 +1,6 @@
 var mongoose = require('mongoose');
 
-let feedBackSchema = new mongoose.Schema({
-    _id:{type:mongoose.Schema.ObjectId,default:null,ref:'tag'},
-    contents:{type:String,default:''},
-    type:{type:Number,default:0},
-    usedTimes:{type:Number,default:0},
-},{_id:false});
-
+//unset: comments->commented,liked:,visitorLiked,bookmarked,followed;
 
 module.exports = new mongoose.Schema({
     title:{type:String,default:""},
@@ -16,13 +10,6 @@ module.exports = new mongoose.Schema({
     published:{type:Boolean,default:false},
     date: { type: Date, default: Date.now },
     chapterCount: {type:Number,default:0},
+    chapterDeleted: {type:Number,default:0},
     updated: {type:Date,default:Date.now()},
-
-    comments: {type:Number,default:0},
-
-    liked:{type:Number,default:0},
-
-    visitorLiked:{type:Number,default:0},
-
-    bookmarked: {type:Number,default:0}, //收藏人数
 },{timeStamps:true});

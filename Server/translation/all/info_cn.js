@@ -23,6 +23,7 @@ var text = [
     "游客",
     "发表",
     "您的回复长度不得少于%n字",
+    "添加"
 ];
 
 module.exports = text;

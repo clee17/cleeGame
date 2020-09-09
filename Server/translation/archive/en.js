@@ -132,7 +132,21 @@ var text = [
     "<div>Do you wish to delete [%t] </div>?",
     "replied",
     "Published at",
-    "Replied at"
+    "Replied at",
+    "delete thread",
+    "you are not authorized to publish a work here, please contact administrator",
+    "This page is limited to registered users only",
+    "The work you are editing does not exist",
+    "Cannot access the index of works",
+    "underage",
+    "non-consent",
+    "age difference",
+    "incest",
+    "fandom, optional",
+    "relationships(press [,] or enter to add tag, optional)",
+    "chapter's title, optional",
+    "characters(press [,] or enter to add tag, optional)",
+    "Do you wish to clear all contents of this chapter? (including title and credentials)"
 ];
 
 module.exports = text;

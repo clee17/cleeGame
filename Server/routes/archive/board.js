@@ -81,8 +81,6 @@ let handler = {
                     if(type === 'visitor')
                         detail.visitor = results.length>0? results[0].access : 2;
 
-                    detail.boardType = type;
-
                     if(detail.user !== undefined && detail.usergroup !== undefined && detail.visitor !== undefined){
                         __renderSubPage(req,res,'board',detail);
                     }
@@ -294,7 +292,15 @@ let handler = {
         reply.thread = info['thread'];
         reply.board = info['board_id'];
         reply.grade = info['grade'];
-        reply.save()
+        threadModel.findOne({_id:reply.thread}).exec()
+            .then(function(thread){
+                if(!thread)
+                    throw _errInfo[32];
+                else {
+                    reply.threadIndex = thread.replied +1;
+                    return reply.save();
+                }
+            })
             .then(function(){
                 let contents = new htmlModel();
                 contents.link = reply._id;
@@ -359,7 +365,7 @@ let handler = {
             let timeNow = Date.now();
             let timePast = timeNow -  1000*60*10;
             let maxLimit = 5;
-            model[info['model']].countDocuments({createdAt:{$lte:timeNow,$gte:timePast}},function(count){
+            model[info['model']].countDocuments({createdAt:{$lte:timeNow,$gte:timePast},ip:req.ip},function(err,count){
                  if(count >= maxLimit){
                       response.success = false;
                       response.message = _errInfo[30];

@@ -231,7 +231,7 @@
     <div style="flex:1;"><table id="contents_list" ng-show="threads.length >0 && !requesting">
         <tr ng-repeat="thread in threads">
             <td>[{{thread.category | category:$parent.board_category}}]</td>
-            <td><a href="{{getBoard(thread)+'/thread/'+thread._id}}">{{thread.title}}</a></td>
+            <td><a href="{{getBoardLink(thread)+'/thread/'+thread._id}}">{{thread.title}}</a></td>
             <td style="font-size:0.85rem;">
                 <a href="{{'/users/'+ thread.author._id}}" target="_blank">{{thread.author | username}}</a>
             </td>
@@ -239,7 +239,7 @@
                 {{thread.createdAt | dateInfo}}
             </td>
             <td>
-                <span><a href="{{getBoard(thread)+'/thread/'+thread._id}}">{{thread.replied}}</a></span>
+                <span><a href="{{getBoardLink(thread)+'/thread/'+thread._id}}">{{thread.replied - thread.deleted}}</a></span>
                 <span>{{thread.visited}}</span>
             </td>
             <td style="width:4rem;font-size:0.8rem;">
