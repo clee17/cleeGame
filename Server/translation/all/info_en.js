@@ -23,7 +23,10 @@ var text = [
     "visitor",
     "publish",
     "Your reply cannot be shorter than 15 characters.",
-    "ADD"
+    "ADD",
+    "Delete",
+    "Edit",
+    "Mute"
 ];
 
 module.exports = text;

@@ -58,18 +58,38 @@
 
     #thread_control{
         width:100%;
-        height:2rem;
+        height:3rem;
         display:flex;
         flex-direction:row;
         margin-left:auto;
         margin-right:auto;
     }
 
-    #thread_control >button:last-child{
+    .reply_control{
+        display:flex;
+        flex-direction:row;
+        height:1.5rem;
+        margin-top:auto;
+    }
+
+    .reply_control button{
+        margin-right:0.8rem;
+    }
+
+    .reply_control button:first-child{
+        margin-left:auto;
+    }
+
+    #thread_control>div{
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    #thread_control >div:last-child{
         margin-right:2rem;
     }
 
-    #thread_control >button:first-child{
+    #thread_control >div:first-child{
         margin-left:auto;
     }
 
@@ -186,6 +206,10 @@
             width:60rem;
         }
 
+        .reply_control{
+            width:100%;
+        }
+
         .author_info{
             width:8rem;
             background:rgba(181,163,160,0.5);
@@ -211,7 +235,7 @@
     grade_1='<%- infoAll[14] %>';
     grade_2='<%- infoAll[15] %>';
     alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
-    message_length = '<%- infoAll[23] %>'">
+    message_length = '<%- infoAll[23] %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div ng-show="threads.length === 0 && !requesting" style="margin:auto;"><%- websiteInfo[106] %></div>
@@ -223,7 +247,7 @@
     </div>
     <div id="thread_control">
         <% if(user && user.isAdmin) { %>
-        <div ng-if="readerId === thread.author._id" class="button button1" style="margin-right:auto;margin-left:20px;" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
+        <div ng-if="readerId === thread.author._id" class="button button1" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
         <% } %>
     </div>
     <div style="flex:1;" id="contents_list">
@@ -261,6 +285,11 @@
                     <span style="margin-left:auto;margin-right:1rem;">#{{reply.threadIndex}}</span>
                 </div>
                 <div base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
+                <div class="reply_control">
+                    <button class="linkBtn" ng-if="readerId === reply.author._id"><%- infoAll[26] %></button> <!--                    编辑按钮-->
+                    <button class="linkBtn" ng-if="readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[25] %></button><!--                    删除按钮-->
+                    <button class="linkBtn" ng-if="readerId === thread.author._id || readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[27] %></button>
+                </div>
             </div>
         </div>
     </div>

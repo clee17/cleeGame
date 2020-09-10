@@ -35,7 +35,17 @@
 
 .button1:hover{
     background:rgba(238,238,238,228);
+    cursor:pointer;
 }
+
+.button1:disabled{
+   background:rgba(208,208,208,1);
+}
+
+.button1:disabled:hover{
+    background:rgba(208,208,208,1);
+}
+
 
 .button2{
     background:rgba(195,186,199,228);
