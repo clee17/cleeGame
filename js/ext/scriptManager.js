@@ -10,7 +10,7 @@ scriptManager.initialize = function(){
     this._checkList = this._fullList.concat(this._moduleList);
     this._checkList = this._checkList.map(function(value){
         return value.name;
-    })
+    });
     this._gameTextLoading = false;
     this._reloadList = [];
     this._loadedList = [];
