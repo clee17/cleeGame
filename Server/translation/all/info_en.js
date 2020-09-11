@@ -26,7 +26,8 @@ var text = [
     "ADD",
     "Delete",
     "Edit",
-    "Mute"
+    "Mute",
+    "Hide"
 ];
 
 module.exports = text;

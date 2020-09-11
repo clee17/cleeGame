@@ -48,11 +48,13 @@
 
 
 .button2{
-    background:rgba(195,186,199,228);
+    background:rgba(158,142,166,1);
+    color:white;
 }
 
 .button2:hover{
-    background:rgba(226,217,231,228);
+    background:#c1a6cf;
+    cursor:pointer;
 }
 
 .remove-line:hover{

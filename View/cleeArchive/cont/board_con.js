@@ -47,8 +47,6 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
 
     $scope.newReply_grade = '0';
 
-    console.log($scope.replies);
-
     $scope.getBoardLink = function(){
         let boardTitle = $rootScope.thread.board.title;
         if(boardTitle === 'NEWS')

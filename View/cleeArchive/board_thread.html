@@ -247,7 +247,7 @@
     </div>
     <div id="thread_control">
         <% if(user && user.isAdmin) { %>
-        <div ng-if="readerId === thread.author._id" class="button button1" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
+        <div ng-if="readerId === thread.author._id" class="button button2" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
         <% } %>
     </div>
     <div style="flex:1;" id="contents_list">
@@ -270,6 +270,10 @@
                     <span></span>
                 </div>
                 <div base64 contents="{{thread.html}}" style="word-break:break-all;"></div>
+                <div class="reply_control">
+                    <button class="linkBtn" ng-if="readerId === thread.author._id"><%- infoAll[26] %></button> <!--                    编辑按钮-->
+                    <button class="linkBtn" ng-if="readerId === thread.author._id || readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[27] %></button>
+                </div>
             </div>
         </div>
         <div ng-repeat="reply in replies" class="contents_thread">
@@ -286,13 +290,16 @@
                 </div>
                 <div base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
                 <div class="reply_control">
-                    <button class="linkBtn" ng-if="readerId === reply.author._id"><%- infoAll[26] %></button> <!--                    编辑按钮-->
-                    <button class="linkBtn" ng-if="readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[25] %></button><!--                    删除按钮-->
-                    <button class="linkBtn" ng-if="readerId === thread.author._id || readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[27] %></button>
+                    <button class="linkBtn" ng-if="readerId === reply.author._id"><%- infoAll[26] %></button> <!-- 编辑按钮-->
+                    <button class="linkBtn" ng-if="readerId == thread.author._id || readerId === thread.board.owner || "><%- infoAll[28] %></button><!--  屏蔽按钮-->
+
+                    <button class="linkBtn" ng-if="readerId === thread.board.owner || <%- user && user.isAdmin %>"><%- infoAll[25] %></button><!--  删除按钮-->
+                    <button class="linkBtn" ng-if="readerId === thread.board.owner || <%- user && user.isAdmin %>"><%- infoAll[27] %></button><!--  禁言按钮-->
                 </div>
             </div>
         </div>
     </div>
+    <div style="height:2rem;"></div>
     <page-index pid='pageIndex' tnm="totalNum" ppg="perPage" style="margin-top:auto;"></page-index>
 
     <div id="reply_line">

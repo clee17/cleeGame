@@ -112,6 +112,30 @@ let handler = {
         });
     },
 
+    loadContents:function(details,contentsId,callback){
+        let findHtml = function(details,listItem){
+            let replies = details.replies;
+            for(let i=0; i<replies.length;++i){
+                if(listItem.link.toString() === replies[i]._id.toString()){
+                    replies[i].html = lzString.compressToBase64(listItem.contents);
+                }
+            }
+        };
+
+        htmlModel.find({link:{$in:contentsId}},function(err,htmlList) {
+            if (err)
+                __renderError(req, res, err.message);
+            else {
+                for(let i=0;i<htmlList.length;++i){
+                    findHtml(details,htmlList[i]);
+                }
+            }
+        });
+        details.loaded.contentsLoaded = true;
+        if(callback)
+            callback();
+    },
+
     threadDetail:function(req,res,type){
         let threadId = req.params.threadId;
         let pageId = req.query.pid || 1;
@@ -120,39 +144,59 @@ let handler = {
             return;
         }
 
-        let details ={};
-
-        let findHtml = function(details,listItem){
-            let replies = details.replies;
-            for(let i=0; i<replies.length;++i){
-                if(listItem.link.toString() === replies[i]._id.toString()){
-                    replies[i].html = lzString.compressToBase64(listItem.contents);
-
-                }
+        let details ={
+            loaded:{
+                theadLoaded:false,
+                contentsLoaded:false,
+                userRoleLoaded:false
             }
         };
 
-        let send = function(details,contentsId,ifFirst){
-             htmlModel.find({link:{$in:contentsId}},function(err,htmlList) {
-                 if (err)
-                     __renderError(req, res, err.message);
-                 else {
-                     for(let i=0;i<htmlList.length;++i){
-                         if(ifFirst && details.thread._id.toString() === htmlList[i].link.toString()){
-                             details.thread.html = lzString.compressToBase64(htmlList[i].contents);
-                             continue;
-                         }
-                         findHtml(details,htmlList[i]);
-                     }
-                     details.editor = true;
-                     if(type === 'events'){}
-                     else
-                         __renderIndex(req,res,{viewport:'/sub/board_thread',
-                             modules:['/view/modules/pageIndex.js'],
-                             controllers:['/view/cont/board_thread_info.js','/view/cont/board_con.js'],
-                             services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:details});
-                 }
-             });
+        let send = function(details){
+            details.editor = true;
+            if(type === 'events'){}
+            else
+                __renderIndex(req,res,{viewport:'/sub/board_thread',
+                    modules:['/view/modules/pageIndex.js'],
+                    controllers:['/view/cont/board_thread_info.js','/view/cont/board_con.js'],
+                    services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:details});
+        };
+
+        let replyFecth = function(thread){
+            let maxCount = thread.replied - thread.deleted;
+            if(maxCount >0 && pageId > Math.ceil(maxCount/20))
+                pageId = Math.ceil(maxCount /20);
+            else if(pageId < 1)
+                pageId = 1;
+            if(pageId === 1)
+                perPage --;
+
+            let perPage = 20;
+
+            let contentsId = [];
+
+            if(pageId === 1)
+                contentsId.push(thread._id);
+
+            if(maxCount >0){
+                replyModel.find({thread:thread._id},null,{sort:{createdAt:1},limit:perPage,skip:(pageId-1)*20},function(err,replies) {
+                    if(err)
+                        __renderError(req,res,err.message);
+                    else{
+                        details.replies = JSON.parse(JSON.stringify(replies));
+                        if(pageId === 1)
+                            details.replies.push(thread);
+                        contentsId = contentsId.concat(replies.map(function(value){return value._id}));
+                        handler.loadContents(details,contentsId,send);
+                    }
+                }).populate({path:'author',select:'_id user'});
+            }else{
+                handler.loadContents(details,contentsId,send);
+            }
+        }
+
+        let userRoleFetch = function(thread){
+
         };
 
         threadModel.findOneAndUpdate({_id:threadId},{$inc:{visited:1}},null,function(err,thread){
@@ -161,13 +205,6 @@ let handler = {
             else if(!thread)
                 __renderError(req,res,_errInfo[29]);
             else{
-                if(thread.replied>0 && pageId > Math.ceil(thread.replied/20))
-                    pageId = Math.ceil(thread.replied /20);
-                else if(pageId < 1)
-                    pageId = 1;
-                let perPage = 20;
-                if(pageId === 1)
-                    perPage --;
                 details.thread = JSON.parse(JSON.stringify(thread));
                 let temp = details.thread;
                 for(let i=0; i<temp.board.category.length;++i){
@@ -175,27 +212,20 @@ let handler = {
                 }
                 temp.board.title = escape(temp.board.title);
                 details.replies = [];
-                let contentsId = [];
-                if(pageId === 1)
-                    contentsId.push(thread._id);
                 //关联所有回复
                 details.thread.isFirst = pageId === 1;
                 details.userInfo = {};
                 details.userInfo.name = req.session.user? req.session.user.user : _infoAll[21];
-                if(thread.replied >0){
-                    replyModel.find({thread:thread._id},null,{sort:{createdAt:1},limit:perPage,skip:(pageId-1)*20},function(err,replies) {
-                           if(err)
-                               __renderError(req,res,err.message);
-                           else{
-                               details.replies = JSON.parse(JSON.stringify(replies));
-                               contentsId = contentsId.concat(replies.map(function(value){return value._id}));
-                               send(details,contentsId,pageId===1);
-                           }
-                        }).populate({path:'author',select:'_id user'});
-                }else
-                    send(details,contentsId,pageId===1);
+                details.loaded.theadLoaded = true;
+                if(req.session.user){
+                    userRoleFetch(thread);
+                    replyFecth(thread);
+                }else{
+                    details.loaded.userRoleLoaded = true;
+                    replyFecth(thread);
+                }
             }
-        }).populate([{path:'author',select:'_id user'},{path:'board',select:'category title _id visited replied'}]);
+        }).populate([{path:'author',select:'_id user'},{path:'board',select:'category title _id visited replied owner'}]);
 
     },
 
