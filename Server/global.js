@@ -126,7 +126,7 @@ global.__multiLang = function(str,ipData){
             str = JSON.parse(str);
         }
         catch(err){
-
+            return 'unknown error happened';
         }
         let cc = __getReaderCode(ipData);
         if(str[cc])

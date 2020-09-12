@@ -2,7 +2,7 @@ app.directive('infoReceiver',function($rootScope){
     return {
         restrict: 'E',
         link:function(scope,element,attr){
-            scope.options = JSON.parse(decodeURIComponent(scope.options));
+            scope.options = JSON.parse(unescape(scope.options));
             scope.result = new Array(scope.options.length);
         }
     }
@@ -91,8 +91,8 @@ app.directive('voteOptionCount',function($rootScope){
 app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManager',function($scope,$rootScope,$cookies,$window,voteManager){
     $scope.completed = false;
     $scope.requesting = false;
-    $rootScope.title = decodeURIComponent($rootScope.title);
-    $rootScope.description = decodeURIComponent($rootScope.description);
+    $rootScope.title = unescape($rootScope.title);
+    $rootScope.description = unescape($rootScope.description);
 
     $scope.checkComplete = function(){
         let elements = document.getElementsByClassName('selection');

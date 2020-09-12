@@ -30,7 +30,7 @@
 
 <div id="voteBoard" ng-controller="voteCon">
     <info-receiver
-            ng-init="options= '<%= encodeURIComponent(JSON.stringify(options)) %>';">
+            ng-init="options= '<%= escape(JSON.stringify(options)) %>';">
     </info-receiver>
     <div id="headTitle">{{title}}</div>
     <div>{{description}}</div>

@@ -31,8 +31,8 @@ let handler = {
                 __renderError(req,res,_errInfo[20]);
             }else{
                 let detail = JSON.parse(JSON.stringify(vote));
-                detail.title = encodeURIComponent(__multiLang(vote.title,req.ipData));
-                detail.description = encodeURIComponent(__multiLang(vote.description,req.ipData));
+                detail.title = escape(__multiLang(vote.title,req.ipData));
+                detail.description = escape(__multiLang(vote.description,req.ipData));
                 let start = new Date(detail.start);
                 let end = new Date(detail.end);
                 let queryStr = 'A='+start.getTime()+'&B='+end.getTime();
@@ -59,8 +59,8 @@ let handler = {
                 return;
             }
             for(let i=0; i<options.length;++i){
-                options[i].title = __multiLang(options[i].title,req.ipData);
-                options[i].description = __multiLang(options[i].description,req.ipData);
+                options[i].title = escape(__multiLang(options[i].title,req.ipData));
+                options[i].description = escape(__multiLang(options[i].description,req.ipData));
             }
             let voted = false;
             if(req.session.user&& req.session.user.isAdmin){
