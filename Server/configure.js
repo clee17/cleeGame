@@ -46,11 +46,10 @@ module.exports=function(app){
 
     app.use('*',function(req,res,next){
         let ip = req.ip;
-        if(ip.match(/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/))
-            req.ipData = ipSearcher.search(ip);
-        else{
+        req.ipData = ipSearcher.search(ip);
+		if(!req.ipData || !req.ipData.country){
             req.ipData = {};
-            req.ipData.country = '中国';
+            req.ipData.country = '中国'; 
         }
 
         if(req.cookies['readerLanguage']){
