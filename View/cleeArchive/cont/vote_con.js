@@ -109,7 +109,7 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
             if(elements[i].checked)
                 selected.push(elements[i].value);
         }
-        $scope.completed = selected.length > 0 && selected.length >=1;
+        $scope.completed = selected.length >=1;
         $scope.limitReached = selected.length >= $rootScope.maxOption && $rootScope.maxOption > 0;
         for(let i=0;i<elements.length;++i){
             elements[i].disabled = null;
