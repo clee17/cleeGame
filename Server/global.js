@@ -122,7 +122,12 @@ global.__processMail = function(mailId,receiver,data,countryCode){
 global.__multiLang = function(str,ipData){
     if(str.substring(0,6).toLowerCase() === "multil"){
         str = str.substring(6);
-        str = JSON.parse(str);
+        try{
+            str = JSON.parse(str);
+        }
+        catch(err){
+
+        }
         let cc = __getReaderCode(ipData);
         if(str[cc])
             return str[cc];
