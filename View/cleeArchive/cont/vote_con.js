@@ -80,7 +80,7 @@ app.directive('voteOptionCount',function($rootScope){
                scope.html = scope.html.substring(0,middleIndex);
            }else{
                scope.html = scope.html.substring(middleIndex+5);
-               scope.html = html.replace(/%s/g,$rootScope.maxOption);
+               scope.html = scope.html.replace(/%s/g,$rootScope.maxOption);
            }
            element.html(scope.html);
            scope.initialized = true;
