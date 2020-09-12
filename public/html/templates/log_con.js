@@ -70,7 +70,6 @@ app.controller('registerCon',function($rootScope,$scope,$window,$location,$rootS
     $scope.userErr = '';
     $rootScope.intro = LZString.decompressFromBase64($rootScope.intro);
 
-    console.log($rootScope.registerId);
     $scope.checkUser = function(){
         if($scope.userChecking)
             return;

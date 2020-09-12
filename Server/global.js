@@ -43,8 +43,6 @@ global.__getCountryCode = function(ipData){
 
 global.__getReaderCode = function(ipData){
     if(ipData.readerLanguage)
-        console.log(ipData.readerLanguage);
-    if(ipData.readerLanguage)
         return ipData.readerLanguage.toUpperCase();
     return __getCountryCode(ipData);
 };
