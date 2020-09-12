@@ -80,12 +80,20 @@ app.directive('voteOptionCount',function($rootScope){
                scope.html = scope.html.substring(0,middleIndex);
            }else{
                scope.html = scope.html.substring(middleIndex+5);
-               scope.html = scope.replace(/%s/g,$rootScope.maxOption);
+               scope.html = html.replace(/%s/g,$rootScope.maxOption);
            }
            element.html(scope.html);
            scope.initialized = true;
         }
     }
+});
+
+
+app.filter('voteOption',function($rootScope){
+    return function(input) {
+        // filter
+        return unescape(input);
+    };
 });
 
 app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManager',function($scope,$rootScope,$cookies,$window,voteManager){
