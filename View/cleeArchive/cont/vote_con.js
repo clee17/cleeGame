@@ -36,7 +36,6 @@ app.directive('voteBar',function(){
             if(count === 0)
                 percent = "0";
 
-
             element.css('width',percent);
 
         }
