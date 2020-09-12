@@ -51,7 +51,7 @@
             <label><input class="selection" type="radio" value="{{option._id}}" ng-click="checkOption($event)"/> {{option.description | voteOption}}</label>
         </div>
         <div style="margin-left:auto;margin-right:auto;height:2rem;margin-top:auto;margin-bottom:2rem;" >
-            <button class="grand-button" style="height:100%;padding-top:4px;padding-bottom:4px;" ng-disabled="!completed || requesting" ng-click="submit()"><%- websiteInfo[60] %></button>
+            <button class="grand-button" style="height:100%;padding-top:4px;padding-bottom:4px;" ng-disabled="!completed || limitReached || requesting" ng-click="submit()"><%- websiteInfo[60] %></button>
         </div>
         <% } %>
         <% if(voted || Date.now() > Number(end)){ %>
