@@ -225,6 +225,15 @@
     cursor:pointer;
 }
 
+.linkBtn:disabled{
+    color:gray;
+    text-decoration:none;
+}
+
+.linkBtn:disabled:hover{
+    color:gray;
+    text-decoration:none;
+}
 
 
 .grade{

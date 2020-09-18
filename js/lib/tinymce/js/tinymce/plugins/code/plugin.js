@@ -49,7 +49,6 @@
           }
           if(api)
               api.setActive(false);
-
       }
     };
 

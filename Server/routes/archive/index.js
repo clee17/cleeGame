@@ -238,6 +238,8 @@ router.post('/board/threads',board.threads);
 router.post('/board/submitThread',board.submitThread);
 router.post('/board/submitReply',board.submitReply);
 router.post('/board/deleteThread',board.deleteThread);
+router.post('/board/deleteReply',board.deleteReply);
+router.post('/board/hideContents',board.hideContents);
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement',main.statement);

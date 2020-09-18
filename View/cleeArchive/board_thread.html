@@ -235,7 +235,8 @@
     grade_1='<%- infoAll[14] %>';
     grade_2='<%- infoAll[15] %>';
     alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
-    message_length = '<%- infoAll[23] %>';">
+    message_length = '<%- infoAll[23] %>';
+    info_hidden='<%- websiteInfo[148] %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div ng-show="threads.length === 0 && !requesting" style="margin:auto;"><%- websiteInfo[106] %></div>
@@ -245,10 +246,8 @@
        <span>[{{thread.category | category:thread.board.category}}]</span>
        <span>{{thread.title}}</span>
     </div>
-    <div id="thread_control">
-        <% if(user && user.isAdmin) { %>
-        <div ng-if="readerId === thread.author._id" class="button button2" ng-click="deleteThread()"><%- websiteInfo[134] %></div>
-        <% } %>
+    <div id="thread_control">  <!--        删除整帖-->
+        <div ng-if="readerId === thread.author._id || accessable(4) " class="button button2" ng-click="deleteContents()"><%- websiteInfo[134] %></div>
     </div>
     <div style="flex:1;" id="contents_list">
         <div style="display:flex;flex-direction:row;overflow:hidden;">
@@ -269,10 +268,21 @@
                 <div><span><%- websiteInfo[132] %> {{thread.createdAt | dateInfo}}</span>
                     <span></span>
                 </div>
-                <div base64 contents="{{thread.html}}" style="word-break:break-all;"></div>
+                <div base64 contents="{{thread.html}}" style="word-break:break-all;" ng-if="!thread.status"></div>
+                <div ng-if="thread.status >0">{{ info_hidden }}</div>
                 <div class="reply_control">
-                    <button class="linkBtn" ng-if="readerId === thread.author._id"><%- infoAll[26] %></button> <!--                    编辑按钮-->
-                    <button class="linkBtn" ng-if="readerId === thread.author._id || readerId === reply.author._id || <%- user && user.isAdmin %>"><%- infoAll[27] %></button>
+                    <button class="linkBtn" ng-if="readerId === thread.author._id" ng-click="editContents(thread._id,0)"><%- infoAll[26] %></button> <!-- 编辑按钮-->
+                    <button class="linkBtn"
+                            ng-disabled="thread.hiding || thread.deleting"
+                            ng-if="readerId !== thread.author._id && accessable(16)"
+                            ng-click="hideContents(null)">
+                        {{ thread.status ? '<%- infoAll[29] %>':'<%- infoAll[28] %>' }}
+                    </button><!--  屏蔽按钮-->
+
+                    <button class="linkBtn"
+                            ng-if="readerId !== thread.author._id && accessable(8)"
+                            ng-disabled="thread.blocking"
+                            ng-click="blockUser(thread.author,thread.ip)"><%- infoAll[27] %></button><!--  禁言按钮-->
                 </div>
             </div>
         </div>
@@ -288,13 +298,25 @@
                     <span><%- websiteInfo[132] %> {{reply.createdAt | dateInfo}}</span>
                     <span style="margin-left:auto;margin-right:1rem;">#{{reply.threadIndex}}</span>
                 </div>
-                <div base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
+                <div ng-if="!reply.status" base64 contents="{{reply.html}}" style="word-break:break-all;"></div>
+                <div ng-if="reply.status > 0"><b>{{ info_hidden }}</b></div>
                 <div class="reply_control">
-                    <button class="linkBtn" ng-if="readerId === reply.author._id"><%- infoAll[26] %></button> <!-- 编辑按钮-->
-                    <button class="linkBtn" ng-if="readerId == thread.author._id || readerId === thread.board.owner || "><%- infoAll[28] %></button><!--  屏蔽按钮-->
+                    <button class="linkBtn" ng-if="readerId === reply.author._id" ng-click="editContents(reply._id,1)"><%- infoAll[26] %></button> <!-- 编辑按钮-->
+                    <button class="linkBtn"
+                            ng-disabled="reply.hiding || reply.deleting"
+                            ng-if="readerId !== reply.author._id && (readerId === thread.author._id || accessable(16))"
+                            ng-click="hideContents(reply)">
+                       {{ reply.status ? '<%- infoAll[29] %>':'<%- infoAll[28] %>' }}
+                    </button><!--  屏蔽按钮-->
 
-                    <button class="linkBtn" ng-if="readerId === thread.board.owner || <%- user && user.isAdmin %>"><%- infoAll[25] %></button><!--  删除按钮-->
-                    <button class="linkBtn" ng-if="readerId === thread.board.owner || <%- user && user.isAdmin %>"><%- infoAll[27] %></button><!--  禁言按钮-->
+                    <button class="linkBtn"
+                            ng-if="readerId !== reply.author._id && accessable(8)"
+                            ng-disabled="reply.blocking"
+                            ng-click="blockUser(reply.author,reply.ip)"><%- infoAll[27] %></button><!--  禁言按钮-->
+                    <button class="linkBtn" ng-if="accessable(4)"
+                            ng-disabled="reply.deleting"
+                            ng-click="deleteContents(reply)"><%- infoAll[25] %></button><!--  删除按钮-->
+
                 </div>
             </div>
         </div>

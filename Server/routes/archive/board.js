@@ -114,6 +114,10 @@ let handler = {
 
     loadContents:function(details,contentsId,callback){
         let findHtml = function(details,listItem){
+            if(details.thread.html.toString() === listItem._id.toString()){
+                details.thread.html = lzString.compressToBase64(listItem.contents);
+                return;
+            }
             let replies = details.replies;
             for(let i=0; i<replies.length;++i){
                 if(listItem.link.toString() === replies[i]._id.toString()){
@@ -129,11 +133,40 @@ let handler = {
                 for(let i=0;i<htmlList.length;++i){
                     findHtml(details,htmlList[i]);
                 }
+                details.loaded.contentsLoaded = true;
+                if(callback)
+                    callback();
             }
         });
-        details.loaded.contentsLoaded = true;
-        if(callback)
-            callback();
+    },
+
+    loadUserAccess:function(board,user,callback){
+        if(!user || !board ){
+            console.log('ERROR, no valid board id or user id received!!');
+            if(callback)
+                callback();
+        }else{
+            let access = 0;
+            userModel.find({board:board,user:user}).exec()
+                .then(function(results){
+                    for(let i=0;i<results.length;++i)
+                        access = access | results[i].access;
+                    return userGroupModel.find({board:board,users:user}).exec();
+                })
+                .then(function(results){
+                    for(let i=0;i<results.length;++i)
+                        access = access | results[i].access;
+                    redisClient.set(board+user,JSON.stringify({access:access,message:null,lastUpdated:Date.now()}));
+                    if(callback)
+                        callback();
+                })
+                .catch(function(err){
+                    console.log(err);
+                    redisClient.set(board+user,JSON.stringify({access:0,message:err.message,lastUpdated:Date.now()}));
+                    if(callback)
+                        callback();
+                })
+        }
     },
 
     threadDetail:function(req,res,type){
@@ -152,9 +185,14 @@ let handler = {
             }
         };
 
-        let send = function(details){
+        let send = function(){
+            for(attr in details.loaded){
+                if(!details.loaded[attr])
+                    return;
+            };
             details.editor = true;
-            if(type === 'events'){}
+            if(type === 'events'){
+            }
             else
                 __renderIndex(req,res,{viewport:'/sub/board_thread',
                     modules:['/view/modules/pageIndex.js'],
@@ -168,10 +206,10 @@ let handler = {
                 pageId = Math.ceil(maxCount /20);
             else if(pageId < 1)
                 pageId = 1;
-            if(pageId === 1)
-                perPage --;
 
             let perPage = 20;
+            if(pageId === 1)
+                perPage --;
 
             let contentsId = [];
 
@@ -184,8 +222,6 @@ let handler = {
                         __renderError(req,res,err.message);
                     else{
                         details.replies = JSON.parse(JSON.stringify(replies));
-                        if(pageId === 1)
-                            details.replies.push(thread);
                         contentsId = contentsId.concat(replies.map(function(value){return value._id}));
                         handler.loadContents(details,contentsId,send);
                     }
@@ -195,8 +231,53 @@ let handler = {
             }
         }
 
-        let userRoleFetch = function(thread){
+        let userRoleFetch = function(){
+            if(!req.session.user){
+                details.loaded.userRoleLoaded = true;
+                send();
+                return;
+            }
+            let board = details.thread.board._id;
+            let user = req.session.user._id;
+            let index = board+user;
+            let settings = req.cookies[board.toString()+user.toString()];
 
+            if(user === details.thread.board.owner || req.session.user.isAdmin){
+                details.loaded.userRoleLoaded = true;
+                res.cookie(index,lzString.compressToBase64(JSON.stringify({access:parseInt('111111111111111111',2),lastUpdated:Date.now(),message:null})));
+                send();
+                return;
+            }
+
+            try{
+                settings = JSON.parse(lzString.decompressFromBase64(settings));
+                let dateNow = Date.now();
+                if(settings.lastUpdated >= (dateNow - 1*60*1000)) {
+                    details.loaded.userRoleLoaded = true;
+                    send();
+                    return;
+                }
+            }catch(err){
+            }
+
+            let getUserFromRedis = function(){
+                redisClient.get(index,function(err,result) {
+                    if(result)
+                        result =  JSON.parse(result);
+                    if(result.lastUpdated <= Date.now() - 1*60*1000){
+                        res.cookie(index,lzString.compressToBase64(JSON.stringify(result)));
+                        details.loaded.userRoleLoaded = true;
+                        send();
+                    } else if(!err)
+                        handler.loadUserAccess(board,user,getUserFromRedis);
+                    else if(err){
+                        details.loaded.userRoleLoaded = true;
+                        send();
+                    }
+                });
+            }
+
+            getUserFromRedis();
         };
 
         threadModel.findOneAndUpdate({_id:threadId},{$inc:{visited:1}},null,function(err,thread){
@@ -506,28 +587,30 @@ let handler = {
             handler.finalSend(res,response);
         }else if(req.session.user && req.session.user.isAdmin){
             callback(received);
-        }else if(req.session.user && req.session.user._id === received.author){
+        }else if(req.session.user && req.session.user._id.toString() === received.author){
             callback(received);
         }else if(req.session.user){
             let access = 0;
-            userModel.find({board:received.board_id,user:received.user}).exec()
+            userModel.find({board:received.board_id,user:req.session.user._id}).exec()
                 .then(function(results){
                     for(let i=0;i<results.length;++i)
                         access = access | results[i].access;
                     if((access & identity) >0){
                         callback(received);
                     }else
-                        return userGroupModel.find({board:received.board_id,users:received.user}).exec();
+                        return userGroupModel.find({board:received.board_id,users:req.session.user._id}).exec();
                 })
                 .then(function(results){
                     for(let i=0;i<results.length;++i)
                         access = access | results[i].access;
                     if((access & identity) >0) {
                         callback(received);
-                    }
+                    }else
+                        throw Error(_errInfo[34]);
                 })
                 .catch(function(err){
                     response.message = err.message;
+                    response.success = false;
                     handler.finalSend(res,response);
                 })
         }
@@ -592,14 +675,123 @@ let handler = {
             handler.validateAccess(req,res,
                 received,
                 deleteThread,
-                parseInt('000100',2),
+                parseInt('010000',2),
                 response);
         }catch(err){
             response.message = err.message;
             response.success = false;
             handler.finalSend(res,response);
         }
+    },
 
+    deleteReply:function(req,res){
+        let response = {
+            sent:false,
+            message:'',
+            success:false,
+        };
+
+        try{
+            let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+
+            if(!received.id || !__validateId(received.id))
+                throw Error(_errInfo[24]);
+            if(!req.session.user)
+                throw Error(_errInfo[35]);
+
+            let deleteReply = function(){
+                replyModel.findOneAndDelete({_id:received.id},function(err,doc){
+                    if(err)
+                        throw Error(err.message);
+                    else if(!doc)
+                        throw Error(_errInfo[36]);
+                    else if(doc) {
+                        htmlModel.deleteOne({link: received.id}, function (err, result) {
+                            console.log(err);
+                        });
+                        threadModel.findOneAndUpdate({_id:received.thread},{$inc:{deleted:1}}, {new:true},function(err,result){
+                            if(err)
+                                console.log(err);
+                        });
+                        response.success = true;
+                        response.result = JSON.parse(JSON.stringify(doc));
+                        handler.finalSend(res,response);
+                    }
+                });
+            };
+
+            handler.validateAccess(req,res,
+                received,
+                deleteReply,
+                parseInt('000100',2),
+                response);
+
+        }catch(err){
+            response.message = err.message;
+            response.success = false;
+            handler.finalSend(res,response);
+        }
+    },
+
+    hideContents:function(req,res){
+        let response = {
+            sent:false,
+            message:'',
+            success:false,
+        };
+
+        try{
+            let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+            if(!received.thread || !__validateId(received.thread))
+                throw Error(_errInfo[33]);
+            if(received.type === 1 && (!received._id || !__validateId(received._id)))
+                throw Error(_errInfo[33]);
+            if(!req.session.user)
+                throw Error(_errInfo[35]);
+
+            let sendResult = function(err,result){
+                if(err){
+                    response.message = err.message;
+                    response.success = false;
+                }else if(!result){
+                    response.message=  _errInfo[33];
+                    response.success = false;
+                }else{
+                    response.success = true;
+                    response.status = result.status;
+                }
+                response._id = result._id;
+                handler.finalSend(res,response);
+            }
+
+            let hideContents = function(){
+                if(received.type){
+                    replyModel.findOneAndUpdate({_id:received._id},{status:received.status},{new:true},function(err,result){
+                        sendResult(err,result);
+                    })
+                }else{
+                    threadModel.findOneAndUpdate({_id:received._id},{status:received.status},{new:true},function(err,result){
+                        sendResult(err,result);
+                    })
+                }
+            };
+
+            threadModel.findOne({_id:received.thread},function(err,result){
+                if(!err && result && result.author.toString() === req.session.user._id.toString())
+                    hideContents();
+                else{
+                    handler.validateAccess(req,res,
+                        received,
+                        hideContents,
+                        parseInt('000100',2),
+                        response);
+                }
+            })
+        }catch(err){
+            response.message = err.message;
+            response.success = false;
+            handler.finalSend(res,response);
+        }
     }
 };
 

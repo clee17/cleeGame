@@ -13,8 +13,6 @@ app.filter('trim', function() { //可以注入依赖
     }
 });
 
-
-
 app.filter('category', function() { //可以注入依赖
     return function(order,category) {
         if(!category){
@@ -34,11 +32,19 @@ app.filter('category', function() { //可以注入依赖
     }
 });
 
-
-
 app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$timeout','boardManager',function($scope,$rootScope,$cookies,$location,$timeout,boardManager){
     $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
     $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
+    let index = $rootScope.thread.board._id + $rootScope.readerId;
+    $scope.adminAccess = $cookies.get(index);
+    if($scope.adminAccess !== undefined)
+        $scope.adminAccess = JSON.parse(LZString.decompressFromBase64($scope.adminAccess));
+    else
+        $scope.adminAccess = 0;
+
+    $scope.accessable = function(index){
+        return $scope.adminAccess.access & index;
+    }
 
     $scope.totalNum = $rootScope.replies.length;
 
@@ -86,6 +92,93 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
         alertInfo.variables = {_id:$rootScope.thread._id,author:$rootScope.thread.author._id,info:'delete thread'};
         $scope.$emit('showAlert', alertInfo);
     };
+
+    $scope.blockUser = function(info,user,ip){
+        if(info)
+            info.userBlocking = true;
+        boardManager.blockUser({id:$rootScope.thread._id,board_id:$rootScope.thread.board._id,author:$rootScope.thread.author._id});
+    };
+
+    $scope.editContents = function(id,type){
+        if(!id)
+            return;
+        let newLink = '/boardMessage/edit?type='+type+'&id='+id;
+        window.location.href = newLink;
+    };
+
+    $scope.hideContents = function(reply){
+        let type = reply? 1:0;
+        let status = 0;
+        if(reply && !reply.status)
+            status = 1;
+        else if(!reply && !$rootScope.thread.status)
+            status = 1;
+        let send = {board_id:$rootScope.thread.board._id,thread:$rootScope.thread._id,_id:reply?reply._id:$rootScope.thread._id,type:type,status:status};
+        boardManager.hideContents(send);
+        if(reply){
+            reply.hiding = true;
+        }else
+           $rootScope.thread.hiding = true;
+    };
+
+    $scope.deleteContents = function(reply){
+        if(reply)
+            reply.deleting = true;
+        else
+            $rootScope.thread.deleting = true;
+        if(reply)
+            boardManager.deleteReply({id:reply._id,board_id:$rootScope.thread.board._id,thread:$rootScope.thread._id,author:reply.author? reply.author._id : null});
+        else
+            boardManager.deleteThread({id:$rootScope.thread._id,board_id:$rootScope.thread.board._id,author:$rootScope.thread.author._id});
+    }
+
+    $scope.$on('board contents hide',function(event,data){
+        if(!data.success){
+            $scope.$emit('showError',data.message);
+            return;
+        }
+
+        if(data.type === 0 && data._id === $rootScope.thread._id){
+            $rootScope.thread.hiding = false;
+            if(data.success)
+                $rootScope.thread.status = data.status;
+        }else{
+            for(let i=0; i<$rootScope.replies.length;++i){
+                if($rootScope.replies[i]._id === data._id){
+                    $rootScope.replies[i].hiding = false;
+                    if(data.success)
+                        $rootScope.replies[i].status = data.status;
+                }
+            }
+        }
+    });
+
+    $scope.$on('reply deleted',function(event,data){
+        if(!data.success)
+            $scope.emit('showError',data.message);
+        for(let i=0; i<$scope.replies.length;++i){
+            if($scope.replies[i]._id === data.result._id){
+                if(data.success){
+                    $scope.replies.splice(i,1);
+                    break;
+                }else
+                    $scope.replies[i].deleting = false;
+            }
+        }
+    });
+
+    $scope.$on('thread deleted',function(event,data){
+        if(data.success){
+            let newLink = $scope.getBoardLink();
+            $scope.$emit('showExplain',{info:'The thread is deleted successfully, the page will be turning in 3 seconds'});
+            $timeout(function(){
+               window.location.href = newLink;
+            },3000);
+        }else{
+            $rootScope.thread.deleting = false;
+            $scope.$emit('showError',data.message);
+        }
+    });
 
 
     $scope.$on('send new editor contents',function(event,data){

@@ -27,7 +27,8 @@ var text = [
     "删除",
     "编辑",
     "禁言",
-    "屏蔽"
+    "屏蔽",
+    "解屏"
 ];
 
 module.exports = text;

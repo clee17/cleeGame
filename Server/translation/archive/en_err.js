@@ -31,7 +31,11 @@ var text = [
     "we could not find the thread in database",
     "As non-registered users, you are limited to publish or reply to threads 5 times every 10 minutes respectively. please register to remove the limit.",
     "This board has forbidden anyone beside from the owner to publish a new tread",
-    "The thread you are replying to does not exist"
+    "The thread you are replying to does not exist",
+    "The post you attempted to block is not valid",
+    "The user account or user group to which you belong is not able to do this.",
+    "You must login first before you continue",
+    "The reply you attempted to delete does not exist."
 ];
 
 module.exports = text;

@@ -146,7 +146,8 @@ var text = [
     "relationships(press [,] or enter to add tag, optional)",
     "chapter's title, optional",
     "characters(press [,] or enter to add tag, optional)",
-    "Do you wish to clear all contents of this chapter? (including title and credentials)"
+    "Do you wish to clear all contents of this chapter? (including title and credentials)",
+    "This post has been blocked by the administrator"
 ];
 
 module.exports = text;
