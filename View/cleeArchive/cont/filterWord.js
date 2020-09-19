@@ -1,33 +1,12 @@
 app.filter('textInfo', function() { //可以注入依赖
     return function(text,noInfo) {
         let noWord = noInfo || '暂无；'
-        text = text.replace(/\n/gi,'<br>');
+        if(text)
+           text = text.replace(/\n/gi,'<br>');
         return text == ''? noWord:text;
     }
 });
 
-
-app.filter('dateInfo',function(){
-    return function(date,format){
-        if(!date)
-            return '错误的日期格式';
-        let finalDate = new Date(date);
-        let year = finalDate.getFullYear();
-        let month = finalDate.getMonth()+1;
-        let day = finalDate.getDate();
-        let hour = finalDate.getHours();
-        let min = finalDate.getMinutes();
-        let sec = finalDate.getSeconds();
-        switch(format){
-            case 0:
-                return year+'-'+month+'-'+day+'  '+hour+':'+min;
-                break;
-            default:
-                return year+'-'+month+'-'+day+'  '+hour+':'+min+':'+sec;
-        }
-
-    }
-});
 
 app.filter('wordCount', function() { //可以注入依赖
     return function(wordCount) {
@@ -40,17 +19,6 @@ app.filter('wordCount', function() { //可以注入依赖
     }
 });
 
-app.filter('grade', function() { //可以注入依赖
-    return function(code,template) {
-        let temp = Number(code);
-        for(let i=0;i<template.length;i++)
-        {
-            if(template[i].code == temp)
-                return template[i].refer;
-        }
-        return '分级模板读取错误';
-    }
-});
 
 app.filter('chapter',function(){
     return function(chapter) {
@@ -62,13 +30,16 @@ app.filter('chapter',function(){
 });
 
 app.filter('chapterTitle',function(){
-    return function(chapter) {
-        if(!chapter)
+    return function(index) {
+        let title = index && index.title ? index.title : "";
+        if(index && index.chapter && index.chapter.title)
+            title = index.chapter.title;
+        if(!index)
             return '[暂无标题]';
-        else if(chapter == '')
+        else if(title === '')
             return '[等待命名]';
         else
-            return chapter;
+            return title;
     }
 });
 

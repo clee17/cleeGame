@@ -14,15 +14,13 @@ let indexModel = require(path.join(__dataModel,'cleeArchive_workIndex')),
 let handler = {
     index:function(req,res,next){
         let response = {};
-        let callBack = function(){
-            handler.indexDetail(req,res,next,response.fanfic_grade);
-        };
-        redisClient.get('fanfic_grade',function(err,docs) {
-            if (!err && docs) {
-                handler.indexDetail(req,res,next,JSON.parse(docs));
-            } else
-                __readSettings(callBack, response);
-        });
+        response.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+        for(let i=0;i<response.fanfic_grade.length;++i){
+            let num = response .fanfic_grade[i].refer;
+            let item =  response .fanfic_grade[i];
+            item.refer = _infoAll[num];
+        }
+        handler.indexDetail(req,res,next,response.fanfic_grade);
     },
 
     statement:function(req,res){
@@ -53,21 +51,25 @@ let handler = {
     indexDetail:function(req,res,next,fanfic_grade){
         let viewPortMap = new Map();
         viewPortMap.set('/',{viewport:'/dynamic/entry',
-            controllers:['/view/cont/index_con.js'],
+            controllers:['/view/cont/welcome_con.js'],
             services:['/view/cont/userService.js','/view/cont/tagService.js']});
         viewPortMap.set('/fanfic',{viewport:'/statement/fanficSearch',
             modules:['/view/modules/workInfo.js','/view/modules/commentList.js','/view/modules/pageIndex.js'],
             styles:[],
-            controllers:['/view/cont/index_con.js','/view/cont/search_con.js'],
+            controllers:['/view/cont/welcome_con.js','/view/cont/search_con.js'],
             services:['/view/cont/searchService.js','/view/cont/filterWord.js','/view/cont/fanficService.js','/view/cont/feedbackService.js'],
             variables:{searchList:[0,1],gradeTemplate:fanfic_grade}});
-        viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/index_con.js']});
+        viewPortMap.set('/tech',{viewport:'/view/tech.html',controllers:['/view/cont/welcome_con.js']});
         viewPortMap.set('/admin',{viewport:'/view/admin.html',controllers:['/view/cont/admin_con.js'],services:['/service/userService.js','/service/copyService.js','/view/cont/filterWord.js','/view/cont/filterUser.js'],modules:['/view/modules/pageIndex.js']});
-        viewPortMap.set('/welcome',{viewport:'/view/welcome.html',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
+        viewPortMap.set('/welcome',{viewport:'/sub/welcome',controllers:['/view/cont/introCon.js'],services:['view/cont/userService.js','/service/countService.js']});
         viewPortMap.set('/donate',{viewport:'/statement/donate',controllers:['/view/cont/donate_Con.js'],services:['view/cont/userService.js'],variables:{}});
         viewPortMap.set('/develop',{viewport:'/view/develop.html',controllers:['/view/cont/develop_con.js'],services:['view/cont/developService.js'],variables:{}});
         viewPortMap.set('/registerProcess',{viewport:'/sub/registerProcess',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js','/view/cont/filterUser.js','/view/cont/filterWord.js']});
         viewPortMap.set('/resetPwdRequest',{viewport:'/sub/resetPwdRequest',controllers:['/view/cont/registerStatusCon.js'],services:['view/cont/userService.js']});
+        viewPortMap.set('/news',{viewport:'/board/5f50a851722e69306462daf8',
+            modules:['/view/modules/pageIndex.js'],
+            controllers:['/view/cont/board_info.js','/view/cont/board_con.js'],
+            services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:{editor:true,boardType:'news'}});
 
         let result = viewPortMap.get(req.url);
         if(!result)

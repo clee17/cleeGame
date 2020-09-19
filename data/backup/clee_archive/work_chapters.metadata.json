@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"clee_archive.work_chapters"},{"v":{"$numberInt":"2"},"key":{"user":{"$numberInt":"1"}},"name":"user_1","ns":"clee_archive.work_chapters","background":true}],"uuid":"bfca4d7a9f7346aa9bf6f6250083daa7"}

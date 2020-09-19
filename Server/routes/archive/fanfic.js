@@ -180,8 +180,6 @@ let handler = {
             }
             else
                 deleteIndex();
-
-
         });
     },
 

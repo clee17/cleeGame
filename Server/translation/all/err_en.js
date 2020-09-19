@@ -9,7 +9,7 @@ var text = [
     'Your registration has been completed already, please kindly login instead',
     "Our Redis Server has failed, please contact us.",
     "You cannot register for a new account as a logined user",
-    "Sorry, we cannot find the page。<br>The developers may still be working on this.", //10
+    "Sorry, we cannot find the page。<br>our programmers may still be working on this.", //10
     "We're experiencing an internal Server Error <br>, you may report the issue you run into at the bottom of page",
     "You are not authorized to make this change",
     "Your login status has expired, please refresh and login again",
@@ -19,9 +19,12 @@ var text = [
     "This mail address has been registered already",
     "This mail address does not exist", //18
     "There is no mail connected to this account, please contact the administrator. ",
-    "You've applied for this identity before, you cannot apply again.",
+    "You've applied for this identity before, you cannot apply again.", //20
     "A user could only apply for the identity by itself",
-    "There is no valid register information connected to your account, please contact administrator."
+    "There is no valid register information connected to your account, please contact administrator.",
+    "Your user id is not consistent with the one on server",
+    "The length of your title cannot be less than %l",
+    "The title cannot be empty"
 ];
 
 module.exports = text;

@@ -10,6 +10,9 @@ module.exports=function(app)
     app.use('/video',express.static(path.join(__basedir,'/public/video')));
     app.use('/svg',express.static(path.join(__basedir,'/public/svg')));
 
+
+    app.use('/tinymce',express.static(path.join(__basedir,'/js/lib/tinymce/js/tinymce')));
+
     //angular modules;
     app.use('/templates',express.static(path.join(__basedir,'/public/html/templates')));
     app.use('/service',express.static(path.join(__basedir,'/public/html/service')));

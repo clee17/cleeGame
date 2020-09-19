@@ -20,7 +20,31 @@ var text = [
     "This work can only be published by technical writers, you may get the identity from your user setting page",
     "publishing",
     'The vote does not exist.<br>     Please check on your vote’s address.', //20
-    "only registered users could apply for a role."
+    "There is no mail address connected to this account, please contact the administrator",
+    "only registered users could apply for a role.",
+    "The discussion board does not exist, please check your address",
+    "You haven't provided a valid board to which the thread belong",
+    "You or the user group to which you belong has been forbidden by the administrators of this discussion board to publish a new thread",
+    "The user group to which you belong is not allowed to publish a thread here",
+    "As a visitor, you cannot publish a new thread here",
+    "only administrators could do this",
+    "we could not find the thread in database",
+    "As non-registered users, you are limited to publish or reply to threads 5 times every 10 minutes respectively. please register to remove the limit.",
+    "This board has forbidden anyone beside from the owner to publish a new tread",
+    "The thread you are replying to does not exist",
+    "The post you attempted to block is not valid",
+    "The user account or user group to which you belong is not able to do this.",
+    "You must login first before you continue",
+    "The reply you attempted to delete does not exist.",
+    "You've been muted by administrator",
+    "for %n days",
+    "(As non-registered user, you may gets blocked due to those who share your IPs, you may register to avoid this)",
+    "The message you attempted to edit does not exist",
+    "We cannot find the contents of this message",
+    "This page is only open to registered users",
+    "You are not the owner of this contents, so you could not edit this.",
+    "Incorrect type of message",
+    "unknown error"
 ];
 
 module.exports = text;

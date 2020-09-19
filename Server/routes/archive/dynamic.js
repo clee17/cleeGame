@@ -37,7 +37,7 @@ let handler = {
                 else
                 {
                     data.currentIndex = JSON.parse(JSON.stringify(doc));
-                    handler.getBookPage(req,res,data,true);
+                    handler.getBookPage(req,res,data,true,0);
                 }
 
             }).populate('chapter');
@@ -52,109 +52,108 @@ let handler = {
 
     bookNew:function(req,res) {
         let data = {ready:false,currentIndex:null,bookDetail:null};
-        handler.getBookPage(req,res,data,false);
+        handler.getBookPage(req,res,data,false,0);
     },
 
-    getBookPage:function(req,res,data,published){
-        redisList = ['grade','warning'];
-        let sent = false;
-        let nextStep = function () {
-            finalSend();
-            if(req.session.user && !data.user)
-                data.user = {username:req.session.user.user};
-            if (redisList.length > 0)
-                readRedis();
-            else if(!data.ready)
-                readDataBase();
-        };
+    getBookPage:function(req,res,data,published,type) {
+        let setting = req.session.user ? req.session.user.settings.role : 0;
+        if (!req.session.user){
+            __renderError(req, res, _errInfo[136]);
+            return;
+        }else if(req.session.user.isAdmin){
+        }else if(req.session.user && setting && (setting.role & 1) >0){
+        }else if( (setting.role & 1) <= 0){
+            __renderError(req, res, _errInfo[135]);
+            return;
+        }
 
-        let readRedis = function () {
-            redisClient.mget(redisList, function (err, docs) {
-                if (err) {
-                    console.log(err);
-                    __readSettings(nextStep,data);
-                    redisList.length = 0;
-                }
-                else if(docs.indexOf(null) != -1)
+        data.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+        data.fanfic_warning = JSON.parse(JSON.stringify(__identityInfo.fanfic_warning));
+        for(let i=0;i<data.fanfic_grade.length;++i){
+            let num =data.fanfic_grade[i].refer;
+            let item =  data.fanfic_grade[i];
+            item.refer = _infoAll[num];
+        }
+
+        for(let i=0;i<data.fanfic_warning.length;++i){
+            let num = data.fanfic_warning[i].refer;
+            let item =  data.fanfic_warning[i];
+            item.refer = _websiteInfo[num];
+        }
+
+        if(!published){
+            data.workIndex = [
                 {
-                    __readSettings(nextStep,data);
-                    redisList.length = 0;
+                    order:0, chapterOrder:0,
+                    chapter:null,
+                    _id:null,wordCount:0,uploaded:true,published:false,
+                    title:""
                 }
-                else
-                {
-                    for(let i=0;i<redisList.length;i++)
-                    {
-                        data['fanfic_'+redisList[i]] = JSON.parse(docs[i]);
-                    }
-                    redisList.length = 0;
-                    nextStep();
-                }
-            });
-        };
-
-        finalSend = function(){
-            if(sent)
-                return;
-            data.user = req.session.user;
-            if (data.err) {
-                __renderError(req,res,_errAll[11]+data.err);
-                sent = true;
-            } else if (!req.session.user) {
-                __renderError(req,res,data.err);
-                sent = true;
-            } else if(data.ready){
-                res.render('cleeArchive/booknew.html',data);
-                sent = true;
-            }
-        };
-
-        readDataBase = function() {
+            ];
+            data.chapters = [];
+            data.book = {
+                    title:"",
+                    user:{user:req.session.user.user,_Id:req.session.user._id},
+                    type:0, //0 同人文
+                    status:0,//狀態，0已完结，1连载中。
+                    published:false,
+                    chapterCount:0,
+                    chapterDeleted:0,
+                    wordCount:0,
+            };
+            data.bookDetail = {
+                notes:"", //章节介绍
+                fandom:[],
+                relationships:[],
+                tag:[],
+                warning:[],
+                grade: 0, // 0, 全年龄向； 1, nc-17; 2 nc-21;
+            };
+            data.currentIndex  = data.workIndex[0];
+            __renderSubPage(req,res,'booknew',data);
+        }else{
             let searchCriteria = {user:req.session.user._id,published:published};
             if(data.currentIndex)
                 searchCriteria._id = data.currentIndex.work;
-
-            let updateCondition = {};
-
-            worksModel.findOneAndUpdate(searchCriteria,{},{new: true, upsert: true,setDefaultsOnInsert: true}).exec()
+            worksModel.findOne(searchCriteria).exec()
                 .then(function(doc){
                     if(!doc)
-                        throw '无法为作者创建编辑中作品信息，数据库出错';
+                        throw _errInfo[137];
                     data.book = JSON.parse(JSON.stringify(doc));
-                    searchCriteria = {work:doc._id,prev:null,order:0};
-                    updateCondition = {};
-                    return indexModel.findOneAndUpdate(searchCriteria,updateCondition,{new:true,upsert:true,setDefaultsOnInsert: true}).populate('chapter','_id title type fandom relationships characters tag intro grade warning wordCount').exec();
+                    return indexModel.find({work:doc._id},{order:1}).populate('chapter','_id title type fandom relationships characters tag intro grade warning wordCount').exec();
                 })
-                .then(function(doc){
+                .then(function(index){
                     if(!doc)
-                        throw '无法获取首章目录索引';
-                    if(doc.chapter)
-                        data.bookDetail = JSON.parse(JSON.stringify(doc.chapter));
-                    if(!data.currentIndex)
-                        data.currentIndex = JSON.parse(JSON.stringify(doc));
-                    data.chapters = [];
-                    data.chapters.push(JSON.parse(JSON.stringify(doc)));
-                    if(data.currentIndex.chapter && data.currentIndex.chapter.chapter) 
-                        data.currentIndex.chapter = data.currentIndex.chapter._id;
-                    return indexModel.find({work:data.book._id}).populate('chapter','title _id wordCount fandom relationships characters tag published').exec();
-                })
-                .then(function(docs){
-                    if(!docs)
-                        throw '无法获取当前作品目录';
-                    docs.map(function(item,i,err){
-                        if(item._id != data.chapters[0]._id)
-                            data.chapters.push(JSON.parse(JSON.stringify(item)));
+                        throw _errInfo[138];
+                    data.workIndex =  index.map(function(item){
+                        let json =  JSON.parse(JSON.stringify(item));
+                        json.prevOrder = json.order;
+                        if(json.prev === null){
+                            data.bookDetail = json.chapter || {};
+                            if(!data.currentIndex)
+                                data.currentIndex ={
+                                     _id:json.chapter._id,
+                                    order:json.chapter.order || 0
+                                }
+                        }
+                        return {
+                            _id:json._id,
+                            order:json.order,
+                            chapterOrder:json.chapter.order || 0,
+                            title:json.chapter.title,
+                            chapter:json.chapter._id,
+                            wordCount:json.chapter.wordCount,
+                            uploaded:true,
+                            published:true
+                        };
                     });
-                    data.ready = true;
-                    nextStep();
+                    if(data.currentIndex.chapter && data.currentIndex.chapter.chapter)
+                        data.currentIndex.chapter = data.currentIndex.chapter._id;
                 })
                 .catch(function(err){
-                    console.log(err);
-                    data.err=err;
-                    nextStep();
+                    __renderError(req, res, err.message);
                 });
-        };
-
-        nextStep();
+        }
     },
 
     entry:function(req,res){
@@ -233,13 +232,13 @@ let handler = {
                     tmpResult[docs[i]._id] = docs[i].num;
                 };
                 response.workCount = tmpResult;
-                redisClient.get('fanfic_grade',function(err,docs) {
-                    if (!err && docs) {
-                        response.fanfic_grade = JSON.parse(docs);
-                        finalSend();
-                    } else
-                        __readSettings(finalSend, response);
-                });
+                response.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+                for(let i=0;i<response.fanfic_grade.length;++i){
+                    let num = response .fanfic_grade[i].refer;
+                    let item =  response .fanfic_grade[i];
+                    item.refer = _infoAll[num];
+                }
+                finalSend();
             })
             .catch(function(err){
                 sent = true;
