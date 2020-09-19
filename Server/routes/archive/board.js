@@ -36,94 +36,6 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(response)));
     },
 
-    entry:function(req,res){
-        let boardId = req.params.boardId;
-
-        if(!boardId || !__validateId(boardId)){
-            __renderSubPage(req,res,'error',{error:_errInfo[22]});
-            return;
-        }
-
-        boardModel.findOne({_id:boardId},function(err,board){
-            if(err){
-                __renderSubPage(req,res,'error',{error:err.message});
-            }else if(!board){
-                __renderSubPage(req,res,'error',{error:_errInfo[23]});
-            }else{
-                let allowNew = parseInt('000001',2);
-                let allowReply = parseInt('0000010',2);
-                let allowUpdate = parseInt('000100',2);
-
-                let detail = JSON.parse(JSON.stringify(board));
-                detail.allowNew = detail.setting & allowNew >0;
-                detail.allowReply = detail.setting & allowReply >0;
-                detail.allowUpdate = detail.setting & allowUpdate >0;
-                detail.registeredUser = !!req.session.user;
-                let defaultCategory = {
-                    cn:'通用',
-                    en:'general'
-                };
-                if(!detail.category || detail.category.length === 0){
-                    detail.category = [{
-                        name: __packMultiLang(defaultCategory),
-                        order:0}
-                    ];
-                }
-                for(let i=0;i<detail.category.length;++i){
-                    detail.category[i].name = encodeURIComponent(__multiLang(detail.category[i].name,req.ipData));
-                }
-
-                let searchgroup = {ips:req.ip,board:detail._id};
-                let searchuser = {ip:req.ip,user:null,board:detail._id};
-                if(req.session.user) {
-                    searchgroup = {users: req.session.user._id,board:detail._id};
-                    searchuser = {user:req.session.user._id,board:detail._id};
-                }
-
-                let process = function(type,results){
-                    if(type === 'usergroup'){
-                        let temp = results.length >0? 0 : -1;
-                        for(let i=0; i<results.length;++i)
-                            temp = temp | results[i].access;
-                        detail.usergroup = temp;
-                    }
-                    if(type === 'user')
-                        detail.user = results.length>0? results[0].access : -1;
-
-                    if(type === 'visitor')
-                        detail.visitor = results.length>0? results[0].access : 2;
-
-                    if(detail.user !== undefined && detail.usergroup !== undefined && detail.visitor !== undefined){
-                        __renderSubPage(req,res,'board',detail);
-                    }
-                };
-
-
-                userGroupModel.find(searchgroup,function(err,response){
-                    if(!err){
-                        process('usergroup',response);
-                    }else
-                        __renderSubPage(req,res,'error',err.message);
-                });
-
-                userGroupModel.find({title:'visitor',board:detail._id},function(err,response){
-                    if(!err){
-                        process('visitor',response);
-                    }else
-                        __renderSubPage(req,res,'error',err.message);
-                });
-
-                userModel.find(searchuser,function(err,response){
-                    if(!err){
-                        process('user',response);
-                    }else
-                        __renderSubPage(req,res,'error',err.message);
-                });
-
-            }
-        });
-    },
-
     loadContents:function(details,contentsId,callback){
         let findHtml = function(details,listItem){
             if(details.thread.html.toString() === listItem._id.toString()){
@@ -173,7 +85,6 @@ let handler = {
                         callback();
                 })
                 .catch(function(err){
-                    console.log(err);
                     redisClient.set(board+user,JSON.stringify({access:0,message:err.message,lastUpdated:Date.now()}));
                     if(callback)
                         callback();
@@ -186,14 +97,182 @@ let handler = {
             if(err || !result){
                 redisClient.set(board+'Visitor',JSON.stringify({access: parseInt('000000011',2),
                     message:err?err.message:'',
-                    lastUpdated:Date.now()}));
+                    lastUpdated:Date.now()}),function(err,response){
+                    if(callback)
+                        callback();
+                });
             }else{
                 redisClient.set(board+'Visitor',JSON.stringify({access: result.access,
                     message:'',
-                    lastUpdated:Date.now()}));
+                    lastUpdated:Date.now()}),function(err,response){
+                    if(callback)
+                        callback();
+                });
             }
         });
     },
+
+    fetchVisitorRole:function(req,res,detail,callback){
+        let board = detail.board._id;
+        let index = board+'Visitor';
+        let settings = req.cookies[index];
+        try{
+            settings = JSON.parse(lzString.decompressFromBase64(settings));
+        }catch(err){
+            settings = null;
+        }
+
+        let getVisitorAccess = function(){
+            redisClient.get(index,function(err,result) {
+                if(result)
+                    result =  JSON.parse(result);
+                if(result){
+                    res.cookie(index,lzString.compressToBase64(JSON.stringify(result)));
+                    callback();
+                } else if(!err) {
+                    handler.loadVisitorAccess(board, getVisitorAccess);
+                }else if(err){
+                    callback();
+                }
+            });
+        };
+
+        let dateNow = Date.now();
+        if(settings && settings.lastUpdated >= (dateNow - 1*60*1000)) {
+            callback();
+        }else
+            getVisitorAccess();
+    },
+
+    fetchUserRole:function(req,res,detail,callback){
+        let board = detail.board._id;
+        let user = req.session.user._id;
+        let index = board+user;
+        let settings = req.cookies[board.toString()+user.toString()];
+
+        if(user === detail.board.owner || req.session.user.isAdmin){
+            res.cookie(index,lzString.compressToBase64(JSON.stringify({access:parseInt('111111111111111111',2),lastUpdated:Date.now(),message:null})));
+            callback();
+            return;
+        }
+
+        try{
+            settings = JSON.parse(lzString.decompressFromBase64(settings));
+            let dateNow = Date.now();
+            if(settings.lastUpdated >= (dateNow - 1*60*1000)) {
+                callback();
+                return;
+            }
+        }catch(err){
+            settings = null;
+        }
+
+        let getUserFromRedis = function(){
+            redisClient.get(index,function(err,result) {
+                if(result)
+                    result =  JSON.parse(result);
+                if(result.lastUpdated <= Date.now() - 1*60*1000){
+                    res.cookie(index,lzString.compressToBase64(JSON.stringify(result)));
+                    if(callback)
+                        callback();
+                } else if(!err) {
+                    handler.loadUserAccess(board, user, getUserFromRedis);
+                }else if(err){
+                    if(callback)
+                         callback();
+                }
+            });
+        };
+
+        let dateNow = Date.now();
+        if(!settings){
+            getUserFromRedis();
+        }else if(settings && settings.lastUpdated < (dateNow - 5*60*1000)){
+            getUserFromRedis();
+        }else{
+            if(callback)
+                callback();
+        }
+    },
+
+    userRoleFetch:function(req,res,detail,callback){
+        if(!req.session.user){
+            handler.fetchVisitorRole(req,res,detail,callback);
+        }else
+            handler.fetchUserRole(req,res,detail,callback);
+    },
+
+    entry:function(req,res){
+        let boardId = req.params.boardId;
+
+        if(!boardId || !__validateId(boardId)){
+            __renderSubPage(req,res,'error',{error:_errInfo[22]});
+            return;
+        }
+
+        boardModel.findOne({_id:boardId},function(err,board){
+            if(err){
+                __renderSubPage(req,res,'error',{error:err.message});
+            }else if(!board){
+                __renderSubPage(req,res,'error',{error:_errInfo[23]});
+            }else{
+                let allowNew = parseInt('000001',2);
+                let allowReply = parseInt('0000010',2);
+                let allowUpdate = parseInt('000100',2);
+
+                let detail = JSON.parse(JSON.stringify(board));
+                detail.board = {
+                    owner:board.owner,
+                    _id:board._id
+                };
+                detail.allowNew = detail.setting & allowNew >0;
+                detail.allowReply = detail.setting & allowReply >0;
+                detail.allowUpdate = detail.setting & allowUpdate >0;
+                detail.loaded  = {
+                    blockLoaded:false,
+                    userRoleLoaded:false
+                };
+
+                detail.isVisitor = !req.session.user;
+                let defaultCategory = {
+                    cn:'通用',
+                    en:'general'
+                };
+                if(!detail.category || detail.category.length === 0){
+                    detail.category = [{
+                        name: __packMultiLang(defaultCategory),
+                        order:0}
+                    ];
+                }
+                for(let i=0;i<detail.category.length;++i){
+                    detail.category[i].name = encodeURIComponent(__multiLang(detail.category[i].name,req.ipData));
+                }
+
+                let send = function(){
+                    for(attr in detail.loaded){
+                        if(!detail.loaded[attr])
+                            return;
+                    }
+                    __renderSubPage(req,res,'board',detail);
+                };
+
+                let finalRoleSend = function(){
+                    detail.loaded.userRoleLoaded = true;
+                    send();
+                };
+
+                let finalBlockSend = function(){
+                    detail.loaded.blockLoaded = true;
+                    send();
+                };
+
+                handler.userRoleFetch(req,res,detail,finalRoleSend);
+
+                handler.checkBlockList(req,res,detail,finalBlockSend);
+            }
+        });
+    },
+
 
     threadDetail:function(req,res,type){
         let threadId = req.params.threadId;
@@ -228,11 +307,6 @@ let handler = {
                     modules:['/view/modules/pageIndex.js'],
                     controllers:['/view/cont/board_thread_info.js','/view/cont/board_con.js'],
                     services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:details});
-        };
-
-        let updateBlock = function(){
-            details.loaded.blockLoaded = true;
-            send();
         };
 
         let findUserBlockInfo = function(block,replies){
@@ -319,94 +393,11 @@ let handler = {
             send();
         };
 
-        let FetchVisitorRole = function(){
-            let board = details.thread.board._id;
-            let index = board+'Visitor';
-            let settings = req.cookies[index];
-            try{
-                settings = JSON.parse(lzString.decompressFromBase64(settings));
-            }catch(err){
-                settings = null;
-            }
-
-            let getVisitorAccess = function(){
-                redisClient.get(index,function(err,result) {
-                    if(result)
-                        result =  JSON.parse(result);
-                    if(result){
-                        res.cookie(index,lzString.compressToBase64(JSON.stringify(result)));
-                        finalRoleSend();
-                    } else if(!err) {
-                        handler.loadVisitorAccess(board, getVisitorAccess);
-                    }else if(err){
-                        finalRoleSend();
-                    }
-                });
-            };
-
-            let dateNow = Date.now();
-            if(settings && settings.lastUpdated >= (dateNow - 1*60*1000)) {
-                finalRoleSend();
-            }else
-                getVisitorAccess();
+        let finalBlockSend = function(){
+            details.loaded.blockLoaded = true;
+            send();
         };
 
-        let FetchUserRole = function(){
-            let board = details.thread.board._id;
-            let user = req.session.user._id;
-            let index = board+user;
-            let settings = req.cookies[board.toString()+user.toString()];
-
-            if(user === details.thread.board.owner || req.session.user.isAdmin){
-                res.cookie(index,lzString.compressToBase64(JSON.stringify({access:parseInt('111111111111111111',2),lastUpdated:Date.now(),message:null})));
-                finalRoleSend();
-                return;
-            }
-
-            try{
-                settings = JSON.parse(lzString.decompressFromBase64(settings));
-                let dateNow = Date.now();
-                if(settings.lastUpdated >= (dateNow - 1*60*1000)) {
-                    finalRoleSend();
-                    return;
-                }
-            }catch(err){
-                settings = null;
-            }
-
-            let getUserFromRedis = function(){
-                redisClient.get(index,function(err,result) {
-                    if(result)
-                        result =  JSON.parse(result);
-                    if(result.lastUpdated <= Date.now() - 1*60*1000){
-                        res.cookie(index,lzString.compressToBase64(JSON.stringify(result)));
-                        details.loaded.userRoleLoaded = true;
-                        send();
-                    } else if(!err) {
-                        handler.loadUserAccess(board, user, getUserFromRedis);
-                    }else if(err){
-                        details.loaded.userRoleLoaded = true;
-                        send();
-                    }
-                });
-            };
-
-            let dateNow = Date.now();
-            if(!settings){
-                getUserFromRedis();
-            }else if(settings && settings.lastUpdated < (dateNow - 5*60*1000)){
-                getUserFromRedis();
-            }else{
-                finalRoleSend();
-            }
-        };
-
-        let userRoleFetch = function(){
-            if(!req.session.user){
-                FetchVisitorRole();
-            }else
-                FetchUserRole();
-        };
 
         threadModel.findOneAndUpdate({_id:threadId},{$inc:{visited:1}},null,function(err,thread){
             if(err)
@@ -423,11 +414,15 @@ let handler = {
                 details.replies = [];
                 //关联所有回复
                 details.thread.isFirst = pageId === 1;
+                details.board = {
+                    _id:details.thread.board._id,
+                    owner:details.thread.board.owner
+                };
                 details.userInfo = {};
                 details.userInfo.name = req.session.user? req.session.user.user : _infoAll[21];
                 details.loaded.theadLoaded = true;
-                handler.checkBlockList(req,res,details,updateBlock);
-                userRoleFetch(thread);
+                handler.checkBlockList(req,res,details,finalBlockSend);
+                handler.userRoleFetch(req,res,details,finalRoleSend);
                 replyFetch(thread);
             }
         }).populate([{path:'author',select:'_id user'},{path:'board',select:'category title _id visited replied owner'}]);

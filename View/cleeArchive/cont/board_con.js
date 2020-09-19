@@ -35,6 +35,7 @@ app.filter('category', function() { //可以注入依赖
 app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$timeout','boardManager',function($scope,$rootScope,$cookies,$location,$timeout,boardManager){
     $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
     $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
+
     let index = $rootScope.thread.board._id + ($rootScope.isVisitor ? 'Visitor':$rootScope.readerId);
     $scope.adminAccess = $cookies.get(index);
     if($scope.adminAccess !== undefined) {
@@ -53,6 +54,10 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
             info.user_blocked += $scope.message_non_registered;
         info.message = $scope.message_visitor_noreply;
         $scope.$broadcast('initialize editor', info);
+    };
+
+    $scope.initialize = function(){
+        $scope.initialized = true;
     };
 
     $scope.accessable = function(index){
@@ -259,6 +264,16 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     $scope.newThread_category = null;
     $scope.threads = [];
 
+    let loadAdminAccess = function(){
+        let index = $scope.board_id + ($rootScope.isVisitor ? 'Visitor':$rootScope.readerId);
+        $scope.adminAccess = $cookies.get(index);
+        if($scope.adminAccess !== undefined) {
+            $scope.adminAccess = JSON.parse(LZString.decompressFromBase64($scope.adminAccess));
+            $scope.adminAccess = $scope.adminAccess.access;
+        }else
+            $scope.adminAccess = 0;
+    };
+
     $scope.totalNum = Number($scope.board_count);
     $scope.pageIndex =  $location.search().id ||1;
     $scope.perPage = 35;
@@ -267,17 +282,20 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
 
     $scope.initialize = function(){
         $scope.requesting= true;
+        $scope.initialized = true;
+        loadAdminAccess();
         boardManager.requestThreads({board_id:$scope['board_id'],board_setting:['board_setting'],pageId:$scope.pageId});
     };
 
     $scope.initializeEditor = function(){
-        let info = {access:0,targetRight:parseInt('0000001',2)};
+        let info = {blocked:$scope.blocked,access:$scope.adminAccess,targetRight:parseInt('0000001',2)};
+        if(info.blocked){
+            $scope.message_block_date = $scope.message_block_date.replace(/%n/g,$scope.blockedDate);
+        }
         if($rootScope.isVisitor){
-            info.message = $scope.message_nonew_visitor;
-            info.access = $scope.personal_visitor;
+            info.message = unescape($scope.message_nonew_visitor);
         }else{
-            info.access =  $scope.personal_usergroup &$scope.personal_user;
-            info.message = $scope.message_nonew_user;
+            info.message = unescape($scope.message_nonew_user);
         }
         info.user_blocked = $scope.message_blocked_user+',' + $scope.message_block_date;
         if($rootScope.isVisitor)
@@ -492,7 +510,6 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
     });
 
     $scope.$on('initialize editor',function(event,data){
-        let allowNew = parseInt('0000001',2);
         if(data.blocked){
             $scope.toggleEditor(false);
             $scope.$parent.editorActive = false;
@@ -505,7 +522,7 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
     });
 
     let editorInitialize = function(){
-        if($scope.$parent.initializeEditor && $scope.instantiated && $scope.instantiated() && $scope.toggleEditor)
+        if($scope.$parent.initialized && $scope.$parent.initializeEditor && $scope.instantiated && $scope.instantiated() && $scope.toggleEditor)
             $scope.$parent.initializeEditor();
         else
             $timeout(editorInitialize,100);
