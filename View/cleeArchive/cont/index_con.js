@@ -44,13 +44,16 @@ app.controller('entryCon',function($scope,$rootScope,$window,$timeout,$cookies,l
         $scope.showAlert = true;
         let showExplain = function(data){
             let explain = document.getElementById('explainBoard');
+            $scope.explainConfirm = !!data.selection;
+            if(data.selection === undefined)
+                $scope.explainConfirm = true;
             if(explain){
                 let children = explain.children;
                 children[0].innerHTML = '<div style="margin:2rem">'+data.info+'</div>';
                 explain.style.height = data.height ? data.height+'rem': '30rem';
             }
         };
-        $timeout(showExplain(data),10)
+        $timeout(showExplain(data),10);
     });
 
     $scope.$on('showError',function(event,data){

@@ -17,6 +17,10 @@
         background:rgba(238,238,238,1);
     }
 
+    #boardPanel select:disabled{
+        background:rgba(238,238,238,1);
+    }
+
     #contents_list {
         flex:1;
         display:flex;
@@ -236,6 +240,13 @@
     grade_2='<%- infoAll[15] %>';
     alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
     message_length = '<%- infoAll[23] %>';
+    message_blocked_user = '<%- errInfo[37] %>';
+    message_block_date = '<%- errInfo[38] %>';
+    message_non_registered = '<%- errInfo[39] %>';
+    message_user_blocked = '<%- websiteInfo[149] %>';
+    message_user_unblocked = '<%- websiteInfo[150] %>';
+    message_thread_deleted = '<%- websiteInfo[151] %>';
+    message_visitor_noreply = '<%- websiteInfo[152] %>';
     info_hidden='<%- websiteInfo[148] %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
@@ -247,7 +258,9 @@
        <span>{{thread.title}}</span>
     </div>
     <div id="thread_control">  <!--        删除整帖-->
-        <div ng-if="readerId === thread.author._id || accessable(4) " class="button button2" ng-click="deleteContents()"><%- websiteInfo[134] %></div>
+        <div ng-if="readerId === thread.author._id || accessable(4) "
+             class="button button2"
+             ng-click="deleteContents()"><%- websiteInfo[134] %></div>
     </div>
     <div style="flex:1;" id="contents_list">
         <div style="display:flex;flex-direction:row;overflow:hidden;">
@@ -271,7 +284,9 @@
                 <div base64 contents="{{thread.html}}" style="word-break:break-all;" ng-if="!thread.status"></div>
                 <div ng-if="thread.status >0">{{ info_hidden }}</div>
                 <div class="reply_control">
-                    <button class="linkBtn" ng-if="readerId === thread.author._id" ng-click="editContents(thread._id,0)"><%- infoAll[26] %></button> <!-- 编辑按钮-->
+                    <button class="linkBtn"
+                            ng-if="readerId === thread.author._id"
+                            ng-click="editContents(thread._id,0)"><%- infoAll[26] %></button> <!-- 编辑按钮-->
                     <button class="linkBtn"
                             ng-disabled="thread.hiding || thread.deleting"
                             ng-if="readerId !== thread.author._id && accessable(16)"
@@ -281,8 +296,10 @@
 
                     <button class="linkBtn"
                             ng-if="readerId !== thread.author._id && accessable(8)"
-                            ng-disabled="thread.blocking"
-                            ng-click="blockUser(thread.author,thread.ip)"><%- infoAll[27] %></button><!--  禁言按钮-->
+                            ng-disabled="thread.muting"
+                            ng-click="blockUser(thread,thread.author,thread.ip)">
+                        {{ thread.userBlocked ? '<%- infoAll[30] %>':'<%- infoAll[27] %>' }}
+                        <%- infoAll[27] %></button><!--  禁言按钮-->
                 </div>
             </div>
         </div>
@@ -311,9 +328,13 @@
 
                     <button class="linkBtn"
                             ng-if="readerId !== reply.author._id && accessable(8)"
-                            ng-disabled="reply.blocking"
-                            ng-click="blockUser(reply.author,reply.ip)"><%- infoAll[27] %></button><!--  禁言按钮-->
-                    <button class="linkBtn" ng-if="accessable(4)"
+                            ng-disabled="reply.muting"
+                            ng-click="blockUser(reply,reply.author,reply.ip)">
+                        {{ reply.userBlocked ? '<%- infoAll[30] %>':'<%- infoAll[27] %>' }}
+                    </button><!--  禁言按钮-->
+
+                    <button class="linkBtn"
+                            ng-if="reply.author._id === readerId || accessable(4)"
                             ng-disabled="reply.deleting"
                             ng-click="deleteContents(reply)"><%- infoAll[25] %></button><!--  删除按钮-->
 
@@ -328,7 +349,9 @@
         <div class="author_info">{{userInfo.name}}</div>
         <div id="reply_main">
             <div style="display:flex;flex-direction:row;">
-                <select ng-model="newReply_grade" style="margin-left:auto;margin-right:1rem;">
+                <select ng-model="newReply_grade"
+                        ng-disabled = "requesting || !editorActive"
+                        style="margin-left:1rem;margin-right:auto;">
                     <option value="0"><%- infoAll[13] %></option>
                     <option value="1"><%- infoAll[14] %></option>
                     <option value="2"><%- infoAll[15] %></option>
@@ -345,7 +368,9 @@
                           width:calc(100% - 40px);
                           height:calc(100% - 60px);"></textarea>
             </div>
-            <div id="reply_btn"><button class="ghost-button" ng-click="publishReply()" ng-disabled="requesting"><%- infoAll[22] %></button></div>
+            <div id="reply_btn"><button class="ghost-button"
+                                        ng-click="publishReply()"
+                                        ng-disabled="requesting || !editorActive"><%- infoAll[22] %></button></div>
         </div>
     </div>
 </div>

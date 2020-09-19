@@ -24,7 +24,7 @@ app.filter('category', function() { //可以注入依赖
                     return decodeURIComponent(category[i].name);
             }
             return 'unknown error';
-        }
+        };
        if(!order)
            return getCategory(0);
        else
@@ -35,16 +35,29 @@ app.filter('category', function() { //可以注入依赖
 app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$timeout','boardManager',function($scope,$rootScope,$cookies,$location,$timeout,boardManager){
     $rootScope.thread.board.title = unescape($rootScope.thread.board.title);
     $rootScope.thread.board.title = $rootScope.thread.board.title.toUpperCase();
-    let index = $rootScope.thread.board._id + $rootScope.readerId;
+    let index = $rootScope.thread.board._id + ($rootScope.isVisitor ? 'Visitor':$rootScope.readerId);
     $scope.adminAccess = $cookies.get(index);
-    if($scope.adminAccess !== undefined)
+    if($scope.adminAccess !== undefined) {
         $scope.adminAccess = JSON.parse(LZString.decompressFromBase64($scope.adminAccess));
-    else
+        $scope.adminAccess = $scope.adminAccess.access;
+    }else
         $scope.adminAccess = 0;
 
+    $scope.initializeEditor = function(){
+        let info = {blocked:$rootScope.blocked,access:$scope.adminAccess,targetRight:parseInt('000010',2)};
+        if($rootScope.blocked){
+            $scope.message_block_date = $scope.message_block_date.replace(/%n/g,$rootScope.blockedDate);
+        }
+        info.user_blocked = $scope.message_blocked_user+',' + $scope.message_block_date;
+        if($rootScope.isVisitor)
+            info.user_blocked += $scope.message_non_registered;
+        info.message = $scope.message_visitor_noreply;
+        $scope.$broadcast('initialize editor', info);
+    };
+
     $scope.accessable = function(index){
-        return $scope.adminAccess.access & index;
-    }
+        return $scope.adminAccess & index;
+    };
 
     $scope.totalNum = $rootScope.replies.length;
 
@@ -69,13 +82,13 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
             author:$rootScope.readerId,
             thread:$rootScope.thread._id,
             grade:Number($scope.newReply_grade),
-        }
+        };
         $scope.$broadcast('publish new reply',data);
     };
 
     $scope.cancelPublishReply = function(){
         $scope.requesting  = false;
-    }
+    };
 
     $scope.sendDeleteThread = function(data){
         $scope.$broadcast('stop thread');
@@ -95,8 +108,12 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
 
     $scope.blockUser = function(info,user,ip){
         if(info)
-            info.userBlocking = true;
-        boardManager.blockUser({id:$rootScope.thread._id,board_id:$rootScope.thread.board._id,author:$rootScope.thread.author._id});
+            info.muting = true;
+        boardManager.blockUser({board_id:$rootScope.thread.board._id,
+            thread:$rootScope.thread._id,
+            _id:info._id,
+            user:user,
+            ip:ip});
     };
 
     $scope.editContents = function(id,type){
@@ -122,6 +139,8 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
     };
 
     $scope.deleteContents = function(reply){
+        if($rootScope.thread.deleting || (reply && reply.deleting))
+            return;
         if(reply)
             reply.deleting = true;
         else
@@ -130,7 +149,7 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
             boardManager.deleteReply({id:reply._id,board_id:$rootScope.thread.board._id,thread:$rootScope.thread._id,author:reply.author? reply.author._id : null});
         else
             boardManager.deleteThread({id:$rootScope.thread._id,board_id:$rootScope.thread.board._id,author:$rootScope.thread.author._id});
-    }
+    };
 
     $scope.$on('board contents hide',function(event,data){
         if(!data.success){
@@ -153,6 +172,23 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
         }
     });
 
+    $scope.$on('user blocked',function(event,data){
+        if(data.success){
+            $scope.$emit('showExplain',{info:data.userBlocked? $scope.message_user_blocked: $scope.message_user_unblocked,height:13});
+            if($rootScope.thread._id === data._id){
+                $rootScope.thread.muting = false;
+                $rootScope.thread.userBlocked = data.userBlocked;
+            }
+            for(let i=0; i<$rootScope.replies.length;++i){
+                if($rootScope.replies[i]._id === data._id) {
+                    $rootScope.replies[i].muting = false;
+                    $rootScope.replies[i].userBlocked = data.userBlocked;
+                }
+            }
+        }else
+            $scope.$emit('showError',data.message);
+    });
+
     $scope.$on('reply deleted',function(event,data){
         if(!data.success)
             $scope.emit('showError',data.message);
@@ -170,10 +206,10 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
     $scope.$on('thread deleted',function(event,data){
         if(data.success){
             let newLink = $scope.getBoardLink();
-            $scope.$emit('showExplain',{info:'The thread is deleted successfully, the page will be turning in 3 seconds'});
+            $scope.$emit('showExplain',{info:$scope.message_thread_deleted,height:14,selection:false});
             $timeout(function(){
                window.location.href = newLink;
-            },3000);
+            },2000);
         }else{
             $rootScope.thread.deleting = false;
             $scope.$emit('showError',data.message);
@@ -198,13 +234,15 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
         }else{
             $scope.$emit('showError',data.message);
         }
-    })
+    });
 
     $scope.$on('tellYes',function(event,data){
         if(data.variables['info'] === 'delete thread'){
             $scope.sendDeleteThread(data.variables);
         }
     });
+
+    $scope.initialize();
 
 }]);
 
@@ -224,8 +262,22 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
 
     $scope.initialize = function(){
         $scope.requesting= true;
-        $scope.$broadcast('initialize editor', {usergroup:$scope.usergroup,user:$scope.user});
         boardManager.requestThreads({board_id:$scope['board_id'],board_setting:['board_setting'],pageId:$scope.pageId});
+    };
+
+    $scope.initializeEditor = function(){
+        let info = {access:0,targetRight:parseInt('0000001',2)};
+        if($rootScope.isVisitor){
+            info.message = $scope.message_nonew_visitor;
+            info.access = $scope.personal_visitor;
+        }else{
+            info.access =  $scope.personal_usergroup &$scope.personal_user;
+            info.message = $scope.message_nonew_user;
+        }
+        info.user_blocked = $scope.message_blocked_user+',' + $scope.message_block_date;
+        if($rootScope.isVisitor)
+            info.user_blocked += ','+$scope.message_non_registered;
+        $scope.$broadcast('initialize editor',info);
     };
 
     $scope.newThread = function(){
@@ -341,7 +393,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             $scope.entries.splice($scope.tempstorage.i,0,$scope.tempStorage.thread);
         }
         $scope.tempStorage = null;
-    })
+    });
 
     $scope.$on('send new editor contents',function(event,data){
         if(data.editor_id === "thread_editor"){
@@ -352,7 +404,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     })
 }]);
 
-app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location',function($scope,$rootScope,$cookies,$location){
+app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location','$timeout',function($scope,$rootScope,$cookies,$location,$timeout){
     $scope.tinymceModel = '';
 
     $scope.$on('textFinished',function(event,data){
@@ -424,7 +476,6 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
     $scope.$on('new contents submitted',function(event,data){
         $scope.awaitingReply = false;
         if(data.success){
-            console.log('entered cleaning stuff');
             $scope.tinymceModel = "";
             $scope.tinymceText = "";
         }else{
@@ -441,15 +492,24 @@ app.controller("TinyMceController",['$scope','$rootScope','$cookies','$location'
 
     $scope.$on('initialize editor',function(event,data){
         let allowNew = parseInt('0000001',2);
-        if(data.user >=0){
-            $scope.toggleEditor((data.usergroup & allowNew) >0);
-            $scope.tinymceModel = (data.usergroup & allowNew) >0 ? '':data.noNew_user;
-        }else if(data.usergroup >=0){
-            $scope.toggleEditor((data.usergroup & allowNew) >0);
-            $scope.tinymceModel = (data.usergroup & allowNew) >0 ? '':data.noNew_usergroup;
-        }else{
-            $scope.toggleEditor((data.visitor & allowNew) >0);
-            $scope.tinymceModel = (data.visitor & allowNew) >0 ? '':data.noNew_visitor;
+        if(data.blocked){
+            $scope.toggleEditor(false);
+            $scope.$parent.editorActive = false;
+            $scope.tinymceModel = data.user_blocked;
+        } else{
+            $scope.$parent.editorActive = (data.access & data.targetRight) >0;
+            $scope.toggleEditor((data.access & data.targetRight) >0);
+            $scope.tinymceModel = (data.access & data.targetRight) >0 ? '':data.message;
         }
     });
+
+    let editorInitialize = function(){
+        if($scope.$parent.initializeEditor && $scope.instantiated && $scope.instantiated() && $scope.toggleEditor)
+            $scope.$parent.initializeEditor();
+        else
+            $timeout(editorInitialize,100);
+    };
+
+    editorInitialize();
+
 }]);

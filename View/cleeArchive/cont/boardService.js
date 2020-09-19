@@ -28,13 +28,17 @@ app.service('boardManager',function($http,$rootScope){
 
     this.deleteThread = function(data){
         manager.requestAll('/board/deleteThread','thread deleted',data);
-    }
+    };
 
     this.deleteReply = function(data){
         manager.requestAll('/board/deleteReply','reply deleted',data);
-    }
+    };
 
     this.hideContents = function(data){
         manager.requestAll('/board/hideContents','board contents hide',data);
-    }
+    };
+
+    this.blockUser = function(data){
+        manager.requestAll('/board/blockUser','user blocked',data);
+    };
 });

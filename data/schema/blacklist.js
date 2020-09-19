@@ -5,8 +5,9 @@ module.exports = new mongoose.Schema({
     end:{type:Date,default:Date.now()+1000*60*60*24*7},//结束时间
     user:{type:mongoose.Schema.ObjectId,default:null,ref:'users'},
     ip:{type:String,default:""},
-    type:{type:Number,default:0}, //黑名单针对的关联类型，0全区，1特定board；
-    area:{type:mongoose.Schema.ObjectId,default:null},
+    submitter:{type:mongoose.Schema.ObjectId,default:null},
+    level:{type:Number,default:0}, //黑名单针对的关联类型，0全区，1特定board；
+    area:{type:mongoose.Schema.ObjectId,default:null}, //board or other info
 },{
     timestamps: {createdAt:true,updatedAt:false}
 });

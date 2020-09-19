@@ -139,7 +139,7 @@ var text = [
     "The work you are editing does not exist",
     "Cannot access the index of works",
     "underage",
-    "non-consent",
+    "non-consent", //140
     "age difference",
     "incest",
     "fandom, optional",
@@ -147,7 +147,11 @@ var text = [
     "chapter's title, optional",
     "characters(press [,] or enter to add tag, optional)",
     "Do you wish to clear all contents of this chapter? (including title and credentials)",
-    "This post has been blocked by the administrator"
+    "This post has been blocked by the administrator",
+    "The user has been blocked successfully.",
+    "The user has been un-muted", //150
+    "The thread is deleted successfully, the page will be turning in 3 seconds",
+    "As a non-registered visitor, you're not allowed to reply to thread in this board"
 ];
 
 module.exports = text;

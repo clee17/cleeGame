@@ -24,7 +24,7 @@ var text = [
     "only registered users could apply for a role.",
     "The discussion board does not exist, please check your address",
     "You haven't provided a valid board to which the thread belong",
-    "You've been forbidden by the administrators of this discussion board to publish a new thread",
+    "You or the user group to which you belong has been forbidden by the administrators of this discussion board to publish a new thread",
     "The user group to which you belong is not allowed to publish a thread here",
     "As a visitor, you cannot publish a new thread here",
     "only administrators could do this",
@@ -35,7 +35,10 @@ var text = [
     "The post you attempted to block is not valid",
     "The user account or user group to which you belong is not able to do this.",
     "You must login first before you continue",
-    "The reply you attempted to delete does not exist."
+    "The reply you attempted to delete does not exist.",
+    "You've been muted by administrator",
+    "for %n days",
+    "(As non-registered user, you may gets blocked due to those who share your IPs, you may register to avoid this)"
 ];
 
 module.exports = text;

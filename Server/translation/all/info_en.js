@@ -28,7 +28,8 @@ var text = [
     "Edit",
     "Mute",
     "block",
-    "Unblock"
+    "Unblock",
+    "Unmute" //30
 ];
 
 module.exports = text;

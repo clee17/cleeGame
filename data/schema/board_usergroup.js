@@ -13,7 +13,7 @@ module.exports = new mongoose.Schema({
     board:{type:mongoose.Schema.ObjectId,default:null,ref:'board'},
     users:[{type:mongoose.Schema.ObjectId,default:null,ref:'users'}],
     ips:[{type:String}],
-    type:{type:Number,default:0},
+    type:{type:Number,default:0}, //10 ，特殊类型，访客类型
     access:{type:Number,default:1},
 },{
     timestamps:true

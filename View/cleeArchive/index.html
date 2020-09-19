@@ -89,7 +89,7 @@
         <div id="explainBoard" ng-show="alertWindow === 1" style="z-index:20;">
             <div style="margin:2rem;flex:1;">
             </div>
-            <button ng-click="hideExplain()" class="grand-button"><%- websiteInfo[0] %></button>
+            <button ng-click="hideExplain()" class="grand-button" ng-show="explainConfirm"><%- websiteInfo[0] %></button>
         </div>
         <div id="alertBox" ng-show="alertWindow === 2"></div>
         <div id="alertContents" class="alert" ng-show="alertWindow === 3" style="height:0;">

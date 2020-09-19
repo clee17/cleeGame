@@ -210,7 +210,7 @@ angular.module('ui.tinymce', [])
                         scope['tinymceText'] = text;
                         updateView(tinyInstance);
                     }
-                }
+                };
 
                 scope.toggleEditor = function(enabled){
                     if (tinyInstance &&
@@ -224,6 +224,10 @@ angular.module('ui.tinymce', [])
                                 buttonsAPI[attr].setDisabled(!enabled);
                         }
                     }
+                };
+
+                scope.instantiated = function(){
+                   return tinyInstance && tinyInstance.getDoc();
                 };
 
                 function ensureInstance() {
