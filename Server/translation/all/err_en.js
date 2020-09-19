@@ -24,7 +24,8 @@ var text = [
     "There is no valid register information connected to your account, please contact administrator.",
     "Your user id is not consistent with the one on server",
     "The length of your title cannot be less than %l",
-    "The title cannot be empty"
+    "The title cannot be empty",
+    "This feature is currently being upgraded, please check <a href='/news'>News</a> for updates."
 ];
 
 module.exports = text;

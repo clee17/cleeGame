@@ -23,7 +23,7 @@
         <div></div>
         <div class="myInput displayRow">
             <div class="inputHint" ng-show="!bookInfo.title || bookInfo.title ==''" style="margin-left:5px;top:7px;font-size:16px;"><%- websiteInfo[108] %></div>
-            <input class="bold-font" style="outline:none;border:none;background:rgba(0,0,0,0);" ng-model="bookInfo.title">
+            <input class="bold-font" style="outline:none;border:none;background:rgba(0,0,0,0);"  ng-disabled="publishing || resetting" ng-model="bookInfo.title">
         </div>
         <img src="/img/loading.gif" ng-show="bookSaving || chapterSaving" style="margin-left:5px;margin-right:5px;width:15px;height:15px;">
     </div>
@@ -189,9 +189,9 @@
                     </div>
 
                     <div class="displayRow tagInput" style="min-height:2rem;">
-                        <div style="width:35px;"><svg class="icon" style="width:20px;height:20px;margin-top:5px;" ><use xlink:href="#icon-pencil"></use></svg></div>
-                        <div class="inputHint" ng-show="warningInput=='' " style="margin-left:35px;">您也可以在这里添加您自己的警告,回车输入(最多20字)</div>
-                        <input ng-model="warningInput" maxlength="30" ng-keyup="submitWarning($event)">
+                        <div><i class="fas fa-pen inputHint" style="margin:auto;display:block;"></i></div>
+                        <div class="inputHint" ng-show="warningInput=='' " style="margin-left:25px;">您也可以在这里添加您自己的警告,回车输入(最多20字)</div>
+                        <input ng-model="warningInput" maxlength="30" ng-keyup="submitWarning($event)" style="padding-left:25px;">
                     </div>
                 </div>
 
@@ -208,14 +208,8 @@
                 <tag-collector hint="您可以用其他关键字让自己的文章被搜索(可以不填)。" list="workInfo.tag" ng-show="valueAtBit(fanficEdit,0)"></tag-collector>
 
                 <div id="editorMain">
-                        <div class="" ng-click="richText('b')"><svg class="icon" style="width:20px;" ><use xlink:href="#icon-bold"></use></svg></div>
-                        <div class="" ng-click="richText('i')"><svg class="icon" style="width:20px;"><use xlink:href="#icon-italic"></use></svg></div>
-                        <div class="" ng-click="richText('u')"><svg class="icon" style="width:20px;" ><use xlink:href="#icon-underline"></use></svg></div>
-                        <div class="" ng-click="richText('s')"><svg class="icon" style="width:20px;" ><use xlink:href="#icon-strikethrough"></use></svg></div>
-                        <div><svg class="icon" style="margin-left:-8px;" ng-click="richText('link')"><use xlink:href="#icon-link"></use></svg></div>
-                        <div><svg class="icon" style="margin-left:-8px;"><use xlink:href="#icon-image" ng-click="richText('img')"></use></svg></div>
-                        <div ng-click="richText('ol')"><svg class="icon" style="margin-left:-9px;"><use xlink:href="#icon-list-numbered"></use></svg></div>
-                        <div ng-click="richText('ul')"><svg class="icon" style="margin-left:-9px;"><use xlink:href="#icon-list2"></use></svg></div>
+                    <div ng-controller="TinyMceController" id="tinyMceEditor"  style="flex:1;" ng-init="editor_id = 'fanfic_editor';">
+                        <textarea ui-tinymce="tinymceOptions" ng-model="tinymceModel">Tiny MCE</textarea>
                         <textarea class="tinymce_codeEditor" id="tinymce_codeEditor"
                                   style="position:absolute;left:0;top:40px;z-index:85;
                           background:rgba(0,0,0,0);

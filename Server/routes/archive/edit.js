@@ -127,13 +127,16 @@ let handler = {
             __renderError(req,res,_errInfo[2]);
         else if(req.session.user && (!__isRole(1,req.session.user.settings) && !req.session.user.isAdmin))
             __renderError(req,res,_errInfo[3]);
-        else if(req.session.user&& (__isRole(1,req.session.user.settings) || req.session.user.isAdmin))
-            __renderIndex(req,res,{viewport:'/dynamic/booknew',
-                controllers:['/view/cont/edit_con.js'],
-                services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
-                variables:{type:0,editor:true},
-                styles:['archive/edit']});
-        else
+        else if(req.session.user&& (__isRole(1,req.session.user.settings) || req.session.user.isAdmin)) {
+            if(!req.session.user.isAdmin)
+                __renderError(req, res, _errAll[26]);
+            else
+                __renderIndex(req,res,{viewport:'/dynamic/booknew',
+                    controllers:['/view/cont/edit_con.js'],
+                    services:['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
+                    variables:{type:0,editor:true},
+                    styles:['archive/edit']});
+        }else
             __renderError(req,res,_errInfo[4]);
     },
 
@@ -150,12 +153,15 @@ let handler = {
                         __renderError(req, res, _errInfo[7]);
                     else {
                         requestIndex = '?id=' + requestIndex;
-                        __renderIndex(req, res, {
-                            viewport: '/dynamic/bookedit' + requestIndex,
-                            controllers: ['/view/cont/edit_con.js'],
-                            services: ['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
-                            styles: ['archive/edit']
-                        });
+                        if(!req.session.user.isAdmin)
+                              __renderError(req,res,_errAll[26]);
+                        else
+                            __renderIndex(req, res, {
+                                viewport: '/dynamic/bookedit' + requestIndex,
+                                controllers: ['/view/cont/edit_con.js'],
+                                services: ['/view/cont/fanficService.js','/view/cont/userService.js','/view/cont/filterWord.js'],
+                                styles: ['archive/edit']
+                            });
                     }
                 }
             }).populate('chapter');

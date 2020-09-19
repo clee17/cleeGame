@@ -276,10 +276,11 @@ app.directive('tagCollector',function(){
            hint:'@'
        },
        template:'<div class="myInput displayRow" style="position:relative;flex-wrap:wrap;padding:0;margin-bottom:0;font-family:SimSun-ExtB,Arial,serif;">\n' +
-           '<div class="inputHint" ng-show="showHint" style="margin-left:40px;">{{hint}}</div>\n' +
-           '<div><svg class="icon icon-users" style="width:22px;height:30px;" ><use xlink:href="#icon-price-tags"></use></svg></div>\n' +
+           '<div class="inputHint" ng-show="showHint" style="margin-left:25px;z-index:0;">{{hint}}</div>\n' +
+           '<div style="z-index:0;"><i class="fa fa-tag inputHint"></i> </div>\n' +
+           '<div style="width:1.5rem;"></div>'+
            '<div class="remove-line no-select" ng-repeat="item in list" ng-click="removeTag($index)" style="font-size:14px;height:1.9rem;margin-left:10px;line-height:1.9rem;color:rgba(133,109,105,255);">#{{item}}</div>\n' +
-           '<div style="height:1.9rem;flex:1;margin-left:5px;padding:0;min-width:2rem;"><input maxlength="30" style="color:rgba(70,59,57,255);"></div>\n' +
+           '<div style="height:1.9rem;flex:1;margin-left:5px;padding:0;min-width:2rem;z-index:99;"><input maxlength="30" style="color:rgba(70,59,57,255);"></div>\n' +
            '</div>',
         link:function(scope,element){
            let root = element.find('input');
