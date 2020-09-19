@@ -151,7 +151,8 @@ var text = [
     "The user has been blocked successfully.",
     "The user has been un-muted", //150
     "The thread is deleted successfully, the page will be turning in 3 seconds",
-    "As a non-registered visitor, you're not allowed to reply to thread in this board"
+    "As a non-registered visitor, you're not allowed to reply to thread in this board",
+    "You have received no replies from the administrator so far"
 ];
 
 module.exports = text;

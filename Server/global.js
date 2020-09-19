@@ -35,7 +35,6 @@ let mailTransport = nodeMailer.createTransport({
 
 
 global.__getCountryCode = function(ipData){
-
     if(ipData.country === '中国')
         return 'CN';
     else
@@ -46,7 +45,7 @@ global.__getReaderCode = function(ipData){
     if(ipData.readerLanguage)
         return ipData.readerLanguage.toUpperCase();
     return __getCountryCode(ipData);
-}
+};
 
 
 global.__saveLog = function(logType,logInfo){
@@ -122,7 +121,12 @@ global.__processMail = function(mailId,receiver,data,countryCode){
 global.__multiLang = function(str,ipData){
     if(str.substring(0,6).toLowerCase() === "multil"){
         str = str.substring(6);
-        str = JSON.parse(str);
+        try{
+            str = JSON.parse(str);
+        }
+        catch(err){
+            return 'unknown error happened';
+        } 
         let cc = __getReaderCode(ipData);
         if(str[cc])
             return str[cc];
