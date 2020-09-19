@@ -143,7 +143,11 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
 
     $scope.rearrangeOrder = function(){
         let refreshOrder = function(newOptions){
+            console.log(newOptions);
             $scope.options = JSON.parse(JSON.stringify(newOptions));
+            $scope.$broadcast('option changed',function(event,data){
+
+            });
         };
         $scope.orderType = $scope.orderType? 0: 1;
         let orderBtn = document.getElementById('orderBtn');
@@ -156,9 +160,18 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
         if($scope.orderType === 0) {
             refreshOrder($scope.backupOptions);
         }else{
-            refreshOrder($scope.options.sort(function(a,b){
-                return a.count < b.count;
-            }));
+            let swap = function(current,next,arr){
+                if(arr[current].count < arr[next].count){
+                    let tmp = arr[current];
+                    arr[current] = arr[next];
+                    arr[next] = tmp;
+                }
+            };
+            for(let i=0; i<$scope.options.length;++i){
+                for(let j=0;j<$scope.options.length -1-i;++j){
+                    swap(j,j+1,$scope.options);
+                }
+            }
         }
     };
 
