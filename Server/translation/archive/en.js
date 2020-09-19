@@ -104,7 +104,8 @@ var text = [
     "You must configure your mail before you continue using this site",
     "The user does not plan to introduce itself",
     "Application's statements",
-    "You have received no replies from the administrator so far"
+    "You have received no replies from the administrator so far",
+    "Arrange to the number of votes↓"
 ];
 
 module.exports = text;

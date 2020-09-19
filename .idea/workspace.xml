@@ -3,8 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="ebfbf8ea-3c6c-49c1-810e-39469b80e34e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/global.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/global.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/html/templates/log_con.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/html/templates/log_con.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/translation/archive/cn.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/translation/archive/cn.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/translation/archive/en.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/translation/archive/en.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/cont/vote_con.js" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/cont/vote_con.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/View/cleeArchive/vote.html" beforeDir="false" afterPath="$PROJECT_DIR$/View/cleeArchive/vote.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/archive/button.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/archive/button.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +46,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="nodejs_interpreter_path" value="$PROJECT_DIR$/../../Program Files/nodejs/node" />
+    <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -70,7 +73,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="6a67b886-aa79-4f24-aa2e-8c4d7ca866e0" name="Default Changelist" comment="" />
+      <changelist id="ebfbf8ea-3c6c-49c1-810e-39469b80e34e" name="Default Changelist" comment="" />
       <created>1578012691015</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -93,6 +96,7 @@
       <workItem from="1579253796300" duration="1227000" />
       <workItem from="1579327857879" duration="2182000" />
       <workItem from="1580633856870" duration="145000" />
+      <workItem from="1600473469750" duration="3613000" />
     </task>
     <servers />
   </component>
@@ -100,15 +104,15 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1152" y="340" width="647" height="534" key="find.popup" timestamp="1599898336449">
+    <state x="1319" y="473" width="676" height="534" key="find.popup" timestamp="1600474513409">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
     <state x="514" y="288" width="1022" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1599475992693" />
-    <state x="1152" y="340" width="647" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599898336449" />
-    <state x="778" y="177" width="672" height="676" key="search.everywhere.popup" timestamp="1599898339714">
+    <state x="1319" y="473" width="676" height="534" key="find.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1600474513409" />
+    <state x="778" y="177" width="672" height="676" key="search.everywhere.popup" timestamp="1600476291573">
       <screen x="0" y="0" width="2560" height="1080" />
     </state>
     <state x="629" y="268" width="672" height="516" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1599476000160" />
-    <state x="778" y="177" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1599898339714" />
+    <state x="778" y="177" width="672" height="676" key="search.everywhere.popup/0.0.2560.1080@0.0.2560.1080" timestamp="1600476291573" />
   </component>
 </project>

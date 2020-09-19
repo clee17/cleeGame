@@ -2,7 +2,8 @@ app.directive('infoReceiver',function($rootScope){
     return {
         restrict: 'E',
         link:function(scope,element,attr){
-            scope.options = JSON.parse(unescape(scope.options));
+            scope.backupOptions = JSON.parse(unescape(scope.options));
+            scope.options =  JSON.parse(unescape(scope.options));
             scope.result = new Array(scope.options.length);
         }
     }
@@ -46,20 +47,26 @@ app.directive('votePercent',function(){
     return {
         restrict: 'A',
         link:function(scope,element,attr){
-            let count = scope.option.count;
-            let options  = scope.$parent.options;
-            let countAll = 0;
-            for(let i=0; i<options.length;++i){
-                countAll += options[i].count;
-            }
+            let calculate = function(){
+                let count = scope.option.count;
+                let options  = scope.$parent.options;
+                let countAll = 0;
+                for(let i=0; i<options.length;++i){
+                    countAll += options[i].count;
+                }
 
-            let percent = Math.round((count / countAll)*100);
-            percent = percent + "%";
-            if(count === 0)
-                percent = "0%";
+                let percent = Math.round((count / countAll)*100);
+                percent = percent + "%";
+                if(count === 0)
+                    percent = "0%";
 
-            element.html("<div style='display:flex;flex-direction:column;height:2rem;'><div style='height:0.9rem;text-align:center;'>"+percent+"</div><div style='font-size:0.8rem;height:1.2rem;font-weight:normal;line-height:1.2rem;color:gray;font-weight:bold;'>"+count+" votes</div></div>");
-            element.css('letter-spacing','0');
+                element.html("<div style='display:flex;flex-direction:column;height:2rem;'><div style='height:0.9rem;text-align:center;'>"+percent+"</div><div style='font-size:0.8rem;height:1.2rem;font-weight:normal;line-height:1.2rem;color:gray;font-weight:bold;'>"+count+" votes</div></div>");
+                element.css('letter-spacing','0');
+            };
+
+            scope.$watch("option",function(){
+                calculate();
+            },true);
         }
     }
 });
@@ -95,11 +102,12 @@ app.filter('voteOption',function($rootScope){
     };
 });
 
-app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManager',function($scope,$rootScope,$cookies,$window,voteManager){
+app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManager','$timeout',function($scope,$rootScope,$cookies,$window,voteManager,$timeout){
     $scope.completed = false;
     $scope.requesting = false;
     $rootScope.title = unescape($rootScope.title);
     $rootScope.description = unescape($rootScope.description);
+    $scope.orderType = 0;
 
     $scope.checkComplete = function(){
         let elements = document.getElementsByClassName('selection');
@@ -126,6 +134,27 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
                 selected.push({_id:elements[i].value});
         }
         voteManager.submitResult({result:selected,_id:$rootScope._id});
+    };
+
+    $scope.rearrangeOrder = function(){
+        let refreshOrder = function(newOptions){
+            $scope.options = JSON.parse(JSON.stringify(newOptions));
+        };
+        $scope.orderType = $scope.orderType? 0: 1;
+        let orderBtn = document.getElementById('orderBtn');
+        if(orderBtn){
+            orderBtn.style.fontWeight = $scope.orderType? 'bold':'normal';
+            orderBtn.style.textDecoration = $scope.orderType? 'underline' :'none';
+            orderBtn.style.filter = $scope.orderType? 'brightness(70%)':'brightness(100%)';
+        }
+
+        if($scope.orderType === 0) {
+            refreshOrder($scope.backupOptions);
+        }else{
+            refreshOrder($scope.options.sort(function(a,b){
+                return a.count > b.count;
+            }));
+        }
     };
 
     $scope.$on('votes Save Finished',function(event,data){

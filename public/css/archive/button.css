@@ -199,3 +199,18 @@
     color:rgba(181,163,160,1);
     cursor:pointer;
 }
+
+.activeBtn{
+    border:none;
+    background:none;
+    color:rgba(109,100,136,1);
+}
+
+.activeBtn:hover{
+    color:lightgray;
+    cursor:pointer;
+}
+
+.activeBtn:active{
+    font-weight:bold;
+}
