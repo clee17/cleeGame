@@ -25,6 +25,17 @@ let handler = {
         res.send(lzString.compressToBase64(JSON.stringify(data)));
     },
 
+    sendError:function(res,response,err){
+        if(response.sent)
+            return;
+        if(typeof err != 'string')
+            err= JSON.stringify(err);
+        response.message=  err;
+        response.success = false;
+        response.sent = true;
+        res.send(lzString.compressToBase64(JSON.stringify(response)));
+    },
+
     entry:function(req,res){
         let boardId = req.params.boardId;
 
@@ -499,8 +510,15 @@ let handler = {
                     response.thread.author = {_id:info['author'], user:req.session.user.user};
                 threadModel.findOneAndUpdate({_id:response.thread._id},{html:article._id},{new:true},function(err,result){
                 });
-                boardModel.findOneAndUpdate({_id:response.thread.board},{$inc:{threads:1}},null,function(err,result){});
-                handler.finalSend(res,response);
+                boardModel.findOneAndUpdate({_id:response.thread.board},{$inc:{threads:1}},{new:true},function(err,result){
+                    if(err || !result)
+                        handler.sendError(res,response,err?err.message:_errInfo[45]);
+                    else{
+                        response.threads = result.threads;
+                        handler.finalSend(res,response);
+                    }
+                });
+
             })
             .catch(function(err){
                 response.success = false;
@@ -809,7 +827,7 @@ let handler = {
             response._id = received.id;
             let checkSuccess = function(result,type){
                 response[type] =  true;
-                if(response['thread'] && response['reply']){
+                if(response['thread'] && response['reply'] && response['board']){
                     response.success = true;
                     handler.finalSend(res,response);
                 }
@@ -841,8 +859,11 @@ let handler = {
                 });
 
                 boardModel.findOneAndUpdate({_id:received.board_id},{$inc:{threads:-1}},null,function(err,result){
-                    if(err)
-                        throw Error(err.message);
+                    if(err|| !result)
+                        throw Error(err?err.message:_errInfo[45]);
+                    else
+                        response.threads= result.threads;
+                    checkSuccess(result,'board');
                 })
             };
 
@@ -1054,6 +1075,155 @@ let handler = {
             handler.finalSend(res,response);
         }
     },
+
+    editMessage:function(req,res){
+        let query = req.query;
+        query.type = Number(query.type);
+        let model = null;
+        switch(query.type){
+            case 0:
+                model = threadModel;
+                break;
+            default:
+                model = replyModel;
+                break;
+        }
+
+        let details = {
+            editor:true,
+            messageType:query.type,
+        };
+
+        if(!query.id || !__validateId(query.id)){
+            __renderError(req,res,_errInfo[40]);
+            return;
+        }
+        if(!req.session.user){
+            __renderError(req,res,_errInfo[43]);
+            return;
+        }
+
+        details.message_id = query.id;
+        let populate = [{path:'thread',select:'_id title author category',populate: { path:  'board', select: '_id category title' }},
+            {path:'author',select:"_id user"}];
+        if(query.type === 0)
+            populate = [{path:'board',select:'_id category title'},{path:'author',select:"_id user"}];
+
+        model.findOne({_id:query.id},function(err,result){
+            if(err || !result){
+                __renderError(req,res,_errInfo[40]);
+            }else if(result.author._id .toString()!== req.session.user._id.toString()) {
+                __renderError(req,res,_errInfo[44]);
+            }else{
+                if(query.type === 0){
+                    details.title = result.title;
+                    details.cat = result.category;
+                    details.category = result.board.category;
+                    details.threadIndex = 0;
+                    details.threadId = result._id;
+                    details.board = result.board;
+                } else{
+                    details.title =  result.thread.title;
+                    details.cat = result.thread.category;
+                    details.category = result.thread.board.category;
+                    details.threadIndex = result.threadIndex;
+                    details.threadId = result.thread._id;
+                    details.board = result.thread.board;
+                }
+
+                details.grade = result.grade;
+                details.author = result.author._id;
+                htmlModel.findOne({link:result._id},function(err,html){
+                    if(err || !result){
+                        details.success = false;
+                        details.contents = err? err.message : _errInfo[41];
+                    }else{
+                        details.contents = html.contents;
+                    }
+                    for(let i=0;i<details.category.length;++i){
+                        details.category[i].name = encodeURIComponent(__multiLang(details.category[i].name,req.ipData));
+                    }
+                    details.title = lzString.compressToBase64(details.title);
+                    details.contents = lzString.compressToBase64(details.contents);
+                    details.category = lzString.compressToBase64(JSON.stringify(details.category));
+                    __renderIndex(req,res,{viewport:'/sub/board_edit',
+                        controllers:['/view/cont/board_edit_con.js'],
+                        services:['view/cont/boardService.js','/view/cont/filterWord.js'],variables:details});
+                });
+            }
+        })
+            .populate(populate);
+    },
+
+    updateMessage:function(req,res){
+        let response = {
+            sent:false,
+            message:'',
+            success:false,
+            loaded:{
+                htmlUpdated:false,
+                infoUpdated:false
+            }
+        };
+
+        let send = function(){
+            for(attr in response.loaded){
+                if(!response.loaded[attr])
+                    return;
+            };
+
+            response.success = true;
+            handler.finalSend(res,response);
+        };
+        try {
+            let received = JSON.parse(lzString.decompressFromBase64(req.body.data));
+            if (!req.session.user)
+                throw Error(_errInfo[35]);
+            else if(req.session.user._id.toString() !== received.author)
+                throw Error(_errInfo[43]);
+
+            let contents = received.contents || "";
+            contents = lzString.decompressFromBase64(contents);
+
+            let title = received.title || "";
+            title = lzString.decompressFromBase64(title);
+
+            let listModel = [threadModel,replyModel];
+            let updateInfo = function(err,result){
+                if(err || !result)
+                    handler.sendError(res,response, err? err.message : _errInfo[40]);
+                else{
+                    response.loaded.infoUpdated= true;
+                    send();
+                }
+            };
+
+            let update = {grade:received.grade};
+            if(received.type >0){
+                update.category = received.category;
+            }else if(received.type ===0){
+                update.title = title;
+            }
+
+            if(listModel[received.type])
+                listModel[received.type].findOneAndUpdate({_id:received.message_id},update,{new:true},updateInfo);
+            else
+                handler.sendError(res,response,_errInfo[44]);
+
+
+            let updateHtmlFunc = function(err,result){
+                if(err || !result)
+                    handler.sendError(res,result,err? err.message : _errInfo[40]);
+                else{
+                    response.loaded.htmlUpdated = true;
+                    send();
+                }
+            };
+            htmlModel.findOneAndUpdate({link:received.message_id},{contents:contents},{new:true},updateHtmlFunc);
+        }catch(err){
+            handler.sendError(res,response,err.message);
+        }
+     }
 };
 
 module.exports = handler;

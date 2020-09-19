@@ -235,12 +235,16 @@ router.get('/resetPwdRequest',main.index);
 router.get('/sub/:pageId',main.sub);
 router.get('/board/:boardId',board.entry);
 router.post('/board/threads',board.threads);
+router.get('/boardMessage/edit',board.editMessage);
 router.post('/board/submitThread',board.submitThread);
 router.post('/board/submitReply',board.submitReply);
 router.post('/board/deleteThread',board.deleteThread);
 router.post('/board/deleteReply',board.deleteReply);
 router.post('/board/hideContents',board.hideContents);
 router.post('/board/blockUser',board.blockUser);
+router.post('/board/updateMessage',board.updateMessage);
+
+
 router.get('/visitorDonate',main.visitorDonate);
 router.get('/tech/:techId',main.tech);
 router.get('/countryStatement',main.statement);

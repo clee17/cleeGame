@@ -41,4 +41,8 @@ app.service('boardManager',function($http,$rootScope){
     this.blockUser = function(data){
         manager.requestAll('/board/blockUser','user blocked',data);
     };
+
+    this.updateMessage = function(data){
+        manager.requestAll('/board/updateMessage','message updated',data);
+    }
 });

@@ -103,6 +103,12 @@
         background:rgba(181,163,160,0.2);
         padding:1.5rem;
         border-bottom:solid 4px rgba(181,163,160,0.3);
+        display:flex;
+        flex-direction:row;
+    }
+
+    .author_info >span{
+        margin-left:3px;
     }
 
     .thread_info{
@@ -218,6 +224,12 @@
             width:8rem;
             background:rgba(181,163,160,0.5);
             height:auto;
+            flex-direction:column;
+        }
+
+
+        .author_info >span{
+            margin-top:8px;
         }
 
         .contents_thread{
@@ -247,6 +259,7 @@
     message_user_unblocked = '<%- websiteInfo[150] %>';
     message_thread_deleted = '<%- websiteInfo[151] %>';
     message_visitor_noreply = '<%- websiteInfo[152] %>';
+    visitorName = '<%- infoAll[21] %>';
     info_hidden='<%- websiteInfo[148] %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
@@ -273,8 +286,10 @@
         <div ng-if="thread.isFirst" class="contents_thread">
             <div class="author_info">
                 <a href="{{'/users/'+thread.author._id}}">{{thread.author.user}}</a>
+                <span ng-if="!thread.author" ><b>{{visitorName}}</b></span>
+                <span ng-if="!thread.author" style="word-break:break-all;font-size:0.8rem;color:gray;">{{getVisitorIdentity(thread.ip)}}</span>
                 <% if (user && user.isAdmin ) { %>
-                    {{thread.ip}}
+                <span style="font-size:0.8rem;"> {{thread.ip}}</span>
                 <% } %>
             </div>
             <div class="thread_info">
@@ -305,9 +320,11 @@
         </div>
         <div ng-repeat="reply in replies" class="contents_thread">
             <div class="author_info">
-                <a href="{{'/users/'+reply.author._id}}">{{reply.author.user}}</a>
+                <a href="{{'/users/'+reply.author._id}}" ng-if="reply.author">{{reply.author.user}}</a>
+                <span ng-if="!reply.author" ><b>{{visitorName}}</b></span>
+                <span  ng-if="!reply.author" style="word-break:break-all;font-size:0.8rem;color:gray;">{{getVisitorIdentity(reply.ip)}}</span>
                 <% if (user && user.isAdmin ) { %>
-                {{thread.ip}}
+                <span style="font-size:0.8rem;">{{thread.ip}}</span>
                 <% } %>
             </div>
             <div class="thread_info" >

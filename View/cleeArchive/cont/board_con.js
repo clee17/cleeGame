@@ -59,7 +59,11 @@ app.controller("thread_con",['$scope','$rootScope','$cookies','$location','$time
         return $scope.adminAccess & index;
     };
 
-    $scope.totalNum = $rootScope.replies.length;
+    $scope.getVisitorIdentity = function(ip){
+        return md5(ip);
+    };
+
+    $scope.totalNum = $rootScope.thread.replied;
 
     $scope.pageIndex =  $location.search().id ||1;
     $scope.perPage = 35;
@@ -255,6 +259,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     $scope.newThread_category = null;
     $scope.threads = [];
 
+    $scope.totalNum = Number($scope.board_count);
     $scope.pageIndex =  $location.search().id ||1;
     $scope.perPage = 35;
 
@@ -313,9 +318,6 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
 
 
     $scope.cancelSubmitThread  = function(event,data){
-        let input = document.getElementById('tinymce_title');
-        if(input)
-            input.style.background = 'white';
         $scope.requesting = false;
     };
 
@@ -329,9 +331,6 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             return;
         }
         $scope.requesting = true;
-        let input = document.getElementById('tinymce_title');
-        if(input)
-            input.style.background = 'rgba(185,185,185,0.8)';
         $scope.$broadcast('publish new thread',{board_id:$scope.board_id,
             editor_id:'thread_editor',
             author:$rootScope.readerId,
@@ -374,6 +373,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
             $scope.newThread_title = "";
             $scope.newThread_grade = '0';
             $scope.threads.unshift(data.thread);
+            $scope.totalNum = data.threads;
             $scope.cancelNewthread();
         }else{
             $scope.$emit('showError',data.message);
@@ -391,6 +391,7 @@ app.controller("board_con",['$scope','$rootScope','$cookies','$location','$timeo
     $scope.$on('thread deleted',function(event,data){
         if(!data.success){
             $scope.entries.splice($scope.tempstorage.i,0,$scope.tempStorage.thread);
+            $scope.totalNum = data.threads;
         }
         $scope.tempStorage = null;
     });

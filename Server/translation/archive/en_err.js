@@ -38,7 +38,13 @@ var text = [
     "The reply you attempted to delete does not exist.",
     "You've been muted by administrator",
     "for %n days",
-    "(As non-registered user, you may gets blocked due to those who share your IPs, you may register to avoid this)"
+    "(As non-registered user, you may gets blocked due to those who share your IPs, you may register to avoid this)",
+    "The message you attempted to edit does not exist",
+    "We cannot find the contents of this message",
+    "This page is only open to registered users",
+    "You are not the owner of this contents, so you could not edit this.",
+    "Incorrect type of message",
+    "unknown error"
 ];
 
 module.exports = text;
