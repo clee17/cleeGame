@@ -25,20 +25,25 @@ app.directive('voteBar',function(){
     return {
         restrict: 'A',
         link:function(scope,element,attr){
-            let count = scope.option.count;
-            let options  = scope.$parent.options;
-            let countAll = 0;
-            for(let i=0; i<options.length;++i){
-                countAll += options[i].count;
-            }
+            let calculate = function(){
+                let count = scope.option.count;
+                let options  = scope.$parent.options;
+                let countAll = 0;
+                for(let i=0; i<options.length;++i){
+                    countAll += options[i].count;
+                }
 
-            let percent =Math.round((count / countAll)*100);
-            percent = percent + "%";
-            if(count === 0)
-                percent = "0";
+                let percent =Math.round((count / countAll)*100);
+                percent = percent + "%";
+                if(count === 0)
+                    percent = "0";
 
-            element.css('width',percent);
+                element.css('width',percent);
+            };
 
+            scope.$watch("option",function(){
+                calculate();
+            },true);
         }
     }
 });
@@ -152,7 +157,7 @@ app.controller("voteCon",['$scope','$rootScope','$cookies','$window','voteManage
             refreshOrder($scope.backupOptions);
         }else{
             refreshOrder($scope.options.sort(function(a,b){
-                return a.count > b.count;
+                return a.count < b.count;
             }));
         }
     };
