@@ -29,7 +29,7 @@ var text = [
     "As a visitor, you cannot publish a new thread here",
     "only administrators could do this",
     "we could not find the thread in database",
-    "As non-registered users, you are limited to publish or reply to threads 5 times every 10 minutes respectively. please register to remove the limit.",
+    "As non-registered users, you are limited to publish or reply to threads 5 times every 10 minutes respectively. please register to remove the limit.", //30
     "This board has forbidden anyone beside from the owner to publish a new tread",
     "The thread you are replying to does not exist",
     "The post you attempted to block is not valid",
@@ -39,7 +39,7 @@ var text = [
     "You've been muted by administrator",
     "for %n days",
     "(As non-registered user, you may gets blocked due to those who share your IPs, you may register to avoid this)",
-    "The message you attempted to edit does not exist",
+    "The message you attempted to edit does not exist", //40
     "We cannot find the contents of this message",
     "This page is only open to registered users",
     "You are not the owner of this contents, so you could not edit this.",

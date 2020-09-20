@@ -255,20 +255,20 @@
 </style>
 
 <div id="boardPanel" ng-controller="thread_con">
-    <info-receiver ng-init="grade_0='<%- infoAll[13] %>';
-    grade_1='<%- infoAll[14] %>';
-    grade_2='<%- infoAll[15] %>';
+    <info-receiver ng-init="grade_0='<%- escape(infoAll[13]) %>';
+    grade_1='<%- escape(infoAll[14]) %>';
+    grade_2='<%- escape(infoAll[15]) %>';
     alert_delete_thread = '<%- escape(websiteInfo[130]) %>';
-    message_length = '<%- infoAll[23] %>';
-    message_blocked_user = '<%- errInfo[37] %>';
-    message_block_date = '<%- errInfo[38] %>';
-    message_non_registered = '<%- errInfo[39] %>';
-    message_user_blocked = '<%- websiteInfo[149] %>';
-    message_user_unblocked = '<%- websiteInfo[150] %>';
-    message_thread_deleted = '<%- websiteInfo[151] %>';
-    message_visitor_noreply = '<%- websiteInfo[152] %>';
-    visitorName = '<%- infoAll[21] %>';
-    info_hidden='<%- websiteInfo[148] %>';">
+    message_length = '<%- escape(infoAll[23]) %>';
+    message_blocked_user = '<%- escape(errInfo[37]) %>';
+    message_block_date = '<%- escape(errInfo[38]) %>';
+    message_non_registered = '<%- escape(errInfo[39]) %>';
+    message_user_blocked = '<%- escape(websiteInfo[149]) %>';
+    message_user_unblocked = '<%- escape(websiteInfo[150]) %>';
+    message_thread_deleted = '<%- escape(websiteInfo[151]) %>';
+    message_visitor_noreply = '<%- escape(websiteInfo[152]) %>';
+    visitorName = '<%- escape(infoAll[21]) %>';
+    info_hidden='<%- escape(websiteInfo[148]) %>';">
     </info-receiver>
     <div style="margin:auto;" ng-show="requesting"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div ng-show="threads.length === 0 && !requesting" style="margin:auto;"><%- websiteInfo[106] %></div>
