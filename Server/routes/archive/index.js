@@ -123,32 +123,6 @@ global.__renderTemplates = function(req,res,pageId,renderInfo){
     res.render(path.join(__templates,pageId+'.html'),renderPage);
 };
 
-
-global.__readSettings = function (callBack,data) {
-    let redisList = ['grade','warning'];
-    let readResult = fs.readFile(path.join(__dataModel, '../json/fanficEdit.json'), {encoding: 'utf-8'},(err,File)=>{
-        if(err)
-        {
-            data.err = err;
-            if(callBack)
-                callBack();
-        } else{
-            let settings = JSON.parse(File);
-            let multiRedisCommands = [];
-            while(redisList.length>0)
-            {
-                let keyString = redisList.pop();
-                data['fanfic_'+keyString] = settings[keyString];
-                multiRedisCommands.push(["set",keyString,JSON.stringify(settings[keyString])]);
-            }
-            if(callBack)
-                callBack();
-            redisClient.multi(multiRedisCommands).exec(function(err,docs){
-            });
-        }
-    });
-};
-
 global.__validateId = function(id){
     if(!id)
         return false;

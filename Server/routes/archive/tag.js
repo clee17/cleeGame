@@ -84,10 +84,6 @@ let handler = {
             tagName: tagName,
         };
 
-        let finalRender = function(){
-			__renderSubPage(req, res, 'tagPage', render);
-		};
-
         tagModel.findOneAndUpdate({name: searchTagName},{$inc:{visited:1}},{new:true,upsert:true,setDefaultsOnInsert: true}).exec()
             .then(function(doc){
                 render.result = doc || {};
@@ -97,15 +93,13 @@ let handler = {
             .then(function(followed){
                 render.followed=  followed? followed.status : false;
                 render.userExisted = !!req.session.user;
-               redisClient.get('fanfic_grade',function(err,grades) {
-                render.fanfic_grade = {};
-                if (!err && grades){
-                    render.fanfic_grade = JSON.parse(grades);
-                    finalRender();
+                render.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+                for(let i=0;i<render.fanfic_grade.length;++i){
+                    let num = render .fanfic_grade[i].refer;
+                    let item =  render .fanfic_grade[i];
+                    item.refer = _infoAll[num];
                 }
-				else
-                    __readSettings(finalRender, render);
-			   });
+                __renderSubPage(req, res, 'tagPage', render);
             })
             .catch(function(err){
                     res.render('cleeArchive/errorB.html',{error:JSON.stringify(err)});

@@ -279,15 +279,13 @@ let handler = {
                 }
             });
 
-            redisClient.get('fanfic_grade',function(err,response){
-                if(!err && response)
-                {
-                    data.fanfic_grade =  JSON.parse(response);
-                    finalSend();
-                }
-                else
-                    __readSettings(finalSend,data);
-            });
+            data.fanfic_grade = JSON.parse(JSON.stringify(__identityInfo.fanfic_grade));
+            for(let i=0;i<data.fanfic_grade.length;++i){
+                let num = data .fanfic_grade[i].refer;
+                let item =  data .fanfic_grade[i];
+                item.refer = _infoAll[num];
+            }
+            finalSend();
         };
 
         let likeModelMatch = {$match:{$and:[{$expr:{$eq:["$work","$$work_id"]}},{$expr:{$eq:["$targetUser","$$user_id"]}}],status:1}};
